@@ -1,8 +1,12 @@
 import random
+import re
 import spacy
 from agData import *
 from pathlib import Path
+from spacy.lang.char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER,CONCAT_QUOTES, LIST_ELLIPSES, LIST_ICONS
 from spacy.util import minibatch, compounding
+from spacy.util import compile_infix_regex
+
 
 
 def trainModel(model=None, output_dir=None, n_iter=100):
@@ -13,6 +17,31 @@ def trainModel(model=None, output_dir=None, n_iter=100):
     else:
         nlp = spacy.blank("en")  # create blank Language class
         print("Created blank 'en' model")
+
+        # The code below is custom to agData. It modifies how the
+        # parser works to avoid splitting pedigrees
+
+        # Tell spacy not to split between hyphens
+        infixes = (
+                LIST_ELLIPSES
+                + LIST_ICONS
+                + [
+                    r"(?<=[0-9])[+\-\*^](?=[0-9-])",
+                    r"(?<=[{al}{q}])\.(?=[{au}{q}])".format(
+                        al=ALPHA_LOWER, au=ALPHA_UPPER, q=CONCAT_QUOTES
+                    ),
+                    r"(?<=[{a}]),(?=[{a}])".format(a=ALPHA),
+                    r"(?<=[{a}0-9])[:<>=/](?=[{a}])".format(a=ALPHA),
+                ]
+        )
+        infix_re = compile_infix_regex(infixes)
+        nlp.tokenizer.infix_finditer = infix_re.finditer
+
+        # Tell spaCy not to split on slashes (/). This will preserve PEDs.
+        # There is a chance we will get unintended side effects but we have
+        # not encountered one yet. We should rigorously test this at a later stage
+        digit_hyphen_re = re.compile(r'[\w|\S]+/[\w|S]+')
+        nlp.tokenizer.token_match = digit_hyphen_re.search
 
     # create the built-in pipeline components and add them to the pipeline
     # nlp.create_pipe works for built-ins that are registered with spaCy
