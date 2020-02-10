@@ -1,0 +1,163 @@
+0	AC Metcalfe	CVAR
+0	two-rowed	TRAT
+0	spring	TRAT
+0	malting	TRAT
+0	barley	CROP
+1	Agriculture and Agri-Food Canada	ORG
+1	1997	DATE
+2	AC Oxbow/Manley	PED
+3	TR 232	ALAS
+3	WM8612-1	ALAS
+4	western Canada	GPE
+4	excellent malting	TRAT
+4	brewing quality	TRAT
+5	tall	TRAT
+5	fair straw strength	TRAT
+5	medium late maturing	TRAT
+5	Harrington	CVAR
+6	resistant	PPTD
+6	stripe rust	PATH
+6	stem rust	PATH
+6	loose smut	PATH
+6	moderately resistant	PPTD
+6	surface-borne smuts	PATH
+6	spot-form of net blotch	PATH
+6	resistance	PPTD
+6	net-form pathotypes	PATH
+6	susceptible	PPTD
+6	scald	PATH
+6	leaf rust	PATH
+6	speckled leaf blotch	PATH
+6	common root rot	PATH
+6	BYD	PATH
+8	Baronesse	CVAR
+8	spring	TRAT
+8	feed	TRAT
+8	barley	CROP
+9	Germany	GPE
+9	United States	GPE
+9	Western Plant Breeders	ORG
+9	1991	DATE
+([(Mentor x Minerva) x mutant of Vada] x [(Carlsberg x Union) x (Opavsky x Salle) x Ricardo]) x (Oriol x 6153 P40)	PED
+17	mid-late season	TRAT
+17	Klages	CVAR
+17	Steptoe	CVAR
+18	medium height	TRAT
+18	Steptoe	CVAR
+18	moderately stiff straw	TRAT
+20	Awns	PLAN
+21	Glumes	PLAN
+22	Hulls	PLAN
+23	Aleurone	PLAN
+24	Rachilla hairs	PLAN
+25	Veins	PLAN
+28	kernel	PLAN
+29	Baroness	CVAR
+29	moderately resistant	PPTD
+29	BYD	PATH
+29	moderately susceptible	PPTD
+29	scald	PATH
+29	net blotch	PATH
+29	susceptible	PPTD
+29	stripe rust	PATH
+29	leaf rust	PATH
+29	powdery mildew	PATH
+31	CDC Copeland	CVAR
+31	two-rowed	TRAT
+31	spring	TRAT
+31	malting	TRAT
+32	Crop Development Center, University of Saskatoon	ORG
+32	Canada	GPE
+32	1999	DATE
+WM861-5/TR118	PED
+35	TR150	ALAS
+36	medium late maturing	TRAT
+36	Manley	CVAR
+36	Harrington	CVAR
+37	CDC Copeland	CVAR
+37	Harrington	CVAR
+37	Manley	CVAR
+37	good resistance to lodging	TRAT
+37	Harrington	CVAR
+37	Manley	CVAR
+38	Manley	CVAR
+38	Harrington	CVAR
+40	Heads	PLAN
+40	semi-nodding	TRAT
+41	awns	PLAN
+41	weak anthocyanin in awn tips	TRAT
+41	spike	PLAN
+42	Glumes	PLAN
+42	awns	PLAN
+42	median spikelet	PLAN
+42	grain	PLAN
+43	hull	PLAN
+43	Aleurone	PLAN
+44	Rachilla hairs	PLAN
+45	lemma nerves	PLAN
+46	Kernels	PLAN
+47	CDC Copeland	CVAR
+47	good resistance	PPTD
+47	wheat stem rust	PATH
+47	Manley	CVAR
+47	Harrington	CVAR
+47	moderately resistanct	PPTD
+47	net blotch	PATH
+47	Manley	CVAR
+47	moderately susceptible	PPTD
+47	stripe rust	PATH
+47	susceptible	PPTD
+47	scald	PATH
+47	Septoria leaf blotch	PATH
+47	Manley	CVAR
+47	Harrington	CVAR
+47	loose smut	PATH
+48	susceptible	PPTD
+48	common root rot	PATH
+48	Manley	CVAR
+50	Celebration	CVAR
+50	six-rowed	TRAT
+50	spring	TRAT
+50	malting	TRAT
+50	barley	CROP
+51	Busch Agricultural Resources, Inc.	ORG
+51	2008	DATE
+52	6B94-7378/C96-2292	PED
+53	Minnesota	GPE
+53	North Dakota	GPE
+53	Idaho	GPE
+53	Montana	GPE
+54	Celebration	CVAR
+54	medium-early maturity	TRAT
+54	medium-short height	TRAT
+54	malt quality	TRAT
+55	head	PLAN
+55	awns	PLAN
+55	rachilla hairs	PLAN
+55	aleurone	PLAN
+56	improved reaction	PPTD
+56	Fusarium head blight	PATH
+56	Legacy	CVAR
+56	Tradition	CVAR
+57	moderately resistant	PPTD
+57	Septoria	PATH
+57	net blotch	PATH
+59	Commander	CVAR
+59	six-rowed	TRAT
+59	spring	TRAT
+59	feed	TRAT
+59	barley	CROP
+60	World Wide Wheat	ORG
+62	7128	ALAS
+63	semi-dwarf	TRAT
+63	stiff straw	TRAT
+63	fair lodging resistance	TRAT
+63	medium late season maturity	TRAT
+64	moderately susceptible	PPTD
+64	BYD	PATH
+64	susceptible	PPTD
+64	scald	PATH
+64	net blotch	PATH
+64	stripe rust	PATH
+64	leaf rust	PATH
+64	powdery mildew	PATH
