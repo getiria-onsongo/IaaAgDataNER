@@ -52,7 +52,7 @@
 24	Rachilla hairs	PLAN
 25	Veins	PLAN
 28	kernel	PLAN
-29	Baroness	CVAR
+29	Baronesse	CVAR
 29	moderately resistant	PPTD
 29	BYD	PATH
 29	moderately susceptible	PPTD
@@ -69,7 +69,7 @@
 32	Crop Development Center, University of Saskatoon	ORG
 32	Canada	GPE
 32	1999	DATE
-WM861-5/TR118	PED
+33	WM861-5/TR118	PED
 35	TR150	ALAS
 36	medium late maturing	TRAT
 36	Manley	CVAR
@@ -84,7 +84,7 @@ WM861-5/TR118	PED
 38	Harrington	CVAR
 40	Heads	PLAN
 40	semi-nodding	TRAT
-41	awns	PLAN
+41	Awns	PLAN
 41	weak anthocyanin in awn tips	TRAT
 41	spike	PLAN
 42	Glumes	PLAN
@@ -92,7 +92,7 @@ WM861-5/TR118	PED
 42	median spikelet	PLAN
 42	grain	PLAN
 43	hull	PLAN
-43	Aleurone	PLAN
+43	aleurone	PLAN
 44	Rachilla hairs	PLAN
 45	lemma nerves	PLAN
 46	Kernels	PLAN
@@ -101,7 +101,7 @@ WM861-5/TR118	PED
 47	wheat stem rust	PATH
 47	Manley	CVAR
 47	Harrington	CVAR
-47	moderately resistanct	PPTD
+47	moderately resistant	PPTD
 47	net blotch	PATH
 47	Manley	CVAR
 47	moderately susceptible	PPTD
