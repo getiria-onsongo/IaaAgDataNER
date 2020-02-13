@@ -1,0 +1,165 @@
+3	Conrad	CVAR
+3	two-rowed	TRAT
+3	spring	TRAT
+3	malting	TRAT
+3	barley	CROP
+4	Busch Agricultural Resources	ORG
+4	2005	DATE
+5	B1215/B88-5336	PED
+6	2B96-5057	ALAS
+7	grain	PLAN
+8	medium late maturity	TRAT
+10	Straw strength	TRAT
+10	B1202	CVAR
+11	Merit	CVAR
+11	Harrington	CVAR
+11	high levels of enzymes	TRAT
+11	higher levels of extract	TRAT
+11	better malt modification	TRAT
+11	B1202	CVAR
+12	resistance	PPTD
+12	scald	PATH
+12	B1202	CVAR
+12	Harrington	CVAR
+12	moderately susceptible	PPTD
+12	net blotch	PATH
+12	moderately resistant	PPTD
+13	resistant	PPTD
+13	stripe rust	PATH
+15	Ishi	CVAR
+15	six-rowed	TRAT
+15	spring	TRAT
+15	feed	TRAT
+15	barley	CROP
+16	California AES	ORG
+16	2005	DATE
+17	UC 828/UC 960	PED
+18	UC 1047	ALAS
+18	UCD PYT99 A-13	ALAS
+19	Ishi	CVAR
+19	has the sdw1 gene	TRAT
+19	short statured	TRAT
+19	UC 937	CVAR
+19	UC 933	CVAR
+19	Central Valley	GPE
+19	Central Coast	GPE
+21	UC 937	CVAR
+21	UC 933	CVAR
+22	days to heading	TRAT
+22	UC 937	CVAR
+22	UC 933	CVAR
+22	time to maturity	TRAT
+23	awns	PLAN
+24	spike	PLAN
+25	kernels	PLAN
+25	aleurone	PLAN
+26	Grains	PLAN
+26	hairs	PLAN
+26	ventral furrow	PLAN
+27	Rachilla hairs	PLAN
+28	Ishi	CVAR
+28	resistant	PPTD
+28	scald	PATH
+28	powdery mildew	PATH
+28	moderately resistant	PPTD
+28	stripe rust	PATH
+28	BYD	PATH
+28	net blotch	PATH
+28	moderately susceptible	PPTD
+28	leaf rust	PATH
+29	moderately susceptible	PPTD
+29	net blotch	PATH
+31	Crop Science 46:1396 (2006)	JRNL
+33	Meltan	CVAR
+33	two-rowed	TRAT
+33	spring	TRAT
+33	feed	TRAT
+33	barley	CROP
+34	Adams Grain Company	ORG
+34	California	GPE
+35	late maturing	TRAT
+35	moderately short	TRAT
+35	fair straw strength	TRAT
+36	resistant	PPTD
+36	leaf rust	PATH
+36	powdery mildew	PATH
+36	moderately resistant	PPTD
+36	stripe rust	PATH
+36	susceptible	PPTD
+36	scald	PATH
+36	net blotch	PATH
+36	BYD	PATH
+38	Merit 57	CVAR
+38	two-rowed	TRAT
+38	spring	TRAT
+38	malting	TRAT
+38	barley	CROP
+39	Busch Agricultural Resources	ORG
+39	2009	DATE
+40	Merit//Merit/2B94-5744	PED
+40	1996	DATE
+40	Fort Collins, Colorado	GPE
+41	high levels of enzymes	TRAT
+41	-amylase	TRAT
+41	diastatic power	TRAT
+41	Merit	CVAR
+42	Merit	CVAR
+42	levels of malt extract	TRAT
+43	Merit 57	CVAR
+43	rough awned	TRAT
+43	late maturing	TRAT
+43	high yield potential	TRAT
+44	plant height	TRAT
+44	straw strength	TRAT
+44	lodging resistance	TRAT
+44	AC Metcalfe	CVAR
+45	resistance to shattering	TRAT
+45	tolerance of straw breakage	TRAT
+45	drought	TRAT
+46	Merit 57	CVAR
+46	denser pubescence	TRAT
+46	flag leaf	PLAN
+46	Merit	CVAR
+47	anthocyanin coloration	TRAT
+47	flag leaf auricles	PLAN
+47	Merit	CVAR
+48	spike emergence	TRAT
+48	Merit	CVAR
+49	lemma awns	PLAN
+49	Merit 57	CVAR
+49	anthocyanin coloration	TRAT
+49	Harrington	CVAR
+50	Merit 57	CVAR
+50	spike	PLAN
+50	Merit	CVAR
+51	spike	PLAN
+51	Merit	CVAR
+51	Harrington	CVAR
+52	basal marking	PLAN
+52	kernel	PLAN
+52	Merit 57	CVAR
+52	Harrington	CVAR
+53	Merit 57	CVAR
+53	kernel	PLAN
+54	Merit 57	CVAR
+54	scald	PATH
+54	resistance	PPTD
+54	Merit	CVAR
+55	Merit 57	CVAR
+55	moderately susceptible	PPTD
+55	scald	PATH
+55	net blotch	PATH
+55	race MCC of stem rust	PATH
+55	spot blotch	PATH
+55	susceptible	PPTD
+55	BYD	PATH
+57	Millennium	CVAR
+57	six-rowed	TRAT
+57	spring	TRAT
+57	feed	TRAT
+57	barley	CROP
+58	Utah AES	ORG
+58	2000	DATE
+59	WA Sel 3564/Unitan//UT Short2*2	PED
+62	UT94B1058-4603	ALAS
+62	UT 4603	ALAS
