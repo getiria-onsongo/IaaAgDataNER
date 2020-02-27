@@ -48,7 +48,7 @@
 22	days to heading	TRAT
 22	UC 937	CVAR
 22	UC 933	CVAR
-22	time to maturity	TRAT
+22	maturity	TRAT
 23	awns	PLAN
 24	spike	PLAN
 25	kernels	PLAN
@@ -79,7 +79,7 @@
 34	California	GPE
 35	late maturing	TRAT
 35	moderately short	TRAT
-35	fair straw strength	TRAT
+35	straw strength	TRAT
 36	resistant	PPTD
 36	leaf rust	PATH
 36	powdery mildew	PATH
@@ -99,7 +99,7 @@
 40	Merit//Merit/2B94-5744	PED
 40	1996	DATE
 40	Fort Collins, Colorado	GPE
-41	high levels of enzymes	TRAT
+41	levels of enzymes	TRAT
 41	-amylase	TRAT
 41	diastatic power	TRAT
 41	Merit	CVAR
@@ -107,8 +107,8 @@
 42	levels of malt extract	TRAT
 43	Merit 57	CVAR
 43	rough awned	TRAT
-43	late maturing	TRAT
-43	high yield potential	TRAT
+43	maturing	TRAT
+43	yield potential	TRAT
 44	plant height	TRAT
 44	straw strength	TRAT
 44	lodging resistance	TRAT

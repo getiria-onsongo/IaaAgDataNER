@@ -9,11 +9,11 @@
 3	TR 232	ALAS
 3	WM8612-1	ALAS
 4	western Canada	GPE
-4	excellent malting	TRAT
+4	malting	TRAT
 4	brewing quality	TRAT
 5	tall	TRAT
-5	fair straw strength	TRAT
-5	medium late maturing	TRAT
+5	straw strength	TRAT
+5	maturing	TRAT
 5	Harrington	CVAR
 6	resistant	PPTD
 6	stripe rust	PATH
@@ -42,9 +42,9 @@
 17	mid-late season	TRAT
 17	Klages	CVAR
 17	Steptoe	CVAR
-18	medium height	TRAT
+18	height	TRAT
 18	Steptoe	CVAR
-18	moderately stiff straw	TRAT
+18	straw	PLAN
 20	Awns	PLAN
 21	Glumes	PLAN
 22	Hulls	PLAN
@@ -71,13 +71,13 @@
 32	1999	DATE
 33	WM861-5/TR118	PED
 35	TR150	ALAS
-36	medium late maturing	TRAT
+36	maturing	TRAT
 36	Manley	CVAR
 36	Harrington	CVAR
 37	CDC Copeland	CVAR
 37	Harrington	CVAR
 37	Manley	CVAR
-37	good resistance to lodging	TRAT
+37	resistance to lodging	TRAT
 37	Harrington	CVAR
 37	Manley	CVAR
 38	Manley	CVAR
@@ -85,7 +85,7 @@
 40	Heads	PLAN
 40	semi-nodding	TRAT
 41	Awns	PLAN
-41	weak anthocyanin in awn tips	TRAT
+41	awn tips	PLAN
 41	spike	PLAN
 42	Glumes	PLAN
 42	awns	PLAN
@@ -150,8 +150,8 @@
 60	World Wide Wheat	ORG
 62	7128	ALAS
 63	semi-dwarf	TRAT
-63	stiff straw	TRAT
-63	fair lodging resistance	TRAT
+63	straw	PLAN
+63	lodging resistance	TRAT
 63	medium late season maturity	TRAT
 64	moderately susceptible	PPTD
 64	BYD	PATH
