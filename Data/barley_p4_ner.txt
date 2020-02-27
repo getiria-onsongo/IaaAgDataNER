@@ -43,15 +43,15 @@
 16	North Dakota AES	ORG
 16	2006	DATE
 17	ND18172/ND19130	PED
-18	high yielding	TRAT
-18	lower protein	TRAT
+18	yielding	TRAT
+18	protein	TRAT
 18	accumulates about 40% less DON	TRAT
 18	Robust	CVAR
 19	Pinnacle	CVAR
 19	quality	TRAT
 20	Conlon	CVAR
 20	Pinnacle	CVAR
-20	lower protein	TRAT
+20	protein	TRAT
 20	kernels	PLAN
 21	Pinnacle	CVAR
 21	resistance	PPTD
@@ -64,8 +64,8 @@
 22	rachilla hairs	PLAN
 22	awns	PLAN
 22	aleurone	PLAN
-22	medium-late maturity	TRAT
-22	medium height	TRAT
+22	maturity	TRAT
+22	height	TRAT
 22	straw strength	TRAT
 23	moderately resistant	PPTD
 23	spot blotch	PATH
@@ -83,7 +83,7 @@
 26	2006	DATE
 28	Entry 2	ALAS
 29	winter	TRAT
-29	low water use	TRAT
+29	water use	TRAT
 29	Southwestern United States	GPE
 29	Arizona	GPE
 30	early maturing	TRAT
@@ -121,7 +121,7 @@
 41	aleurone	PLAN
 42	shorter	TRAT
 42	Drummond	CVAR
-43	stronger straw	TRAT
+43	straw	PLAN
 43	Robust	CVAR
 44	resistant	PPTD
 44	spot blotch	PATH
@@ -131,7 +131,7 @@
 44	net blotch	PATH
 44	susceptible	PPTD
 44	loose smut	PATH
-46	Crop Sci 46(2):980.	JRNL
+46	Crop Sci 46(2):980	JRNL
 48	Steptoe	CVAR
 48	six-rowed	TRAT
 48	spring	TRAT
@@ -148,7 +148,7 @@
 54	Steptoe	CVAR
 54	tall	TRAT
 54	lodging	TRAT
-54	early to intermediate maturity	TRAT
+54	maturity	TRAT
 55	fall-seeded	TRAT
 56	spikes	PLAN
 56	awns	PLAN

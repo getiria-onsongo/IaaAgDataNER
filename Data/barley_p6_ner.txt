@@ -62,7 +62,7 @@
 29	2007	DATE
 30	Camas/Baronesse	PED
 31	YU501-385	ALAS
-32	midseason maturity	TRAT
+32	maturity	TRAT
 32	plant height	TRAT
 33	plant height	TRAT
 33	straw strength	TRAT
@@ -112,7 +112,7 @@
 54	mid-season in maturity	TRAT
 54	Luther	CVAR
 54	Kamiak	CVAR
-54	stiff straw	TRAT
+54	straw	PLAN
 54	tall	TRAT
 54	lodging resistant	TRAT
 55	spike	PLAN

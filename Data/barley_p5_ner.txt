@@ -9,11 +9,11 @@
 3	2007	DATE
 4	Ataco/Achira//Higo x UC 960	PED
 7	UCD YP03-9/3	ALAS
-8	medium maturing	TRAT
-8	medium-short height	TRAT
-9	good straw strength	TRAT
+8	maturing	TRAT
+8	height	TRAT
+9	straw strength	TRAT
 10	awns	PLAN
-10	good resistance to shattering	TRAT
+10	resistance to shattering	TRAT
 11	Kernels	PLAN
 11	aleurone	PLAN
 12	hulless	TRAT
@@ -22,7 +22,7 @@
 12	barley	CROP
 12	Tamalpais	CVAR
 13	Tamalpais	CVAR
-13	high in Beta-glucan	TRAT
+13	Beta-glucan	TRAT
 15	resistant	PPTD
 15	leaf rust	PATH
 15	powdery mildew	PATH
@@ -42,9 +42,9 @@
 20	Mari/Luther//Traill/3/Briggs/Prato sib	PED
 21	UC80206	ALAS
 23	UC 603	CVAR
-23	medium short stature	TRAT
-23	good lodging resistance	TRAT
-23	early maturity	TRAT
+23	stature	TRAT
+23	lodging resistance	TRAT
+23	maturity	TRAT
 24	basal rachis internode	PLAN
 25	rachis edges	PLAN
 25	hairs	PLAN
@@ -91,11 +91,11 @@
 45	stripe rust	PATH
 46	UC 933	CVAR
 46	spring growth habit	TRAT
-46	medium early maturity	TRAT
+46	maturity	TRAT
 47	UC 937	CVAR
 47	UC 603	CVAR
-47	medium height	TRAT
-47	fair straw strength	TRAT
+47	height	TRAT
+47	straw strength	TRAT
 48	Spikes	PLAN
 49	Glumes	PLAN
 49	hairs	PLAN
@@ -132,11 +132,11 @@
 68	spring planting	TRAT
 69	UC 960	CVAR
 69	short-statured	TRAT
-69	excellent straw strength	TRAT
+69	straw strength	TRAT
 69	Gustoe	CVAR
 69	Diamant	CVAR
 69	Minn Dwarf 64.988	CVAR
 70	UC 960	CVAR
-70	early maturing	TRAT
+70	maturing	TRAT
 70	Gustoe	CVAR
 70	Steptoe	CVAR
