@@ -14,6 +14,6 @@
     ('Crop Science 43:437 (2003)', {'entities': [(0, 26, 'JRNL')]}),
     ('Sma1 has the parentage Steptoe/2*Diamant/3/Minn Dwarf 64.98-8/Briggs/4/Asse.', {'entities': [(0, 4, 'CVAR'), (23, 75, 'PED')]}),
     ('Crop Science 42:1374 (2002)', {'entities': [(0, 27, 'JRNL')]}),
-    ('Sma1 has the parentage Steptoe/2*Diamant/3/Minn Dwarf 64.98-8/Briggs/4/Asse.', {'entities': [(0, 4, 'CVAR'), (23, 75, 'JRNL')]}),
+    ('Sma1 has the parentage Steptoe/2*Diamant/3/Minn Dwarf 64.98-8/Briggs/4/Asse.', {'entities': [(0, 4, 'CVAR'), (23, 75, 'PED')]}),
     ('Crop Science 43:438 (2003)', {'entities': [(0, 26, 'JRNL')]}),
     ('Crop Science 17(4):672 (1977)', {'entities': [(0, 29, 'JRNL')]}),
