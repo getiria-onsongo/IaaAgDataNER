@@ -1,0 +1,142 @@
+2	Tamalpais	CVAR
+2	six-rowed	TRAT
+2	spring	TRAT
+2	hulless	TRAT
+2	feed	TRAT
+2	food	TRAT
+2	barley	CROP
+3	California AES	ORG
+3	2007	DATE
+4	Ataco/Achira//Higo x UC 960	PED
+7	UCD YP03-9/3	ALAS
+8	medium maturing	TRAT
+8	medium-short height	TRAT
+9	good straw strength	TRAT
+10	awns	PLAN
+10	good resistance to shattering	TRAT
+11	Kernels	PLAN
+11	aleurone	PLAN
+12	hulless	TRAT
+12	feed	TRAT
+12	food	TRAT
+12	barley	CROP
+12	Tamalpais	CVAR
+13	Tamalpais	CVAR
+13	high in Beta-glucan	TRAT
+15	resistant	PPTD
+15	leaf rust	PATH
+15	powdery mildew	PATH
+15	moderately resistant	PPTD
+15	scald	PATH
+15	net blotch	PATH
+15	BYD	PATH
+15	moderately susceptible	PPTD
+15	stripe rust	PATH
+18	UC 603	CVAR
+18	six-rowed	TRAT
+18	spring	TRAT
+18	feed	TRAT
+18	barley	CROP
+19	University of California AES	ORG
+19	1988	DATE
+20	Mari/Luther//Traill/3/Briggs/Prato sib	PED
+21	UC80206	ALAS
+23	UC 603	CVAR
+23	medium short stature	TRAT
+23	good lodging resistance	TRAT
+23	early maturity	TRAT
+24	basal rachis internode	PLAN
+25	rachis edges	PLAN
+25	hairs	PLAN
+26	spike	PLAN
+27	lemma awn	PLAN
+28	glume awn	PLAN
+28	glume	PLAN
+29	glume	PLAN
+29	lemma	PLAN
+30	rachilla	PLAN
+30	hairs	PLAN
+31	Kernels	PLAN
+31	hulls	PLAN
+31	aleurone	PLAN
+32	UC 603	CVAR
+32	resistant	PPTD
+32	BYD	PATH
+32	resistant to moderately resistant	PPTD
+32	net blotch	PATH
+32	scald	PATH
+32	powdery mildew	PATH
+32	leaf rust	PATH
+33	susceptible	PPTD
+33	net blotch	PATH
+33	moderately susceptible	PPTD
+33	stripe rust	PATH
+33	leaf rust	PATH
+33	moderately resistant	PPTD
+33	BYD	PATH
+35	Crop Science 30:1154-1155 (1990)	JRNL
+36	UC 933	CVAR
+36	six-rowed	TRAT
+36	spring	TRAT
+36	feed	TRAT
+37	California AES	ORG
+37	2001	DATE
+38	Sma1/Sunbar 401/3/Gus/Kombyne//Sma1	PED
+39	Sma1	CVAR
+39	Steptoe/2*Diamant /3/Minn Dwarf 64.98-8/Briggs/4/Asse	PED
+43	UCD 92-10,585	ALAS
+43	1992	DATE
+45	UC 933	CVAR
+45	resistance	PPTD
+45	stripe rust	PATH
+46	UC 933	CVAR
+46	spring growth habit	TRAT
+46	medium early maturity	TRAT
+47	UC 937	CVAR
+47	UC 603	CVAR
+47	medium height	TRAT
+47	fair straw strength	TRAT
+48	Spikes	PLAN
+49	Glumes	PLAN
+49	hairs	PLAN
+50	Glume awns	PLAN
+50	glumes	PLAN
+51	Lemma awns	PLAN
+52	Kernels	PLAN
+52	aleurone	PLAN
+53	UC 933	CVAR
+53	resistant	PPTD
+53	scald	PATH
+53	net blotch	PATH
+53	stripe rust	PATH
+53	leaf rust	PATH
+53	moderately resistant	PPTD
+53	BYD	PATH
+53	powdery mildew	PATH
+54	susceptible	PPTD
+54	leaf rust	PATH
+56	Crop Science 43:437 (2003)	JRNL
+58	UC 960	CVAR
+58	six-rowed	TRAT
+58	spring	TRAT
+58	feed	TRAT
+58	barley	CROP
+59	California AES	ORG
+59	1999	DATE
+60	UC 960	CVAR
+60	Sma1/Sunbar 401/3/Gus/Kombyne//Sma1	PED
+61	Sma1	CVAR
+61	Steptoe/2*Diamant/3/Minn Dwarf 64.98-8/Briggs/4/Asse	PED
+67	NK 2867	CVAR
+68	UC 960	CVAR
+68	spring planting	TRAT
+69	UC 960	CVAR
+69	short-statured	TRAT
+69	excellent straw strength	TRAT
+69	Gustoe	CVAR
+69	Diamant	CVAR
+69	Minn Dwarf 64.988	CVAR
+70	UC 960	CVAR
+70	early maturing	TRAT
+70	Gustoe	CVAR
+70	Steptoe	CVAR
