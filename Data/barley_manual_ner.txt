@@ -24,3 +24,7 @@
     ('Crop Science 35(5): 1503 (1995)', {'entities': [(0, 31, 'JRNL')]}),
     ('Crop Science 12:124 (1972)', {'entities': [(0, 26, 'JRNL')]}),
     ('Crop Science 26:1079 (1986)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Westbred Sprinter is a six-rowed facultative (winter/spring) feed barley.', {'entities': [(0, 17, 'CVAR'), (23, 32, 'TRAT'), (33, 44, 'TRAT'), (45, 60, 'TRAT'), (61, 65, 'TRAT'), (66, 72, 'CROP')]}),
+    ('Sunstar Double is a six-rowed facultative (winter/spring) feed barley.', {'entities': [(0, 14, 'CVAR'), (20, 29, 'TRAT'), (30, 41, 'TRAT'), (42, 57, 'TRAT'), (58, 62, 'TRAT'), (63, 69, 'CROP')]}),
+    ('It is a reselection made in 1973 at Pullman, Washington from WA6591-69 which was selected from the cross Foma/Triple Bearded Mariout//White Winter (WA6194- 63)/3/Blazer.', {'entities': [(28, 32, 'DATE'), (36, 55, 'GPE'), (61, 70, 'CVAR'), (105, 168, 'PED')]}),
+    ('Crop Science 23:1218 (1983)', {'entities': [(0, 27, 'JRNL')]}),
