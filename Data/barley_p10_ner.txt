@@ -1,0 +1,156 @@
+1	Veins	PLAN
+2	crease	PLAN
+2	base	PLAN
+2	beard	PLAN
+3	susceptible	PPTD
+3	BYD	PATH
+3	moderately resistant	PPTD
+3	powdery mildew	PATH
+5	Crop Science 25:1123 (1985)	JRNL
+6	Apex	CVAR
+6	two-row	TRAT
+6	spring	TRAT
+6	malting	TRAT
+6	feed	TRAT
+6	barley	CROP
+8	Aramir*((Cebaco 6721*(Julia/3/Volla*L100))	PED
+9	maturing	TRAT
+9	mid-tall	TRAT
+9	straw strength	TRAT
+10	resistant	PPTD
+10	leaf rust	PATH
+10	net blotch	PATH
+10	powdery mildew	PATH
+12	Aquila	CVAR
+12	six-row	TRAT
+12	spring	TRAT
+12	feed	TRAT
+12	barley	CROP
+13	Utah AES	ORG
+13	2003	DATE
+14	UT-S.D. B1-1009/M72-395/3/Utah Short #2//ID633019/Woodvale/4/Steptoe/M27//Westbred Gustoe	PED
+15	UT97B1480-1632	ALAS
+16	heading	TRAT
+16	lodging resistance	TRAT
+17	Plant height	TRAT
+17	mid-tall	TRAT
+17	Steptoe	CVAR
+18	spike	PLAN
+18	lateral spikelets	PLAN
+19	peduncle	PLAN
+20	rachis	PLAN
+20	hairs	PLAN
+21	spike	PLAN
+21	collar	PLAN
+21	closed type	TRAT
+21	V-shaped	TRAT
+22	basal rachis internode	PLAN
+22	shape	TRAT
+23	rachis internodes	PLAN
+23	spike	PLAN
+24	Glumes	PLAN
+24	dorsal surfaces	PLAN
+24	edges	PLAN
+25	Glume awns	PLAN
+25	glumes	PLAN
+26	hairs	PLAN
+26	ventral surface	PLAN
+26	glumes	PLAN
+27	awns	PLAN
+28	seed	PLAN
+28	crease	PLAN
+28	lemma base	PLAN
+29	Lemma teeth	PLAN
+29	nerves	PLAN
+29	rachilla	PLAN
+29	hulls	PLAN
+29	aleurone	PLAN
+30	resistant	PPTD
+30	loose smut	PATH
+30	covered smut	PATH
+30	susceptible	PPTD
+30	stripe rust	PATH
+32	Crop Science 45: 1160 (2005)	JRNL
+33	Arivat	CVAR
+33	six-rowed	TRAT
+33	spring	TRAT
+33	feed	TRAT
+33	barley	CROP
+34	Arizona AES	ORG
+34	1940	DATE
+36	Atlas/Vaughn	PED
+36	1927	DATE
+36	California	GPE
+38	Arivat	CVAR
+38	growth	TRAT
+38	maturity	TRAT
+38	stature	TRAT
+38	straw	TRAT
+39	spike	PLAN
+40	Lateral kernels	PLAN
+40	tip	PLAN
+41	rachis edges	PLAN
+42	Awns	PLAN
+43	glume	PLAN
+44	glume awn	PLAN
+44	glume	PLAN
+45	Rachilla hairs	PLAN
+46	Kernels	PLAN
+46	hulls	PLAN
+46	aleurone	PLAN
+47	moderately susceptible	PPTD
+47	leaf rust	PATH
+47	net blotch	PATH
+47	susceptible	PPTD
+47	stripe rust	PATH
+47	scald	PATH
+47	BYD	PATH
+49	Agronomy Journal 52:661 (1960)	JRNL
+51	Atlas	CVAR
+51	six-rowed	TRAT
+51	spring	TRAT
+51	feed	TRAT
+51	malting	TRAT
+51	barley	CROP
+52	California AES	ORG
+52	1969	DATE
+53	Atlas *3/CIho 3920-1//Atlas 46/3/4* Atlas/CIho 1179//2* Atlas 57	PED
+57	growth	TRAT
+57	maturity	TRAT
+58	straw	PLAN
+58	spikes	PLAN
+58	awns	PLAN
+59	kernels	PLAN
+59	aleurone	PLAN
+59	rachilla	PLAN
+60	resistant	PPTD
+60	BYD	PATH
+60	powdery mildew	PATH
+60	scald	PATH
+62	Crop Science 9(4):521 (1969)	JRNL
+64	Azure	CVAR
+64	six-rowed	TRAT
+64	spring	TRAT
+64	malting	TRAT
+64	barley	CROP
+65	North Dakota AES	ORG
+65	USDA-ARS	ORG
+65	1982	DATE
+66	Bonanza//Nordic/NDB130	PED
+67	ND 1894	ALAS
+68	barley	CROP
+68	North Dakota	GPE
+68	Minnesota	GPE
+68	South Dakota	GPE
+69	maturing	TRAT
+69	straw	TRAT
+70	Spikes	PLAN
+71	Awns	PLAN
+72	glume awn	PLAN
+72	glume	PLAN
+73	hairs	PLAN
+73	glume	PLAN
+74	Hulls	PLAN
+75	Aleurone	PLAN
+76	Rachilla hairs	PLAN
+77	Veins	PLAN
