@@ -34,3 +34,6 @@
     ('Agronomy Journal 52:661 (1960)', {'entities': [(0, 30, 'JRNL')]}),
     ('It was selected from the cross Atlas *3/CIho 3920-1//Atlas 46/3/4* Atlas/CIho 1179//2* Atlas 57.', {'entities': [(31, 95, 'JRNL')]}),
     ('Crop Science 9(4):521 (1969)', {'entities': [(0, 28, 'JRNL')]}),
+    ('Crop Science 22:1083 (1982)', {'entities': [(0, 27, 'JRNL')]}),
+
+
