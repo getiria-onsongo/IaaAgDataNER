@@ -1,0 +1,161 @@
+2	Bob	CVAR
+2	two-rowed	TRAT
+2	spring	TRAT
+2	malting	TRAT
+2	feed	TRAT
+2	barley	CROP
+3	Washington State University Agriculture Research Center	ORG
+3	Idaho and Oregon Agricultural Experiment Stations	ORG
+3	USDA-ARS	ORG
+3	2002	DATE
+4	A308 (Lewis somaclonal line)/Baronesse	PED
+5	WA8682-96	ALAS
+6	maturity	TRAT
+6	plant height	TRAT
+6	Baronesse	CVAR
+6	straw strength	TRAT
+6	spikes	PLAN
+6	awns	PLAN
+6	kernels	PLAN
+6	rachilla hairs	PLAN
+7	head types	TRAT
+8	eastern Washington	GPE
+8	Idaho	GPE
+8	Oregon	GPE
+9	Yield	TRAT
+9	Baronesse	CVAR
+9	eastern Washington	GPE
+10	Test weight	TRAT
+10	kernel	PLAN
+10	Baronesse	CVAR
+11	Maturity	TRAT
+11	Baronesse	CVAR
+12	Malting quality	TRAT
+12	Harrington	CVAR
+13	moderately resistant	PPTD
+13	leaf rust	PATH
+13	moderately susceptible	PPTD
+13	stripe rust	PATH
+15	Crop Science 43:1132-1133 (2003)	JRNL
+17	Bowman	CVAR
+17	two-rowed	TRAT
+17	spring	TRAT
+17	feed	TRAT
+17	barley	CROP
+18	North Dakota AES	ORG
+18	USDA-ARS	ORG
+18	1984	DATE
+19	Klages//Fergus/Nordic/3/ND1156/4/Hector	PED
+21	ND 4994	ALAS
+22	maturity	TRAT
+22	height	TRAT
+22	straw	TRAT
+23	Spikes	PLAN
+24	Awns	PLAN
+25	Seeds	PLAN
+25	aleurone	PLAN
+26	Test weight	TRAT
+27	resistant	PPTD
+27	stem rust	PATH
+27	susceptible	PPTD
+27	leaf rust	PATH
+27	BYD	PATH
+27	loose smut	PATH
+29	Crop Science 25:883 (1985)	JRNL
+30	Briggs	CVAR
+30	six-rowed	TRAT
+30	spring	TRAT
+30	feed	TRAT
+30	barley	CROP
+31	California AES	ORG
+31	1966	DATE
+32	2*California Mariout/Arivat	PED
+33	UCD 27	ALAS
+34	Briggs	CVAR
+34	Sacramento Valley	GPE
+34	Coastal area of California	GPE
+35	Arivat	CVAR
+36	stature	TRAIT
+36	straw	TRAIT
+36	maturity	TRAIT
+37	Collars	PLAN
+37	basal rachis internode	PLAN
+38	spike	PLAN
+39	lemma awn	PLAN
+40	glume awn	PLAN
+40	glume	PLAN
+41	glume	PLAN
+41	lemma	PLAN
+42	Rachilla hairs	PLAN
+43	Kernels	PLAN
+43	aleurone	PLAN
+44	Briggs	CVAR
+44	moderately resistant	PPTD
+44	scald	PATH
+44	leaf rust	PATH
+44	powdery mildew	PATH
+44	susceptible	PPTD
+44	BYD	PATH
+44	net blotch	PATH
+46	Crop Science 8:776 (1968)	JRNL
+47	Brigham	CVAR
+47	six-rowed	TRAT
+47	spring	TRAT
+47	feed	TRAT
+47	barley	CROP
+48	Utah AES	ORG
+48	1998	DATE
+49	Woodvale//Primus/SD67-297/3/Steptoe/4/UT Short #1	PED
+50	UT90B772-2120	ALAS
+50	UT002120	ALAS
+51	Brigham	CVAR
+51	erect-growing	TRAT
+51	semi-dwarf	TRAT
+51	maturity	TRAT
+52	Spikes	PLAN
+52	lateral kernels	PLAN
+52	rachis edges	PLAN
+52	hairs	PLAN
+53	Brigham	CVAR
+53	leaves	PLAN
+53	spikes	PLAN
+54	Glumes	PLAN
+54	hairs	PLAN
+54	glume awns	PLAN
+55	Lemma awns	PLAN
+56	seed	PLAN
+56	rachilla hairs	PLAN
+56	crease	PLAN
+56	base	PLAN
+57	Aleurone	PLAN
+58	stems	PLAN
+58	neck	PLAN
+58	spikes	PLAN
+58	collar	PLAN
+58	base	PLAN
+60	resistant	PPTD
+60	loose smut	PATH
+60	covered smut	PATH
+60	moderately resistant	PPTD
+60	BYD	PATH
+60	moderately susceptible	PPTD
+60	powdery mildew	PATH
+60	susceptible	PPTD
+60	stripe rust	PATH
+62	Crop Science 42:666 (2002)	JRNL
+63	Caliber	CVAR
+63	six-rowed	TRAT
+63	spring	TRAT
+63	feed	TRAT
+63	barley	CROP
+64	World-Wide Wheat	ORG
+66	BA 2139	ALAS
+67	maturity	TRAT
+67	plant height	TRAT
+67	straw strength	TRAT
+68	moderately susceptible	PPTD
+68	scald	PATH
+68	net blotch	PATH
+68	leaf rust	PATH
+68	susceptible	PPTD
+68	stripe rust	PATH
