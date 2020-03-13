@@ -7,8 +7,6 @@ from spacy.lang.char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER,CONCAT_QUOTE
 from spacy.util import minibatch, compounding
 from spacy.util import compile_infix_regex
 
-
-
 def trainModel(model=None, output_dir=None, n_iter=100):
     """Load the model, set up the pipeline and train the entity recognizer."""
     if model is not None:
