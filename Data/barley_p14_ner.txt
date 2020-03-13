@@ -1,0 +1,155 @@
+2	Camelot	CVAR
+2	two-rowed	TRAT
+2	spring	TRAT
+2	feed	TRAT
+2	barley	CROP
+3	maturing	TRAT
+3	mid-tall	TRAT
+3	straw strength	TRAT
+5	Century	CVAR
+5	six-rowed	TRAT
+5	spring	TRAT
+5	feed	TRAT
+5	barley	CROP
+6	Utah AES	ORG
+6	1997	DATE
+7	WA641566/Bracken	PED
+8	UT1705-L	ALAS
+9	maturity	TRAT
+9	height	TRAT
+9	straw strength	TRAT
+10	spikes	PLAN
+10	lateral kernels	PLAN
+10	spike	PLAN
+10	hairs	PLAN
+10	rachis edges	PLAN
+11	leaves	PLAN
+11	spikes	PLAN
+12	Glumes	PLAN
+12	hairs	PLAN
+12	glume awns	PLAN
+13	Lemma awns	PLAN
+14	Stigmas	PLAN
+15	Seed	PLAN
+15	rachilla hairs	PLAN
+15	crease	PLAN
+15	base	PLAN
+16	Aleurone	PLAN
+17	base	PLAN
+17	spikes	PLAN
+17	collar	PLAN
+18	resistant	PPTD
+18	covered smut	PATH
+18	less resistant	PPTD
+18	loose smut	PATH
+18	Steptoe	CVAR
+18	Rollo	CVAR
+18	Walker	CVAR
+18	Statehood	CVAR
+19	moderately resistant	PPTD
+19	powdery mildew	PATH
+19	susceptible	PPTD
+19	stripe rust	PATH
+21	Crop Science 40:1506 (2000)	JRNL
+22	Clark	CVAR
+22	two-rowed	TRAT
+22	spring	TRAT
+22	feed	TRAT
+22	malting	TRAT
+22	barley	CROP
+23	USDA-ARS	ORG
+23	Montana AES	ORG
+23	1981	DATE
+24	Hector/Klages	PED
+25	MT 547234	ALAS
+26	Montana	GPE
+26	Great Plains area	GPE
+27	maturity	TRAT
+27	heading	TRAT
+27	Klages	CVAR
+27	mid-tall	TRAT
+27	straw strength	TRAT
+27	lodging	TRAT
+28	Spikes	PLAN
+28	awns	PLAN
+28	rachilla	PLAN
+29	Veins	PLAN
+30	barbs	PLAN
+30	lateral veins	PLAN
+31	crease	PLAN
+31	base	PLAN
+31	tip	PLAN
+32	Kernels	PLAN
+32	hulls	PLAN
+33	Aleurone	PLAN
+34	tolerance	PPTD
+34	spot blotch	PATH
+34	net blotch	PATH
+34	common root rot	PATH
+34	Klages	CVAR
+36	Crop Science 25:197 (1985)	JRNL
+36	CM 67	CVAR
+36	six-rowed	TRAT
+36	spring	TRAT
+36	feed	TRAT
+36	barley	CROP
+37	California AES	ORG
+37	1968	DATE
+38	California Mariout*5/CIho 2376//6*California Mariout/2*Club Mariout	PED
+39	short-statured	TRAT
+39	maturity	TRAT
+40	rough awned	TRAT
+40	spikes	PLAN
+41	Kernels	PLAN
+41	aleurone	PLAN
+41	rachilla	PLAN
+42	highly tolerant	PPTD
+42	BYD	PATH
+42	susceptible	PPTD
+42	scald	PATH
+42	powdery mildew	PATH
+45	Crop Science 9:521 (1969)	JRNL
+48	CM 72	CVAR
+48	six-rowed	TRAT
+48	spring	TRAT
+48	feed	TRAT
+48	barley	CROP
+49	California AES	ORG
+49	1974	DATE
+50	California Mariout*4/CIho 1179//2*California Mariout*/Club Mariout/3/CM 67	PED
+54	California Mariout	CVAR
+55	CM 67	CVAR
+55	resistance	PPTD
+55	powdery mildew	PATH
+56	CM 72	CVAR
+56	resistance	PPTD
+56	barley yellow dwarf virus	PATH
+57	CM 67	CVAR
+57	California Mariout	CVAR
+58	CM 72	CVAR
+58	straw	TRAT
+58	lodging	TRAT
+58	maturing	TRAT
+59	spike	PLAN
+60	basal rachis internode	PLAN
+60	rachis edges	PLAN
+60	hair	PLAN
+61	rachilla	PLAN
+62	lemma awn	PLAN
+63	glume awn	PLAN
+63	glume	PLAN
+64	glume	PLAN
+64	lemma	PLAN
+65	kernels	PLAN
+65	hulls	PLAN
+65	aleurone	PLAN
+66	CM 72	CVAR
+66	resistant	PPTD
+66	BYD	PATH
+66	powdery mildew	PATH
+66	moderately resistant	PPTD
+66	leaf rust	PATH
+66	net blotch	PATH
+66	susceptible	PPTD
+66	scald	PATH
+68	Crop Science 17:485 (1977)
