@@ -1,11 +1,13 @@
-import random
+from spacy.lang.char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER,CONCAT_QUOTES, LIST_ELLIPSES, LIST_ICONS
+from spacy.util import compile_infix_regex
 import re
 import spacy
-from agData import *
-from pathlib import Path
-from spacy.lang.char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER,CONCAT_QUOTES, LIST_ELLIPSES, LIST_ICONS
+from spacy.matcher import Matcher
+import srsly
 from spacy.util import minibatch, compounding
-from spacy.util import compile_infix_regex
+from agData import *
+import random
+from pathlib import Path
 
 path_to_pretrained_weights="/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/preTrainInput/text.jsonl"
 
@@ -17,31 +19,6 @@ def trainModel(model=None, output_dir=None, n_iter=100):
     else:
         nlp = spacy.blank("en_core_web_lg")  # create blank Language class
         print("Created blank 'en_core_web_lg' model")
-
-        # The code below is custom to agData. It modifies how the
-        # parser works to avoid splitting pedigrees
-
-        # Tell spacy not to split between hyphens
-        infixes = (
-                LIST_ELLIPSES
-                + LIST_ICONS
-                + [
-                    r"(?<=[0-9])[+\-\*^](?=[0-9-])",
-                    r"(?<=[{al}{q}])\.(?=[{au}{q}])".format(
-                        al=ALPHA_LOWER, au=ALPHA_UPPER, q=CONCAT_QUOTES
-                    ),
-                    r"(?<=[{a}]),(?=[{a}])".format(a=ALPHA),
-                    r"(?<=[{a}0-9])[:<>=/](?=[{a}])".format(a=ALPHA),
-                ]
-        )
-        infix_re = compile_infix_regex(infixes)
-        nlp.tokenizer.infix_finditer = infix_re.finditer
-
-        # Tell spaCy not to split on slashes (/). This will preserve PEDs.
-        # There is a chance we will get unintended side effects but we have
-        # not encountered one yet. We should rigorously test this at a later stage
-        digit_hyphen_re = re.compile(r'[\w|\S]+/[\w|\S]+')
-        nlp.tokenizer.token_match = digit_hyphen_re.search
 
     # create the built-in pipeline components and add them to the pipeline
     # nlp.create_pipe works for built-ins that are registered with spaCy
@@ -69,9 +46,9 @@ def trainModel(model=None, output_dir=None, n_iter=100):
         if model is None:
             nlp.begin_training()
 
-        # Now that we have our model, we can load in the pretrained weights.
-        with open(path_to_pretrained_weights, "rb") as file_:
-            nlp.model.tok2vec.from_bytes(file_.read())
+            # Now that we have our model, we can load in the pretrained weights.
+            with open(path_to_pretrained_weights, "rb") as file_:
+                nlp.model.tok2vec.from_bytes(file_.read())
 
         q1 = int(n_iter // 4)
         q2 = int(q1 * 2)
@@ -99,7 +76,6 @@ def trainModel(model=None, output_dir=None, n_iter=100):
             # print("Losses", losses)
 
     print("Training complete!")
-
     # save model to output directory
     if output_dir is not None:
         output_dir = Path(output_dir)
@@ -107,3 +83,66 @@ def trainModel(model=None, output_dir=None, n_iter=100):
             output_dir.mkdir()
         nlp.to_disk(output_dir)
         print("Saved model to", output_dir)
+
+
+
+# The code below is custom to agData. It modifies how the
+# parser works to avoid splitting pedigrees
+
+nlp = spacy.load('en_core_web_lg')
+
+# Tell spacy not to split between hyphens
+infixes = (
+        LIST_ELLIPSES
+        + LIST_ICONS
+        + [
+            #r"(?<=[0-9])[+\-\*^](?=[0-9-])",
+            r"(?<=[0-9])[+\*^](?=[0-9-])", # Do not split on -
+            r"(?<=[{al}{q}])\.(?=[{au}{q}])".format(
+                al=ALPHA_LOWER, au=ALPHA_UPPER, q=CONCAT_QUOTES),
+            r"(?<=[{a}]),(?=[{a}])".format(a=ALPHA),
+            r"(?<=[{a}0-9])[:<>=](?=[{a}])".format(a=ALPHA) # Do not split in /
+           #r"(?<=[{a}0-9])[:<>=/](?=[{a}])".format(a=ALPHA)
+        ]
+        )
+infix_re = compile_infix_regex(infixes)
+# Tell spacy not to split between hyphens (-) and slashes (/)
+nlp.tokenizer.infix_finditer = infix_re.finditer
+
+# Try to match journal: Crop Science 32(3):828 (1992)
+digit_hyphen_re = re.compile(r'\s\(\d\)')
+nlp.tokenizer.token_match = digit_hyphen_re.search
+
+
+'''
+doc = nlp("It was selected from the cross Steveland/Luther//Wintermalt")
+for token in doc:
+    print(token.text)
+
+doc = nlp("It was derived from I1162-19/J-126//WA1245///Steptoe.")
+values=[]
+for token in doc:
+    values.append(token.text)
+preTrainData=[{"tokens":values}]
+path="/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/preTrainInput"
+srsly.write_jsonl(path+"/text.jsonl", preTrainData)
+# --use-vectors to use the vectors from existing English model.
+
+# python3 -m spacy download en_core_web_lg
+# python3 -m spacy pretrain  preTrainInput/text.jsonl "en_core_web_lg" preTrainOutput --use-vectors
+'''
+
+doc = nlp("It was selected from the cross I1162-19/J-126//WA1245///Steptoe")
+for token in doc:
+    print(token.text)
+
+
+doc = nlp("The journal is Crop Science 32(3):828 (1992)")
+
+for token in doc:
+    print(token.text)
+
+indexes = [m.span() for m in re.finditer('[\w|\S]+\s\([\w|\S]+\)', doc.text, flags=re.IGNORECASE)]
+for (span_start, span_end) in indexes:
+    print(doc.text[span_start:span_end])
+
