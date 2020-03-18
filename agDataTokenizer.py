@@ -11,6 +11,8 @@ import random
 from pathlib import Path
 from spacy.gold import docs_to_json
 import json
+import PyPDF2
+
 
 path_to_pretrained_weights="/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/preTrainInput/text.jsonl"
 
@@ -116,7 +118,22 @@ nlp.tokenizer.infix_finditer = infix_re.finditer
 digit_hyphen_re = re.compile(r'\s\(\d\)')
 nlp.tokenizer.token_match = digit_hyphen_re.search
 
-def convertToJSON(fileName, data):
+def pdfToJSON(inputPDF, outputFilename, tokenizer):
+    pdfFile = open(inputPDF, mode="rb")
+    data = []
+    pdfReader = PyPDF2.PdfFileReader(pdfFile)
+    numPages = pdfReader.getNumPages()
+    for i in range(numPages):
+        OnePage = pdfReader.getPage(i)
+        OnePageText = OnePage.extractText()
+        OnePageText = OnePageText.replace('\n', '')
+        data.append({"text":OnePageText})
+        break # remove after testing is done
+    srsly.write_jsonl(outputFilename, data)
+    pdfFile.close()
+
+
+def entitiesToJSON(fileName, data):
     file = open(fileName, "w")
     for entry in data:
         trainDataJson = {}
@@ -134,10 +151,17 @@ def convertToJSON(fileName, data):
         file.write("\n")
     file.close()
 
+
+
 '''
 doc = nlp("It was selected from the cross Steveland/Luther//Wintermalt")
 for token in doc:
     print(token.text)
+'''
+# TO DO
+# 1) FINALIZE AND TEST TOKENIZER
+# 2) CREATE PRE-TRAINING DATA. AT THE MOMENT I CAN ONLY GET IT TO WORK WITH
+# ONE DICTIONARY WITH A SINGLE KEY (TOKENS)
 
 doc = nlp("It was derived from I1162-19/J-126//WA1245///Steptoe.")
 values=[]
@@ -149,13 +173,14 @@ srsly.write_jsonl(path+"/text.jsonl", preTrainData)
 # --use-vectors to use the vectors from existing English model.
 
 # python3 -m spacy download en_core_web_lg
-# python3 -m spacy pretrain  preTrainInput/text.jsonl "en_core_web_lg" preTrainOutput --use-vectors
+# python3 -m spacy pretrain  preTrainInput/raw.jsonl  "en_core_web_lg" preTrainOutput --use-vectors
 # python3 -m spacy convert trainData.jsonl --converter jsonl -l en > trainData.json
 # python3 -m spacy train en --base-mode "en_core_web_lg" NerModel trainData.json trainData.json --pipeline ner --init-tok2ve preTrainOutput/model999.bin --n-iter 10
 
 # Change --n-iter 1000 in actual implementation
-'''
 
+
+''' 
 doc = nlp("It was selected from the cross I1162-19/J-126//WA1245///Steptoe")
 for token in doc:
     print(token.text)
@@ -166,9 +191,13 @@ doc = nlp("The journal is Crop Science 32(3):828 (1992)")
 # for token in doc:
 #     print(token.text)
 
+# CODE FOR FIXING JOURNAL TOKENS
 indexes = [m.span() for m in re.finditer('[\w|\S]+\s[\w|\S]+\s\([\w|\S]+\)', doc.text, flags=re.IGNORECASE)]
 print("\n")
 print(indexes)
 for (span_start, span_end) in indexes:
     print(doc.text[span_start:span_end])
+'''
+
+pdfToJSON("BarCvDescLJ11.pdf", "raw.jsonl")
 
