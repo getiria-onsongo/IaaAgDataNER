@@ -9,6 +9,8 @@ from spacy.util import minibatch, compounding
 from agData import *
 import random
 from pathlib import Path
+from spacy.gold import docs_to_json
+import json
 
 path_to_pretrained_weights="/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/preTrainInput/text.jsonl"
 
@@ -114,6 +116,23 @@ nlp.tokenizer.infix_finditer = infix_re.finditer
 digit_hyphen_re = re.compile(r'\s\(\d\)')
 nlp.tokenizer.token_match = digit_hyphen_re.search
 
+def convertToJSON(fileName, data):
+    file = open(fileName, "w")
+    for entry in data:
+        trainDataJson = {}
+        ents = []
+        entities = entry[1]['entities']
+        for ent in entities:
+            entData = {}
+            entData['start'] = ent[0]
+            entData['end'] = ent[1]
+            entData['label'] = ent[2]
+            ents.append(entData)
+        trainDataJson['text'] = entry[0]
+        trainDataJson['spans'] = ents
+        file.write(json.dumps(trainDataJson))
+        file.write("\n")
+    file.close()
 
 '''
 doc = nlp("It was selected from the cross Steveland/Luther//Wintermalt")
