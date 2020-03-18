@@ -1,5 +1,6 @@
 from spacy.lang.char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER,CONCAT_QUOTES, LIST_ELLIPSES, LIST_ICONS
 from spacy.util import compile_infix_regex
+from spacy.gold import biluo_tags_from_offsets
 import re
 import spacy
 from spacy.matcher import Matcher
@@ -130,6 +131,10 @@ srsly.write_jsonl(path+"/text.jsonl", preTrainData)
 
 # python3 -m spacy download en_core_web_lg
 # python3 -m spacy pretrain  preTrainInput/text.jsonl "en_core_web_lg" preTrainOutput --use-vectors
+# python3 -m spacy convert trainData.jsonl --converter jsonl -l en > trainData.json
+# python3 -m spacy train en NerModel trainData.json trainData.json --pipeline ner --init-tok2ve preTrainOutput/model999.bin --n-iter 10
+
+# Change --n-iter 1000 in actual implementation
 '''
 
 doc = nlp("It was selected from the cross I1162-19/J-126//WA1245///Steptoe")
@@ -139,10 +144,12 @@ for token in doc:
 
 doc = nlp("The journal is Crop Science 32(3):828 (1992)")
 
-for token in doc:
-    print(token.text)
+# for token in doc:
+#     print(token.text)
 
-indexes = [m.span() for m in re.finditer('[\w|\S]+\s\([\w|\S]+\)', doc.text, flags=re.IGNORECASE)]
+indexes = [m.span() for m in re.finditer('[\w|\S]+\s[\w|\S]+\s\([\w|\S]+\)', doc.text, flags=re.IGNORECASE)]
+print("\n")
+print(indexes)
 for (span_start, span_end) in indexes:
     print(doc.text[span_start:span_end])
 
