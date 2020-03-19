@@ -123,7 +123,7 @@ nlp.tokenizer.infix_finditer = infix_re.finditer
 digit_hyphen_re = re.compile(r'\s\(\d\)')
 nlp.tokenizer.token_match = digit_hyphen_re.search
 
-def pdfToJSON(inputPDF, outputFilename):
+def pdfToJSON(inputPDF, outputFilename, nlp):
     pdfFile = open(inputPDF, mode="rb")
     data = []
     pdfReader = PyPDF2.PdfFileReader(pdfFile)
@@ -132,8 +132,10 @@ def pdfToJSON(inputPDF, outputFilename):
         OnePage = pdfReader.getPage(i)
         OnePageText = OnePage.extractText()
         OnePageText = OnePageText.replace('\n', '')
-        data.append({"text":OnePageText})
-        break # remove after testing is done
+        doc = nlp(OnePageText)
+        for sent in doc.sents:
+            data.append({"text":sent.text})
+
     srsly.write_jsonl(outputFilename, data)
     pdfFile.close()
 
@@ -178,16 +180,11 @@ srsly.write_jsonl(path+"/text.jsonl", preTrainData)
 
 entitiesToJSON("devData.json", DEV_DATA)
 entitiesToJSON("trainData.json", TRAIN_DATA)
-# --use-vectors to use the vectors from existing English model.
 
-# python3 -m spacy download en_core_web_lg
-# python3 -m spacy pretrain  trainData.json  "en_core_web_lg" preTrainOutput --use-vectors --n-iter 10
-# rm -rf NerModel
-# python3 -m spacy train en --base-mode "en_core_web_lg" NerModel trainData.json devData.json --pipeline ner --init-tok2ve preTrainOutput/model9.bin --n-iter 10
 
-# To validate training data
-# python3 -m spacy debug-data en training-data.json training-data.json -b "en_core_web_lg" -p ner -V
-# Change --n-iter 1000 in actual implementation
+
+
+
 
 
 ''' 
@@ -209,7 +206,51 @@ for (span_start, span_end) in indexes:
     print(doc.text[span_start:span_end])
 '''
 
-pdfToJSON("BarCvDescLJ11.pdf", "raw.jsonl")
+# pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
+
+t1 = "Eight-Twelve is a six-rowed winter feed barley."
+t2 = "New York was derived in Great Britain from I1162-19/J-126//WA1245///Steptoe."
+t = [t1, t2]
+file = open("testOne.json", "w")
+file.write("[")
+print("len(t)=",len(t))
+for i in range(len(t)):
+    doc = nlp(t[i])
+    json_data = docs_to_json([doc],i)
+    file.write(json.dumps(json_data))
+
+    for ent in doc.ents:
+        print(ent.text + ' - ' + ent.label_ + ' - ' + str(spacy.explain(ent.label_)))
+file.write("]")
+file.close()
+
+#('It was selected from the cross Steveland/Luther//Wintermalt.', {'entities': [(31, 59, 'PED')]}),
+
+#doc = nlp.pipe("It was selected from the cross Steveland/Luther//Wintermalt.", disable=["tagger", "parser"])
+doc = nlp("It was selected from the cross Steveland/Luther//Wintermalt.")
+entities = [(31, 59, 'PED')]
+tags = biluo_tags_from_offsets(doc, entities)
+print(docs_to_json([doc]))
+print("tags=", tags)
+print(docs_to_json([doc]))
+
+# NEXT WE NEED TO GO THROUGH AN UPDATE NER TAGS
+# NOTE: BE SURE TO USE THE SAME NLP (SAME TOKENIZER)
+
+# --use-vectors to use the vectors from existing English model.
+
+# python3 -m spacy download en_core_web_lg
+# rm -rf preTrainOutput
+# python3 -m spacy pretrain raw.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 10
+# rm -rf NerModel
+# python3 -m spacy train en --base-mode "en_core_web_lg" NerModel trainData.json devData.json --pipeline ner --init-tok2ve preTrainOutput/model9.bin --n-iter 10
+
+# To validate training data
+# python3 -m spacy debug-data en training-data.json training-data.json -b "en_core_web_lg" -p ner -V
+# Change --n-iter 1000 in actual implementation
 
 # MISC
 # python3 -m spacy convert trainData.json --converter jsonl -l en > trainData.jsonl
+
+#data = [{"text": "It was selected from the cross I1162-19/J-126//WA1245///Steptoe"}, {"text": "Its experimental designation was 79Ab812."}]
+#srsly.write_jsonl("raw.jsonl", data)
