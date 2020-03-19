@@ -13,6 +13,11 @@ from spacy.gold import docs_to_json
 import json
 import PyPDF2
 
+DEV_DATA = [
+    ('Eight-Twelve is a six-rowed winter feed barley.', {'entities': [(0, 12, 'CVAR'), (18, 27, 'TRAT'), (28, 34, 'TRAT'), (35, 39, 'CVAR'), (40, 46, 'CROP')]}),
+    ('It was released by the USDA-ARS and the Idaho AES in 1991.', {'entities': [(23, 31, 'ORG'), (40, 49, 'ORG'), (53, 57, 'DATE')]}),
+    ('It was selected from the cross Steveland/Luther//Wintermalt.', {'entities': [(31, 59, 'PED')]}),
+    ('Its experimental designation was 79Ab812.', {'entities': [(33, 40, 'ALAS')]})]
 
 path_to_pretrained_weights="/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/preTrainInput/text.jsonl"
 
@@ -118,7 +123,7 @@ nlp.tokenizer.infix_finditer = infix_re.finditer
 digit_hyphen_re = re.compile(r'\s\(\d\)')
 nlp.tokenizer.token_match = digit_hyphen_re.search
 
-def pdfToJSON(inputPDF, outputFilename, tokenizer):
+def pdfToJSON(inputPDF, outputFilename):
     pdfFile = open(inputPDF, mode="rb")
     data = []
     pdfReader = PyPDF2.PdfFileReader(pdfFile)
@@ -170,13 +175,18 @@ for token in doc:
 preTrainData=[{"tokens":values}]
 path="/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/preTrainInput"
 srsly.write_jsonl(path+"/text.jsonl", preTrainData)
+
+entitiesToJSON("devData.json", DEV_DATA)
+entitiesToJSON("trainData.json", TRAIN_DATA)
 # --use-vectors to use the vectors from existing English model.
 
 # python3 -m spacy download en_core_web_lg
-# python3 -m spacy pretrain  preTrainInput/raw.jsonl  "en_core_web_lg" preTrainOutput --use-vectors
-# python3 -m spacy convert trainData.jsonl --converter jsonl -l en > trainData.json
-# python3 -m spacy train en --base-mode "en_core_web_lg" NerModel trainData.json trainData.json --pipeline ner --init-tok2ve preTrainOutput/model999.bin --n-iter 10
+# python3 -m spacy pretrain  trainData.json  "en_core_web_lg" preTrainOutput --use-vectors --n-iter 10
+# rm -rf NerModel
+# python3 -m spacy train en --base-mode "en_core_web_lg" NerModel trainData.json devData.json --pipeline ner --init-tok2ve preTrainOutput/model9.bin --n-iter 10
 
+# To validate training data
+# python3 -m spacy debug-data en training-data.json training-data.json -b "en_core_web_lg" -p ner -V
 # Change --n-iter 1000 in actual implementation
 
 
@@ -201,3 +211,5 @@ for (span_start, span_end) in indexes:
 
 pdfToJSON("BarCvDescLJ11.pdf", "raw.jsonl")
 
+# MISC
+# python3 -m spacy convert trainData.json --converter jsonl -l en > trainData.jsonl
