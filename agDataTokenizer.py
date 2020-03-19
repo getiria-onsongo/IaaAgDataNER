@@ -227,12 +227,40 @@ file.close()
 #('It was selected from the cross Steveland/Luther//Wintermalt.', {'entities': [(31, 59, 'PED')]}),
 
 #doc = nlp.pipe("It was selected from the cross Steveland/Luther//Wintermalt.", disable=["tagger", "parser"])
-doc = nlp("It was selected from the cross Steveland/Luther//Wintermalt.")
+doc1 = nlp("It was selected from the cross Steveland/Luther//Wintermalt.")
 entities = [(31, 59, 'PED')]
-tags = biluo_tags_from_offsets(doc, entities)
-print(docs_to_json([doc]))
+tags = biluo_tags_from_offsets(doc1, entities)
 print("tags=", tags)
-print(docs_to_json([doc]))
+print(docs_to_json([doc1]))
+
+# ('Eight-Twelve is a six-rowed winter feed barley.', {'entities': [(0, 12, 'CVAR'), (18, 27, 'TRAT'), (28, 34, 'TRAT'), (35, 39, 'CVAR'), (40, 46, 'CROP')]})
+print("\n\n")
+doc2 = nlp("Eight-Twelve is a six-rowed winter feed barley.")
+entities = [(0, 12, 'CVAR'), (18, 27, 'TRAT'), (28, 34, 'TRAT'), (35, 39, 'CVAR'), (40, 46, 'CROP')]
+tags = biluo_tags_from_offsets(doc2, entities)
+print("tags=", tags)
+print(docs_to_json([doc2]))
+
+# ('Its experimental designation was 79Ab812.', {'entities': [(33, 40, 'ALAS')]})]
+print("\n\n")
+doc3 = nlp("Its experimental designation was 79Ab812.")
+entities = [(33, 40, 'ALAS')]
+tags = biluo_tags_from_offsets(doc3, entities)
+print("tags=", tags)
+docs_dict = docs_to_json([doc3])
+
+print("Before")
+print(docs_dict)
+
+#print(type(docs_to_json([doc3])))
+
+
+for i in range(len(docs_dict['paragraphs'][0]['sentences'][0]['tokens'])):
+    docs_dict['paragraphs'][0]['sentences'][0]['tokens'][i]['ner'] = tags[i]
+    #print(docs_dict['paragraphs'][0]['sentences'][0]['tokens'][i])
+
+print("After")
+print(docs_dict)
 
 # NEXT WE NEED TO GO THROUGH AN UPDATE NER TAGS
 # NOTE: BE SURE TO USE THE SAME NLP (SAME TOKENIZER)
