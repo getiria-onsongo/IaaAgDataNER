@@ -207,7 +207,7 @@ srsly.write_jsonl(path+"/text.jsonl", preTrainData)
 entitiesToJSON("devData.json", DEV_DATA)
 x = TRAIN_DATA[0:10]
 entitiesToJSON("trainData.json", x)
-print("len(x)=",len(x))
+#print("len(x)=",len(x))
 
 
 
@@ -235,13 +235,13 @@ for (span_start, span_end) in indexes:
 '''
 
 # pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
-
+'''
 t1 = "Eight-Twelve is a six-rowed winter feed barley."
 t2 = "New York was derived in Great Britain from I1162-19/J-126//WA1245///Steptoe."
 t = [t1, t2]
 file = open("testOne.json", "w")
 file.write("[")
-print("len(t)=",len(t))
+#print("len(t)=",len(t))
 for i in range(len(t)):
     doc = nlp(t[i])
     json_data = docs_to_json([doc],i)
@@ -251,10 +251,11 @@ for i in range(len(t)):
         print(ent.text + ' - ' + ent.label_ + ' - ' + str(spacy.explain(ent.label_)))
 file.write("]")
 file.close()
-
+'''
 #('It was selected from the cross Steveland/Luther//Wintermalt.', {'entities': [(31, 59, 'PED')]}),
 
 #doc = nlp.pipe("It was selected from the cross Steveland/Luther//Wintermalt.", disable=["tagger", "parser"])
+'''
 doc1 = nlp("It was selected from the cross Steveland/Luther//Wintermalt.")
 entities = [(31, 59, 'PED')]
 tags = biluo_tags_from_offsets(doc1, entities)
@@ -274,7 +275,7 @@ print(docs_to_json([doc2]))
 # ('Maja is a six-rowed winter feed/malt barley.', {'entities': [(0, 4, 'CVAR'), (10, 19, 'TRAT'), (20, 26, 'TRAT'), (27, 31, 'TRAT'), (32, 36, 'TRAT'), (37, 43, 'CROP')]}),
 # ('It is medium height (2 inches shorter than Steptoe) and has moderately stiff straw.', {'entities': [(13, 19, 'TRAT'), (43, 50, 'CVAR'), (77, 82, 'PLAN')]}),
 #
-
+'''
 print("\n\n")
 doc3 = nlp("It is mid-late season in maturity (similar to Klages and 3-5 days later than Steptoe).")
 entities = [(6, 21, 'TRAT'), (46, 52, 'CVAR'), (77, 84, 'CVAR')]
@@ -296,14 +297,28 @@ print("After")
 print(docs_dict)
 
 nerDataToJSON(nlp, DEV_DATA, "devData.json")
-buggyEntries = [TRAIN_DATA[29],TRAIN_DATA[61], TRAIN_DATA[66]]
+buggyEntries = [TRAIN_DATA[29],TRAIN_DATA[61],TRAIN_DATA[66],TRAIN_DATA[181],TRAIN_DATA[197]
+                ,TRAIN_DATA[211],TRAIN_DATA[219],TRAIN_DATA[231],TRAIN_DATA[253],TRAIN_DATA[257],
+                TRAIN_DATA[276],TRAIN_DATA[280],TRAIN_DATA[282],TRAIN_DATA[340]]
 
 x = TRAIN_DATA[0:29]
 x.extend(TRAIN_DATA[30:61])
 x.extend(TRAIN_DATA[62:66])
-x.extend(TRAIN_DATA[67:100])
-# working TRAIN_DATA[100:120]
-nerDataToJSON(nlp, TRAIN_DATA[100:120], "trainData.json")
+x.extend(TRAIN_DATA[67:181])
+x.extend(TRAIN_DATA[182:197])
+x.extend(TRAIN_DATA[198:211])
+x.extend(TRAIN_DATA[212:219])
+x.extend(TRAIN_DATA[220:231])
+x.extend(TRAIN_DATA[232:253])
+x.extend(TRAIN_DATA[254:257])
+x.extend(TRAIN_DATA[258:276])
+x.extend(TRAIN_DATA[277:280])
+x.extend(TRAIN_DATA[281:282])
+x.extend(TRAIN_DATA[283:340])
+x.extend(TRAIN_DATA[341:350])
+x.extend(TRAIN_DATA[350:351])
+# working TRAIN_DATA[:]
+nerDataToJSON(nlp, x, "trainData.json")
 
 print("\n\n")
 for val in buggyEntries:
