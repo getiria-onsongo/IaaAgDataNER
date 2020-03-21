@@ -158,7 +158,33 @@ def entitiesToJSON(fileName, data):
         file.write("\n")
     file.close()
 
+def nerDataToJSON(nlp, data, fileName):
+    ''' Take as input ner training data and convert it into
+    CLI json training data.'''
+    file = open(fileName, "w")
+    file.write("[")
+    cnt = 0
+    for entry in data:
+        rawText = entry[0]
+        doc = nlp(rawText)
+        entities = entry[1]['entities']
+        tags = biluo_tags_from_offsets(doc, entities)
+        docs_dict = docs_to_json([doc], cnt)
+        for i in range(len(docs_dict['paragraphs'][0]['sentences'][0]['tokens'])):
+            # I added the if statement because the following NER example is not being tagged correctly
+            # ('Maja is a six-rowed winter feed/malt barley.', {'entities': [(0, 4, 'CVAR'), (10, 19, 'TRAT'), (20, 26, 'TRAT'), (27, 31, 'TRAT'), (32, 36, 'TRAT'), (37, 43, 'CROP')]}),
+            if (tags[i] == '-'):
+                docs_dict['paragraphs'][0]['sentences'][0]['tokens'][i]['ner'] = 'O'
+            else:
+                docs_dict['paragraphs'][0]['sentences'][0]['tokens'][i]['ner'] = tags[i]
+        if(cnt > 0):
+            file.write(",")
+            file.write("\n")
+        file.write(json.dumps(docs_dict))
 
+        cnt = cnt + 1
+    file.write("]")
+    file.close()
 
 '''
 doc = nlp("It was selected from the cross Steveland/Luther//Wintermalt")
@@ -179,7 +205,9 @@ path="/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/preTrain
 srsly.write_jsonl(path+"/text.jsonl", preTrainData)
 
 entitiesToJSON("devData.json", DEV_DATA)
-entitiesToJSON("trainData.json", TRAIN_DATA)
+x = TRAIN_DATA[0:10]
+entitiesToJSON("trainData.json", x)
+print("len(x)=",len(x))
 
 
 
@@ -233,6 +261,7 @@ tags = biluo_tags_from_offsets(doc1, entities)
 print("tags=", tags)
 print(docs_to_json([doc1]))
 
+
 # ('Eight-Twelve is a six-rowed winter feed barley.', {'entities': [(0, 12, 'CVAR'), (18, 27, 'TRAT'), (28, 34, 'TRAT'), (35, 39, 'CVAR'), (40, 46, 'CROP')]})
 print("\n\n")
 doc2 = nlp("Eight-Twelve is a six-rowed winter feed barley.")
@@ -242,9 +271,13 @@ print("tags=", tags)
 print(docs_to_json([doc2]))
 
 # ('Its experimental designation was 79Ab812.', {'entities': [(33, 40, 'ALAS')]})]
+# ('Maja is a six-rowed winter feed/malt barley.', {'entities': [(0, 4, 'CVAR'), (10, 19, 'TRAT'), (20, 26, 'TRAT'), (27, 31, 'TRAT'), (32, 36, 'TRAT'), (37, 43, 'CROP')]}),
+# ('It is medium height (2 inches shorter than Steptoe) and has moderately stiff straw.', {'entities': [(13, 19, 'TRAT'), (43, 50, 'CVAR'), (77, 82, 'PLAN')]}),
+#
+
 print("\n\n")
-doc3 = nlp("Its experimental designation was 79Ab812.")
-entities = [(33, 40, 'ALAS')]
+doc3 = nlp("It is mid-late season in maturity (similar to Klages and 3-5 days later than Steptoe).")
+entities = [(6, 21, 'TRAT'), (46, 52, 'CVAR'), (77, 84, 'CVAR')]
 tags = biluo_tags_from_offsets(doc3, entities)
 print("tags=", tags)
 docs_dict = docs_to_json([doc3])
@@ -262,6 +295,21 @@ for i in range(len(docs_dict['paragraphs'][0]['sentences'][0]['tokens'])):
 print("After")
 print(docs_dict)
 
+nerDataToJSON(nlp, DEV_DATA, "devData.json")
+buggyEntries = [TRAIN_DATA[29],TRAIN_DATA[61], TRAIN_DATA[66]]
+
+x = TRAIN_DATA[0:29]
+x.extend(TRAIN_DATA[30:61])
+x.extend(TRAIN_DATA[62:66])
+x.extend(TRAIN_DATA[67:100])
+# working TRAIN_DATA[100:120]
+nerDataToJSON(nlp, TRAIN_DATA[100:120], "trainData.json")
+
+print("\n\n")
+for val in buggyEntries:
+    print(val)
+
+
 # NEXT WE NEED TO GO THROUGH AN UPDATE NER TAGS
 # NOTE: BE SURE TO USE THE SAME NLP (SAME TOKENIZER)
 
@@ -274,7 +322,7 @@ print(docs_dict)
 # python3 -m spacy train en --base-mode "en_core_web_lg" NerModel trainData.json devData.json --pipeline ner --init-tok2ve preTrainOutput/model9.bin --n-iter 10
 
 # To validate training data
-# python3 -m spacy debug-data en training-data.json training-data.json -b "en_core_web_lg" -p ner -V
+# python3 -m spacy debug-data en trainData.json devData.json -b "en_core_web_lg" -p ner -V
 # Change --n-iter 1000 in actual implementation
 
 # MISC
