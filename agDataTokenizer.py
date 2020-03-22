@@ -139,27 +139,6 @@ def pdfToJSON(inputPDF, outputFilename, nlp):
     srsly.write_jsonl(outputFilename, data)
     pdfFile.close()
 
-def pdfToTokensJSON(inputPDF, outputFilename, nlp):
-    pdfFile = open(inputPDF, mode="rb")
-    data = []
-    pdfReader = PyPDF2.PdfFileReader(pdfFile)
-    numPages = pdfReader.getNumPages()
-
-    for i in range(numPages):
-        OnePage = pdfReader.getPage(i)
-        OnePageText = OnePage.extractText()
-        OnePageText = OnePageText.replace('\n', '')
-        doc = nlp(OnePageText)
-        for sent in doc.sents:
-            # For some reason if we use all the tokens in a page, Spacy complains with
-            # an error message that the array is too long. Try using tokens in a sentence
-            doc2 = nlp(sent.text)
-            tokens = []
-            for token in doc2:
-                tokens.append(token.text)
-            data.append({"tokens": tokens})
-    srsly.write_jsonl(outputFilename, data)
-    pdfFile.close()
 
 def entitiesToJSON(fileName, data):
     file = open(fileName, "w")
@@ -337,12 +316,8 @@ x.extend(TRAIN_DATA[506:575])
 x.extend(TRAIN_DATA[576:664])
 x.extend(TRAIN_DATA[665:])
 pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
-pdfToTokensJSON("BarCvDescLJ11.pdf", "rawTokens.json", nlp)
-
-nerDataToJSON(nlp,x,"trainData.json")
-nerDataToJSON(nlp,x[740:],"devData.json")
-
-print(len(x))
+nerDataToJSON(nlp,x[0:50],"devData.json")
+nerDataToJSON(nlp,x[50:],"trainData.json")
 
 
 # NEXT WE NEED TO GO THROUGH AN UPDATE NER TAGS
@@ -351,20 +326,17 @@ print(len(x))
 # --use-vectors to use the vectors from existing English model.
 
 # python3 -m spacy download en_core_web_lg
-
-# python3 -m spacy debug-data en trainData.json devData.json -b "en_core_web_lg" -p ner -V
-
 # rm -rf preTrainOutput
-# python3 -m spacy pretrain rawTokens.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000
-
+# python3 -m spacy pretrain raw.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000
 # rm -rf NerModel
-# python3 -m spacy train en NerModel trainData.json devData.json -v "en_core_web_lg" -p ner -t2v preTrainOutput/model999.bin -n 50 -ne 10
+# python3 -m spacy train en --base-mode "en_core_web_lg" NerModel trainData.json devData.json --pipeline ner --init-tok2ve preTrainOutput/model9.bin --n-iter 10
+
+# To validate training data
+# python3 -m spacy debug-data en trainData.json devData.json -b "en_core_web_lg" -p ner -V
+# Change --n-iter 1000 in actual implementation
 
 # MISC
 # python3 -m spacy convert trainData.json --converter jsonl -l en > trainData.jsonl
-
-# python3 -m spacy train en NerModel trainData.json devData.json -p ner  -n 10 --debug
-
 
 #data = [{"text": "It was selected from the cross I1162-19/J-126//WA1245///Steptoe"}, {"text": "Its experimental designation was 79Ab812."}]
 #srsly.write_jsonl("raw.jsonl", data)
