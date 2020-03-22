@@ -648,7 +648,7 @@ TRAIN_DATA = [
     ('Its experimental designation was UCD 27.', {'entities': [(33, 39, 'ALAS')]}),
     ('Briggs is adapted to the Sacramento Valley and Coastal area of California.', {'entities': [(0, 6, 'CVAR'), (25, 42, 'GPE'), (47, 73, 'GPE')]}),
     ('It is similar to Arivat in many characteristics.', {'entities': [(17, 23, 'CVAR')]}),
-    ('It has short stature, but relatively weak straw compared to more recently released cultivars, and early maturity.', {'entities': [(13, 20, 'TRAIT'), (42, 47, 'TRAIT'), (104, 112, 'TRAIT')]}),
+    ('It has short stature, but relatively weak straw compared to more recently released cultivars, and early maturity.', {'entities': [(13, 20, 'TRAT'), (42, 47, 'TRAT'), (104, 112, 'TRAT')]}),
     ('Collars are closed and the basal rachis internode is straight.', {'entities': [(0, 7, 'PLAN'), (27, 49, 'PLAN')]}),
     ('The spike is parallel, lax, and nodding at maturity.', {'entities': [(4, 9, 'PLAN')]}),
     ('The lemma awn is long and semi-smooth.', {'entities': [(4, 13, 'PLAN')]}),
