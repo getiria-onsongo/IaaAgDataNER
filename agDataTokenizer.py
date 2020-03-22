@@ -195,7 +195,7 @@ for token in doc:
 # 1) FINALIZE AND TEST TOKENIZER
 # 2) CREATE PRE-TRAINING DATA. AT THE MOMENT I CAN ONLY GET IT TO WORK WITH
 # ONE DICTIONARY WITH A SINGLE KEY (TOKENS)
-
+'''
 doc = nlp("It was derived from I1162-19/J-126//WA1245///Steptoe.")
 values=[]
 for token in doc:
@@ -210,12 +210,7 @@ entitiesToJSON("trainData.json", x)
 #print("len(x)=",len(x))
 
 
-
-
-
-
-
-''' 
+ 
 doc = nlp("It was selected from the cross I1162-19/J-126//WA1245///Steptoe")
 for token in doc:
     print(token.text)
@@ -234,7 +229,7 @@ for (span_start, span_end) in indexes:
     print(doc.text[span_start:span_end])
 '''
 
-# pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
+#
 '''
 t1 = "Eight-Twelve is a six-rowed winter feed barley."
 t2 = "New York was derived in Great Britain from I1162-19/J-126//WA1245///Steptoe."
@@ -275,10 +270,10 @@ print(docs_to_json([doc2]))
 # ('Maja is a six-rowed winter feed/malt barley.', {'entities': [(0, 4, 'CVAR'), (10, 19, 'TRAT'), (20, 26, 'TRAT'), (27, 31, 'TRAT'), (32, 36, 'TRAT'), (37, 43, 'CROP')]}),
 # ('It is medium height (2 inches shorter than Steptoe) and has moderately stiff straw.', {'entities': [(13, 19, 'TRAT'), (43, 50, 'CVAR'), (77, 82, 'PLAN')]}),
 #
-'''
+
 print("\n\n")
-doc3 = nlp("It is mid-late season in maturity (similar to Klages and 3-5 days later than Steptoe).")
-entities = [(6, 21, 'TRAT'), (46, 52, 'CVAR'), (77, 84, 'CVAR')]
+doc3 = nlp("It was selected from the cross Luther/Hudson//Alpine/Svalof//White Winter/Triple Bearded Mariout-305.")
+entities = [(31, 100, 'PED')]
 tags = biluo_tags_from_offsets(doc3, entities)
 print("tags=", tags)
 docs_dict = docs_to_json([doc3])
@@ -295,11 +290,11 @@ for i in range(len(docs_dict['paragraphs'][0]['sentences'][0]['tokens'])):
 
 print("After")
 print(docs_dict)
-
-nerDataToJSON(nlp, DEV_DATA, "devData.json")
+'''
 buggyEntries = [TRAIN_DATA[29],TRAIN_DATA[61],TRAIN_DATA[66],TRAIN_DATA[181],TRAIN_DATA[197]
                 ,TRAIN_DATA[211],TRAIN_DATA[219],TRAIN_DATA[231],TRAIN_DATA[253],TRAIN_DATA[257],
-                TRAIN_DATA[276],TRAIN_DATA[280],TRAIN_DATA[282],TRAIN_DATA[340]]
+                TRAIN_DATA[276],TRAIN_DATA[280],TRAIN_DATA[282],TRAIN_DATA[340],TRAIN_DATA[447],
+                TRAIN_DATA[505],TRAIN_DATA[575],TRAIN_DATA[664]]
 
 x = TRAIN_DATA[0:29]
 x.extend(TRAIN_DATA[30:61])
@@ -315,14 +310,14 @@ x.extend(TRAIN_DATA[258:276])
 x.extend(TRAIN_DATA[277:280])
 x.extend(TRAIN_DATA[281:282])
 x.extend(TRAIN_DATA[283:340])
-x.extend(TRAIN_DATA[341:350])
-x.extend(TRAIN_DATA[350:351])
-# working TRAIN_DATA[:]
-nerDataToJSON(nlp, x, "trainData.json")
-
-print("\n\n")
-for val in buggyEntries:
-    print(val)
+x.extend(TRAIN_DATA[341:447])
+x.extend(TRAIN_DATA[448:505])
+x.extend(TRAIN_DATA[506:575])
+x.extend(TRAIN_DATA[576:664])
+x.extend(TRAIN_DATA[665:])
+pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
+nerDataToJSON(nlp,x[0:50],"devData.json")
+nerDataToJSON(nlp,x[50:],"trainData.json")
 
 
 # NEXT WE NEED TO GO THROUGH AN UPDATE NER TAGS
@@ -332,7 +327,7 @@ for val in buggyEntries:
 
 # python3 -m spacy download en_core_web_lg
 # rm -rf preTrainOutput
-# python3 -m spacy pretrain raw.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 10
+# python3 -m spacy pretrain raw.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000
 # rm -rf NerModel
 # python3 -m spacy train en --base-mode "en_core_web_lg" NerModel trainData.json devData.json --pipeline ner --init-tok2ve preTrainOutput/model9.bin --n-iter 10
 
