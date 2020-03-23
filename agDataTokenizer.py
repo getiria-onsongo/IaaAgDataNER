@@ -139,6 +139,26 @@ def pdfToJSON(inputPDF, outputFilename, nlp):
     srsly.write_jsonl(outputFilename, data)
     pdfFile.close()
 
+def pdfToTokensJSON(inputPDF, outputFilename, nlp):
+    pdfFile = open(inputPDF, mode="rb")
+    data = []
+    pdfReader = PyPDF2.PdfFileReader(pdfFile)
+    numPages = pdfReader.getNumPages()
+    for i in range(numPages):
+        OnePage = pdfReader.getPage(i)
+        OnePageText = OnePage.extractText()
+        OnePageText = OnePageText.replace('\n', '')
+        doc = nlp(OnePageText)
+        for sent in doc.sents:
+            tokens = []
+            doc2 = nlp(sent.text)
+            for token in doc2:
+                tokens.append(token.text)
+            data.append({"tokens":tokens})
+
+    srsly.write_jsonl(outputFilename, data)
+    pdfFile.close()
+
 
 def entitiesToJSON(fileName, data):
     file = open(fileName, "w")
@@ -319,20 +339,39 @@ pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
 nerDataToJSON(nlp,x[0:50],"devData.json")
 nerDataToJSON(nlp,x[50:],"trainData.json")
 
+pdfToTokensJSON("BarCvDescLJ11.pdf", "rawTokens.json", nlp)
+pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
+
+# python3 -m spacy download en_core_web_lg
+
+# To validate training data
+# python3 -m spacy debug-data en trainData.json devData.json -b "en_core_web_lg" -p ner -V
+
+# rm -rf preTrainOutput
+
+# python3 -m spacy pretrain rawTokens.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000
+
+# rm -rf NerModel
+
+# python3 -m spacy train en NerModel trainData.json devData.json -t2v preTrainOutput/model999.bin -b en_core_web_lg -v "en_core_web_lg" -p ner  -n 50 -ne 5 -rt raw.json -VV  -D
+
+# -- HERE
+
+# python3 -m spacy train en NerModel trainData.json devData.json -p ner -v "en_core_web_lg" -t2v preTrainOutput/model999.bin -n 30 -ne 5 -D
+
+# -- HERE
 
 # NEXT WE NEED TO GO THROUGH AN UPDATE NER TAGS
 # NOTE: BE SURE TO USE THE SAME NLP (SAME TOKENIZER)
 
 # --use-vectors to use the vectors from existing English model.
 
-# python3 -m spacy download en_core_web_lg
-# rm -rf preTrainOutput
-# python3 -m spacy pretrain raw.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000
+
 # rm -rf NerModel
+
 # python3 -m spacy train en --base-mode "en_core_web_lg" NerModel trainData.json devData.json --pipeline ner --init-tok2ve preTrainOutput/model9.bin --n-iter 10
 
-# To validate training data
-# python3 -m spacy debug-data en trainData.json devData.json -b "en_core_web_lg" -p ner -V
+
 # Change --n-iter 1000 in actual implementation
 
 # MISC
