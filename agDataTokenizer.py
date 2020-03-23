@@ -149,12 +149,17 @@ def pdfToTokensJSON(inputPDF, outputFilename, nlp):
         OnePageText = OnePage.extractText()
         OnePageText = OnePageText.replace('\n', '')
         doc = nlp(OnePageText)
+        tokens = []
+        cnt = 0
         for sent in doc.sents:
-            tokens = []
             doc2 = nlp(sent.text)
             for token in doc2:
                 tokens.append(token.text)
-            data.append({"tokens":tokens})
+            if(cnt > 5):
+                data.append({"tokens": tokens})
+                tokens = []
+                cnt = 0
+            cnt = cnt + 1
 
     srsly.write_jsonl(outputFilename, data)
     pdfFile.close()
@@ -355,13 +360,9 @@ pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
 
 # python3 -m spacy train en NerModel trainData.json devData.json -t2v preTrainOutput/model999.bin -v "en_core_web_lg" -p ner -n 50 -ne 5 -rt raw.json -D
 
-# -- HERE
 
-# python3 -m spacy train en NerModel trainData.json devData.json -p ner -v "en_core_web_lg" -t2v preTrainOutput/model999.bin -n 30 -ne 5 -D
-
-# -- HERE
-
-# NEXT WE NEED TO GO THROUGH AN UPDATE NER TAGS
+# MISC
+# NEXT WE NEED TO GO THROUGH AND UPDATE NER TAGS
 # NOTE: BE SURE TO USE THE SAME NLP (SAME TOKENIZER)
 
 # --use-vectors to use the vectors from existing English model.
@@ -374,7 +375,9 @@ pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
 
 # Change --n-iter 1000 in actual implementation
 
-# MISC
+
+# python3 -m spacy train en NerModel trainData.json devData.json -p ner -v "en_core_web_lg" -t2v preTrainOutput/model999.bin -n 30 -ne 5 -D
+
 # python3 -m spacy convert trainData.json --converter jsonl -l en > trainData.jsonl
 
 #data = [{"text": "It was selected from the cross I1162-19/J-126//WA1245///Steptoe"}, {"text": "Its experimental designation was 79Ab812."}]
