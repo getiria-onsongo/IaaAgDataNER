@@ -349,11 +349,11 @@ pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
 
 # rm -rf preTrainOutput
 
-# python3 -m spacy pretrain rawTokens.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000
+# python3 -m spacy pretrain rawTokens.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000 -se 10
 
 # rm -rf NerModel
 
-# python3 -m spacy train en NerModel trainData.json devData.json -t2v preTrainOutput/model999.bin -b en_core_web_lg -v "en_core_web_lg" -p ner  -n 50 -ne 5 -rt raw.json -VV  -D
+# python3 -m spacy train en NerModel trainData.json devData.json -t2v preTrainOutput/model999.bin -v "en_core_web_lg" -p ner -n 50 -ne 5 -rt raw.json -D
 
 # -- HERE
 
