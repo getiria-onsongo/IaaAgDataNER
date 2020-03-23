@@ -15,8 +15,8 @@ def trainModel(model=None, output_dir=None, n_iter=100):
         nlp = spacy.load(model)  # load existing spaCy model
         print("Model loaded.. '%s'" % model)
     else:
-        nlp = spacy.blank("en_core_web_lg")  # create blank Language class
-        print("Created blank 'en_core_web_lg' model")
+        nlp = spacy.blank("en")  # create blank Language class
+        print("Created blank 'en' model")
 
         # The code below is custom to agData. It modifies how the
         # parser works to avoid splitting pedigrees
@@ -55,23 +55,16 @@ def trainModel(model=None, output_dir=None, n_iter=100):
     # add entity labels
     for _, annotations in TRAIN_DATA:
         for ent in annotations.get("entities"):
-
             ner.add_label(ent[2])
 
     # get names of other pipes to disable them during training, if present
     other_pipes = [pipe for pipe in nlp.pipe_names if pipe != "ner"]
-
-
 
     with nlp.disable_pipes(*other_pipes):  # only train NER
         # reset and initialize the weights randomly – but only if we're
         # training a new model
         if model is None:
             nlp.begin_training()
-
-        # Now that we have our model, we can load in the pretrained weights.
-        with open(path_to_pretrained_weights, "rb") as file_:
-            nlp.model.tok2vec.from_bytes(file_.read())
 
         q1 = int(n_iter // 4)
         q2 = int(q1 * 2)
