@@ -57,3 +57,7 @@
     ('Crop Science 32:1506-1507 (1992)', {'entities': [(0, 32, 'JRNL')]}),
     ('Crop Science 31:481 (1991)', {'entities': [(0, 26, 'JRNL')]}),
     ('It was selected from the cross Hazen*2/WPG821/4/Stander/3/Bumper/Hazen//Azure.', {'entities': [(31, 77, 'JRNL')]}),
+    ('Crop Science 42: 664-665 (2002)', {'entities': [(0, 31, 'JRNL')]}),
+    ('It was selected from the cross Cree/Bonanza//Manker/3/2*Robust.', {'entities': [(31, 62, 'JRNL')]}),
+    ('Crop Science 31:227 (1991)', {'entities': [(0, 26, 'JRNL')]}),
+    ('Crop Science 42:2209-2210 (2002)', {'entities': [(0, 32, 'JRNL')]}),
