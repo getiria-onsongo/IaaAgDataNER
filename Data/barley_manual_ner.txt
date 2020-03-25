@@ -52,3 +52,8 @@
     ('Crop Science 33:1401 (1993)', {'entities': [(0, 27, 'JRNL')]}),
     ('Journal of American Society of Agronomy 33:252 (1941)', {'entities': [(0, 53, 'JRNL')]}),
     ('It was selected from the cross Bowman*2/Brigitta mutant//ND10232.', {'entities': [(31, 64, 'JRNL')]}),
+    ('Crop Science 26:1079 (1986)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Crop Science 46:1812 (2006)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Crop Science 32:1506-1507 (1992)', {'entities': [(0, 32, 'JRNL')]}),
+    ('Crop Science 31:481 (1991)', {'entities': [(0, 26, 'JRNL')]}),
+    ('It was selected from the cross Hazen*2/WPG821/4/Stander/3/Bumper/Hazen//Azure.', {'entities': [(31, 77, 'JRNL')]}),
