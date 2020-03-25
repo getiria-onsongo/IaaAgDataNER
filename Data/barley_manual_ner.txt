@@ -49,3 +49,6 @@
     ('Crop Science 9:521 (1969)', {'entities': [(0, 25, 'JRNL')]}),
     ('It was selected from the cross California Mariout*4/CIho 1179//2*California Mariout*/Club Mariout/3/CM 67.', {'entities': [(31, 105, 'JRNL')]}),
     ('Crop Science 17:485 (1977)', {'entities': [(0, 26, 'JRNL')]}),
+    ('Crop Science 33:1401 (1993)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Journal of American Society of Agronomy 33:252 (1941)', {'entities': [(0, 53, 'JRNL')]}),
+    ('It was selected from the cross Bowman*2/Brigitta mutant//ND10232.', {'entities': [(31, 64, 'JRNL')]}),
