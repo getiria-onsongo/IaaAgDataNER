@@ -61,3 +61,6 @@
     ('It was selected from the cross Cree/Bonanza//Manker/3/2*Robust.', {'entities': [(31, 62, 'JRNL')]}),
     ('Crop Science 31:227 (1991)', {'entities': [(0, 26, 'JRNL')]}),
     ('Crop Science 42:2209-2210 (2002)', {'entities': [(0, 32, 'JRNL')]}),
+    ('Crop Science 37:1018 (1997)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Crop Science 27:815 (1987)', {'entities': [(0, 26, 'JRNL')]}),
+    ('It was selected from the cross Harrington/78Ab6871(Crystal).', {'entities': [(31, 59, 'JRNL')]}),
