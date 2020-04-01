@@ -64,3 +64,7 @@
     ('Crop Science 37:1018 (1997)', {'entities': [(0, 27, 'JRNL')]}),
     ('Crop Science 27:815 (1987)', {'entities': [(0, 26, 'JRNL')]}),
     ('It was selected from the cross Harrington/78Ab6871(Crystal).', {'entities': [(31, 59, 'JRNL')]}),
+    ('Crop Science 40:851(2000)', {'entities': [(0, 25, 'JRNL')]}),
+    ('Crop Science 19:409(1979)', {'entities': [(0, 25, 'JRNL')]}),
+    ('Crop Science 45:2658 (2005)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Crop Science 5:198 (1965)', {'entities': [(0, 25, 'JRNL')]}),
