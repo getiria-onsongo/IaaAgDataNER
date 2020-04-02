@@ -68,3 +68,7 @@
     ('Crop Science 19:409(1979)', {'entities': [(0, 25, 'JRNL')]}),
     ('Crop Science 45:2658 (2005)', {'entities': [(0, 27, 'JRNL')]}),
     ('Crop Science 5:198 (1965)', {'entities': [(0, 25, 'JRNL')]}),
+    ('Agronomy Journal 50(11): 708 (1958)', {'entities': [(0, 35, 'JRNL')]}),
+    ('Crop Science 8:514 (1968)', {'entities': [(0, 25, 'JRNL')]}),
+    ('It was selected from the cross Betzes*7/"Strip Tease".', {'entities': [(31, 53, 'JRNL')]}),
+    ('Crop Science 30: 230 (1990)', {'entities': [(0, 27, 'JRNL')]}),
