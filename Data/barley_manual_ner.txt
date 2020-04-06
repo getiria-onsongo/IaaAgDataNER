@@ -72,3 +72,4 @@
     ('Crop Science 8:514 (1968)', {'entities': [(0, 25, 'JRNL')]}),
     ('It was selected from the cross Betzes*7/"Strip Tease".', {'entities': [(31, 53, 'JRNL')]}),
     ('Crop Science 30: 230 (1990)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Crop Science 24:1210 (1984)', {'entities': [(0, 27, 'JRNL')]}),
