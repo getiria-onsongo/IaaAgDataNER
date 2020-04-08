@@ -84,3 +84,5 @@
     ('Crop Science 18:692 (1978)', {'entities': [(0, 26, 'JRNL')]}),
     ('Crop Science 41:1991 (2001)', {'entities': [(0, 27, 'JRNL')]}),
     ('Crop Science 28:373 (1988)', {'entities': [(0, 26, 'JRNL')]}),
+    ('Crop Science 4:239 (1964)', {'entities': [(0, 25, 'JRNL')]}),
+    ('Crop Science 25:570-571 (1985)', {'entities': [(0, 30, 'JRNL')]}),
