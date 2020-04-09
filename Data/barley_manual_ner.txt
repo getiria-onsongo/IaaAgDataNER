@@ -86,3 +86,6 @@
     ('Crop Science 28:373 (1988)', {'entities': [(0, 26, 'JRNL')]}),
     ('Crop Science 4:239 (1964)', {'entities': [(0, 25, 'JRNL')]}),
     ('Crop Science 25:570-571 (1985)', {'entities': [(0, 30, 'JRNL')]}),
+    ('It was selected from the cross Cree/4/Parkland *2/NDB112/3/Vantage//Kindred/Jotun.', {'entities': [(31, 81, 'PED')]}),
+    ('Crop Science 15:603 (1975)', {'entities': [(0, 26, 'JRNL')]}),
+    ('Crop Science 35:1504 (1995)', {'entities': [(0, 27, 'JRNL')]}),
