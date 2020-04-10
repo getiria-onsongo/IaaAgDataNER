@@ -89,3 +89,6 @@
     ('It was selected from the cross Cree/4/Parkland *2/NDB112/3/Vantage//Kindred/Jotun.', {'entities': [(31, 81, 'PED')]}),
     ('Crop Science 15:603 (1975)', {'entities': [(0, 26, 'JRNL')]}),
     ('Crop Science 35:1504 (1995)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Crop Science 19:293 (1979)', {'entities': [(0, 26, 'JRNL')]}),
+    ('Its experimental designation was APB F-3.', {'entities': [(33, 40, 'ALAS')]}),
+    ('It was released by Northrup King & Co,', {'entities': [(19, 37, 'ORG')]}),
