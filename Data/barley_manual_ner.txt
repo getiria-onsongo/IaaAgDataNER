@@ -96,3 +96,8 @@
     ('Crop Science 8:776 (1968)', {'entities': [(0, 25, 'JRNL')]}),
     ('Crop Science 40:849-850 (2000)', {'entities': [(0, 30, 'JRNL')]}),
     ('It was selected from the cross Harrington/Orca//D172 (Shyri/Galena).', {'entities': [(31, 67, 'PED')]}),
+    ('Poco was selected from an early maturing CIMMYT line from the cross HJA C4715*Olli- M64-69.', {'entities': [(0, 4, 'CVAR'), (62, 90, 'PED')]}),
+    ('It is an F5 selection made in 1975 from the modified backcross CM 67/3*Briggs/4/Briggs*4/3/California Mariout*4/CIho 1179//2*California Mariout*6/Club Mariout.', {'entities': [(30, 34, 'DATE'), (63, 158, 'PED')]}),
+    ('Crop Science 19:741 (1979)', {'entities': [(0, 26, 'JRNL')]}),
+    ('It was selected from the cross (Induced mutant in Harrington) ant29-667/Baronesse.', {'entities': [(31, 81, 'PED')]}),
+    ('Crop Science 44:1859-1860 (2004)', {'entities': [(0, 32, 'JRNL')]}),
