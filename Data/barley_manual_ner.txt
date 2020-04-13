@@ -92,3 +92,7 @@
     ('Crop Science 19:293 (1979)', {'entities': [(0, 26, 'JRNL')]}),
     ('Its experimental designation was APB F-3.', {'entities': [(33, 40, 'ALAS')]}),
     ('It was released by Northrup King & Co,', {'entities': [(19, 37, 'ORG')]}),
+    ('It was selected from the cross California Mariout *4/Arivat.', {'entities': [(31, 59,'PED')]}),
+    ('Crop Science 8:776 (1968)', {'entities': [(0, 25, 'JRNL')]}),
+    ('Crop Science 40:849-850 (2000)', {'entities': [(0, 30, 'JRNL')]}),
+    ('It was selected from the cross Harrington/Orca//D172 (Shyri/Galena).', {'entities': [(31, 67, 'PED')]}),
