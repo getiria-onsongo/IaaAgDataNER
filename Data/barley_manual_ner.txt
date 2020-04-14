@@ -126,3 +126,7 @@
     ('Crop Science 13:770 (1973)', {'entities': [(0, 26, 'JRNL')]}),
     ('It was selected from the cross [(Numar*2/CI 2376)/Yellow Dwarf Resistant Numar]/2*UC 75012W.', {'entities': [(31, 91, 'PED')]}),
     ('Crop Science 36:466 (1996)', {'entities': [(0, 26, 'JRNL')]}),
+    ('Sma1 has the parentage Steptoe/2*Diamant /3/Minn Dwarf 64.98-8/Briggs/4/Asse.', {'entities': [(0, 4, 'CVAR'), (23, 76, 'PED')]}),
+    ('Crop Science 42:1374 (2002)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Crop Science 15:603 (1975)', {'entities': [(0, 26, 'JRNL')]}),
+    ('Crop Science 33:1413 (1993)', {'entities': [(0, 27, 'JRNL')]}),
