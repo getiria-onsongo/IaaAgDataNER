@@ -1,0 +1,171 @@
+1	Crop Science 33:1403 (1993)	JRNL
+3	Statehood	CVAR
+3	six-rowed	TRAT
+3	spring	TRAT
+3	feed	TRAT
+3	barley	CVAR
+4	Utah Agricultural Experiment Station	ORG
+4	1997	DATE
+5	WA641566/Bracken	PED
+6	UT1705-D	ALAS
+7	maturity	TRAT
+7	erect-growing	TRAT
+7	height	TRAT
+7	straw strength	TRAT
+8	head	PLAN
+8	lateral kernels	PLAN
+8	hairs	PLAN
+8	rachis edges	PLAN
+8	leaves	PLAN
+8	heads	PLAN
+9	Glumes	PLAN
+9	hairs	PLAN
+9	glume awns	PLAN
+10	Lemma awns	PLAN
+10	rachilla hairs	PLAN
+10	crease	PLAN
+10	base	PLAN
+11	Aleurone	PLAN
+12	1000-kernel weight	TRAT
+14	base	PLAN
+14	spikes	PLAN
+14	collar	PLAN
+15	resistant	PPTD
+15	loose smut	PATH
+15	covered smut	PATH
+15	moderately resistant	PPTD
+15	powdery mildew	PATH
+15	susceptible	PPTD
+15	stripe rust	PATH
+15	BYD	PATH
+17	Crop Science 40:1507-1508 (2000)	JRNL
+19	Stockford	CVAR
+19	two-rowed	TRAT
+19	hooded	TRAT
+19	spring	TRAT
+19	forage	TRAT
+19	barley	CVAR
+20	WestBred LLC	ORG
+21	maturing	TRAT
+21	tall	TRAT
+21	straw strength	TRAT
+21	yielding	TRAT
+21	quality	TRAT
+22	stems	PLAN
+22	feeding	TRAT
+22	digestibility	TRAT
+23	moderately susceptible	PPTD
+23	stripe rust	PATH
+23	susceptible	PPTD
+23	scald	PATH
+23	net blotch	PATH
+23	BYD	PATH
+26	Summit	CVAR
+26	two-rowed	TRAT
+26	spring	TRAT
+26	malting	TRAT
+26	barley	CROP
+27	American Plant Breeders	ORG
+27	1977	DATE
+28	HP1203*(Zephyr*Tern)	PED
+29	maturity	TRAT
+29	short	TRAT
+29	shorter	TRAT
+29	Klages	CVAR
+29	Steptoe	CVAR
+29	straw	PLAN
+30	Awns	PLAN
+31	Glumes	PLAN
+31	hairs	PLAN
+31	glume	PLAN
+32	Hulls	PLAN
+33	Aleurone	PLAN
+34	Rachilla hairs	PLAN
+35	barbs	PLAN
+35	lateral veins	PLAN
+36	crease	PLAN
+36	kernel	PLAN
+36	awn	PLAN
+37	resistant	PPTD
+37	powdery mildew	PATH
+37	moderately resistant	PPTD
+37	common root rot	PATH
+37	susceptible	PPTD
+37	net blotch	PATH
+37	spot blotch	PATH
+40	Sunbar 458	CVAR
+40	six-rowed	TRAT
+40	spring	TRAT
+40	feed	TRAT
+40	barley	CVAR
+41	Northrup-King & Co	ORG
+41	1989	DATE
+42	NK80W41558	ALAS
+42	NK41558	ALAS
+43	maturing	TRAT
+43	tall	TRAT
+43	straw strength	TRAT
+44	resistant	PPTD
+44	powdery mildew	PATH
+44	moderately resistant	PPTD
+44	leaf rust	PATH
+44	net blotch	PATH
+44	moderately susceptible	PPTD
+44	scald	PATH
+44	susceptible	PPTD
+44	BYD	PATH
+44	stripe rust	PATH
+46	Sunbar Barley Blend 82-2	CVAR
+49	Northrup-King & Co	ORG
+49	1983	DATE
+51	NK41248	CVAR
+51	maturity	TRAT
+51	straw strength	TRAT
+51	seed	PLAN
+51	test weight	TRAT
+52	NK41248	CVAR
+52	NK31275	CVAR
+52	taller	TRAT
+52	straw	PLAN
+52	seed	PLAN
+52	test weight	TRAT
+54	Sunbar Barley Blend 82-2	CVAR
+54	statured	TRAT
+54	stiff-strawed	TRAT
+54	lodging resistance	TRAT
+54	maturity	TRAT
+55	Kernels	PLAN
+55	test weight	TRAT
+56	Sunbar Barley Blend 82-2	CVAR
+56	resistant	PPTD
+56	moderately resistant	PPTD
+56	BYD	PATH
+56	scald	PATH
+56	net blotch	PATH
+56	moderately susceptible	PPTD
+56	powdery mildew	PATH
+56	leaf rust	PATH
+59	Sunbar Brand 400	CVAR
+59	six-rowed	TRAT
+59	spring	TRAT
+59	feed	TRAT
+59	barley	CVAR
+60	Northrup-King & Co	ORG
+60	1980	DATE
+61	Sunbar Brand 400	CVAR
+61	stature	TRAT
+61	straw	PLAN
+61	maturity	TRAT
+62	basal rachis internode	PLAN
+63	Rachis edges	PLAN
+63	hairs	PLAN
+64	spike	PLAN
+65	lemma awn	PLAN
+66	glume awn	PLAN
+66	glume	PLAN
+67	glume	PLAN
+67	lemma	PLAN
+68	Rachilla hairs	PLAN
+69	Kernels	PLAN
+69	hulls	PLAN
+69	aleurone	PLAN

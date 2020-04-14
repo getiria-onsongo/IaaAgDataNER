@@ -106,3 +106,7 @@
     ('Crop Science 33:1412-1413 (1993)', {'entities': [(0, 32, 'JRNL')]}),
     ('Crop Science 28:574 (1988)', {'entities': [(0, 26, 'JRNL')]}),
     ('Crop Science 29:487-488 (1989)', {'entities': [(0, 30, 'JRNL')]}),
+    ('Crop Science 33:1403 (1993)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Crop Science 40:1507-1508 (2000)', {'entities': [(0, 32, 'JRNL')]}),
+    ('It was selected from the cross HP1203*(Zephyr*Tern).', {'entities': [(31, 51, 'PED')]}),
+    ('Sunbar Barley Blend 82-2 is a six-rowed spring feed barley.', {'entities': [(0, 24, 'CVAR'), (30, 39, 'TRAT'), (40, 46, 'TRAT'), (47, 51, 'TRAT'), (52, 58, 'CROP')]}),
