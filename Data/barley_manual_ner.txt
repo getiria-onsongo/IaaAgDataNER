@@ -101,3 +101,7 @@
     ('Crop Science 19:741 (1979)', {'entities': [(0, 26, 'JRNL')]}),
     ('It was selected from the cross (Induced mutant in Harrington) ant29-667/Baronesse.', {'entities': [(31, 81, 'PED')]}),
     ('Crop Science 44:1859-1860 (2004)', {'entities': [(0, 32, 'JRNL')]}),
+    ('Crop Science 23:1216 (1983)', {'entities': [(0, 27, 'JRNL')]}),
+    ('It was selected from the cross Bracken/UT75B65-532 (ID633019/Woodvale).', {'entities': [(31, 70, 'PED')]}),
+    ('Crop Science 33:1412-1413 (1993)', {'entities': [(0, 32, 'JRNL')]}),
+    ('Crop Science 28:574 (1988)', {'entities': [(0, 26, 'JRNL')]}),
