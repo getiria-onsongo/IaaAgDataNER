@@ -1,0 +1,153 @@
+1	Robust	CVAR
+1	six-rowed	TRAT
+1	spring	TRAT
+1	malting	TRAT
+1	barley	CROP
+2	Minnesota AES	ORG
+2	1983	DATE
+3	Morex/Manker	PED
+4	M36	ALAS
+6	smooth-awned	TRAT
+6	maturity	TRAT
+6	Morex	CVAR
+7	mid-tall	TRAT
+7	straw	PLAN
+8	Spikes	PLAN
+9	Kernels	PLAN
+9	rachilla	PLAN
+9	aleurone	PLAN
+10	central vein	PLAN
+10	lateral veins	PLAN
+10	kernel	PLAN
+11	barbs	PLAN
+11	lateral veins	PLAN
+12	crease	PLAN
+12	base	PLAN
+13	Lateral kernels	PLAN
+13	crease	PLAN
+14	Morex	CVAR
+14	grain yield	TRAT
+14	kernel plumpness	TRAT
+14	lodging resistance	TRAT
+15	highly resistant	PPTD
+15	stem rust	PATH
+15	spot blotch	PATH
+15	susceptible	PPTD
+15	loose smut	PATH
+17	Crop Science 23:1216 (1983)	JRNL
+18	Rollo	CVAR
+18	six-rowed	TRAT
+18	spring	TRAT
+18	feed	TRAT
+18	barley	CROP
+19	Utah AES	ORG
+19	1991	DATE
+20	Bracken/UT75B65-532 (ID633019/Woodvale)	PED
+21	UT 1075	ALAS
+22	maturity	TRAT
+22	Steptoe	CVAR
+22	plant height	TRAT
+22	lodging	TRAT
+23	Steptoe	CVAR
+23	heads	TRAT
+23	test weight	TRAT
+23	shorter	TRAT
+23	straw	PLAN
+23	lodging	TRAT
+24	Spikes	PLAN
+24	lateral kernels	PLAN
+24	hairs	PLAN
+24	rachis edges	PLAN
+25	Glumes	PLAN
+25	hairs	PLAN
+25	glume awns	PLAN
+26	Lemma awns	PLAN
+27	seed	PLAN
+27	rachilla hairs	PLAN
+27	transverse crease	PLAN
+27	base	PLAN
+28	Aleurone	PLAN
+29	field resistance	PPTD
+29	barley loose smut	PATH
+29	covered smut	PATH
+29	moderate resistance	PPTD
+29	powdery mildew	PATH
+30	susceptible	PPTD
+30	stripe rust	PATH
+32	Crop Science 33:1412-1413 (1993)	JRNL
+34	Russell	CVAR
+34	six-rowed	TRAT
+34	spring	TRAT
+34	feed	TRAT
+34	malting	TRAT
+34	barley	CROP
+35	USDA-ARS	ORG
+35	Idaho and Oregon AESs	ORG
+35	1985	DATE
+36	Karla/ND1265	PED
+37	78Ab9009-5RC	ALAS
+38	kernel plumpness	TRAT
+38	straw	PLAN
+38	heading	TRAT
+39	lodging	TRAT
+39	Steptoe	CVAR
+40	test weight	TRAT
+40	height	TRAT
+40	mid-tall	TRAT
+40	heading date	TRAT
+40	Steptoe	CVAR
+40	heads	TRAT
+40	Tulelake	CVAR
+41	Spikes	PLAN
+42	Awns	PLAN
+43	Glumes	PLAN
+43	hairs	PLAN
+44	hull	PLAN
+45	aleurone	PLAN
+46	Rachilla hairs	PLAN
+47	Veins	PLAN
+47	barbs	PLAN
+47	lateral veins	PLAN
+48	crease	PLAN
+48	base	PLAN
+48	awn	PLAN
+49	Lateral kernels	PLAN
+50	susceptible	PPTD
+50	stripe rust	PATH
+50	kernel blight	PATH
+50	Alternaria spp	PATH
+50	powdery mildew	PATH
+50	moderately susceptible	PPTD
+50	scald	PATH
+52	Crop Science 28:574 (1988)	JRNL
+53	Samish 23	CVAR
+53	two-rowed	TRAT
+53	spring	TRAT
+53	feed	TRAT
+53	malting	TRAT
+53	barley	CROP
+54	Fossum Cereals	ORG
+54	Washington	GPE
+55	85Ab2323/Acclaim	PED
+56	maturing	TRAT
+56	short-statured	TRAT
+56	straw strength	TRAT
+57	resistant	PPTD
+57	stripe rust	PATH
+60	Sara	CVAR
+60	six-rowed	TRAT
+60	spring	TRAT
+60	hooded	TRAT
+60	feed	TRAT
+60	barley	CROP
+61	Oregon AES	ORG
+61	Winema Elevators Inc	ORG
+61	Tulelake, CA	GPE
+61	2001	DATE
+62	Marco/Fragil//Cali92/3/Gloria-Bar/Come-b//Esperanza	PED
+63	Sara	CVAR
+63	stripe rust	PATH
+63	resistant	PPTD
+63	hooded	TRAT
+63	spring	TRAT
+63	barley	CROP
