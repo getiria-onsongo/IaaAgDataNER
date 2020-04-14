@@ -116,3 +116,7 @@
     ('It was selected from the cross CIho 1237/2*Winter Tennessee.', {'entities': [(31, 59, 'PED')]}),
     ('Crop Science 13:285 (1973)', {'entities': [(0, 26, 'JRNL')]}),
     ('It was selected from the cross Orca-sib/2*Steptoe.', {'entities': [(31, 49, 'PED')]}),
+    ('Crop Science 43:729-731 (2003)', {'entities': [(0, 30, 'JRNL')]}),
+    ('Crop Science 35:1209-1210 (1995)', {'entities': [(0, 32, 'JRNL')]}),
+    ('It was released by Resource Seeds, Inc.', {'entities': [(19, 38, 'ORG')]}),
+    ("It was selected from the cross X1275/Sunbar 458//Gloria 'S'/Copal 'S'.", {'entities': [(31, 69, 'PED')]}),
