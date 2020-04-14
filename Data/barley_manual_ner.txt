@@ -105,3 +105,4 @@
     ('It was selected from the cross Bracken/UT75B65-532 (ID633019/Woodvale).', {'entities': [(31, 70, 'PED')]}),
     ('Crop Science 33:1412-1413 (1993)', {'entities': [(0, 32, 'JRNL')]}),
     ('Crop Science 28:574 (1988)', {'entities': [(0, 26, 'JRNL')]}),
+    ('Crop Science 29:487-488 (1989)', {'entities': [(0, 30, 'JRNL')]}),
