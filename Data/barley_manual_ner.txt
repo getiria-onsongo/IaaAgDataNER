@@ -130,3 +130,4 @@
     ('Crop Science 42:1374 (2002)', {'entities': [(0, 27, 'JRNL')]}),
     ('Crop Science 15:603 (1975)', {'entities': [(0, 26, 'JRNL')]}),
     ('Crop Science 33:1413 (1993)', {'entities': [(0, 27, 'JRNL')]}),
+    ('Crop Science 19:409 (1979)', {'entities': [(0, 26, 'JRNL')]}),
