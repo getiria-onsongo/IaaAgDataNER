@@ -11,10 +11,6 @@ import argparse
 # Convert agData.py into JSON so that we can avoid the dangerous code
 # I've written (allowing someone to import a python file they choose for
 # execution).
-#
-# Break up training data into 37 parts (for each page) and then
-# creating code to leave out one page and test it with a model generated
-# from the other 36.
 
 #
 # Global Variables:
@@ -22,10 +18,11 @@ import argparse
 # entity_tally - Global dict with count of observations for all entity types
 #                (e.g., 'TRAT', 'CROP', 'CVAR') in each of the following
 #                categories ('match', 'overlap', 'mislabel', 'false_pos',
-#                            'false_neg')
+#                            'false_neg', 'total')
 # e.g.,
 #    >>> entity_tally['TRAT']
-#    {'match': 210, 'overlap': 8, 'mislabel': 3, 'false_pos': 7, 'false_neg': 7}
+#    {'match': 210, 'overlap': 8, 'mislabel': 3, 'false_pos': 7, 'false_neg': 7,
+#     'total': 235}
 
 entity_tally = dict()
 
@@ -90,6 +87,7 @@ def tally_label_state(label, state):
     """record an instance of state 'state' for the label 'label' 
        labels might include ('TRAT', 'CROP', 'CVAR',...)"
        states include ('match', 'overlap', 'mislabel', 'false_pos', 'false_neg')
+       Note that a special state 'total' is incremented with any tally.
     """
 #    print("Tallying: ", label, state)
     try:
@@ -107,6 +105,12 @@ def tally_label_state(label, state):
             entity_tally[label] = dict()
             entity_tally[label][state] = 1
 #            print(3, label, state, entity_tally[label][state])
+
+    # now accumulate the total counts
+    try:
+        entity_tally[label]['total'] += 1
+    except KeyError:
+        entity_tally[label]['total'] = 1
 
 def same_tuple(tuple1, tuple2):
     """Checks whether two tuples have the same coordinates and label"""
@@ -148,15 +152,15 @@ def remove_tuples(master_list, removal_list):
 def print_stats():
     """Print tallies for all named entities"""
 
-    print("Entity\tStatus\tCount")
+    print("Entity\tStatus\tCount\tPercent")
     
     for label in entity_tally:
-        sum = 0
         for state in entity_tally[label]:
-            count = entity_tally[label][state]
-            print(label+"\t"+state+"\t"+str(count))
-            sum += count
-        print(label+"\tTOTAL\t"+str(sum))
+            if state != 'total':
+                count = entity_tally[label][state]
+                total = entity_tally[label]['total']
+                pcnt = round(100*count/total, 1)
+                print(label+"\t"+state+"\t"+str(count)+"\t"+str(pcnt))
     
 if __name__ == "__main__":
 
