@@ -51,4 +51,4 @@ TRAIN_DATA = [
     ('It was released by Busch Agricultural Resources.', {'entities': [(19, 47, 'ORG')]}),
     ('It is late maturing and mid-tall (similar in plant height to Klages).', {'entities': [(11, 19, 'TRAT'), (24, 32, 'TRAT'), (45, 57, 'TRAT'), (61, 67, 'CVAR')]}),
     ('Crop Science 22:1083 (1982)', {'entities': [(0, 27, 'JRNL')]})
-}
+]
