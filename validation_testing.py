@@ -4,24 +4,27 @@ import spacy
 import re
 import sys
 import os
+import json
 import argparse
 from nerTraining import *
 import subprocess
 
-def train_nth_model(n, output_dir, outfile_prefix):
+def train_nth_model(n, training_file, output_dir, outfile_prefix):
     """train nth spaCy model"""
 
     model_dir = output_dir+"/"+outfile_prefix+str(n)
     n_iter = 100
-    trainModel(None, model_dir, n_iter)
+    trainModel(None, training_file, model_dir, n_iter)
     return model_dir
 
 def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_prefix):
-    """Build a python training set that excludes the nth among maxn entries."""
+    """Build a JSON training set that excludes the nth among maxn entries."""
 
-    trainFile_name = output_dir+"/"+outfile_prefix+str(n)+".py"
+    local_data = dict()
+    
+    trainFile_name = output_dir+"/"+outfile_prefix+str(n)+".json"
     fo = open(trainFile_name, 'w')
-    fo.write("TRAIN_DATA = [\n")
+    fo.write("[")
     
     for i in range(1, maxn+1):
         sys.stderr.write("Working on training segment "+str(i)+"\n")
@@ -29,21 +32,15 @@ def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_
         if (i != n):
             infile = input_dir+"/"+fprefix+str(i)+fsuffix
 
-            fi = open(infile, 'r') 
-            for line in fi:
-                # output file doesn't need TRAIN_DATA and closing ']' internally
-                if ((line.find('TRAIN_DATA') == -1) and
-                    (line != ']\n')):
+            with open(infile) as fi:
+                local_data = json.load(fi)
+            json.dump(local_data, fo)
 
-                    # replace last ')' with '),' in each intermediary file
-                    # except the last (maxn+1th) one
-                    if re.search(r'\)$', line) and (i != maxn):
-                        line = re.sub(r'\)$', '),', line)
-                    
-                    fo.write(line)
+            if (i != maxn):
+                fo.write(", ")
 
-    fo.write(']\n')
-    fo.close()
+    fo.write("]\n")
+
     return trainFile_name
 
 if __name__ == "__main__":
@@ -84,13 +81,7 @@ if __name__ == "__main__":
     for i in range(1, maxn+1):
         train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
 
-        os.chdir(output_dir)
-        print("output_dir: "+output_dir)
-        training_data = __import__(output_prefix+str(i))
-        TRAIN_DATA = training_data.TRAIN_DATA
-        print("TRAIN_DATA:", TRAIN_DATA[0])
-
-        model_dir = train_nth_model(i, output_dir, output_prefix)
-        accuracyFile_name = model_dir+"_stats.txt"
-        fh_acc = open(accuracyFile_name, 'w')
-        subprocess.run(["python3", "checkAccuracy.py", model_dir, train_file], stdout=fh_acc)
+#        model_dir = train_nth_model(i, output_prefix+str(i)+".json", output_dir, output_prefix)
+#        accuracyFile_name = model_dir+"_stats.txt"
+#        fh_acc = open(accuracyFile_name, 'w')
+#        subprocess.run(["python3", "checkAccuracy.py", model_dir, train_file], stdout=fh_acc)
