@@ -22,12 +22,12 @@ def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_
 
     local_data = dict()
     
+    sys.stderr.write("Working on training segment "+str(n)+"\n")
     trainFile_name = output_dir+"/"+outfile_prefix+str(n)+".json"
     fo = open(trainFile_name, 'w')
     fo.write("[")
     
     for i in range(1, maxn+1):
-        sys.stderr.write("Working on training segment "+str(i)+"\n")
         
         if (i != n):
             infile = input_dir+"/"+fprefix+str(i)+fsuffix
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     for i in range(1, maxn+1):
         train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
 
-#        model_dir = train_nth_model(i, output_prefix+str(i)+".json", output_dir, output_prefix)
-#        accuracyFile_name = model_dir+"_stats.txt"
-#        fh_acc = open(accuracyFile_name, 'w')
-#        subprocess.run(["python3", "checkAccuracy.py", model_dir, train_file], stdout=fh_acc)
+        model_dir = train_nth_model(i, output_dir+"/"+output_prefix+str(i)+".json", output_dir, output_prefix)
+        accuracyFile_name = model_dir+"_stats.txt"
+        fh_acc = open(accuracyFile_name, 'w')
+        subprocess.run(["python3", "checkAccuracy.py", model_dir, train_file], stdout=fh_acc)
