@@ -6,6 +6,33 @@ import os
 import argparse
 
 def dict_2_mixed_type(data):
+    """ convert multi-document (list) or single-document (dict) JSON records
+     to spaCy training ready objects.  E.g.:
+
+     simple = {'doc': 'p.pdf', 'url': 'https://hello', 'chunk': 1, 'sentences': {'sentence 1': {'entity 1': {'start': 0, 'end': 3, 'label': 'TY1'}, 'entity 2': {'start': 4, 'end': 6, 'label': 'TY2'}}}}
+
+     returns: [('sentence 1', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]})]
+
+     whereas
+
+     complex = [{'doc': 'p.pdf', 'url': 'https://hello', 'chunk': 1, 'sentences': {'sentence 1': {'entity 1': {'start': 0, 'end': 3, 'label': 'TY1'}, 'entity 2': {'start': 4, 'end': 6, 'label': 'TY2'}}}}, {'doc': 'p.pdf', 'url': 'https://hello', 'chunk': 2, 'sentences': {'sentence 2': {'entity 1': {'start': 0, 'end': 4, 'label': 'TT1'}, 'entity 2': {'start': 6, 'end': 8, 'label': 'TY2'}}}}]
+
+     returns: [('sentence 1', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]}),
+               ('sentence 2', {'entities': [(0, 4, 'TT1'), (6, 8, 'TT2')]})]
+    """
+
+    if isinstance(data, dict):
+        return dict_2_mixed_type_simple(data)
+    else:
+        result = []
+        for record in data:
+            subset = dict_2_mixed_type_simple(record)
+            for sentence, entity_dict in subset:
+                result.append((sentence, entity_dict))
+
+    return result
+
+def dict_2_mixed_type_simple(data):
     """ Convert Nested JSON-like dictionary to the complex training
      data that spaCy requires. Specifically:
      {'doc': 'BarCvDescLJ11.pdf', 
