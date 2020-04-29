@@ -7,6 +7,7 @@ import os
 import json
 import argparse
 from nerTraining import *
+from checkAccuracy import *
 import subprocess
 
 def train_nth_model(n, training_file, output_dir, outfile_prefix):
@@ -82,6 +83,6 @@ if __name__ == "__main__":
         train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
 
         model_dir = train_nth_model(i, output_dir+"/"+output_prefix+str(i)+".json", output_dir, output_prefix)
+
         accuracyFile_name = model_dir+"_stats.txt"
-        fh_acc = open(accuracyFile_name, 'w')
-        subprocess.run(["python3", "checkAccuracy.py", model_dir, train_file], stdout=fh_acc)
+        check_model_accuracy(train_file, model_dir, accuracyFile_name)
