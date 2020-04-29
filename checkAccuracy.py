@@ -3,6 +3,7 @@
 import spacy
 import re
 import sys
+from json2py import *
 import argparse
 
 #
@@ -149,10 +150,15 @@ def remove_tuples(master_list, removal_list):
             if tuple == bygone:
                 master_list.remove(tuple)
 
-def print_stats():
+def print_stats(outfile=None):
     """Print tallies for all named entities"""
 
-    print("Entity\tStatus\tCount\tPercent")
+    if outfile is None:
+        print("Entity\tStatus\tCount\tPercent")
+    else:
+        fo = open(outfile, "w")
+        fo.write("Entity\tStatus\tCount\tPercent\n")
+        
     
     for label in entity_tally:
         for state in entity_tally[label]:
@@ -160,7 +166,31 @@ def print_stats():
                 count = entity_tally[label][state]
                 total = entity_tally[label]['total']
                 pcnt = round(100*count/total, 1)
-                print(label+"\t"+state+"\t"+str(count)+"\t"+str(pcnt))
+                if outfile is None: # print to STDOUT
+                    print(label+"\t"+state+"\t"+str(count)+"\t"+str(pcnt))
+                else:
+                    fo.write(label+"\t"+state+"\t"+str(count)+"\t"+str(pcnt)+"\n")
+
+def check_model_accuracy(training_file, model_dir, outfile=None):
+    """apply NLP model to docs in training_file and assess accuracy"""
+
+    training_data = json_2_dict(training_file)
+    TRAIN_DATA = dict_2_mixed_type(training_data)
+
+    #
+    # Open the training file, grab each line and apply the model
+    # to each line of text in the training file.
+    #
+    nlp = spacy.load(model_dir)
+
+    for truth_record in TRAIN_DATA:
+#        print(truth_record)
+        model_results = apply_model_2_text(nlp, truth_record[0])
+#        print("compared with: ", model_results)
+        tally_calls(truth_record[1]['entities'], model_results)
+
+    print_stats(outfile)
+    
     
 if __name__ == "__main__":
 
@@ -169,7 +199,7 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description = "Compare predicted NER components with trained data",
-        epilog = 'Example: python3 checkAccuracy.py modelDir trainingFile'
+        epilog = 'Example: python3 checkAccuracy.py modelDir trainingFile (optional --outfile fname)'
     )
     parser.add_argument(
         'model_dir', help = 'model directory. This is the NLP model built by spaCy.'
@@ -177,31 +207,17 @@ if __name__ == "__main__":
     parser.add_argument(
         'truth_file', help = 'Ground truth training data that we are comparing to.'
     )
+    parser.add_argument(
+        '--outfile', default = None, help = 'Output file for accuracy statistics\
+        Default = STDOUT'
+    )
 
     if len(sys.argv)<2:
         parser.print_usage()
         sys.exit()
         
     args = parser.parse_args()
-    model_dir, training_file = args.model_dir, args.truth_file
+    model_dir, training_file, outfile = args.model_dir, args.truth_file, args.outfile
     training_file = training_file.replace(".py", "")
 
-    #
-    # Open the training file, grab each line and apply the model
-    # to each line of text in the training file.
-    #
-    nlp = spacy.load(model_dir)
-
-    # The following loads data into an array TRAIN_DATA
-    # It is assumed that training data is of the expected form, and not
-    # some malicious code. This code should not be used by untrusted parties
-    truth = __import__(training_file)
-
-    for truth_record in truth.TRAIN_DATA:
-#        print(truth_record)
-        model_results = apply_model_2_text(nlp, truth_record[0])
-#        print("compared with: ", model_results)
-        tally_calls(truth_record[1]['entities'], model_results)
-
-    print_stats()
-
+    check_model_accuracy(training_file, model_dir, outfile)
