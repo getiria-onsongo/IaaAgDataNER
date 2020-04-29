@@ -84,7 +84,7 @@ if __name__ == "__main__":
     for i in range(1, maxn+1):
         train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
 
-#        model_dir = train_nth_model(i, output_dir+"/"+output_prefix+str(i)+".json", output_dir, output_prefix)
+        model_dir = train_nth_model(i, output_dir+"/"+output_prefix+str(i)+".json", output_dir, output_prefix)
 
-#        accuracyFile_name = model_dir+"_stats.txt"
-#        check_model_accuracy(train_file, model_dir, accuracyFile_name)
+        accuracyFile_name = model_dir+"_stats.txt"
+        check_model_accuracy(train_file, model_dir, accuracyFile_name)
