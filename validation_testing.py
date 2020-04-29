@@ -37,7 +37,9 @@ def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_
                 local_data = json.load(fi)
             json.dump(local_data, fo)
 
-            if (i != maxn):
+            if ((n == maxn) and (i != maxn-1) or
+                (n == maxn-1) and (i != maxn) or
+                (n < maxn-1) and (i != maxn)):
                 fo.write(", ")
 
     fo.write("]\n")
@@ -51,7 +53,7 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description = "Perform leave one out validation for NER training",
-        epilog = 'Example: python3 validation_testing.py maxn fprefix fsuffix input_dir output_prefix'
+        epilog = 'Example: python3 validation_testing.py maxn fprefix fsuffix input_dir output_dir output_prefix'
     )
     parser.add_argument(
         'maxn', help = 'integer for max chunks the training data is broken into'
@@ -82,7 +84,7 @@ if __name__ == "__main__":
     for i in range(1, maxn+1):
         train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
 
-        model_dir = train_nth_model(i, output_dir+"/"+output_prefix+str(i)+".json", output_dir, output_prefix)
+#        model_dir = train_nth_model(i, output_dir+"/"+output_prefix+str(i)+".json", output_dir, output_prefix)
 
-        accuracyFile_name = model_dir+"_stats.txt"
-        check_model_accuracy(train_file, model_dir, accuracyFile_name)
+#        accuracyFile_name = model_dir+"_stats.txt"
+#        check_model_accuracy(train_file, model_dir, accuracyFile_name)
