@@ -51,6 +51,7 @@ def leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_pre
 
        accuracyFile_name = model_dir+"_stats.txt"
        check_model_accuracy(train_file, model_dir, accuracyFile_name)
+       clear_tally()
    
 def train_nth_model(n, training_file, output_dir, outfile_prefix):
     """train nth spaCy model"""

@@ -7,13 +7,6 @@ from json2py import *
 import argparse
 
 #
-# TODO:
-#
-# Convert agData.py into JSON so that we can avoid the dangerous code
-# I've written (allowing someone to import a python file they choose for
-# execution).
-
-#
 # Global Variables:
 #
 # entity_tally - Global dict with count of observations for all entity types
@@ -38,6 +31,10 @@ def apply_model_2_text(nlp_model, text):
         entities.append(tup)
 
     return entities
+
+def clear_tally():
+    """ clear out the tally stats """
+    entity_tally = dict()
 
 def tally_calls(truth, model):
     """compare model results to ground truth and tally in global dict"""
@@ -147,7 +144,7 @@ def remove_tuples(master_list, removal_list):
 
     for bygone in removal_list:
         for tuple in master_list:
-            if tuple == bygone:
+            if same_tuple(tuple, bygone):
                 master_list.remove(tuple)
 
 def print_stats(outfile=None):
