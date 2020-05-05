@@ -95,7 +95,7 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description = "Perform leave one out validation for NER training",
-        epilog = 'Example: python3 validation_testing.py maxn fprefix fsuffix input_dir output_dir output_prefix'
+        epilog = 'Example: python3 validation_testing.py maxn fprefix fsuffix input_dir output_dir output_prefix (optional --titrate)'
     )
     parser.add_argument(
         'maxn', help = 'integer for max chunks the training data is broken into'
@@ -115,13 +115,20 @@ if __name__ == "__main__":
     parser.add_argument(
         'output_prefix', help = 'Output filename base prefix for combined training file that includes all chunks except the ith one.'
     )
+    parser.add_argument(
+        '--titrate', help = 'Flag to perform experiments where the number of chuncks used in training is titrated from 1 all the way up to maxn-1. Default=False', action = 'store_true', default = False
+    )
 
     if len(sys.argv)<5:
         parser.print_usage()
         sys.exit()
         
     args = parser.parse_args()
-    maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix = int(args.maxn), args.fprefix, args.fsuffix, args.input_dir, args.output_dir, args.output_prefix
+    maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix, titrate = int(args.maxn), args.fprefix, args.fsuffix, args.input_dir, args.output_dir, args.output_prefix, args.titrate
 
-    leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
+    if titrate:
+        for i in range(2, maxn+1):
+            leave_one_out_xval(i, fprefix, fsuffix, input_dir, output_dir, output_prefix+'.'+str(i)+'.')
+    else:
+        leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
     summarize_stats(output_dir+'/'+output_prefix)
