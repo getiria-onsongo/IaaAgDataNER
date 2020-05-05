@@ -5,11 +5,53 @@ import re
 import sys
 import os
 import json
+import glob
+import csv
 import argparse
 from nerTraining import *
 from checkAccuracy import *
 import subprocess
 
+def summarize_stats(fprefix):
+    """ summarize accuracy statistics across all files in the series"""
+
+    tally = dict()
+    for fname in glob.glob(fprefix+'*'+'_stats.txt'):
+        with open(fname) as fh:
+            rd = csv.reader(fh, delimiter="\t")
+            for row in rd:
+                if row[0] != 'Entity':
+                    try:
+                        tally[row[0]]['total'] += int(row[2])
+                    except KeyError:
+                        tally[row[0]] = dict()
+                        tally[row[0]]['total'] = int(row[2])
+                    try:
+                        tally[row[0]][row[1]] += int(row[2])
+                    except KeyError:
+                        tally[row[0]][row[1]] = int(row[2])
+
+    # print combined stats
+    sys.stderr.write("Entity\tStatus\tCount\tPercent\n")
+    for label in tally:
+        for state in tally[label]:
+            if state != 'total':
+                count = tally[label][state]
+                total = tally[label]['total']
+                pcnt = round(100*count/total, 1)
+                sys.stderr.write(label+"\t"+state+"\t"+str(count)+"\t"+str(pcnt)+"\n")
+
+def leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix):
+   """ perform leave-one-out cross validation on the dataset. """
+
+   for i in range(1, maxn+1):
+       train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
+
+       model_dir = train_nth_model(i, output_dir+"/"+output_prefix+str(i)+".json", output_dir, output_prefix)
+
+       accuracyFile_name = model_dir+"_stats.txt"
+       check_model_accuracy(train_file, model_dir, accuracyFile_name)
+   
 def train_nth_model(n, training_file, output_dir, outfile_prefix):
     """train nth spaCy model"""
 
@@ -81,10 +123,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix = int(args.maxn), args.fprefix, args.fsuffix, args.input_dir, args.output_dir, args.output_prefix
 
-    for i in range(1, maxn+1):
-        train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
-
-        model_dir = train_nth_model(i, output_dir+"/"+output_prefix+str(i)+".json", output_dir, output_prefix)
-
-        accuracyFile_name = model_dir+"_stats.txt"
-        check_model_accuracy(train_file, model_dir, accuracyFile_name)
+    leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
+    summarize_stats(output_dir+'/'+output_prefix)
