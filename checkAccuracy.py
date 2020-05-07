@@ -34,6 +34,7 @@ def apply_model_2_text(nlp_model, text):
 
 def clear_tally():
     """ clear out the tally stats """
+    global entity_tally
     entity_tally = dict()
 
 def tally_calls(truth, model):
@@ -65,6 +66,9 @@ def tally_calls(truth, model):
     model = remove_tuples(model, marked_to_remove)
     truth = remove_tuples(truth, marked_to_remove)
 
+    # print("model leftovers: "+str(model))
+    # print("truth leftovers: "+str(truth))
+
     # Any entries left in the model list are all false positives
     try:
         for ent_tuple in model:
@@ -87,22 +91,23 @@ def tally_label_state(label, state):
        states include ('match', 'overlap', 'mislabel', 'false_pos', 'false_neg')
        Note that a special state 'total' is incremented with any tally.
     """
-#    print("Tallying: ", label, state)
+    global entity_tally
+    # print("Tallying: ", label, state)
     try:
         # If no error, a 'state' with 'label' was already seen
         entity_tally[label][state] += 1
-#        print(1, label, state, entity_tally[label][state])
+        # print(1, label, state, entity_tally[label][state])
     except KeyError:
         try:
             # If no error, we've seen other 'states' for 'label', but not
             # this one
             entity_tally[label][state] = 1
-#            print(2, label, state, entity_tally[label][state])
+            # print(2, label, state, entity_tally[label][state])
         except KeyError:
             # we've never tallied anything yet for this 'label'
             entity_tally[label] = dict()
             entity_tally[label][state] = 1
-#            print(3, label, state, entity_tally[label][state])
+            # print(3, label, state, entity_tally[label][state])
 
     # now accumulate the total counts
     try:
@@ -146,6 +151,7 @@ def remove_tuples(master_list, removal_list):
         for tuple in master_list:
             if same_tuple(tuple, bygone):
                 master_list.remove(tuple)
+    return master_list
 
 def print_stats(outfile=None):
     """Print tallies for all named entities"""
@@ -181,9 +187,9 @@ def check_model_accuracy(training_file, model_dir, outfile=None):
     nlp = spacy.load(model_dir)
 
     for truth_record in TRAIN_DATA:
-#        print(truth_record)
+        # print(truth_record)
         model_results = apply_model_2_text(nlp, truth_record[0])
-#        print("compared with: ", model_results)
+        # print("compared with: ", model_results)
         tally_calls(truth_record[1]['entities'], model_results)
 
     print_stats(outfile)
