@@ -24,7 +24,7 @@ You can test the accuracy of the NER training with only N pages of the 37 page d
 git clone https://github.com/getiria-onsongo/IaaAgDataNER
 cd IaaAgDataNER
 mkdir /tmp/spacy
-python3 validation_testing.py 5 'barley_p' '_td.json' Data /tmp/spacy 'test_'
+python3 validation_testing.py 5 'barley_p' '_td.json' Data/DavisLJ11 /tmp/spacy 'test_'
 ```
 This will generate 5 JSON training files in `/tmp/spacy`: one that has
 pages 2-5, one with page 1 and 3-5, one with pages 1-2 and 4-5, etc. A
