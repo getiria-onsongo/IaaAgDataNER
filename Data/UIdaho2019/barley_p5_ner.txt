@@ -1,0 +1,145 @@
+1	Julie	CVAR
+1	test weight	TRAT
+1	protein	TRAT
+1	food	TRAT
+1	barleys	CROP
+1	seed beta-glucan	TRAT
+1	CDC McGwire	CVAR
+2	Julie	CVAR
+2	yielding	TRAT
+2	hulless	TRAT
+2	waxy	TRAT
+2	barley	CROP
+3	Lodging	TRAT
+3	Julie	CVAR
+3	heading date	TRAT
+3	Champion	CVAR
+4	Kardia	CVAR
+4	2Ab09-X06F084-51	ALAS
+5	Kardia	CVAR
+5	two-rowed	TRAT
+5	hulled	TRAT
+5	food	TRAT
+5	barley	CROP
+5	2016	DATE
+5	USDA-ARS	ORG
+5	Aberdeen	GPE
+5	University of Idaho AES	ORG
+5	Salute	CVAR
+5	yield	TRAT
+6	Yield	TRAT
+6	Kardia	CVAR
+6	Julie	CVAR
+6	Transit	CVAR
+6	Goldenhart	CVAR
+7	beta-glucan level	TRAT
+7	Kardia	CVAR
+7	Salute	CVAR
+8	Kardia	CVAR
+8	levels of DON	TRAT
+8	Fusarium head blight	PATH
+8	hulled	TRAT
+8	test weight	TRAT
+9	Transit	CVAR
+9	03AH3054-51	ALAS
+9	two-rowed	TRAT
+9	hulless	TRAT
+9	USDA-ARS	ORG
+9	University of Idaho AES	ORG
+9	2010	DATE
+9	high-beta glucan content	TRAT
+10	beta-glucan content	TRAT
+10	CDC Fibar	CVAR
+10	CDC McGwire	CVAR
+11	Transit	CVAR
+11	yields	TRAT
+11	percent beta-glucan	TRAT
+11	Julie	CVAR
+12	hulless	TRAT
+12	test weights	TRAT
+12	barley	CROP
+13	Transit	CVAR
+13	disease ratings	TRAT
+13	FHB	PATH
+13	DON levels	TRAT
+15	Feed Altorado	CVAR
+15	BZ509-601	ALAS
+16	Altorado	CVAR
+16	2016	DATE
+16	Highland Specialty Grains	ORG
+17	Altorado	CVAR
+17	two-rowed	TRAT
+17	feed	TRAT
+17	barley	CROP
+17	yield potential	TRAT
+18	yield	TRAT
+18	Champion	CVAR
+18	test weight	TRAT
+19	Altorado	CVAR
+19	Champion	CVAR
+19	heading date	TRAT
+19	test weight	TRAT
+19	plant height	TRAT
+19	lodging	TRAT
+19	grain protein	TRAT
+21	2007	DATE
+21	WestBred, LLC	ORG
+21	Highland Specialty Grain	ORG
+22	Champion	CVAR
+22	yielding	TRAT
+22	two-rowed	TRAT
+22	spring	TRAT
+22	feed	TRAT
+22	barley	CROP
+23	Champion	CVAR
+23	yields	TRAT
+23	Xena	CVAR
+23	Lenetah	CVAR
+23	test weight	TRAT
+23	plumps	TRAT
+24	Champion	CVAR
+24	height	TRAT
+24	protein	TRAT
+24	heads	TRAT
+25	Claymore	CVAR
+25	BZ509-216	ALAS
+25	two-rowed	TRAT
+25	feed	TRAT
+25	WestBred	ORG
+25	Highland Specialty Grains	ORG
+27	Claymore	CVAR
+27	height	TRAT
+27	Champion	CVAR
+27	heading	TRAT
+27	test weight	TRAT
+27	lodging	TRAT
+28	Idagold II	CVAR
+28	C32	ALAS
+28	two-rowed	TRAT
+28	spring	TRAT
+28	feed	TRAT
+28	malt	TRAT
+28	Coors Brewing Company	ORG
+28	Burley	GPE
+28	2002	DATE
+29	Idagold II	CVAR
+29	short	TRAT
+29	lodging	TRAT
+29	test weight	TRAT
+30	Protein	TRAT
+30	plumps	TRAT
+31	Idagold II	CVAR
+31	susceptible	PPTD
+31	FHB	PATH
+31	levels of DON accumulated in the seed	TRAT
+32	Idagold II	CVAR
+32	stature	TRAT
+33	Lenetah	CVAR
+33	01Ab11107	ALAS
+33	2008	DATE
+33	USDA-ARS	ORG
+33	Idaho AES	ORG
+34	Lenetah	CVAR
+34	yielding	TRAT
+34	two-rowed	TRAT
+34	feed	TRAT

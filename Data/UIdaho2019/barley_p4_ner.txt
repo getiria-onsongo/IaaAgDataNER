@@ -1,0 +1,125 @@
+1	LCS Odyssey	CVAR
+1	resistance	PPTD
+1	CCN	PATH
+1	Idaho	GPE
+2	Genie	CVAR
+2	Odyssey	CVAR
+2	malt quality	TRAT
+3	Manta	CVAR
+3	two-rowed	TRAT
+3	spring	TRAT
+3	malt	TRAT
+3	barley	CROP
+3	Ackermann Saatzucht GmbH & Co	ORG
+5	Manta	CVAR
+5	yields	TRAT
+5	2018	DATE
+6	2019	DATE
+6	yields	TRAT
+6	Explorer	CVAR
+7	Plumps	TRAT
+7	plant height	TRAT
+7	protein	TRAT
+7	lodging	TRAT
+8	Merit 57	CVAR
+8	2B99-2657	ALAS
+9	malt quality	TRAT
+9	Merit 57	CVAR
+9	2009	DATE
+9	Busch Agricultural Resources	ORG
+10	Merit 57	CVAR
+10	maturity	TRAT
+10	two-rowed	TRAT
+10	malt	TRAT
+10	seed	PLAN
+10	yields	TRAT
+10	test weight	TRAT
+10	lodging	TRAT
+11	Merit 57	CVAR
+11	plumps	TRAT
+11	protein	TRAT
+12	Moravian 69	CVAR
+13	C69	ALAS
+13	two-rowed	TRAT
+13	spring	TRAT
+13	malt	TRAT
+13	barley	CROP
+13	Coors Brewing Co	ORG
+13	2005	DATE
+14	Moravian 69	CVAR
+14	yield potential	TRAT
+14	ABI Voyager	CVAR
+14	Copeland	CVAR
+15	2019	DATE
+15	yields	TRAT
+15	LCS Genie	CVAR
+15	Odyssey	CVAR
+16	M69	CVAR
+16	short	TRAT
+16	lodging	TRAT
+17	Protein	TRAT
+17	test weight	TRAT
+17	plumps	TRAT
+18	Moravian 69	CVAR
+18	susceptible	PPTD
+18	FHB	PATH
+18	accumulation of DON in the seed	TRAT
+19	Moravian 179	CVAR
+19	two-rowed	TRAT
+19	malt	TRAT
+19	MillerCoors	ORG
+19	Idaho	GPE
+20	Yields	TRAT
+20	Moravian 179	CVAR
+20	LCS Genie	CVAR
+20	M69	CVAR
+20	2018	DATE
+20	2019	DATE
+20	plumps	TRAT
+20	test weight	TRAT
+20	lodging	TRAT
+21	Proteins	TRAT
+21	plant height	TRAT
+21	M69	CVAR
+22	MillerCoors	ORG
+24	two-rowed	TRAT
+24	spring	TRAT
+24	malt	TRAT
+24	barley	CROP
+24	Ackermann Saatzucht GmbH & Co	ORG
+24	Sangria	CVAR
+24	Manta	CVAR
+24	malt quality	TRAT
+25	Sangria	CVAR
+25	yields	TRAT
+25	lodging resistance	TRAT
+25	plumps	TRAT
+25	protein	TRAT
+25	test weight	TRAT
+26	Yields	TRAT
+26	Aberdeen	GPE
+27	2019	DATE
+27	Sangria	CVAR
+27	Manta	CVAR
+27	yields	TRAT
+27	lodging	TRAT
+28	Protein	TRAT
+28	test weight	TRAT
+28	Manta	CVAR
+30	Food Goldenhart	CVAR
+30	2Ab09-X06F058HL-31	ALAS
+31	spring	TRAT
+31	2-rowed	TRAT
+31	hulless	TRAT
+31	food	TRAT
+31	barley	CROP
+31	beta-glucan content	TRAT
+31	Transit	CVAR
+31	yield potential	TRAT
+32	Goldenhart	CVAR
+32	yield	TRAT
+32	Transit	CVAR
+33	Goldenhart	CVAR
+33	test weight	TRAT
+33	plump	TRAT
+33	protein	TRAT
