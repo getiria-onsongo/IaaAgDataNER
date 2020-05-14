@@ -1,0 +1,167 @@
+0	soft	TRAT
+0	white	TRAT
+0	spring	TRAT
+0	wheat	CROP
+0	2019	DATE
+0	irrigated yields	TRAT
+0	Louise	CVAR
+1	yield	TRAT
+1	SY Saltese	CVAR
+1	WB6430	CVAR
+3	Ryan	CVAR
+3	Hessian fly	PATH
+3	resistance	PPTD
+3	stripe rust	PATH
+4	Ryan	CVAR
+4	heading	TRAT
+4	UI Pettit	CVAR
+4	shorter	TRAT
+4	test weight	TRAT
+4	resistance to lodging	TRAT
+5	Seahawk	CVAR
+5	WA8162	ALAS
+5	soft	TRAT
+5	white	TRAT
+5	spring	TRAT
+5	wheat	CROP
+5	Washington State	ORG
+5	2014	DATE
+6	Seahawk	CVAR
+6	resistance	PPTD
+6	Hessian fly	PATH
+6	very resistant	PPTD
+6	stripe rust	PATH
+6	least susceptible	PPTD
+6	soft	TRAT
+6	white	TRAT
+6	spring	TRAT
+6	wheats	CROP
+6	FHB	PATH
+8	Yield	TRAT
+8	test weight	TRAT
+8	soft	TRAT
+8	white	TRAT
+8	springs	TRAT
+8	UI Stone	CVAR
+8	WB6430	CVAR
+10	Plant height	TRAT
+10	heading date	TRAT
+11	Seahawk	CVAR
+11	lodge	TRAT
+12	SY Saltese	CVAR
+12	SY3024-2	ALAS
+12	soft	TRAT
+12	white	TRAT
+12	spring	TRAT
+12	wheat	CROP
+12	2016	DATE
+12	Syngenta Cereals	ORG
+13	SY Saltese	CVAR
+13	yield potential	TRAT
+13	Seahawk	CVAR
+13	UI Stone	CVAR
+14	SY Saltese	CVAR
+14	yielded	TRAT
+15	2019	DATE
+15	SY Saltese	CVAR
+15	yields	TRAT
+15	UI Stone	CVAR
+16	SY Saltese	CVAR
+16	test weight	TRAT
+16	resistance	PPTD
+16	stripe rust	PATH
+16	SR	PATH
+16	susceptible	PPTD
+16	currently developing SR races	PATH
+17	SY Saltese	CVAR
+17	lodge	TRAT
+17	susceptible	PPTD
+17	FHB	PATH
+18	SY Saltese	CVAR
+18	susceptible	PPTD
+18	Hessian fly	PATH
+19	Tekoa	CVAR
+19	WA8189	ALAS
+19	Washington State University	ORG
+19	2016	DATE
+19	soft	TRAT
+19	white	TRAT
+19	spring	TRAT
+19	wheat	CROP
+20	Tekoa	CVAR
+20	yield	TRAT
+21	2018	DATE
+21	2019	DATE
+21	Tekoa	CVAR
+21	yields	TRAT
+22	Tekoa	CVAR
+22	adapted to low pH soils	TRAT
+23	Tekoa	CVAR
+23	test weight	TRAT
+23	maturity	TRAT
+23	heading date	TRAT
+23	plant height	TRAT
+24	Tekoa	CVAR
+24	resistant	PPTD
+24	stripe rust	PATH
+24	Hessian fly	PATH
+24	moderately resistant	PPTD
+24	FHB	PATH
+24	Seahawk	CVAR
+25	UI Cookie	CVAR
+25	IDO1405S	ALAS
+25	soft	TRAT
+25	white	TRAT
+25	spring	TRAT
+25	wheat	CROP
+25	2019	DATE
+25	University of Idaho Ag Experiment Station	ORG
+26	UI Cookie	CVAR
+26	yield	TRAT
+26	test weight	TRAT
+26	grain protein	TRAT
+27	UI Cookie	CVAR
+27	end-use quality	TRAT
+27	resistance	PPTD
+27	FHB	PATH
+27	UI Stone	CVAR
+27	stripe rust	PATH
+27	threshability	TRAT
+28	UI Pettit	CVAR
+28	IDO632	ALAS
+28	soft	TRAT
+28	white	TRAT
+28	spring	TRAT
+28	wheat	CROP
+28	2006	DATE
+28	Idaho AES	ORG
+29	Yields	TRAT
+29	test weight	TRAT
+30	UI Pettit	CVAR
+30	short	TRAT
+30	heads	TRAT
+30	Alturas	CVAR
+31	UI Pettit	CVAR
+31	very susceptible	PPTD
+31	current races of stripe rust	PATH
+31	FHB	PATH
+32	UI Stone	CVAR
+32	IDO599	ALAS
+32	soft	TRAT
+32	white	TRAT
+32	spring	TRAT
+32	wheat	CROP
+32	Idaho AES	ORG
+32	2012	DATE
+33	UI Stone	CVAR
+33	yield potential	TRAT
+33	UI Pettit	CVAR
+33	Alturas	CVAR
+34	UI Stone	CVAR
+34	end-use quality	TRAT
+34	susceptibility	PPTD
+34	FHB	PATH
+35	2019	DATE
+35	UI Stone	CVAR
+35	yielded	TRAT
+35	Seahawk	CVAR
