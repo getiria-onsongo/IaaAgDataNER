@@ -1,10 +1,34 @@
+The following work with PyPDF2's PdfFileReader:
 https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf
 https://www.uidaho.edu/-/media/UIdaho-Responsive/Files/Extension/topic/cereals/scse/2019/small-grains-report_2019.pdf	pp 41-66
+http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Ripper-Reprint.pdf
+http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Ripper-Reprint.pdf
+http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Bill-Brown-Reprint.pdf
+http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Cowboy-reprint.pdf
+
+The following do not work with PyPDF2's PdfFileReader
 http://washingtoncrop.com/documents/Barley/2-Row/Crystal.pdf
+http://washingtoncrop.com/documents/Barley/6-Row/Poco.pdf
+https://www.extension.uidaho.edu/publishing/pdf/CIS/CIS1166.pdf
+http://wheat.wptest.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Ankor-Reprint.pdf
+http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Avalanche-Reprint.pdf
+http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Above-reprint.pdf	lots of strange characters and many pairs of words strung together
+http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Bond-CL-Reprint.pdf
+http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/AP502-CL-Reprint.pdf	lots of strange characters
+http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Protection-Reprint.pdf
+
+These are in HTML:
 http://www.ndsuresearchfoundation.org/barley
 https://www.upov.int/pluto/en/
 https://apps.ams.usda.gov/CMS/
 http://agropedia.iitk.ac.in/content/barley-varieties-and-their-characteristics
 https://www.ohioseed.org/certified-barley-varieties/
-http://washingtoncrop.com/documents/Barley/6-Row/Poco.pdf
-https://www.extension.uidaho.edu/publishing/pdf/CIS/CIS1166.pdf
+https://grdc.com.au/resources-and-publications/grdc-update-papers/tab-content/grdc-update-papers/2015/03/barley-agronomy-and-varieties
+https://barleyworld.org/barley-info/seed-availability
+https://barleyworld.org/breeding-genetics/variety-development-and-oregon-brand
+https://wheat.agsci.colostate.edu/varieties/
+
+These are in tabular form
+https://ambainc.org/wp-content/uploads/2020/05/KYMBV.pdf
+https://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2020/01/snowmass-2.0.pdf
+
