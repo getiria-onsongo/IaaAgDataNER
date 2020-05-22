@@ -1,0 +1,23 @@
+1	Ripper	CVAR
+1	kernel weight	TRAT
+1	Above	CVAR
+1	Hatcher	CVAR
+1	Ankor	CVAR
+1	SKCS kernel diame-ter	TRAT
+1	SKCS kernel hardness	TRAT
+6	baking-related variables	TRAT
+6	Ripper	CVAR
+7	Ripper	CVAR
+7	grain protein content	TRAT
+7	Hatcher	CVAR
+9	water absorption	TRAT
+9	Ripper	CVAR
+12	bake water absorption	TRAT
+12	Hatcher	CVAR
+12	Ankor	CVAR
+12	Above	CVAR
+12	bake mixing time	TRAT
+13	pup loaf volume	TRAT
+13	Ankor	CVAR
+13	Hatcher	CVAR
+13	Above	CVAR
