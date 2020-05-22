@@ -46,11 +46,12 @@ def leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_pre
 
    for i in range(1, maxn+1):
        train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
+       test_file = input_dir+"/"+fprefix+str(i)+fsuffix
 
        model_dir = train_nth_model(i, output_dir+"/"+output_prefix+str(i)+".json", output_dir, output_prefix)
 
        accuracyFile_name = model_dir+"_stats.txt"
-       check_model_accuracy(train_file, model_dir, accuracyFile_name)
+       check_model_accuracy(test_file, model_dir, accuracyFile_name)
        clear_tally()
    
 def train_nth_model(n, training_file, output_dir, outfile_prefix):
