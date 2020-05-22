@@ -2,7 +2,6 @@ The following work with PyPDF2's PdfFileReader:
 https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf
 https://www.uidaho.edu/-/media/UIdaho-Responsive/Files/Extension/topic/cereals/scse/2019/small-grains-report_2019.pdf	pp 41-66
 http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Ripper-Reprint.pdf
-http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Ripper-Reprint.pdf
 http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Bill-Brown-Reprint.pdf
 http://wheat.agsci.colostate.edu/wp-content/uploads/sites/85/2016/02/Cowboy-reprint.pdf
 

@@ -1,0 +1,35 @@
+18	Bill Brown	CVAR
+18	‘Yumar’/‘Arlin’	PED
+18	1997	DATE
+18	Fort Collins, CO	GPE
+19	Yumar	CVAR
+19	PI 605388	ALAS
+19	hard	TRAT
+19	red	TRAT
+19	winter	TRAT
+19	wheat	CROP
+19	CSU	ORG
+19	1997	DATE
+19	Arlin	CVAR
+19	PI 564246	ALAS
+20	hard	TRAT
+20	white	TRAT
+20	winter	TRAT
+20	wheat	CROP
+20	Kansas State University	ORG
+20	1992	DATE
+21	Bill Brown	CVAR
+21	Yuma, AZ	GPE
+21	2003	DATE
+21	CO01385	CVAR
+21	CO01385-A1	ALAS
+22	Bill Brown	CVAR
+22	grain yield	TRAT
+22	Colorado	GPE
+23	grain yield	TRAT
+23	Bill Brown	CVAR
+23	grain volume weight	TRAT
+23	resistance	PPTD
+23	leaf and stripe rust	PATH
+23	milling	TRAT
+23	bread baking quality	TRAT
