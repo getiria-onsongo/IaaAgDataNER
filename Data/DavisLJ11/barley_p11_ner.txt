@@ -1,0 +1,134 @@
+1	lateral veins	PLAN
+2	crease	PLAN
+3	Kernels	PLAN
+3	lateral kernels	PLAN
+4	resistant	PPTD
+4	stem rust	PATH
+4	moderately resistant	PPTD
+4	spot blotch	PATH
+4	net blotch	PATH
+4	susceptible	PPTD
+4	loose smut	PATH
+4	false loose smut	PATH
+4	covered smut	PATH
+4	powdery mildew	PATH
+4	barley stripe mosaic	PATH
+6	Crop Science 22:1083 (1982)	JRNL
+7	B1201	CVAR
+7	two-rowed	TRAT
+7	spring	TRAT
+7	malting	TRAT
+7	barley	CROP
+8	Busch Agricultural Resources	ORG
+9	maturing	TRAT
+9	mid-tall	TRAT
+9	plant height	TRAT
+9	Klages	CVAR
+12	B1202	CVAR
+12	two-rowed	TRAT
+12	spring	TRAT
+12	malting	TRAT
+12	barley	CROP
+13	Busch Agricultural Resources	ORG
+13	1989	DATE
+14	RDB70-268/2B75-1223//Klages	PED
+15	2B81-4038	ALAS
+16	maturing	TRAT
+16	mid-tall	TRAT
+16	maturity	TRAT
+16	plant height	TRAT
+16	Klages	CVAR
+17	lodging	TRAT
+17	yield potential	TRAT
+17	Klages	CVAR
+18	Spikes	PLAN
+19	Awns	PLAN
+20	Glumes	PLAN
+20	hairs	PLAN
+21	Hulls	PLAN
+22	Aleurone	PLAN
+23	Rachilla hairs	PLAN
+24	central vein	PLAN
+24	inner lateral vein	PLAN
+24	outer lateral vein	PLAN
+25	lateral veins	PLAN
+26	crease	PLAN
+26	beard end	PLAN
+27	Kernels	PLAN
+28	moderately resistant	PPTD
+28	powdery mildew	PATH
+28	BYD	PATH
+28	moderately susceptible	PPTD
+28	scald	PATH
+28	net blotch	PATH
+28	susceptible	PPTD
+28	stripe rust	PATH
+30	B1215	CVAR
+30	two-rowed	TRAT
+30	spring	TRAT
+30	malting	TRAT
+30	barley	CROP
+31	Busch Agricultural Resources	ORG
+32	maturing	TRAT
+32	mid-tall	TRAT
+32	straw strength	TRAT
+35	B1603	CVAR
+35	six-rowed	TRAT
+35	spring	TRAT
+35	malting	TRAT
+35	barley	CROP
+36	Busch Agricultural Resources	ORG
+37	maturing	TRAT
+37	mid-tall	TRAT
+37	straw strength	TRAT
+40	B1614	CVAR
+40	six-rowed	TRAT
+40	spring	TRAT
+40	malting	TRAT
+40	barley	CROP
+41	Busch Agricultural Resources	ORG
+42	maturing	TRAT
+42	mid-tall	TRAT
+42	straw strength	TRAT
+43	moderately susceptible	PPTD
+43	stripe  rust	PATH
+46	B2601	CVAR
+46	six-rowed	TRAT
+46	spring	TRAT
+46	malting	TRAT
+46	barley	CROP
+47	Busch Agricultural Resources	ORG
+47	1989	DATE
+48	M31/6-rowed high extract composite cross	PED
+49	maturing	TRAT
+49	Morex	CVAR
+50	semi-dwarf	TRAT
+50	Morex	CVAR
+50	straw	TRAT
+51	awns	PLAN
+52	Glumes	PLAN
+52	hairs	PLAN
+53	Hulls	PLAN
+54	Rachilla hairs	PLAN
+55	central vein	PLAN
+55	kernel	PLAN
+56	inner lateral vein	PLAN
+56	outer lateral vein	PLAN
+57	barbs	PLAN
+57	lateral veins	PLAN
+58	kernel	PLAN
+59	susceptible	PPTD
+59	scald	PATH
+59	net blotch	PATH
+59	stripe rust	PATH
+59	powdery mildew	PATH
+62	Bacon	CVAR
+62	two-rowed	TRAT
+62	spring	TRAT
+62	malting	TRAT
+62	barley	CROP
+64	maturing	TRAT
+64	height	TRAT
+64	straw strength	TRAT
+65	moderately susceptible	PPTD
+65	BYD	PATH

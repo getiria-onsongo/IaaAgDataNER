@@ -1,0 +1,150 @@
+2	Bancroft	CVAR
+2	two-rowed	TRAT
+2	spring	TRAT
+2	feed	TRAT
+2	barley	CROP
+3	USDA-ARS	ORG
+3	Idaho, Colorado, and Oregon AESs	ORG
+3	2000	DATE
+4	Hector/60Ab1810-53	PED
+5	78Ab10274	ALAS
+6	maturity	TRAT
+6	Crystal	CVAR
+6	Harrington	CVAR
+7	mid-tall	TRAT
+7	plant height	TRAT
+7	Crystal	CVAR
+7	Harrington	CVAR
+7	straw strength	TRAT
+8	Spikes	PLAN
+9	Awns	PLAN
+10	Kernels	PLAN
+10	aleurone	PLAN
+11	Rachilla hairs	PLAN
+12	Barbs	PLAN
+12	lateral veins	PLAN
+13	Lemmas	PLAN
+14	Glumes	PLAN
+14	hairs	PLAN
+15	Rachis edges	PLAN
+15	hairs	PLAN
+16	resistant	PPTD
+16	stripe rust	PATH
+18	Crop Science 41:265-266 (2001)	JRNL
+20	Baretta	CVAR
+20	six-rowed	TRAT
+20	spring	TRAT
+20	feed	TRAT
+20	barley	CROP
+21	Arizona Plant Breeders	ORG
+23	APB B-712	ALAS
+24	maturing	TRAT
+24	height	TRAT
+24	straw strength	TRAT
+25	moderately resistant	PPTD
+25	BYD	PATH
+25	moderately susceptible	PPTD
+25	net blotch	PATH
+25	leaf rust	PATH
+25	susceptible	PPTD
+25	scald	PATH
+25	stripe rust	PATH
+28	Bearpaw	CVAR
+28	two-rowed	TRAT
+28	spring	TRAT
+28	feed	TRAT
+28	barley	CROP
+29	Montana AES	ORG
+29	USDA-ARS	ORG
+29	1989	DATE
+30	TR440/Clark = Klages//Zephyr/Centennial/3/Clark	PED
+31	MT 81616	ALAS
+32	maturity	TRAT
+32	mid-tall	TRAT
+32	straw strength	TRAT
+33	Spikes	PLAN
+34	awns	PLAN
+35	Kernels	PLAN
+35	rachillas	PLAN
+35	hulls	PLAN
+35	aleurone	PLAN
+36	heading	TRAT
+36	percentage of plump kernels	TRAT
+36	shorter	TRAT
+36	straw	TRAT
+36	Hector	CVAR
+37	adapted	TRAT
+37	central and north central Montana	GPE
+37	Pacific Northwest	GPE
+37	Northern Great Plains	GPE
+38	resistant	PPTD
+38	powdery mildew	PATH
+38	net blotch	PATH
+38	susceptible	PPTD
+38	leaf rust	PATH
+40	Crop Science 30(2): 421 (1990)	JRNL
+41	Belford	CVAR
+41	six-rowed	TRAT
+41	hooded	TRAT
+41	spring	TRAT
+41	barley	CROP
+42	Washington AES	ORG
+42	1943	DATE
+43	Beldi Giant/Horsford	PED
+44	growth	TRAT
+45	maturity	TRAT
+45	plant height	TRAT
+45	straw	TRAT
+46	basal rachis internode	PLAN
+47	rachis	PLAN
+47	edges	PLAN
+48	spike	PLAN
+49	lemma	PLAN
+49	middle lobe	PLAN
+50	glume awn	PLAN
+50	glume	PLAN
+51	Glumes	PLAN
+51	lemma	PLAN
+51	hairs	PLAN
+52	rachilla	PLAN
+53	Kernels	PLAN
+54	Hulls	PLAN
+55	moderately susceptible	PPTD
+55	scald	PATH
+55	susceptible	PPTD
+55	stripe rust	PATH
+55	leaf rust	PATH
+55	BYD	PATH
+56	Bella Union	CVAR
+56	six-rowed	TRAT
+56	spring	TRAT
+56	feed	TRAT
+56	barley	CROP
+57	CIMMYT	ORG
+58	maturity	TRAT
+58	plant height	TRAT
+58	straw strength	TRAT
+59	resistant	PPTD
+59	powdery mildew	PATH
+59	net blotch	PATH
+59	scald	PATH
+59	stripe rust	PATH
+59	moderately resistant	PPTD
+59	BYD	PATH
+61	Bellona	CVAR
+61	two-rowed	TRAT
+61	spring	TRAT
+61	malting	TRAT
+61	barley	CROP
+62	Cebeco Seeds, the Netherlands	ORG
+62	1983	DATE
+63	Wilbur-Ellis Co	ORG
+63	Aramir//Aramir/Bomi	PED
+64	Cebeco 7931	ALAS
+65	maturity	TRAT
+65	plant height	TRAT
+65	straw strength	TRAT
+66	Spikes	PLAN
+66	anthocyanin	TRAT
+66	awns	PLAN
+67	rachilla hairs	PLAN

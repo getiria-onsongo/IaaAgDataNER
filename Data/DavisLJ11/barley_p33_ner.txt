@@ -1,0 +1,140 @@
+1	resistant	PPTD
+1	stripe rust	PATH
+1	susceptible	PPTD
+1	BYD	PATH
+3	Crop Science 43:729-731 (2003)	JRNL
+5	Targhee	CVAR
+5	two-rowed	TRAT
+5	spring	TRAT
+5	feed	TRAT
+5	barley	CROP
+6	USDA-ARS	ORG
+6	Idaho, Oregon, and Washington AESs	ORG
+6	1991	DATE
+7	60Ab1810-53/Hector	PED
+7	Betzes/Domen//Hector	PED
+8	78Ab10099-B	ALAS
+10	maturity	TRAT
+10	Klages	CVAR
+10	height	TRAT
+10	mid-tall	TRAT
+10	head	TRAT
+11	aleurone	PLAN
+11	spikes	PLAN
+11	awns	PLAN
+11	rachilla hairs	PLAN
+12	Lateral veins	PLAN
+12	barbs	PLAN
+13	Lemmas	PLAN
+13	glumes	PLAN
+13	hairs	PLAN
+14	susceptible	PPTD
+14	stripe rust	PATH
+16	Crop Science 35:1209-1210 (1995)	JRNL
+17	Teton	CVAR
+17	six-rowed	TRAT
+17	spring	TRAT
+17	feed	TRAT
+17	barley	TRAT
+18	USDA-ARS	ORG
+18	Idaho AES	ORG
+19	maturing	TRAT
+19	height	TRAT
+19	straw strength	TRAT
+22	Tetonia	CVAR
+22	two-rowed	TRAT
+22	spring	TRAT
+22	feed	TRAT
+22	barley	TRAT
+23	USDA-ARS	ORG
+23	Idaho AES	ORG
+23	2007	DATE
+24	85Ab2323/Baronesse	PED
+25	98Ab11720	ALAS
+26	maturing	TRAT
+26	tall	TRAT
+27	plant height	TRAT
+27	straw strength	TRAT
+28	moderately susceptible	PPTD
+28	stripe rust	PATH
+30	Tipton	CVAR
+30	six-rowed	TRAT
+30	spring	TRAT
+30	feed	TRAT
+30	barley	CROP
+31	Resource Seeds, Inc	ORG
+32	X1275/Sunbar 458//Gloria 'S'/Copal 'S'	PED
+35	RSI 212	ALAS
+36	maturing	TRAT
+36	height	TRAT
+36	straw strength	TRAT
+37	moderately resistant	PPTD
+37	scald	PATH
+37	BYD	PATH
+37	leaf rust	PATH
+37	powdery mildew	PATH
+37	moderately susceptible	PPTD
+37	net blotch	PATH
+37	susceptible	PPTD
+37	stripe rust	PATH
+40	Tradition	CVAR
+40	six-rowed	TRAT
+40	spring	TRAT
+40	malting	TRAT
+40	barley	CROP
+41	Busch Agricultural Resources	ORG
+41	2003	DATE
+42	6B89-2126/ND10981	PED
+43	6B95-2482	ALAS
+44	tall	TRAT
+44	lodging resistance	TRAT
+44	maturity	TRAT
+45	awns	PLAN
+45	rachilla hairs	PLAN
+45	aleurone	PLAN
+46	resistant	PPTD
+46	spot blotch	PATH
+46	net blotch	PATH
+46	resistance	PPTD
+46	Robust	CVAR
+47	susceptible	PPTD
+47	scald	PATH
+47	BYD	PATH
+47	stripe rust	PATH
+50	Triumph	CVAR
+50	two-rowed	TRAT
+50	spring	TRAT
+50	malting	TRAT
+50	barley	TRAT
+51	German Democratic Republic	ORG
+51	1976	DATE
+52	Diamant/St. 1402964-9	PED
+53	maturity	TRAT
+53	short to medium tall	TRAT
+53	straw	PLAN
+54	Spikes	PLAN
+55	Awns	PLAN
+56	Glumes	PLAN
+56	hairs	PLAN
+56	glume awn	PLAN
+56	glume	PLAN
+57	Hulls	PLAN
+57	aleurone	PLAN
+58	Rachilla hairs	PLAN
+59	Veins	PLAN
+59	barbs	PLAN
+59	lateral veins	PLAN
+60	crease	PLAN
+61	Kernels	PLAN
+62	resistant	PPTD
+62	stripe rust	PATH
+62	scald	PATH
+62	susceptible	PPTD
+62	powdery mildew	PATH
+64	UC 337	CVAR
+64	six-rowed	TRAT
+64	spring	TRAT
+64	feed	TRAT
+64	barley	CROP
+65	University of California AES	ORG
+65	1985	DATE

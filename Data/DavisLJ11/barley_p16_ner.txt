@@ -1,0 +1,143 @@
+0	moderately susceptible	PPTD
+0	BYD	PATH
+2	Crop Science 26:1079 (1986)	JRNL
+4	Craft	CVAR
+4	two-rowed	TRAT
+4	spring	TRAT
+4	malting	TRAT
+4	barley	CROP
+5	Montana AES	ORG
+5	2004	DATE
+6	Klages/Baronesse	PED
+7	MT 970116	ALAS
+8	flavor profile	TRAT
+8	malting	TRAT
+8	Klages	CVAR
+9	maturity	TRAT
+9	plant height	TRAT
+9	straw strength	TRAT
+11	Creel	CVAR
+11	six-rowed	TRAT
+11	spring	TRAT
+11	feed	TRAT
+11	barley	CROP
+12	USDA-ARS	ORG
+12	Idaho AES	ORG
+12	2005	DATE
+13	M44/80Ab4952//79Ab10719	PED
+14	93Ab688	ALAS
+16	Creel	CVAR
+16	maturity	TRAT
+16	heading	TRAT
+16	Colter	CVAR
+17	mid-tall	TRAT
+17	Colter	CVAR
+17	lodges	TRAT
+18	spikes	PLAN
+18	awns	PLAN
+18	rachilla hairs	PLAN
+19	Kernels	PLAN
+19	aleurone	PLAN
+20	kernel plumpness	TRAT
+20	Colter	CVAR
+20	Morex	CVAR
+21	Creel	CVAR
+21	moderately susceptible	PPTD
+21	BYD	PATH
+21	net blotch	PATH
+21	scald	PATH
+21	susceptible	PPTD
+21	stripe rust	PATH
+23	Crop Science 46:1812 (2006)	JRNL
+24	Crest	CVAR
+24	two-rowed	TRAT
+24	spring	TRAT
+24	malting	TRAT
+24	feed	TRAT
+24	barley	CROP
+25	Washington State University	ORG
+25	Idaho	ORG
+25	Oregon AESs	ORG
+25	1992	DATE
+26	Klages/2 WA8537-68	PED
+27	WA 8771-78	ALAS
+29	maturity	TRAT
+29	Klages	CVAR
+29	height	TRAT
+29	lodging	TRAT
+30	Spikes	PLAN
+30	awns	PLAN
+31	Kernels	PLAN
+32	Hulls	PLAN
+33	Veins	PLAN
+33	crease	PLAN
+34	Rachilla hairs	PLAN
+35	aleurone	PLAN
+36	malting	TRAT
+36	nutritional quality	TRAT
+37	partial resistance	PPTD
+37	powdery mildew	PATH
+37	stripe rust	PATH
+37	susceptible	PPTD
+37	Russian wheat aphid	PATH
+39	Crop Science 32:1506-1507 (1992)	JRNL
+40	Criton	CVAR
+40	two-rowed	TRAT
+40	spring	TRAT
+40	feed	TRAT
+40	barley	CROP
+41	Idaho AES	ORG
+41	2002	DATE
+42	Gallatin/Targhee//Bowman	PED
+43	91Ab3148	ALAS
+44	maturing	TRAT
+44	plant height	TRAT
+44	lodging	TRAT
+45	moderately susceptible	PPTD
+45	stripe rust	PATH
+47	Crystal	CVAR
+47	two-rowed	TRAT
+47	spring	TRAT
+47	malting	TRAT
+47	barley	CROP
+48	USDA-ARS	ORG
+48	Idaho AES	ORG
+48	Idaho and Oregon AESs	ORG
+48	1989	DATE
+49	Columba/Klages	PED
+50	78Ab6871	ALAS
+51	maturity	TRAT
+51	mid-tall	TRAT
+51	Klages	CVAR
+51	straw strength	TRAT
+52	Spikes	PLAN
+52	awns	PLAN
+53	Rachilla hairs	PLAN
+54	Glumes	PLAN
+54	hairs	PLAN
+55	hull	PLAN
+56	Aleurone	PLAN
+57	lateral veins	PLAN
+58	central vein	PLAN
+59	barbs	PLAN
+59	lateral veins	PLAN
+60	crease	PLAN
+60	base	PLAN
+60	beard	PLAN
+61	Malting quality	TRAT
+61	Klages	CVAR
+62	Kernel color retention	TRAT
+63	susceptible	PPTD
+63	stripe rust	PATH
+63	good field tolerance	PPTD
+63	kernel blight	PATH
+65	Crop Science 31:481 (1991)	JRNL
+66	Drummond	CVAR
+66	six-rowed	TRAT
+66	spring	TRAT
+66	malting	TRAT
+66	barley	CROP
+67	North Dakota AES	ORG
+67	2000	DATE
+68	Hazen*2/WPG821/4/Stander/3/Bumper/Hazen//Azure	PED
+69	ND15477	ALAS
