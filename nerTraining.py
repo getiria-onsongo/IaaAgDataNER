@@ -1,7 +1,7 @@
 import random
 import re
 import spacy
-from agData import *
+from json2py import *
 from pathlib import Path
 from spacy.lang.char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER,CONCAT_QUOTES, LIST_ELLIPSES, LIST_ICONS
 from spacy.util import minibatch, compounding
@@ -9,12 +9,18 @@ from spacy.util import compile_infix_regex
 
 path_to_pretrained_weights="/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/preTrainInput/text.jsonl"
 
-def trainModel(model=None, output_dir=None, n_iter=100):
+def trainModel(model=None, training_file=None, output_dir=None, n_iter=100):
     """Load the model, set up the pipeline and train the entity recognizer."""
+
     if model is not None:
         nlp = spacy.load(model)  # load existing spaCy model
         print("Model loaded.. '%s'" % model)
     else:
+
+        if training_file is None:
+            print("A JSON training file must be provided. Exiting.\n")
+            return
+    
         nlp = spacy.blank("en")  # create blank Language class
         print("Created blank 'en' model")
 
@@ -52,6 +58,10 @@ def trainModel(model=None, output_dir=None, n_iter=100):
     else:
         ner = nlp.get_pipe("ner")
 
+    # load training data from a file
+    training_data = json_2_dict(training_file)
+    TRAIN_DATA = dict_2_mixed_type(training_data)
+    
     # add entity labels
     for _, annotations in TRAIN_DATA:
         for ent in annotations.get("entities"):

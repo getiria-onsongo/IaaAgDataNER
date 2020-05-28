@@ -1,0 +1,145 @@
+1	Piston	CVAR
+1	two-rowed	TRAT
+1	spring	TRAT
+1	feed	TRAT
+1	barley	CROP
+2	CENEX, Oregon	ORG
+3	maturing	TRAT
+3	heads	TRAT
+3	Steptoe	CVAR
+3	plant height	TRAT
+3	shorter	TRAT
+3	straw strength	TRAT
+4	moderately resistant	PPTD
+4	leaf rust	PATH
+4	susceptible	PPTD
+4	scald	PATH
+4	BYD	PATH
+7	Poco	CVAR
+7	six-rowed	TRAT
+7	spring	TRAT
+7	feed	TRAT
+7	barley	CROP
+8	Anderson Clayton Co	ORG
+8	1981	DATE
+9	Poco	CVAR
+9	HJA C4715*Olli- M64-69	PED
+12	CMB73-383-2Y-2B-Y-0B	ALAS
+12	PC238	ALAS
+13	Poco	CVAR
+13	maturity	TRAT
+13	stature	TRAT
+13	straw strength	TRAT
+14	spike	PLAN
+15	basal rachis internode	PLAN
+15	rachis edges	PLAN
+15	hairs	PLAN
+16	lemma awn	PLAN
+17	glume awn	PLAN
+17	glume	PLAN
+18	glume	PLAN
+18	lemma	PLAN
+19	Rachilla hairs	PLAN
+20	Kernels	PLAN
+20	hulls	PLAN
+20	aleurone	PLAN
+21	moderately resistant	PPTD
+21	BYD	PATH
+21	moderately susceptible	PPTD
+21	net blotch	PATH
+21	powdery mildew	PATH
+21	leaf rust	PATH
+21	susceptible	PPTD
+21	scald	PATH
+24	Prato	CVAR
+24	six-rowed	TRAT
+24	spring	TRAT
+24	feed	TRAT
+24	barley	CROP
+25	California AES	ORG
+25	1978	DATE
+26	CM 67/3*Briggs/4/Briggs*4/3/California Mariout*4/CIho 1179//2*California Mariout*6/Club Mariout	PED
+27	UC76137	ALAS
+28	Prato	CVAR
+28	stature	TRAT
+28	straw strength	TRAT
+28	maturity	TRAT
+28	Briggs	CVAR
+29	spike	PLAN
+30	basal rachis internode	PLAN
+31	rachis edges	PLAN
+31	hairs	PLAN
+32	Rachilla hairs	PLAN
+33	lemma awn	PLAN
+34	glume awn	PLAN
+34	glume	PLAN
+35	glume	PLAN
+35	lemma	PLAN
+36	Kernels	PLAN
+36	hulls	PLAN
+36	aleurone	PLAN
+37	Prato	CVAR
+37	resistant	PPTD
+37	BYD	PATH
+37	moderately resistant	PPTD
+37	scald	PATH
+37	leaf rust	PATH
+37	powdery mildew	PATH
+37	susceptible	PPTD
+37	net blotch	PATH
+39	Crop Science 19:741 (1979)	JRNL
+41	Premier	CVAR
+41	two-rowed	TRAT
+41	spring	TRAT
+41	malting	TRAT
+41	barley	CROP
+42	Busch Agricultural Resources, Inc	ORG
+42	1985	DATE
+43	Klages/Summit	PED
+44	2B78-471	ALAS
+45	Premier	CVAR
+45	straw	PLAN
+45	lodging resistance	TRAT
+45	maturity	TRAT
+46	Spikes	PLAN
+46	awns	PLAN
+47	Rachis edges	PLAN
+47	hair	PLAN
+48	glume awn	PLAN
+48	glume	PLAN
+49	Kernels	PLAN
+49	rachilla hairs	PLAN
+49	hulls	PLAN
+49	aleurone	PLAN
+50	Veins	PLAN
+50	barbs	PLAN
+50	lateral veins	PLAN
+51	crease	PLAN
+51	kernel	PLAN
+54	Radiant	CVAR
+54	two-rowed	TRAT
+54	spring	TRAT
+54	feed	TRAT
+54	malting	TRAT
+54	barley	CROP
+55	Washington State University Agricultural Research Center	ORG
+55	Idaho and Oregon AESs	ORG
+55	USDA-ARS	ORG
+55	2003	DATE
+56	(Induced mutant in Harrington) ant29-667/Baronesse	PED
+58	98-NZ 223	ALAS
+63	Baronesse	CVAR
+63	pest resistances	TRAT
+63	maturing	TRAT
+63	heads	TRAT
+64	height	TRAT
+64	straw strength	TRAT
+65	Harrington	CVAR
+66	malt extract	TRAT
+66	beta-glucan content	TRAT
+67	moderately resistant	PPTD
+67	stripe rust	PATH
+67	powdery mildew	PATH
+67	net blotch	PATH
+67	scald	PATH
+69	Crop Science 44:1859-1860 (2004)	JRNL

@@ -1,0 +1,164 @@
+1	plant height	TRAT
+1	Klages	CVAR
+1	Crystal	CVAR
+1	Harrington	CVAR
+1	straw strength	TRAT
+2	spikes	PLAN
+2	awns	PLAN
+3	Kernels	PLAN
+3	aleurone	PLAN
+4	Rachilla hairs	PLAN
+4	barbs	PLAN
+4	lateral veins	PLAN
+4	lemmas	PLAN
+4	glumes	PLAN
+4	rachis edges	PLAN
+4	hairs	PLAN
+5	susceptible	PPTD
+5	stripe rust	PATH
+5	Russian wheat aphid	PATH
+7	Crop Science 40:851(2000)	JRNL
+10	Glenn	CVAR
+10	six-rowed	TRAT
+10	spring	TRAT
+10	malting	TRAT
+10	barley	CROP
+11	North Dakota Agricultural Experiment Station	ORG
+11	USDA-ARS	ORG
+11	1978	DATE
+13	BR5755-3/Trophy//ND B138	PED
+14	ND 718	ALAS
+15	medium-early	TRAT
+15	mid-tall	TRAT
+15	straw	PLAN
+16	Spikes	PLAN
+16	awned	PLAN
+17	Kernels	PLAN
+17	aleurone	PLAN
+17	rachilla hairs	PLAN
+18	yields	TRAT
+18	Larker	CVAR
+18	total protein content	TRAT
+18	wort protein	TRAT
+18	extract	TRAT
+18	enzyme activity	TRAT
+19	resistant	PPTD
+19	loose smut	PATH
+19	covered smut	PATH
+19	stem rust	PATH
+19	resistant	PPTD
+19	Larker	CVAR
+19	Septoria passerini	PATH
+19	Helminthosporium teres	PATH
+19	H. sativum	PATH
+21	Crop Science 19:409(1979)	JRNL
+22	Goldeneye	CVAR
+22	six-rowed	TRAT
+22	spring	TRAT
+22	feed	TRAT
+22	barley	CROP
+23	Utah AES	ORG
+23	2005	DATE
+24	ID633019/Woodvale//Steptoe//OR3	PED
+25	UT95B1216-4087	ALAS
+26	erect-growing	TRAT
+26	heading	TRAT
+27	Plant height	TRAT
+27	Steptoe	CVAR
+27	mid-tall	TRAT
+28	spike	PLAN
+28	upper lateral spikelets	PLAN
+29	basal rachis internode	PLAN
+29	collar	PLAN
+30	rachis internodes	PLAN
+30	spike	PLAN
+30	rachis edges	PLAN
+30	hairs	PLAN
+31	awns	PLAN
+32	glumes	PLAN
+33	hairs	PLAN
+33	glumes	PLAN
+34	glume awns	PLAN
+34	glumes	PLAN
+35	seed	PLAN
+36	Lemma teeth	PLAN
+36	nerves	PLAN
+37	rachilla	PLAN
+38	lemma base	PLAN
+39	Hulls	PLAN
+39	aleurone	PLAN
+40	resistant	PPTD
+40	loose smut	PATH
+40	covered smut	PATH
+40	susceptible	PPTD
+40	stripe rust	PATH
+42	Crop Science 45:2658 (2005)	JRNL
+44	Grande	CVAR
+44	six-rowed	TRAT
+44	spring	TRAT
+44	feed	TRAT
+44	barley	CROP
+45	California AES	ORG
+45	1963	DATE
+46	Composite Cross II	PED
+47	CAS 1358	ALAS
+49	maturity	TRAT
+50	growth habit	TRAT
+51	Plant height	TRAT
+51	straw strength	TRAT
+52	Atlas 57	CVAR
+53	Arivat	CVAR
+53	Winter Tennessee	CVAR
+53	plant height	TRAT
+54	Spikes	PLAN
+55	Awns	PLAN
+56	rachilla	PLAN
+56	hairs	PLAN
+57	Kernels	PLAN
+58	resistant	PPTD
+58	tolerant	PPTD
+58	powdery mildew	PATH
+58	net blotch	PATH
+58	scald	PATH
+58	moderately susceptible	PPTD
+58	BYD	PATH
+60	Crop Science 5:198 (1965)	JRNL
+61	Gus	CVAR
+61	six-rowed	TRAT
+61	spring	TRAT
+61	feed	TRAT
+61	barley	CROP
+62	Western Plant Breeders	ORG
+62	1977	DATE
+65	WPB6-3	ALAS
+66	Gus	CVAR
+66	semi-dwarf	TRAT
+66	straw	PLAN
+66	maturity	TRAT
+67	leaves	PLAN
+67	growth habit	TRAT
+68	spike	PLAN
+68	kernels	PLAN
+68	tip	PLAN
+70	rachis edges	PLAN
+70	hairs	PLAN
+71	rachilla	PLAN
+71	hairs	PLAN
+72	Kernels	PLAN
+72	hulls	PLAN
+72	tips	PLAN
+72	aleurone	PLAN
+73	Veins	PLAN
+73	barbs	PLAN
+73	lateral veins	PLAN
+74	crease	PLAN
+74	beard	PLAN
+75	Gus	CVAR
+75	moderately resistant	PPTD
+75	scald	PATH
+75	net blotch	PATH
+75	susceptible	PPTD
+75	loose smut	PATH
+75	leaf rust	PATH
+75	BYD	PATH
+75	powdery mildew	PATH

@@ -1,0 +1,62 @@
+1	plant growth habit	TRAT
+1	plant color	TRAT
+1	coleop-tile	PLAN
+1	anthocyanin pigment	PLAN
+2	Flag leaves	PLAN
+2	Bill Brown	CVAR
+2	bloom	PLAN
+3	Bill Brown	CVAR
+3	heads	PLAN
+3	awns	PLAN
+4	Bill Brown	CVAR
+4	glumes	PLAN
+4	shoulders	PLAN
+4	beaks	PLAN
+5	Bill Brown	CVAR
+5	kernels	PLAN
+5	brush	PLAN
+5	cheek	PLAN
+5	crease	PLAN
+5	germ	PLAN
+5	phenol reaction	TRAT
+11	Bill Brown	CVAR
+11	susceptible	PPTD
+11	stem rust	PATH
+16	Bill Brown	CVAR
+16	leaf rust	PATH
+17	leaf rust	PATH
+17	Colorado	GPE
+17	Kansas	GPE
+17	2007	DATE
+17	Bill Brown	CVAR
+17	resistant	PPTD
+17	Hatcher	CVAR
+17	Jagalene	CVAR
+19	Bill Brown	CVAR
+19	resistant	PPTD
+19	race PST-116	PATH
+19	intermediate	PPTD
+19	race PST-100	PATH
+19	stripe rust	PATH
+19	P. striiformis Westend	PATH
+34	maturity	TRAT
+34	heading	TRAT
+34	Ripper	CVAR
+34	PI 644222	ALAS
+34	Hatcher	CVAR
+34	PI 632275	ALAS
+34	Prow-ers 99	CVAR
+35	PI 612420	ALAS
+36	Plant height	TRAT
+36	Bill Brown	CVAR
+36	medium-short	TRAT
+36	Ripper	CVAR
+36	Hatcher	CVAR
+36	Prowers 99	CVAR
+37	Coleoptile length	TRAT
+37	Bill Brown	CVAR
+37	Hatcher	CVAR
+37	Ripper	CVAR
+37	Prowers 99	CVAR
+39	straw strength	TRAT
+39	Bill Brown	CVAR
