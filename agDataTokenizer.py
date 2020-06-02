@@ -356,9 +356,23 @@ pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
 
 # python3 -m spacy pretrain rawTokens.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000 -se 10
 
-# rm -rf NerModel
+#
 
-# python3 -m spacy train en NerModel trainData.json devData.json -t2v preTrainOutput/model999.bin -v "en_core_web_lg" -p ner -n 50 -ne 5 -rt raw.json -D
+# To find out more about commands
+# > python3 -m spacy train -h
+
+# NOTE: If you get an error along the line of "TypeError: '>' not supported between instances of 'dict' and 'dict'"
+# here is the fix: https://github.com/explosion/spaCy/pull/5186/files
+# The file will probably be at this location: /usr/local/lib/python3.7/site-packages/spacy/cli/train.py
+# You will need to add 5 lines in: train.py
+
+# rm -rf NerModel
+# python3 -m spacy train en NerModel trainData.json devData.json --init-tok2vec preTrainOutput/model999.bin --vectors "en_core_web_lg" --pipeline ner --n-iter 1000 --n-early-stopping 10 --raw-text raw.json --textcat-multilabel --debug
+
+
+
+
+
 
 
 # MISC
