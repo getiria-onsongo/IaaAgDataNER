@@ -12,94 +12,18 @@ from pathlib import Path
 from spacy.gold import docs_to_json
 import json
 import PyPDF2
-
-DEV_DATA = [
-    ('Eight-Twelve is a six-rowed winter feed barley.', {'entities': [(0, 12, 'CVAR'), (18, 27, 'TRAT'), (28, 34, 'TRAT'), (35, 39, 'CVAR'), (40, 46, 'CROP')]}),
-    ('It was released by the USDA-ARS and the Idaho AES in 1991.', {'entities': [(23, 31, 'ORG'), (40, 49, 'ORG'), (53, 57, 'DATE')]}),
-    ('It was selected from the cross Steveland/Luther//Wintermalt.', {'entities': [(31, 59, 'PED')]}),
-    ('Its experimental designation was 79Ab812.', {'entities': [(33, 40, 'ALAS')]})]
-
-path_to_pretrained_weights="/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/preTrainInput/text.jsonl"
-
-def trainModel(model=None, output_dir=None, n_iter=100):
-    """Load the model, set up the pipeline and train the entity recognizer."""
-    if model is not None:
-        nlp = spacy.load(model)  # load existing spaCy model
-        print("Model loaded.. '%s'" % model)
-    else:
-        nlp = spacy.blank("en_core_web_lg")  # create blank Language class
-        print("Created blank 'en_core_web_lg' model")
-
-    # create the built-in pipeline components and add them to the pipeline
-    # nlp.create_pipe works for built-ins that are registered with spaCy
-    if "ner" not in nlp.pipe_names:
-        ner = nlp.create_pipe("ner")
-        nlp.add_pipe(ner, last=True)
-    # otherwise, get it so we can add labels
-    else:
-        ner = nlp.get_pipe("ner")
-
-    # add entity labels
-    for _, annotations in TRAIN_DATA:
-        for ent in annotations.get("entities"):
-
-            ner.add_label(ent[2])
-
-    # get names of other pipes to disable them during training, if present
-    other_pipes = [pipe for pipe in nlp.pipe_names if pipe != "ner"]
-
-
-
-    with nlp.disable_pipes(*other_pipes):  # only train NER
-        # reset and initialize the weights randomly – but only if we're
-        # training a new model
-        if model is None:
-            nlp.begin_training()
-
-            # Now that we have our model, we can load in the pretrained weights.
-            with open(path_to_pretrained_weights, "rb") as file_:
-                nlp.model.tok2vec.from_bytes(file_.read())
-
-        q1 = int(n_iter // 4)
-        q2 = int(q1 * 2)
-        q3 = int(q1 * 3)
-
-        for itn in range(n_iter):
-            if itn == q1:
-                print("Training 25% done")
-            elif itn == q2:
-                print("Training 50% done")
-            elif itn == q3:
-                print("Training 75% done")
-            random.shuffle(TRAIN_DATA)
-            losses = {}
-            # batch up the examples using spaCy's minibatch
-            batches = minibatch(TRAIN_DATA, size=compounding(4.0, 32.0, 1.001))
-            for batch in batches:
-                texts, annotations = zip(*batch)
-                nlp.update(
-                    texts,  # batch of texts
-                    annotations,  # batch of annotations
-                    drop=0.5,  # dropout - make it harder to memorise data
-                    losses=losses,
-                )
-            # print("Losses", losses)
-
-    print("Training complete!")
-    # save model to output directory
-    if output_dir is not None:
-        output_dir = Path(output_dir)
-        if not output_dir.exists():
-            output_dir.mkdir()
-        nlp.to_disk(output_dir)
-        print("Saved model to", output_dir)
-
-
-
+''' 
 # The code below is custom to agData. It modifies how the
 # parser works to avoid splitting pedigrees
 
-nlp = spacy.load('en_core_web_lg')
+THE CODE BELOW ALTERS THE TOKENIZER TO PREVENT IT FROM SPLITTING PEDs. 
+BECAUSE OUR TRAINING DATA HAS THE PEDs IN UNSPLIT AND IN THE CORRECT FORMAT, 
+I WILL START BY USING THE DEFAULT TOKENIZER TO SEE IF SPACY IS ABLE TO FIGURE
+OUT HOW TO COMBINE THE DIFFERENT TOKENS INTO A SINGLE PED. MY HESITATION IN 
+USING CUSTOM TOKENIZER IS I AM NOT CLEAR HOW IT WILL PLAY WITH THE COMPLETE 
+PIPELINE. AS AN EXAMPLE, USING THE CUSTOM TOKENIZER BREAKS THE DATA VALIDATION
+UTILITY (python3 -m spacy debug-data)
+
 
 # Tell spacy not to split between hyphens
 infixes = (
@@ -122,6 +46,7 @@ nlp.tokenizer.infix_finditer = infix_re.finditer
 # Try to match journal: Crop Science 32(3):828 (1992)
 digit_hyphen_re = re.compile(r'\s\(\d\)')
 nlp.tokenizer.token_match = digit_hyphen_re.search
+'''
 
 def pdfToJSON(inputPDF, outputFilename, nlp):
     pdfFile = open(inputPDF, mode="rb")
@@ -183,9 +108,10 @@ def entitiesToJSON(fileName, data):
         file.write("\n")
     file.close()
 
-def nerDataToJSON(nlp, data, fileName):
+def nerDataToJSON(data, fileName,nlp):
     ''' Take as input ner training data and convert it into
     CLI json training data.'''
+    # nlp = spacy.load('en_core_web_lg')
     file = open(fileName, "w")
     file.write("[")
     cnt = 0
@@ -196,12 +122,7 @@ def nerDataToJSON(nlp, data, fileName):
         tags = biluo_tags_from_offsets(doc, entities)
         docs_dict = docs_to_json([doc], cnt)
         for i in range(len(docs_dict['paragraphs'][0]['sentences'][0]['tokens'])):
-            # I added the if statement because the following NER example is not being tagged correctly
-            # ('Maja is a six-rowed winter feed/malt barley.', {'entities': [(0, 4, 'CVAR'), (10, 19, 'TRAT'), (20, 26, 'TRAT'), (27, 31, 'TRAT'), (32, 36, 'TRAT'), (37, 43, 'CROP')]}),
-            if (tags[i] == '-'):
-                docs_dict['paragraphs'][0]['sentences'][0]['tokens'][i]['ner'] = 'O'
-            else:
-                docs_dict['paragraphs'][0]['sentences'][0]['tokens'][i]['ner'] = tags[i]
+            docs_dict['paragraphs'][0]['sentences'][0]['tokens'][i]['ner'] = tags[i]
         if(cnt > 0):
             file.write(",")
             file.write("\n")
@@ -315,15 +236,18 @@ for i in range(len(docs_dict['paragraphs'][0]['sentences'][0]['tokens'])):
 
 print("After")
 print(docs_dict)
-'''
+
 buggyEntries = [TRAIN_DATA[29],TRAIN_DATA[61],TRAIN_DATA[66],TRAIN_DATA[181],TRAIN_DATA[197]
                 ,TRAIN_DATA[211],TRAIN_DATA[219],TRAIN_DATA[231],TRAIN_DATA[253],TRAIN_DATA[257],
                 TRAIN_DATA[276],TRAIN_DATA[280],TRAIN_DATA[282],TRAIN_DATA[340],TRAIN_DATA[447],
                 TRAIN_DATA[505],TRAIN_DATA[575],TRAIN_DATA[664]]
 
 x = TRAIN_DATA[0:29]
+#print("TRAIN_DATA[29]=",TRAIN_DATA[29])
 x.extend(TRAIN_DATA[30:61])
+#print("TRAIN_DATA[61]=",TRAIN_DATA[61])
 x.extend(TRAIN_DATA[62:66])
+#print("TRAIN_DATA[66]=",TRAIN_DATA[66])
 x.extend(TRAIN_DATA[67:181])
 x.extend(TRAIN_DATA[182:197])
 x.extend(TRAIN_DATA[198:211])
@@ -340,23 +264,25 @@ x.extend(TRAIN_DATA[448:505])
 x.extend(TRAIN_DATA[506:575])
 x.extend(TRAIN_DATA[576:664])
 x.extend(TRAIN_DATA[665:])
-pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
-nerDataToJSON(nlp,x[0:50],"devData.json")
-nerDataToJSON(nlp,x[50:],"trainData.json")
+'''
+# python3 -m spacy download en_core_web_lg
+nlp = spacy.load('en_core_web_lg')
 
+# Pre-Train data
 pdfToTokensJSON("BarCvDescLJ11.pdf", "rawTokens.json", nlp)
 pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
 
-# python3 -m spacy download en_core_web_lg
+# Train data
+nerDataToJSON(TRAIN_DATA[0:50],"devData.json",nlp)
+nerDataToJSON(TRAIN_DATA[50:],"trainData.json",nlp)
 
-# To validate training data
+
+# To validate training data. NOTE: I have observed this validation fails if we use a custom
+# tokenizer. Pre-train and train still works even with a failed data debug. Just an FYI
 # python3 -m spacy debug-data en trainData.json devData.json -b "en_core_web_lg" -p ner -V
 
 # rm -rf preTrainOutput
-
-# python3 -m spacy pretrain rawTokens.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000 -se 10
-
-#
+# python3 -m spacy pretrain rawTokens.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000 -se 50
 
 # To find out more about commands
 # > python3 -m spacy train -h
@@ -366,8 +292,8 @@ pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
 # The file will probably be at this location: /usr/local/lib/python3.7/site-packages/spacy/cli/train.py
 # You will need to add 5 lines in: train.py
 
-# rm -rf NerModel
-# python3 -m spacy train en NerModel trainData.json devData.json --init-tok2vec preTrainOutput/model999.bin --vectors "en_core_web_lg" --pipeline ner --n-iter 1000 --n-early-stopping 10 --raw-text raw.json --textcat-multilabel --debug
+# rm -rf NerModelPreTrain
+# python3 -m spacy train en NerModelPreTrain trainData.json devData.json --init-tok2vec preTrainOutput/model999.bin --vectors "en_core_web_lg" --pipeline ner --n-iter 1000 --n-early-stopping 10 --raw-text raw.json --textcat-multilabel --debug
 
 
 

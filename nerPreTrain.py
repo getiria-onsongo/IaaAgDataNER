@@ -1,3 +1,5 @@
+import json
+import PyPDF2
 import random
 import re
 import spacy
@@ -110,4 +112,58 @@ def trainModel(model=None, training_file=None, output_dir=None, n_iter=100):
         print("Saved model to", output_dir)
 
 if __name__ == "__main__":
-    pass
+    pre_path="Data/Combined"
+    json_file=pre_path+"/"+"Combined_p1_td.json"
+    f = open(json_file)
+    data = json.load(f)
+    f.close()
+
+    windowSize = 3
+    nlp = spacy.load('en_core_web_lg')
+
+    # Get sentences in training dataset
+    trainingDataSentences = []
+
+    for key in data['sentences'].keys():
+        trainingDataSentences.append(key)
+
+    # Path to source PDF
+    pdf_file_path=pre_path+"/"+data['doc']
+
+    # Open PDF file for reading
+    pdfFile = open(pdf_file_path, mode="rb")
+    pdfReader = PyPDF2.PdfFileReader(pdfFile,strict=False)
+
+    # Get pdf page where training data came from
+    pageNumber = int(data['chunk'])
+    pageIndex = pageNumber-1
+    page = pdfReader.getPage(pageIndex)
+    pageText = page.extractText()
+
+    # Extract sentences from pdf page and put them in a list
+    pageText = pageText.replace('\n', '')
+    doc = nlp(pageText)
+
+    pageSentences = []
+    for sent in doc.sents:
+        pageSentences.append(sent.text)
+
+    cnt = 0
+    for trainSent in trainingDataSentences:
+        try:
+            sent_num = pageSentences.index(trainSent)
+            start = sent_num - windowSize
+            end = sent_num + windowSize + 1  # slicing grabs up to but not the end
+            if(start < 0):
+                start = 0
+            # No need to check if end > length of list. If it is, slice will
+            # grab everything up to the end
+            print(pageSentences[start:end])
+            cnt = cnt + 1
+        except ValueError:
+            # If sentence is not present, a ValueError will be
+            # raised. Just ignore it for now.
+            continue
+
+    print("Matched " + str(cnt) + " out of " + str(len(trainingDataSentences)) + " sentences")
+
