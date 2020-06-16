@@ -282,7 +282,7 @@ nerDataToJSON(TRAIN_DATA[50:],"trainData.json",nlp)
 # python3 -m spacy debug-data en trainData.json devData.json -b "en_core_web_lg" -p ner -V
 
 # rm -rf preTrainOutput
-# python3 -m spacy pretrain rawTokens.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000 -se 50
+# python3 -m spacy pretrain raw.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000 -se 50
 
 # To find out more about commands
 # > python3 -m spacy train -h

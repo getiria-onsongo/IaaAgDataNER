@@ -118,7 +118,7 @@ if __name__ == "__main__":
     data = json.load(f)
     f.close()
 
-    windowSize = 3
+    windowSize = 1
     nlp = spacy.load('en_core_web_lg')
 
     # Get sentences in training dataset
@@ -150,6 +150,7 @@ if __name__ == "__main__":
 
     cnt = 0
     for trainSent in trainingDataSentences:
+        paragraph = ""
         try:
             sent_num = pageSentences.index(trainSent)
             start = sent_num - windowSize
@@ -158,7 +159,10 @@ if __name__ == "__main__":
                 start = 0
             # No need to check if end > length of list. If it is, slice will
             # grab everything up to the end
-            print(pageSentences[start:end])
+            sent_list = pageSentences[start:end]
+            for i in sent_list:
+                paragraph = paragraph + i
+            print("{\"text\":\"" + paragraph +"\"}")
             cnt = cnt + 1
         except ValueError:
             # If sentence is not present, a ValueError will be
