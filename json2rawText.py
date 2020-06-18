@@ -8,11 +8,14 @@ import PyPDF2
 import spacy
 import glob
 
-def json2raw(json_file_name, path_to_pdf, windowSize):
+def json2raw(json_file_name, path_to_pdf, windowSize, fhandler):
     """ Takes as input a json document with training data (str), path to the PDF file that
-     was used to generate the data (str) and an integer (windowSize)
-    defining the number of sentences flanking the training dataset when extracting a paragraph.
-    It returns as output raw text in JSONL (newline-delimited JSON) file.
+     was used to generate the data (str), an integer (windowSize) defining the number of
+     sentences flanking the training dataset when extracting a paragraph and file handler for the
+     output file. NOTE: The output file should already be open.
+
+     It writes to the output file  raw text in JSONL
+     (newline-delimited JSON) file.
 
     NOTE: The recommendation by spacy is one input text per line and the total number of
     sentences flanking the training sentence should be roughly a paragraph length).
@@ -25,8 +28,7 @@ def json2raw(json_file_name, path_to_pdf, windowSize):
     :type json_file_name: str.
     :param windowSize: Number of sentences padding the training data sentence.
     :type windowSize: int.
-    :return:
-    :rtype: jsonl
+
 
     E.g.:
 
@@ -90,19 +92,46 @@ def json2raw(json_file_name, path_to_pdf, windowSize):
             # No need to check if end > length of list. If it is, slice will
             # grab everything up to the end
             sent_list = pageSentences[start:end]
-            for i in sent_list:
-                paragraph = paragraph + i
-            print("{\"text\":\"" + paragraph + "\"}")
+            beforeChars=0
+            for i in range(len(sent_list)):
+                paragraph = paragraph + sent_list[i]
+                print("i=",i)
+                print("sent_num=", sent_num)
+                if i < windowSize:
+                    beforeChars = beforeChars + len(sent_list[i])
+            # Remove double quotes otherwise they will mess up the jsonl format. A double quote
+            # will be considered end of text
+            paragraph = paragraph.replace('"', '')
+            fhandler.write("{\"text\":\"" + paragraph + "\"}")
+            fhandler.write("\n")
             cnt = cnt + 1
+
+            print("\n----")
+            print("beforeChars=",beforeChars)
+            print(paragraph)
+            print("len(paragraph=",len(paragraph))
+            print(data['sentences'][trainSent])
+            for ent, vals in data['sentences'][trainSent].items():
+                print(ent,vals)
+                print(vals['start']+beforeChars)
+                print(vals['end']+beforeChars)
+                print(paragraph[vals['start']+beforeChars:vals['end']+beforeChars],vals['label'])
+            print("----\n")
+
         except ValueError:
             # If sentence is not present, a ValueError will be
             # raised. Just ignore it for now.
             continue
+
     print("Matched " + str(cnt) + " out of " + str(len(trainingDataSentences)) + " sentences in file: " + json_file_name)
 def convert_files(windowSize, fprefix, fsuffix, input_dir, output_dir, output_prefix):
     """ Add docstring """
+    " Name of the output file is the prefix out the input file with .jsonl added at the end."
+
+    fhandler = open(output_dir + "/" + output_prefix+".jsonl", "w")
     for fname in glob.glob(input_dir+"/"+fprefix+'*'+fsuffix):
-        json2raw(fname, input_dir, windowSize)
+        json2raw(fname, input_dir, windowSize, fhandler)
+    fhandler.close()
 
 if __name__ == "__main__":
     #
@@ -110,7 +139,7 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description="Create raw text for pre-training in jsonl format",
-        epilog='Example: python3 json2rawText.py 1 barley_p1_ td.json Data/DavisLJ11 Data/DavisLJ11/rawText barley_p1 '
+        epilog='Example: python3 json2rawText.py 3 barley_p _td.json Data/DavisLJ11  Data/DavisLJ11/rawText DavisLJ11_raw_text'
     )
 
     parser.add_argument(
@@ -130,12 +159,14 @@ if __name__ == "__main__":
         'output_dir',
         help='Output directory (must exist already) to place output file in jsonl format.'
     )
+
     parser.add_argument(
         'output_prefix',
-        help='Output filename base prefix for raw text to use in pre-training'
+        help='Output filename base prefix for combined raw text from all json files.'
     )
 
-    if len(sys.argv) < 5:
+
+    if len(sys.argv) < 6:
         parser.print_usage()
         sys.exit()
 

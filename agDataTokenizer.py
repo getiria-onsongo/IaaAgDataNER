@@ -276,13 +276,18 @@ pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
 nerDataToJSON(TRAIN_DATA[0:50],"devData.json",nlp)
 nerDataToJSON(TRAIN_DATA[50:],"trainData.json",nlp)
 
+# Generate raw text for training
+# rm -rf Data/DavisLJ11/rawText
+# mkdir -p Data/DavisLJ11/rawText
+# python3 json2rawText.py 3 barley_p _td.json Data/DavisLJ11  Data/DavisLJ11/rawText DavisLJ11_raw_text
 
+## ADD STEPS TO GENERATE trainData.json AND devData.json
 # To validate training data. NOTE: I have observed this validation fails if we use a custom
 # tokenizer. Pre-train and train still works even with a failed data debug. Just an FYI
 # python3 -m spacy debug-data en trainData.json devData.json -b "en_core_web_lg" -p ner -V
 
 # rm -rf preTrainOutput
-# python3 -m spacy pretrain raw.json "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000 -se 50
+# python3 -m spacy pretrain Data/DavisLJ11/rawText/DavisLJ11_raw_text.jsonl "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000 -se 50
 
 # To find out more about commands
 # > python3 -m spacy train -h
@@ -293,9 +298,22 @@ nerDataToJSON(TRAIN_DATA[50:],"trainData.json",nlp)
 # You will need to add 5 lines in: train.py
 
 # rm -rf NerModelPreTrain
-# python3 -m spacy train en NerModelPreTrain trainData.json devData.json --init-tok2vec preTrainOutput/model999.bin --vectors "en_core_web_lg" --pipeline ner --n-iter 1000 --n-early-stopping 10 --raw-text raw.json --textcat-multilabel --debug
+# python3 -m spacy train en NerModelPreTrain trainData.json devData.json --init-tok2vec preTrainOutput/model999.bin --vectors "en_core_web_lg" --pipeline ner --n-iter 1000 --n-early-stopping 10  --debug
+
+# Train without pre-training
+# rm -rf NerModel
+# python3 -m spacy train en NerModel trainData.json devData.json --vectors "en_core_web_lg" --pipeline ner --n-iter 1000 --n-early-stopping 10  --debug
 
 
+# Not sure why training is not working with --raw-text
+# python3 -m spacy train en NerModelPreTrain trainData.json devData.json --init-tok2vec preTrainOutput/model999.bin --vectors "en_core_web_lg" --pipeline ner --n-iter 1000 --n-early-stopping 10 --raw-text Data/DavisLJ11/rawText/DavisLJ11_raw_text.jsonl --debug
+
+# Understanding training output: see https://spacy.io/usage/training
+
+# NER Loss: Training loss for named entity recognizer. Should decrease, but usually not to 0.
+# NER P: NER precision on development data. Should increase.
+# NER R: NER recall on development data. Should increase.
+# NER F: NER F-score on development data. Should increase.
 
 
 
