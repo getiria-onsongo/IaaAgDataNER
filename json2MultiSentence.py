@@ -8,7 +8,7 @@ import PyPDF2
 import spacy
 import glob
 
-def json2raw(json_file_name, path_to_pdf, windowSize, fhandler):
+def json2MultiSent(json_file_name, path_to_pdf, windowSize):
     """ Takes as input a json document with training data (str), path to the PDF file that
      was used to generate the data (str), an integer (windowSize) defining the number of
      sentences flanking the training dataset when extracting a paragraph and file handler for the
@@ -54,7 +54,7 @@ def json2raw(json_file_name, path_to_pdf, windowSize, fhandler):
     data = json.load(f)
     f.close()
 
-    nlp = spacy.load('en_core_web_lg')
+    nlp = spacy.load('en_core_web_sm')
 
     # Get sentences in training dataset
     trainingDataSentences = []
@@ -80,6 +80,12 @@ def json2raw(json_file_name, path_to_pdf, windowSize, fhandler):
     for sent in doc.sents:
         pageSentences.append(sent.text)
 
+    result = dict()
+    result['doc'] = data['doc']
+    result['url'] = data['url']
+    result['chunk'] = data['chunk']
+    result['sentences'] = dict()
+
     cnt = 0
     for trainSent in trainingDataSentences:
         paragraph = ""
@@ -87,28 +93,30 @@ def json2raw(json_file_name, path_to_pdf, windowSize, fhandler):
             sent_num = pageSentences.index(trainSent)
             start = sent_num - windowSize
             end = sent_num + windowSize + 1  # slicing grabs up to but not the end
+            updateRanges = True
             if (start < 0):
                 start = 0
+                # If this is the first sentence, no need to update range for tags
+                updateRanges = False
             # No need to check if end > length of list. If it is, slice will
             # grab everything up to the end
             sent_list = pageSentences[start:end]
             beforeChars=0
             for i in range(len(sent_list)):
                 paragraph = paragraph + sent_list[i]
-                if i < windowSize:
+                if (i < windowSize and updateRanges):
                     beforeChars = beforeChars + len(sent_list[i])
             # Remove double quotes otherwise they will mess up the jsonl format. A double quote
             # will be considered end of text
             paragraph = paragraph.replace('"', '')
-            fhandler.write("{\"text\":\"" + paragraph + "\"}")
-            fhandler.write("\n")
             cnt = cnt + 1
 
-            print("\n----")
-            print(paragraph)
+            result['sentences'][paragraph] = dict()
             for ent, vals in data['sentences'][trainSent].items():
-                print(paragraph[vals['start']+beforeChars:vals['end']+beforeChars],vals['label'])
-            print("----\n")
+                # print(paragraph[vals['start']+beforeChars:vals['end']+beforeChars],vals['label'])
+                result['sentences'][paragraph][ent] = {'start': vals['start']+beforeChars, 'end': vals['end']+beforeChars,'label': vals['label']}
+
+
 
         except ValueError:
             # If sentence is not present, a ValueError will be
@@ -116,14 +124,24 @@ def json2raw(json_file_name, path_to_pdf, windowSize, fhandler):
             continue
 
     print("Matched " + str(cnt) + " out of " + str(len(trainingDataSentences)) + " sentences in file: " + json_file_name)
-def convert_files(windowSize, fprefix, fsuffix, input_dir, output_dir, output_prefix):
+    return result
+
+def dict_2_json(mydict, fname):
+    """ Convert a structured nested dict object to a JSON dump"""
+
+    with open(fname, "w") as fho:
+        json.dump(mydict, fho)
+
+def convert_files(windowSize, fprefix, fsuffix, input_dir, output_dir):
     """ Add docstring """
     " Name of the output file is the prefix out the input file with .jsonl added at the end."
 
-    fhandler = open(output_dir + "/" + output_prefix+".jsonl", "w")
     for fname in glob.glob(input_dir+"/"+fprefix+'*'+fsuffix):
-        json2raw(fname, input_dir, windowSize, fhandler)
-    fhandler.close()
+        result = json2MultiSent(fname, input_dir, windowSize)
+        output_filename_temp= fname.split("/")[-1].split(".")[0]
+        output_filename= output_dir + "/" + output_filename_temp + "_parag.json"
+        dict_2_json(result,output_filename)
+
 
 if __name__ == "__main__":
     #
@@ -131,7 +149,7 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description="Create raw text for pre-training in jsonl format",
-        epilog='Example: python3 json2rawText.py 3 barley_p _td.json Data/DavisLJ11  Data/DavisLJ11/rawText DavisLJ11_raw_text'
+        epilog='Example: python3 json2MultiSentence.py 3 barley_p _td.json Data/DavisLJ11  Data/DavisLJ11/parag '
     )
 
     parser.add_argument(
@@ -152,18 +170,12 @@ if __name__ == "__main__":
         help='Output directory (must exist already) to place output file in jsonl format.'
     )
 
-    parser.add_argument(
-        'output_prefix',
-        help='Output filename base prefix for combined raw text from all json files.'
-    )
-
-
-    if len(sys.argv) < 6:
+    if len(sys.argv) < 5:
         parser.print_usage()
         sys.exit()
 
     args = parser.parse_args()
-    windowSize, fprefix, fsuffix, input_dir, output_dir, output_prefix = int(
-        args.windowSize), args.fprefix, args.fsuffix, args.input_dir, args.output_dir, args.output_prefix
+    windowSize, fprefix, fsuffix, input_dir, output_dir = int(
+        args.windowSize), args.fprefix, args.fsuffix, args.input_dir, args.output_dir
 
-    convert_files(windowSize, fprefix, fsuffix, input_dir, output_dir, output_prefix)
+    convert_files(windowSize, fprefix, fsuffix, input_dir, output_dir)

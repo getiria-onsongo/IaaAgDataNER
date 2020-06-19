@@ -6,7 +6,9 @@ import spacy
 from spacy.matcher import Matcher
 import srsly
 from spacy.util import minibatch, compounding
-from agData import *
+#from agData import *
+from temp1 import *
+from temp2 import *
 import random
 from pathlib import Path
 from spacy.gold import docs_to_json
@@ -269,12 +271,21 @@ x.extend(TRAIN_DATA[665:])
 nlp = spacy.load('en_core_web_lg')
 
 # Pre-Train data
-pdfToTokensJSON("BarCvDescLJ11.pdf", "rawTokens.json", nlp)
-pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
+#pdfToTokensJSON("BarCvDescLJ11.pdf", "rawTokens.json", nlp)
+#pdfToJSON("BarCvDescLJ11.pdf", "raw.json", nlp)
 
 # Train data
-nerDataToJSON(TRAIN_DATA[0:50],"devData.json",nlp)
-nerDataToJSON(TRAIN_DATA[50:],"trainData.json",nlp)
+print(len(TRAIN_DATA))
+print(len(TEST_DATA))
+print(TRAIN_DATA[21])
+print(TRAIN_DATA[26])
+print(TEST_DATA[33])
+print(TEST_DATA[43])
+#nerDataToJSON(TRAIN_DATA[0:50],"devData.json",nlp)
+#nerDataToJSON(TRAIN_DATA[50:],"trainData.json",nlp)
+
+nerDataToJSON(TRAIN_DATA,"trainData_test.json",nlp)
+nerDataToJSON(TEST_DATA,"devData_test.json",nlp)
 
 # Generate raw text for training
 # rm -rf Data/DavisLJ11/rawText
