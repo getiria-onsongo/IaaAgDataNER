@@ -1,75 +1,22 @@
 #!/bin/env python3
 
-import json
-import sys
-import os
-import argparse
+from json2py import *
+import glob
 
-def dict_2_mixed_type(data):
-    """ convert multi-document (list) or single-document (dict) JSON records
-     to spaCy training ready objects.  E.g.:
+def combineJsonFiles(fprefix, fsuffix, input_dir, output_file, output_dir):
+    """ Add docstring """
+    " Name of the output file is the prefix out the input file with .jsonl added at the end."
 
-     simple = {'doc': 'p.pdf', 'url': 'https://hello', 'chunk': 1, 'sentences': {'sentence 1': {'entity 1': {'start': 0, 'end': 3, 'label': 'TY1'}, 'entity 2': {'start': 4, 'end': 6, 'label': 'TY2'}}}}
-
-     returns: [('sentence 1', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]})]
-
-     whereas
-
-     complex = [{'doc': 'p.pdf', 'url': 'https://hello', 'chunk': 1, 'sentences': {'sentence 1': {'entity 1': {'start': 0, 'end': 3, 'label': 'TY1'}, 'entity 2': {'start': 4, 'end': 6, 'label': 'TY2'}}}}, {'doc': 'p.pdf', 'url': 'https://hello', 'chunk': 2, 'sentences': {'sentence 2': {'entity 1': {'start': 0, 'end': 4, 'label': 'TT1'}, 'entity 2': {'start': 6, 'end': 8, 'label': 'TY2'}}}}]
-
-     returns: [('sentence 1', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]}),
-               ('sentence 2', {'entities': [(0, 4, 'TT1'), (6, 8, 'TT2')]})]
-    """
-
-    if isinstance(data, dict):
-        return dict_2_mixed_type_simple(data)
-    else:
-        result = []
-        for record in data:
-            subset = dict_2_mixed_type_simple(record)
-            for sentence, entity_dict in subset:
-                result.append((sentence, entity_dict))
-
-    return result
-
-def dict_2_mixed_type_simple(data):
-    """ Convert Nested JSON-like dictionary to the complex training
-     data that spaCy requires. Specifically:
-     {'doc': 'BarCvDescLJ11.pdf', 
-      'url': 'https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf', 
-      'chunk': 2, 
-      'sentences': {'sentence 1': {'entity 1': 
-                                       {'start': 0, 'end': 3, 'label': 'TY1'}, 
-                                   'entity 2': 
-                                       {'start': 4, 'end': 6, 'label': 'TY2'}
-                                   }
-                    }
-      }
-     is converted to:
-       ('sentence 1', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]})
-    """
     training_data = []
-    
-    for sentence in data['sentences']:
-        entity_dict = dict()
-        entity_list = []
-        for entity_label in data['sentences'][sentence]:
-            entity = data['sentences'][sentence][entity_label]
-            tuple = (entity['start'], entity['end'], entity['label'])
-            entity_list.append(tuple)
-        entity_dict['entities'] = entity_list
-        training_data.append((sentence, entity_dict))
+    for fname in glob.glob(input_dir+"/"+fprefix+'*'+fsuffix):
+        data = json_2_dict(fname)
+        train_data = dict_2_mixed_type(data)
+        training_data.extend(train_data)
 
-    return(training_data)
+    fho = open(output_dir + "/" + output_file, 'w')
 
-def json_2_dict(fname):
-    """ Convert a JSON object as a simple nested dict object"""
-
-    data = dict()
-    with open(fname) as fi:
-        data = json.load(fi)
-
-    return data
+    train_data = dict_2_mixed_type(data)
+    fho.write('TRAIN_DATA = ' + str(training_data) + "\n")
 
 if __name__ == "__main__":
 
@@ -77,27 +24,32 @@ if __name__ == "__main__":
     # Parse out the arguments and assign them to variables
     #
     parser = argparse.ArgumentParser(
-        description = "convert JSON training data to python nested lists",
-        epilog = "Example: python3 json2py.py jsonInput pyOutput"
+        description="Convert json to training data list",
+        epilog='Example: python3 json2TrainData.py barley_p _td_parag.json Data/DavisLJ11/parag barley_train_data.py Data/DavisLJ11/train_data'
     )
     parser.add_argument(
-        'jsonInput', help = 'input json file.'
+        'fprefix', help='File prefix for training data in json format.'
     )
     parser.add_argument(
-        'pyOutput', help = 'output python file.'
+        'fsuffix', help='File suffix for training data in json format.'
+    )
+    parser.add_argument(
+        'input_dir', help='Input directory where the training data can be found.'
+    )
+    parser.add_argument(
+        'output_file', help='Name of output file.'
+    )
+    parser.add_argument(
+        'output_dir',
+        help='Output directory (must exist already) to place output file in jsonl format.'
     )
 
-    if len(sys.argv)<2:
+    if len(sys.argv) < 5:
         parser.print_usage()
         sys.exit()
-        
+
     args = parser.parse_args()
-    infile, outfile = args.jsonInput,args.pyOutput
+    fprefix, fsuffix, input_dir, output_file, output_dir = args.fprefix, args.fsuffix, args.input_dir, args.output_file, args.output_dir
 
-    data = json_2_dict(infile)
-
-    fho = open(outfile, 'w')
-
-    train_data = dict_2_mixed_type(data)
-    fho.write('TRAIN_DATA = '+str(train_data)+"\n")
+    combineJsonFiles(fprefix, fsuffix, input_dir, output_file, output_dir)
 

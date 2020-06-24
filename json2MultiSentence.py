@@ -149,7 +149,7 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description="Create raw text for pre-training in jsonl format",
-        epilog='Example: python3 json2MultiSentence.py 3 barley_p _td.json Data/DavisLJ11  Data/DavisLJ11/parag '
+        epilog='Example: python3 json2MultiSentence.py 3 barley_p _td.json Data/DavisLJ11  Data/DavisLJ11/parag'
     )
 
     parser.add_argument(
