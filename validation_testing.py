@@ -87,7 +87,7 @@ def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_
                 fo.write(", ")
 
     fo.write("]\n")
-
+    fo.close()
     return trainFile_name
 
 if __name__ == "__main__":

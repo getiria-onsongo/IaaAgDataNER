@@ -16,7 +16,6 @@ preTrainInput/*
 preTrainOutput/*
 raw.json
 rawTokens.json
-temp.py
 temp2.py
 tempv23.txt
 testOne.json
