@@ -20,3 +20,6 @@ python3 json2rawText.py Combined_p _td.json Data/Combined Data/Combined/rawText 
 rm -rf preTrainOutput
 python3 -m spacy pretrain Data/Combined/rawText/combined_raw_text.jsonl "en_core_web_lg" preTrainOutput --use-vectors --n-iter 1000 -se 50 > pre-train.log
 
+# ### Leave one out cross validation using pre-trained data
+mkdir -p CombinedPreTrain
+python3 validation_testing_pretrain.py 2 Combined_p _td.json Data/Combined CombinedPreTrain AgCombined preTrainOutput/model999.bin
