@@ -53,6 +53,9 @@ def nerDataToJSON(data, fileName,nlp):
     cnt = 0
     for entry in data:
         rawText = entry[0]
+        #rawText = rawText.strip()
+        #rawText = rawText.replace('"','')
+        #rawText = rawText.replace("'", "")
         doc = nlp(rawText)
         entities = entry[1]['entities']
         tags = biluo_tags_from_offsets(doc, entities)
@@ -121,43 +124,58 @@ def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_
     fo.close()
     return trainFile_name
 
-def train_nth_model(n, training_file, output_dir, outfile_prefix, test_size,pretrained_model):
+def train_nth_model(n, training_file, output_dir, outfile_prefix, test_size,pretrained_model, base_model, model_folder):
     """train nth spaCy model"""
-    n_iter=20
-    early_stop=10
+    n_iter = 30
+    early_stop = 5
     training_data_file_name = output_dir+"/"+outfile_prefix+str(n)+"_training_data.json"
     validate_data_file_name = output_dir+"/"+outfile_prefix+str(n)+"_validate_data.json"
 
     convert_to_biluo_tags(training_file,test_size,training_data_file_name,validate_data_file_name)
 
-    validate_cmd = "python3 -m spacy debug-data en "+training_data_file_name+" "+validate_data_file_name+" -b \"en_core_web_lg\" -p ner -V"
-    sys.stderr.write(validate_cmd)
-    execute(validate_cmd)
+    # ### NOTE: Validation is failing for some of the data because spacy considered entities with a space
+    # as being in valid. Some of our entities have spaces in them
+    #
+    #validate_cmd = "python3 -m spacy debug-data en "+training_data_file_name+" "+validate_data_file_name+" -b \"en_core_web_lg\" -p ner -V"
+    #sys.stderr.write(validate_cmd)
+    #execute(validate_cmd)
+    if (n > 1):
+        train_cmd = "python3 -m spacy train en " + model_folder + " " + training_data_file_name + " " + validate_data_file_name + " --base-model " + base_model + " --init-tok2vec " + pretrained_model + "  --vectors \"en_core_web_lg\" --pipeline ner --n-iter " + str(n_iter) + " --n-early-stopping " + str(early_stop) + "  --debug"
 
-    trained_model = output_dir+"/"+outfile_prefix+"_model_"+str(n)
-    train_cmd = "python3 -m spacy train en "+trained_model+" "+training_data_file_name+" "+validate_data_file_name+" --init-tok2vec "+pretrained_model+ "  --vectors \"en_core_web_lg\" --pipeline ner --n-iter " + str(n_iter) + " --n-early-stopping " + str(early_stop) + "  --debug"
+    else:
+        train_cmd = "python3 -m spacy train en " +model_folder + " " + training_data_file_name + " " + validate_data_file_name + " --init-tok2vec "+pretrained_model+ "  --vectors \"en_core_web_lg\" --pipeline ner --n-iter " + str(n_iter) + " --n-early-stopping " + str(early_stop) + "  --debug"
     sys.stderr.write(train_cmd)
     execute(train_cmd)
-    model_dir = trained_model + "/model-best"
-    return model_dir
+    model = model_folder + "/model-best"
+    return model
 
+def deleteFolder(folder_to_delete):
+    """ Delete folder"""
+    delete_cmd = "rm -rf " + folder_to_delete
+    sys.stderr.write(delete_cmd)
+    execute(delete_cmd)
 
 def leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix,pretrained_model,test_size):
    """ perform leave-one-out cross validation on the dataset. """
-
    for i in range(1, maxn+1):
        train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
        test_file = input_dir + "/" + fprefix + str(i) + fsuffix
+       # Delete model folder no longer being used. Models consume a lot of disk space (about 1GB a model)
+       if i > 2:
+           deleteFolder(output_dir+"/"+output_prefix+"_model_"+str(i-2))
+           deleteFolder(output_dir+"/"+output_prefix+str(i-2)+"_training_data.json")
+           deleteFolder(output_dir+"/"+output_prefix+str(i-2)+"_validate_data.json")
+           deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + ".json")
 
-       model_dir = train_nth_model(i, train_file, output_dir, output_prefix, test_size, pretrained_model)
+       model_folder = output_dir+"/"+output_prefix+"_model_"+str(i)
+       prev_model = output_dir+"/"+output_prefix+"_model_"+str(i-1) + "/model-best"
+       model_dir = train_nth_model(i, train_file, output_dir, output_prefix, test_size, pretrained_model,prev_model, model_folder)
 
-       accuracyFile_name = model_dir+"_stats.txt"
+       accuracyFile_name = model_folder+"_stats.txt"
        check_model_accuracy(test_file, model_dir, accuracyFile_name)
        clear_tally()
 
-
 if __name__ == "__main__":
-
     #
     # Parse out the arguments and assign them to variables
     #
@@ -196,11 +214,13 @@ if __name__ == "__main__":
         sys.exit()
         
     args = parser.parse_args()
-    maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix, pretrained_model,titrate = int(args.maxn), args.fprefix, args.fsuffix, args.input_dir, args.output_dir, args.output_prefix, args.pretrained_model,args.titrate
+    maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix, pretrained_model, titrate = int(args.maxn), args.fprefix, args.fsuffix, args.input_dir, args.output_dir, args.output_prefix, args.pretrained_model,args.titrate
 
     if titrate:
         for i in range(2, maxn+1):
             leave_one_out_xval(i, fprefix, fsuffix, input_dir, output_dir, output_prefix+'.'+str(i)+'.',pretrained_model,test_size=0.1)
     else:
         leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix,pretrained_model,test_size=0.1)
+
+    print("Summarizing statistics")
     summarize_stats(output_dir+'/'+output_prefix)

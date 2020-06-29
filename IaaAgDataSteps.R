@@ -22,4 +22,6 @@ python3 -m spacy pretrain Data/Combined/rawText/combined_raw_text.jsonl "en_core
 
 # ### Leave one out cross validation using pre-trained data
 mkdir -p CombinedPreTrain
-python3 validation_testing_pretrain.py 2 Combined_p _td.json Data/Combined CombinedPreTrain AgCombined preTrainOutput/model999.bin
+python3 validation_testing_pretrain.py 35 Combined_p _td.json Data/Combined CombinedPreTrain Combined preTrainOutput/model999.bin
+
+# python3 validation_testing_pretrain.py 3 barley_p _td.json temp temp_out temp preTrainOutput/model999.bin
