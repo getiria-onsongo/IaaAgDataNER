@@ -14,6 +14,9 @@ def json2raw(json_file_name, fhandler):
 
     cnt = 0
     for key in data['sentences'].keys():
+        # Remove double quotes otherwise they will mess up the jsonl format. A double quote
+        # will be considered end of text
+        key = key.replace('"', '')
         fhandler.write("{\"text\":\"" + key + "\"}")
         fhandler.write("\n")
         cnt = cnt + 1

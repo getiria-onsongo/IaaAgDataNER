@@ -1,3 +1,7 @@
+*_test_*
+NerModelPreTrain/*
+Data/CombinedSingleSentence/*
+Data/Combined/*
 NERtraining.png
 temp/*
 NerModel.tar.gz
