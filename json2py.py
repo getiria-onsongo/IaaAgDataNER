@@ -100,4 +100,5 @@ if __name__ == "__main__":
 
     train_data = dict_2_mixed_type(data)
     fho.write('TRAIN_DATA = '+str(train_data)+"\n")
+    fho.close()
 
