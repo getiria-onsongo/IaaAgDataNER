@@ -1,3 +1,7 @@
+*_test_*
+NerModelPreTrain/*
+Data/CombinedSingleSentence/*
+Data/Combined/*
 NERtraining.png
 temp/*
 NerModel.tar.gz
@@ -16,7 +20,6 @@ preTrainInput/*
 preTrainOutput/*
 raw.json
 rawTokens.json
-temp.py
 temp2.py
 tempv23.txt
 testOne.json

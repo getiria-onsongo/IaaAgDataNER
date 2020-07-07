@@ -41,6 +41,28 @@ def summarize_stats(fprefix):
                 pcnt = round(100*count/total, 1)
                 sys.stderr.write(label+"\t"+state+"\t"+str(count)+"\t"+str(pcnt)+"\n")
 
+def execute(cmd):
+    """
+        Takes as input a command to execute (cmd: str), executes the command and
+        returns the exit code (exit_code)
+    """
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (stdout_data, stderr_data) = process.communicate()
+    return_code = process.wait()
+
+    if (return_code != 0):
+        print("Error:", stderr_data)
+        raise ValueError("Failed to execute command:", cmd)
+
+    sys.stderr.write(stderr_data.decode())
+    sys.stdout.write(stdout_data.decode())
+
+def deleteFolder(folder_to_delete):
+    """ Delete folder"""
+    delete_cmd = "rm -rf " + folder_to_delete
+    sys.stderr.write(delete_cmd)
+    execute(delete_cmd)
+
 def leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix):
    """ perform leave-one-out cross validation on the dataset. """
 
@@ -53,6 +75,8 @@ def leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_pre
        accuracyFile_name = model_dir+"_stats.txt"
        check_model_accuracy(test_file, model_dir, accuracyFile_name)
        clear_tally()
+       if i > 1:
+           deleteFolder(output_dir + "/" + output_prefix + str(i-1))
    
 def train_nth_model(n, training_file, output_dir, outfile_prefix):
     """train nth spaCy model"""
@@ -67,7 +91,7 @@ def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_
 
     local_data = dict()
     
-    sys.stderr.write("Working on training segment "+str(n)+"\n")
+    sys.stderr.write("\n Working on training segment "+str(n)+"\n")
     trainFile_name = output_dir+"/"+outfile_prefix+str(n)+".json"
     fo = open(trainFile_name, 'w')
     fo.write("[")
@@ -87,7 +111,7 @@ def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_
                 fo.write(", ")
 
     fo.write("]\n")
-
+    fo.close()
     return trainFile_name
 
 if __name__ == "__main__":
