@@ -97,86 +97,72 @@ def execute(cmd):
     sys.stdout.write(stdout_data.decode())
 
 
-def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_prefix):
-    """Build a JSON training set that excludes the nth among maxn entries."""
 
-    sys.stderr.write("\n\n============================ Working on segment " + str(n) + " ===========================\n")
-    trainFile_name = output_dir + "/" + outfile_prefix + str(n) + ".json"
+def build_datasets(test_pages, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_prefix):
+    """Take as input two lists indicating pages to use for training and test set and
+    create training and test sets."""
+
+    sys.stderr.write("\n\n============================ Creating datasets ============================================\n")
+    trainFile_name = output_dir + "/" + outfile_prefix + "_training_data.json"
+    testFile_name = output_dir + "/" + outfile_prefix + "_test_data.json"
+    num_test_pages = len(test_pages)
+    num_train_pages = maxn - num_test_pages
+
     fo = open(trainFile_name, 'w')
     fo.write("[")
-
+    num_train = 1
     for i in range(1, maxn + 1):
-
-        if (i != n):
+        if i not in test_pages:
             infile = input_dir + "/" + fprefix + str(i) + fsuffix
-
             with open(infile) as fi:
                 local_data = json.load(fi)
             json.dump(local_data, fo)
-
-            if ((n == maxn) and (i != maxn - 1) or
-                    (n == maxn - 1) and (i != maxn) or
-                    (n < maxn - 1) and (i != maxn)):
+            if (num_train < num_train_pages):
                 fo.write(", ")
-
+            num_train = num_train + 1
     fo.write("]\n")
     fo.close()
-    return trainFile_name
 
-def train_nth_model(n, training_file, output_dir, outfile_prefix, test_size,pretrained_model, base_model, model_folder):
-    """train nth spaCy model"""
-    n_iter = 1000
-    early_stop = 20
-    training_data_file_name = output_dir+"/"+outfile_prefix+str(n)+"_training_data.json"
-    validate_data_file_name = output_dir+"/"+outfile_prefix+str(n)+"_validate_data.json"
+    fo = open(testFile_name, 'w')
+    fo.write("[")
+    num_test = 1
+    for page_num in test_pages:
+            infile = input_dir + "/" + fprefix + str(page_num) + fsuffix
+            with open(infile) as fi:
+                local_data = json.load(fi)
+            json.dump(local_data, fo)
+            if (num_test < num_test_pages):
+                fo.write(", ")
+            num_test = num_test + 1
+    fo.write("]\n")
+    fo.close()
 
+    return trainFile_name, testFile_name
+
+def train_model_pretrain(training_file,output_dir,outfile_prefix,test_size,pretrained_model,model_folder, n_iter = 1000, early_stop = 20):
+    """train spaCy model"""
+    sys.stderr.write("\n\n============================ Training Model ============================================\n")
+    training_data_file_name = output_dir+"/"+outfile_prefix+"_cli_training_data.json"
+    validate_data_file_name = output_dir+"/"+outfile_prefix+"_cli_validate_data.json"
     convert_to_biluo_tags(training_file,test_size,training_data_file_name,validate_data_file_name)
-
-    # ### NOTE: Validation is failing for some of the data because spacy considered entities with a space
-    # as being in valid. Some of our entities have spaces in them
-    #
-    #validate_cmd = "python3 -m spacy debug-data en "+training_data_file_name+" "+validate_data_file_name+" -b \"en_core_web_md\" -p ner -V"
-    #sys.stderr.write(validate_cmd)
-    #execute(validate_cmd)
     train_cmd = "python3 -m spacy train en " + model_folder + " " + training_data_file_name + " " + validate_data_file_name + " --init-tok2vec " + pretrained_model + "  --vectors \"en_core_web_md\" --pipeline ner --n-iter " + str(n_iter) + " --n-early-stopping " + str(early_stop) + "  --debug"
-
-    '''
-    if (n > 1):
-        train_cmd = "python3 -m spacy train en " + model_folder + " " + training_data_file_name + " " + validate_data_file_name + " --base-model " + base_model + " --init-tok2vec " + pretrained_model + "  --vectors \"en_core_web_md\" --pipeline ner --n-iter " + str(n_iter) + " --n-early-stopping " + str(early_stop) + "  --debug"
-
-    else:
-        train_cmd = "python3 -m spacy train en " +model_folder + " " + training_data_file_name + " " + validate_data_file_name + " --init-tok2vec "+pretrained_model+ "  --vectors \"en_core_web_md\" --pipeline ner --n-iter " + str(n_iter) + " --n-early-stopping " + str(early_stop) + "  --debug"
-    '''
     sys.stderr.write(train_cmd)
     execute(train_cmd)
     model = model_folder + "/model-best"
     return model
 
-def deleteFolder(folder_to_delete):
-    """ Delete folder"""
-    delete_cmd = "rm -rf " + folder_to_delete
-    sys.stderr.write(delete_cmd)
-    execute(delete_cmd)
 
-def leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix,pretrained_model,test_size):
-   """ perform leave-one-out cross validation on the dataset. """
-   for i in range(1, maxn+1):
-       train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
-       test_file = input_dir + "/" + fprefix + str(i) + fsuffix
-       # Delete model folder no longer being used. Models consume a lot of disk space (about 1GB a model)
-       if i > 2:
-           deleteFolder(output_dir+"/"+output_prefix+"_model_"+str(i-2))
-           deleteFolder(output_dir+"/"+output_prefix+str(i-2)+"_training_data.json")
-           deleteFolder(output_dir+"/"+output_prefix+str(i-2)+"_validate_data.json")
-           deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + ".json")
 
-       model_folder = output_dir+"/"+output_prefix+"_model_"+str(i)
-       prev_model = output_dir+"/"+output_prefix+"_model_"+str(i-1) + "/model-best"
-       model_dir = train_nth_model(i, train_file, output_dir, output_prefix, test_size, pretrained_model,prev_model, model_folder)
+def test_model(test_pages_list, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix,pretrained_model,test_size):
+   """ """
+   train_file, test_file = build_datasets(test_pages_list, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
+   model_folder = output_dir+"/"+output_prefix+"_model"
 
-       accuracyFile_name = model_folder+"_stats.txt"
-       check_model_accuracy(test_file, model_dir, accuracyFile_name)
-       clear_tally()
+   model_dir = train_model_pretrain(train_file, output_dir, output_prefix, test_size, pretrained_model,model_folder)
+   accuracyFile_name = model_folder+"_stats.txt"
+   sys.stderr.write("\n\n============================ Checking model accuracy ============================================\n")
+   check_model_accuracy(test_file, model_dir, accuracyFile_name)
+
 
 if __name__ == "__main__":
     #
@@ -184,11 +170,16 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description = "Perform leave one out validation for NER training",
-        epilog = 'Example: python3 validation_testing.py maxn fprefix fsuffix input_dir output_dir output_prefix pretrained_model (optional --titrate)'
+        epilog = 'Example: python3 ner_model_testing.py maxn test_pages fprefix fsuffix input_dir output_dir output_prefix pretrained_model'
     )
     parser.add_argument(
         'maxn', help = 'integer for max chunks the training data is broken into'
     )
+
+    parser.add_argument(
+        'test_pages', help='Comma separated list of test pages'
+    )
+
     parser.add_argument(
         'fprefix', help = 'File prefix for training data.'
     )
@@ -208,22 +199,17 @@ if __name__ == "__main__":
         'pretrained_model',
         help='Folder with pre-trained model.'
     )
-    parser.add_argument(
-        '--titrate', help = 'Flag to perform experiments where the number of chuncks used in training is titrated from 1 all the way up to maxn-1. Default=False', action = 'store_true', default = False
-    )
 
     if len(sys.argv)<6:
         parser.print_usage()
         sys.exit()
         
     args = parser.parse_args()
-    maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix, pretrained_model, titrate = int(args.maxn), args.fprefix, args.fsuffix, args.input_dir, args.output_dir, args.output_prefix, args.pretrained_model,args.titrate
+    maxn,test_pages,fprefix,fsuffix,input_dir,output_dir,output_prefix,pretrained_model = int(args.maxn),args.test_pages,args.fprefix, args.fsuffix, args.input_dir, args.output_dir, args.output_prefix, args.pretrained_model
 
-    if titrate:
-        for i in range(2, maxn+1):
-            leave_one_out_xval(i, fprefix, fsuffix, input_dir, output_dir, output_prefix+'.'+str(i)+'.',pretrained_model,test_size=0.1)
-    else:
-        leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix,pretrained_model,test_size=0.1)
+    test_pages_list = []
+    for page in test_pages.split(","):
+        test_pages_list.append(int(page))
+    test_model(test_pages_list, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix, pretrained_model,test_size=0.5)
 
-    print("Summarizing statistics")
     summarize_stats(output_dir+'/'+output_prefix)
