@@ -7,6 +7,7 @@ model and to build on it so that its Named Entity Recognizer (NER) can
 recognize instances of the following agricultural terms:
 - ALAS = varietal alias
 - CROP = crop
+- CVAR = crop_variety
 - JRNL = journal reference
 - PATH = pathogen
 - PED  = pedigree
