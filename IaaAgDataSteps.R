@@ -13,14 +13,55 @@ python3 -m spacy pretrain Data/CombinedSingleSentence/combined_raw_text.jsonl  "
 # I prefer this testing option for now because the datasets are imbalanced. Better performance of barley datasets which is
 # about 50% of the pages will mask bad performance of CSU abd Idaho datasets.
 
+python3 -m spacy debug-data en UIdaho_test_pretrain_cli_training_data.json UIdaho_test_pretrain_cli_validate_data.json -b en_core_web_md -p ner -V
+
 mkdir -p CSU_test_35
 python3 ner_model_testing.py 35 '4,7' 'Combined_p' '_td.json' Data/CombinedSingleSentence CSU_test_35 CSU_test
 
 mkdir -p CSU_pretrain_test_35
 python3 ner_model_testing_cli.py 35 '4,7' 'Combined_p' '_td.json' Data/CombinedSingleSentence CSU_pretrain_test_35 CSU_test_pretrain preTrainOutput/model999.bin
 
+mkdir -p CSU_test_54
+python3 ner_model_testing.py 54 '4,7' 'Combined_p' '_td.json' Data/CombinedSingleSentence CSU_test_54 CSU_test
 
--- HERE
+mkdir -p CSU_pretrain_test_54
+python3 ner_model_testing_cli.py 54 '4,7' 'Combined_p' '_td.json' Data/CombinedSingleSentence CSU_pretrain_test_54 CSU_test_pretrain preTrainOutput/model999.bin
+
+mkdir -p UIdaho_test_35
+python3 ner_model_testing.py 35 '11,14' 'Combined_p' '_td.json' Data/CombinedSingleSentence UIdaho_test_35 UIdaho_test
+
+mkdir -p UIdaho_pretrain_test_35
+python3 ner_model_testing_cli.py 35 '11,14' 'Combined_p' '_td.json' Data/CombinedSingleSentence UIdaho_pretrain_test_35 UIdaho_test_pretrain preTrainOutput/model999.bin
+
+mkdir -p UIdaho_test_54
+python3 ner_model_testing.py 54 '11,14' 'Combined_p' '_td.json' Data/CombinedSingleSentence UIdaho_test_54 UIdaho_test
+
+mkdir -p UIdaho_pretrain_test_54
+python3 ner_model_testing_cli.py 54 '11,14' 'Combined_p' '_td.json' Data/CombinedSingleSentence UIdaho_pretrain_test_54 UIdaho_test_pretrain preTrainOutput/model999.bin
+
+mkdir -p DavisLJ11_test_35
+# NOTE: Pages in test dataset have to be between 1 and maxn
+python3 ner_model_testing.py 35 '19,24,27' 'Combined_p' '_td.json' Data/CombinedSingleSentence DavisLJ11_test_35 DavisLJ11_test
+
+mkdir -p DavisLJ11_pretrain_test_35
+python3 ner_model_testing_cli.py 35 '19,24,27' 'Combined_p' '_td.json' Data/CombinedSingleSentence DavisLJ11_pretrain_test_35 DavisLJ11_test_pretrain preTrainOutput/model999.bin
+
+mkdir -p DavisLJ11_test_54
+python3 ner_model_testing.py 54 '19,24,27' 'Combined_p' '_td.json' Data/CombinedSingleSentence DavisLJ11_test_54 DavisLJ11_test
+
+mkdir -p DavisLJ11_pretrain_test_54
+python3 ner_model_testing_cli.py 54 '19,24,27' 'Combined_p' '_td.json' Data/CombinedSingleSentence DavisLJ11_pretrain_test_54 DavisLJ11_test_pretrain preTrainOutput/model999.bin
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -33,7 +74,6 @@ mkdir -p CombinedNoPreTrainAllData
 python3 validation_testing.py 54 'Combined_p' '_td.json' Data/CombinedSingleSentence CombinedNoPreTrainAllData 'CombinedNoPreTrain_'
 
 
--- HERE
 
 
 
