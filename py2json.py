@@ -4,6 +4,7 @@ import json
 import sys
 import os
 import argparse
+import importlib
 
 #
 # WARNING: the python file with the data (e.g., agData.py) must be in the
@@ -85,8 +86,17 @@ if __name__ == "__main__":
     input_file, outfile = args.pyInput,args.jsonOutput
     infile = input_file.replace(".py", "")
 
-    data = __import__(infile)
-    TRAIN_DATA = data.TRAIN_DATA
+    #data = __import__(infile)
+    #TRAIN_DATA = data.TRAIN_DATA
+
+    # For some reason __import__(infile) was not working for Getiria
+    # The solution below worked for me
+    mod_name = infile.split("/")[-1]
+    from importlib.machinery import SourceFileLoader
+
+    data_module = SourceFileLoader(mod_name, input_file).load_module()
+    TRAIN_DATA = data_module.TRAIN_DATA
+
 
     train_dict = mixed_type_2_dict(TRAIN_DATA, args.chunk, args.doc, args.url)
     dict_2_json(train_dict, outfile)
