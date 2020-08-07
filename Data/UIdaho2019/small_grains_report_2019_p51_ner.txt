@@ -1,4 +1,3 @@
-0	California	ORG
 1	AP Octane	CVAR
 2	AP Octane	CVAR
 2	2019	DATE
@@ -60,8 +59,7 @@
 14	Venom	CVAR
 14	strong	TRAT
 14	fall planted	TRAT
-14	straw	PLAN
-14	strength	TRAT
+14	straw strength	TRAT
 14	taller	TRAT
 14	AP Octane	CVAR
 15	AP Venom	CVAR
@@ -86,6 +84,8 @@
 20	red	TRAT
 20	spring	TRAT
 20	wheat	CROP
+20	Resource Seeds	ORG
+20	Syngenta Cereals	ORG
 21	Cabernet	CVAR
 21	yields	TRAT
 21	SY Gunsight	CVAR
@@ -109,8 +109,7 @@
 24	Montana State University	ORG
 24	2003	DATE
 25	Choteau	CVAR
-25	solid	TRAT
-25	stem	PLAN
+25	solid-stem	TRAT
 25	resistance	PPTD
 25	stem sawfly	PATH
 26	Choteau	CVAR

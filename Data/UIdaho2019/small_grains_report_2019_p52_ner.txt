@@ -1,4 +1,3 @@
-0	Syngenta	ORG
 1	Dayn	CVAR
 1	yielding	TRAT
 1	hard	TRAT
@@ -30,12 +29,14 @@
 8	wheat stem sawfly	PATH
 9	wheat stem sawfly	PATH
 10	Duclair	CVAR
+10	awned	TRAT
 10	semi-dwarf	TRAT
 10	Choteau	CVAR
 10	heading	TRAT
 10	taller	TRAT
 11	Yield	TRAT
 11	Duclair	CVAR
+11	Soda Springs	GPE
 11	2019	DATE
 11	SY Selway	CVAR
 11	test weight	TRAT
@@ -50,7 +51,7 @@
 13	wheat	CROP
 13	2012	DATE
 13	Washington State University	ORG
-13	end use	TRAT
+13	end use quality	TRAT
 13	resistance	PPTD
 13	stripe rust	PATH
 14	Glee	CVAR
@@ -63,8 +64,10 @@
 16	WB9411	CVAR
 16	protein	TRAT
 17	Imperial	CVAR
+18	durum	TRAT
+18	grain	PLAN
 18	awns	PLAN
-18	maturity	TRAT
+18	black	TRAT
 18	Imperial	CVAR
 18	yields	TRAT
 18	Alzada	CVAR
@@ -83,10 +86,10 @@
 21	1998	DATE
 22	Jefferson	CVAR
 22	taller	TRAT
-22	susceptible	PPTD
-22	lodging	TRAT
+22	susceptible to lodging	TRAT
 23	yields	TRAT
 25	Jefferson	CVAR
+25	quality	TRAT
 25	grain	PLAN
 25	protein	TRAT
 26	Jefferson	CVAR
@@ -101,6 +104,7 @@
 28	white	TRAT
 28	spring	TRAT
 28	wheat	CROP
+28	quality	TRAT
 29	Klasic	CVAR
 29	1982	DATE
 29	Northrup-King	ORG
@@ -121,13 +125,12 @@
 33	flowering	TRAT
 33	Klasic	CVAR
 34	Klasic	CVAR
-34	seeding	TRAT
+34	seeding rates	TRAT
 34	yield	TRAT
 35	Klasic	CVAR
 36	seeding	TRAT
-36	seeds	PLAN
 37	yield	TRAT
-37	seeding	TRAT
+37	seeding rates	TRAT
 38	Net CL+	CVAR
 38	WA8280 CL+	ALAS
 39	2019	DATE
