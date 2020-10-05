@@ -19,8 +19,14 @@ def trainModel(model=None, training_file=None, output_dir=None, n_iter=100):
             print("A JSON training file must be provided. Exiting.\n")
             return
     
-        nlp = spacy.blank("en")  # create blank Language class
-        print("Created blank 'en' model")
+# DO NOT create a blank model like below! We absolutely need POS information, and that 
+#  won't be included with a blank model!!
+#        nlp = spacy.blank("en")  # create blank Language class
+#        print("Created blank 'en' model")
+        
+        nlp=spacy.load('en_core_web_sm') # create English model as basic class to augment
+        print("Created pre-trained 'en' model")
+        
 
         # The code below is custom to agData. It modifies how the
         # parser works to avoid splitting pedigrees
