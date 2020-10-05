@@ -7,6 +7,7 @@ temp/*
 NerModel.tar.gz
 *~
 NerModel/*
+NerModelTest/*
 .gitignore~
 .idea/*
 .ipynb_checkpoints/*
