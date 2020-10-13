@@ -58,15 +58,16 @@ at the bottom of the page was cut and pasted to append to the `agData.py`
 object. And this was used as input to the `setupTraning.ipynb` notebook.
 
 ### TODO item
-This all unfortunately is out of date, because we found it wiser to convert everything to JSON format (to avoid importing variable .py python files). So we need to output our training data in JSON format from the outset.
 
 ## Next steps
 There is a lot to be done, and we can divide the work. Here are some of the
 items:
-1. Convert input Jupyter notebooks to scripts and use only JSON notation
- (except when passing training data to spaCy which requires the odd nested
- set of lists, dictionaries and tuples).
-2. Create truth-data for additional web documents (e.g., ag experiment stations, Plant variety patents) and then assess accuracy.
-3. Improve tokenization of pedigrees
-4. Experiment with alternative spaCy training strategies
-5. Create routines that use spaCy relationships to create useful entities. E.g., 'awns' is a plant part (PLAN), but spaCy will note that it is modified with an adjective 'rough' or 'smooth'. So the combined 'rough awns' is a trait (TRAT). Similarly 'maturity' is a trait, but it may be modified by 'early' or 'late' or 'early-to-mid', and that is useful to add onto the base trait.
+1. Create truth-data for additional web documents (e.g., ag experiment stations, Plant variety patents) and then assess accuracy.
+2. Experiment with alternative spaCy training strategies
+3. Finish recognition of JRNL and PED entries
+   3a. Remove JRNL and PED from main training
+   3b. Remove changes to tokenization that used to be there to accomodate PED strings
+   3c. Add module that recognizes JRNL and PED via regex to the pipe
+4. Finish routines that use spaCy relationships to create useful entities. E.g., 'awns' is a plant part (PLAN), but spaCy will note that it is modified with an adjective 'rough' or 'smooth'. So the combined 'rough awns' is a trait (TRAT). Similarly 'maturity' is a trait, but it may be modified by 'early' or 'late' or 'early-to-mid', and that is useful to add onto the base trait.
+   4a. Add routine to handle multiple-word adjectival or adverbial modifiers like 'mid to late maturity' and 'height is very low'
+   4b. Handle TRAT (be) ADJ constructs like 'its yield is low'
