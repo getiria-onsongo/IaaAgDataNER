@@ -65,8 +65,10 @@ items:
 1. Create truth-data for additional web documents (e.g., ag experiment stations, Plant variety patents) and then assess accuracy.
 2. Experiment with alternative spaCy training strategies
 3. Finish recognition of JRNL and PED entries
-   3a and b are done now
-   3c. Add module that recognizes JRNL and PED via regex to the pipe
-4. Finish routines that use spaCy relationships to create useful entities. E.g., 'awns' is a plant part (PLAN), but spaCy will note that it is modified with an adjective 'rough' or 'smooth'. So the combined 'rough awns' is a trait (TRAT). Similarly 'maturity' is a trait, but it may be modified by 'early' or 'late' or 'early-to-mid', and that is useful to add onto the base trait.
-   4a. Add routine to handle multiple-word adjectival or adverbial modifiers like 'mid to late maturity' and 'height is very low'
-   4b. Handle TRAT (be) ADJ constructs like 'its yield is low'
+   * Add calls to find_ped() and find_jrnl() in preparse.py as a module to the pipe
+   * Remove PED and JRNL ents from the main NLP pipe
+4. Finish routines that use spaCy relationships to create useful entities. E.g.
+   * Add routine to handle multiple-word adjectival or adverbial modifiers like 'mid to late maturity' and 'height is very low'
+   * Handle TRAT (be) ADJ constructs like 'its yield is low'
+5. Create a python module to deal with compound traits using lessons learned in the CompoundTerms python notebook.
+6. Clean up all the code and move academic exercises and failed experiments to an ARCHIVE folder
