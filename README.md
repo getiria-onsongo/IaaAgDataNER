@@ -48,6 +48,17 @@ You can test this code like this:
 pytest -q test_checkAccuracy.py
 ```
 
+If you wish to play with it on the interpreter line, try this:
+```
+from agParse import *
+nlp = spacy.load('NerModelTest')
+text = 'Kold is a six-rowed winter feed barley obtained from the cross Triumph/Victor. It was released by the Oregon AES in 1993. It has rough awns and the aleurone is white. It has low lodging, matures early and its yield is low. Crop Science 25:1123 (1985).'
+nlp.add_pipe(compound_trait_entities, after='ner')
+doc = nlp(text)
+for ent in doc.ents:
+    print(ent.text, ent.start_char, ent.end_char, ent.label_)
+```
+
 ## Manual work done initially
 This required manually labeling all
 entities in the 37 pages so that we could have known 'truth' labels.
@@ -64,11 +75,8 @@ There is a lot to be done, and we can divide the work. Here are some of the
 items:
 1. Create truth-data for additional web documents (e.g., ag experiment stations, Plant variety patents) and then assess accuracy.
 2. Experiment with alternative spaCy training strategies
-3. Finish recognition of JRNL and PED entries
-   * Add calls to find_ped() and find_jrnl() in preparse.py as a module to the pipe
-   * Remove PED and JRNL ents from the main NLP pipe
-4. Finish routines that use spaCy relationships to create useful entities. E.g.
+3. Finish routines that use spaCy relationships to create useful entities. E.g.
    * Add routine to handle multiple-word adjectival or adverbial modifiers like 'mid to late maturity' and 'height is very low'
    * Handle TRAT (be) ADJ constructs like 'its yield is low'
-5. Create a python module to deal with compound traits using lessons learned in the CompoundTerms python notebook.
-6. Clean up all the code and move academic exercises and failed experiments to an ARCHIVE folder
+4. Create a python module to deal with compound traits using lessons learned in the CompoundTerms python notebook.
+5. Clean up all the code and move academic exercises and failed experiments to an ARCHIVE folder

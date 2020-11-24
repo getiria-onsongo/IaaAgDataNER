@@ -5,7 +5,8 @@ from preparse import *
 from spacy.tokens import Span
 from preparse import *
 from spacy.matcher import Matcher
-matcher = Matcher(nlp.vocab)
+
+nlp = spacy.load('en_core_web_sm')
 
 def adj_ent_entities(doc):
     # only deals with ADJ TRAT (or PLAN) = TRAT entities (e.g, 'low lodging' or 'rough awns')
@@ -77,6 +78,8 @@ def plan_adj_entities(doc):
 
 def get_matched_spans(doc, substring):
 
+    matcher = Matcher(nlp.vocab)
+    
     sdoc = nlp(substring)
     pattern = [{"ORTH": token.text} for token in sdoc] #allows matching multi-word pattern
     matcher.add(substring, None, pattern)
@@ -88,22 +91,43 @@ def get_matched_spans(doc, substring):
 #        string_id = nlp.vocab.strings[match_id]  # Get string representation
         span = doc[start:end]  # The matched span
 #        print(match_id, string_id, start, end, span.text)
-        print(match_id, start, end, span.text)
+#        print(match_id, start, end, span.text)
         result.append(span)
     return result
+
+def add_non_ovlp_ent(new_ent, master_ents):
+    '''check if new entity (new_ent) overlaps with any in the master, and
+       remove the old master entry if it is found to overlap.
+       Return the original entity list with the new one added. '''
+
+    if new_ent is None:
+        return master_ents
     
+    result = []
+    for estab_ent in master_ents:
+        if not ((new_ent.end_char >= estab_ent.start_char) and
+            (new_ent.start_char <= estab_ent.start_char) or
+            (estab_ent.end_char >= new_ent.start_char) and
+            (estab_ent.start_char <= new_ent.start_char)):
+            # no overlap detected, so add this established entity
+            result.append(estab_ent)
+
+    # add the new entity
+    result.append(new_ent)
+    return result
 
 def add_ped_jrnl_entities(doc):
     '''add PED and JRNL entities derived from regex code'''
 
     # add in regex-derived PED & JRNL entries, being sure to remove other 
     # entities that overlap with them
-    
+
+    all_ents = list(doc.ents)
     regex_ents = preparse(doc.text)
-    for ent_no in regex_ents[text]:
+    for ent_no in regex_ents[doc.text]:
         # The following ent_data is a dictionary for a new entity with keys like
         # {'start': 29, 'end': 33, 'label': 'PED', 'substring': 'A1/P2'}
-        ent_data = regex_ents[text][ent_no]
+        ent_data = regex_ents[doc.text][ent_no]
 
         # the following returns a list of spans in the original doc that
         # match ent_data['substring'], each indexed as
@@ -114,8 +138,12 @@ def add_ped_jrnl_entities(doc):
         # first one for now
         new_ent = Span(doc, span_list[0].start, span_list[0].end, label=ent_data['label'])
 
-        if new_ent is not None:
-            doc.ents.append(new_ent)
+        # Check to see if this new entity overlaps one called by the NLP.
+        # If it does, remove the NLP-derived one.
+        all_ents = add_non_ovlp_ent(new_ent, all_ents)
+
+    doc.ents = all_ents
+    return doc
 
 def compound_trait_entities(doc):
     doc = adj_ent_entities(doc)
@@ -148,11 +176,10 @@ if __name__ == "__main__":
     text = args.text
     model_dir = args.model_dir
     
-    if model_dir is None:
-        nlp = spacy.load('en_core_web_sm')
-    else:
+    if model_dir is not None:
         nlp = spacy.load(model_dir)
 
+    nlp.add_pipe(compound_trait_entities, after='ner')
     doc = nlp(text)
     print("Text:")
     print(doc)
