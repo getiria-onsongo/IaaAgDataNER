@@ -3,7 +3,6 @@ import re
 import spacy
 from json2py import *
 from pathlib import Path
-from spacy.lang.char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER,CONCAT_QUOTES, LIST_ELLIPSES, LIST_ICONS
 from spacy.util import minibatch, compounding
 from spacy.util import compile_infix_regex
 
@@ -19,33 +18,13 @@ def trainModel(model=None, training_file=None, output_dir=None, n_iter=100):
             print("A JSON training file must be provided. Exiting.\n")
             return
     
-        nlp = spacy.blank("en")  # create blank Language class
-        print("Created blank 'en' model")
-
-        # The code below is custom to agData. It modifies how the
-        # parser works to avoid splitting pedigrees
-
-        # Tell spacy not to split between hyphens
-        infixes = (
-                LIST_ELLIPSES
-                + LIST_ICONS
-                + [
-                    r"(?<=[0-9])[+\-\*^](?=[0-9-])",
-                    r"(?<=[{al}{q}])\.(?=[{au}{q}])".format(
-                        al=ALPHA_LOWER, au=ALPHA_UPPER, q=CONCAT_QUOTES
-                    ),
-                    r"(?<=[{a}]),(?=[{a}])".format(a=ALPHA),
-                    r"(?<=[{a}0-9])[:<>=/](?=[{a}])".format(a=ALPHA),
-                ]
-        )
-        infix_re = compile_infix_regex(infixes)
-        nlp.tokenizer.infix_finditer = infix_re.finditer
-
-        # Tell spaCy not to split on slashes (/). This will preserve PEDs.
-        # There is a chance we will get unintended side effects but we have
-        # not encountered one yet. We should rigorously test this at a later stage
-        digit_hyphen_re = re.compile(r'[\w|\S]+/[\w|\S]+')
-        nlp.tokenizer.token_match = digit_hyphen_re.search
+# DO NOT create a blank model like below! We absolutely need POS information, and that 
+#  won't be included with a blank model!!
+#        nlp = spacy.blank("en")  # create blank Language class
+#        print("Created blank 'en' model")
+        
+        nlp=spacy.load('en_core_web_sm') # create English model as basic class to augment
+        print("Created pre-trained 'en' model")
 
     # create the built-in pipeline components and add them to the pipeline
     # nlp.create_pipe works for built-ins that are registered with spaCy
@@ -58,12 +37,23 @@ def trainModel(model=None, training_file=None, output_dir=None, n_iter=100):
 
     # load training data from a file
     training_data = json_2_dict(training_file)
-    TRAIN_DATA = dict_2_mixed_type(training_data)
+    RAW_TRAIN_DATA = dict_2_mixed_type(training_data)
     
     # add entity labels
-    for _, annotations in TRAIN_DATA:
+    labels = set()
+    TRAIN_DATA = []
+    for sent, annotations in RAW_TRAIN_DATA:
+        ent_count = 0
         for ent in annotations.get("entities"):
-            ner.add_label(ent[2])
+            if ent[2] not in ('JRNL', 'PED'):
+                ent_count += 1
+                labels.add(ent[2])
+        if ent_count != 0: # ignore 0-cnt lines where only anno was JRNL or PED
+            TRAIN_DATA.append((sent, annotations))
+                
+    # print ('DEBUG: Labels include', labels)
+    # [print('Adding label',label) for label in labels]
+    [ner.add_label(label) for label in labels]
 
     # get names of other pipes to disable them during training, if present
     other_pipes = [pipe for pipe in nlp.pipe_names if pipe != "ner"]
