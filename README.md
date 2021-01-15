@@ -48,6 +48,17 @@ You can test this code like this:
 pytest -q test_checkAccuracy.py
 ```
 
+If you wish to play with it on the interpreter line, try this:
+```
+from agParse import *
+nlp = spacy.load('NerModelTest')
+text = 'Kold is a six-rowed winter feed barley obtained from the cross Triumph/Victor. It was released by the Oregon AES in 1993. It has rough awns and the aleurone is white. It has low lodging, matures early and its yield is low. Crop Science 25:1123 (1985).'
+nlp.add_pipe(compound_trait_entities, after='ner')
+doc = nlp(text)
+for ent in doc.ents:
+    print(ent.text, ent.start_char, ent.end_char, ent.label_)
+```
+
 ## Manual work done initially
 This required manually labeling all
 entities in the 37 pages so that we could have known 'truth' labels.
@@ -58,15 +69,14 @@ at the bottom of the page was cut and pasted to append to the `agData.py`
 object. And this was used as input to the `setupTraning.ipynb` notebook.
 
 ### TODO item
-This all unfortunately is out of date, because we found it wiser to convert everything to JSON format (to avoid importing variable .py python files). So we need to output our training data in JSON format from the outset.
 
 ## Next steps
 There is a lot to be done, and we can divide the work. Here are some of the
 items:
-1. Convert input Jupyter notebooks to scripts and use only JSON notation
- (except when passing training data to spaCy which requires the odd nested
- set of lists, dictionaries and tuples).
-2. Create truth-data for additional web documents (e.g., ag experiment stations, Plant variety patents) and then assess accuracy.
-3. Improve tokenization of pedigrees
-4. Experiment with alternative spaCy training strategies
-5. Create routines that use spaCy relationships to create useful entities. E.g., 'awns' is a plant part (PLAN), but spaCy will note that it is modified with an adjective 'rough' or 'smooth'. So the combined 'rough awns' is a trait (TRAT). Similarly 'maturity' is a trait, but it may be modified by 'early' or 'late' or 'early-to-mid', and that is useful to add onto the base trait.
+1. Create truth-data for additional web documents (e.g., ag experiment stations, Plant variety patents) and then assess accuracy.
+2. Experiment with alternative spaCy training strategies
+3. Finish routines that use spaCy relationships to create useful entities. E.g.
+   * Add routine to handle multiple-word adjectival or adverbial modifiers like 'mid to late maturity' and 'height is very low'
+   * Handle TRAT (be) ADJ constructs like 'its yield is low'
+4. Create a python module to deal with compound traits using lessons learned in the CompoundTerms python notebook.
+5. Clean up all the code and move academic exercises and failed experiments to an ARCHIVE folder
