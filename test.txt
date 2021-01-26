@@ -1,0 +1,12 @@
+test1 = '''
+Kold is a six-rowed winter feed barley and it was published in Crop Science 25:1123 (1985).
+It was published in Crop Science 9(4):521 (1969).
+It was published in Crop Science 41:265-266 (2001).
+It was published in Crop Science 30(2): 421 (1990).
+It was published in Crop Science 42:665-666 (2002).
+It was selected from the cross Robust/6/Glenn/4/Nordic//Dickson/Trophy/3/Azure/5/Glenn/Karl.
+It was selected from the cross Triumph/Victor.
+It was published in Journal of American Society of Agronomy 33:252 (1941).
+It was published in Science 30(2): 421 (1990).'''
+
+test2 = 'The cross Triumph/Victor was published in Journal of American Society of Agronomy 33:252 (1941).'
