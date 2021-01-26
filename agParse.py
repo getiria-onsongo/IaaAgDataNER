@@ -86,7 +86,7 @@ def get_matched_spans(doc, substring):
     
     result = []
     matches = matcher(doc)
-    print(matches)
+    #print(matches)
     for match_id, start, end in matches:
 #        string_id = nlp.vocab.strings[match_id]  # Get string representation
         span = doc[start:end]  # The matched span
