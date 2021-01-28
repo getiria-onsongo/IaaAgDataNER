@@ -1,8 +1,8 @@
 #!/bin/env python3
-from agParse import *
+from trainNER import *
 
 output_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/agdataNew"
-# trainModel(None, output_dir, 100)
+trainModel(None, output_dir, 10)
 print("Loading trained model", output_dir)
 agdata_nlp = spacy.load(output_dir)
 agdata_nlp.add_pipe(compound_trait_entities, after='ner')
