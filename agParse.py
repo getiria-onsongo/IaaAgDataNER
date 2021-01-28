@@ -1,10 +1,10 @@
 #!/bin/env python3
 
 import spacy
-from preparse import *
 from spacy.tokens import Span
-from preparse import *
 from spacy.matcher import Matcher
+
+from preparse import *
 
 nlp = spacy.load('en_core_web_sm')
 
