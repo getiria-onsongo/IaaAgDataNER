@@ -10,6 +10,6 @@ agParse.py
 nerTraining.py
 preparse.py
 trainNER.py
-
+Note
 Data/
 
