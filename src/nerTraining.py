@@ -1,7 +1,7 @@
 import random
 import re
 import spacy
-from json2py import *
+from src.json2py import *
 from pathlib import Path
 from spacy.util import minibatch, compounding
 from spacy.util import compile_infix_regex

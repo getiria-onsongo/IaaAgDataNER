@@ -1,4 +1,5 @@
-agdataNew/*
+src/__pycache*
+agdata/*
 ExperimentalCode/*
 iaa_todo.txt
 temp.py
