@@ -13,3 +13,9 @@ trainNER.py
 Note
 Data/
 
+# NEXT: 
+CompoundTerms.ipynb
+CreatingTrainingData.ipynb
+
+# Passed testing
+Spacy-Basics.ipynb
