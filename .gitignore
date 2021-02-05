@@ -17,10 +17,8 @@ NerModelTest/*
 .idea/*
 .ipynb_checkpoints/*
 CustomTokenizer.ipynb
-CustomTokenizer.py
 NER-Training.ipynb
 __pycache__/*
-agdata/*
 devData.json
 preTrainInput/*
 preTrainOutput/*
@@ -29,8 +27,6 @@ rawTokens.json
 temp2.py
 tempv23.txt
 testOne.json
-trainAgDataModel.py
 trainData.json
-trainNER.py
 training-data.json
 Testing/__pycache__/*
