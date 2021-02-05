@@ -1,0 +1,40 @@
+# Switch to this folder
+cd /Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/
+
+# Create a config file to use for training
+python -m spacy init config ner.cfg --lang "en" --pipeline "ner" --optimize "accuracy" --force
+
+# Create test data
+python -m spacy convert --converter json devData.json TrainingData
+
+# Activate NER environment
+conda activate ner
+
+# Create an environment
+conda create -n ner python=3.8 spacy=3 -y
+
+conda create -n nerSpacy2 spacy=2 -y
+
+# To activate this environment
+conda activate ner
+
+# Download English model
+python3.8 -m spacy download en_core_web_sm
+
+# Install transformer package. It is sometimes using in training
+pip install spacy-transformers
+
+
+# To deactivate an active environment
+conda deactivate
+
+# To remove an environment
+conda remove --name ner --all -y
+
+# To list environments
+conda env list
+
+
+# To delete files from git
+git rm -r --cached src/__pycache__/
+ 
