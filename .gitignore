@@ -1,4 +1,4 @@
-src/__pycache*
+*_pycache*
 agdata/*
 ExperimentalCode/*
 iaa_todo.txt
