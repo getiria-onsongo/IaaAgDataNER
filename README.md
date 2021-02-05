@@ -23,11 +23,17 @@ a compendium of barley varieties.
 You can test the accuracy of the NER training with only N pages of the 37 page document. You will see that with only 5 pages, accuracy is good. Check for yourself!
 ```
 git clone https://github.com/getiria-onsongo/IaaAgDataNER
+
 cd IaaAgDataNER
+
 mkdir /tmp/spacy
-python3 validation_testing.py 5 'barley_p' '_td.json' Data/DavisLJ11 /tmp/spacy 'test_'
+
 # To send output to a file (test_results.txt) instead of STDERR
 python3 validation_testing.py 5 'barley_p' '_td.json' Data/DavisLJ11 /tmp/spacy 'test_' 2> test_results.txt
+
+# To send output to STDERR
+python3 validation_testing.py 5 'barley_p' '_td.json' Data/DavisLJ11 /tmp/spacy 'test_'
+
 ```
 This will generate 5 JSON training files in `/tmp/spacy`: one that has
 pages 2-5, one with page 1 and 3-5, one with pages 1-2 and 4-5, etc. A
