@@ -1,7 +1,7 @@
 import random
 import re
 import spacy
-from src.json2py import *
+from json2py import *
 from pathlib import Path
 from spacy.util import minibatch, compounding
 from spacy.util import compile_infix_regex
@@ -21,10 +21,10 @@ def trainModel(model=None, training_file=None, output_dir=None, n_iter=100):
 # DO NOT create a blank model like below! We absolutely need POS information, and that 
 #  won't be included with a blank model!!
 #        nlp = spacy.blank("en")  # create blank Language class
-#        print("Created blank 'en' model")
+#        print("Created blank 'en_core_web_sm' model")
         
         nlp=spacy.load('en_core_web_sm') # create English model as basic class to augment
-        print("Created pre-trained 'en' model")
+        print("Created pre-trained 'en_core_web_sm' model")
 
     # create the built-in pipeline components and add them to the pipeline
     # nlp.create_pipe works for built-ins that are registered with spaCy
