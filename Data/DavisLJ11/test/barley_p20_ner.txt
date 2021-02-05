@@ -1,0 +1,132 @@
+1	Hannchen	CVAR
+1	two-rowed	TRAT
+1	spring	TRAT
+1	malting	TRAT
+1	barley	CROP
+2	Swedish Seed Association	ORG
+2	Svalof, Sweden	GPE
+2	1904	DATE
+3	Hanna	PED
+3	1893	DATE
+4	maturity	TRAT
+4	straw strength	TRAT
+4	height	TRAT
+5	Spikes	PLAN
+6	Rachis edges	PLAN
+7	Awns	PLAN
+8	glume	PLAN
+8	hairs	PLAN
+8	glume awn	PLAN
+9	hull	PLAN
+10	aleurone	PLAN
+11	Rachilla hairs	PLAN
+12	Veins	PLAN
+13	barbs	PLAN
+13	lateral veins	PLAN
+14	crease	PLAN
+16	Trebi	CVAR
+16	yield	TRAT
+17	resistant	PPTD
+17	stripe	PATH
+17	susceptible	PPTD
+17	powdery mildew	PATH
+21	Harland	CVAR
+21	six-rowed	TRAT
+21	spring	TRAT
+21	feed	TRAT
+21	barley	CROP
+22	California AES	ORG
+22	USDA-ARS	ORG
+22	1967	DATE
+24	Harland	CVAR
+24	composite Cross XVI	PED
+25	kernels	PLAN
+26	spikes	PLAN
+26	seeds	PLAN
+30	Harrington	CVAR
+30	two-rowed	TRAT
+30	spring	TRAT
+30	malting	TRAT
+30	barley	CROP
+31	University of Saskatchewan	ORG
+31	1981	DATE
+32	Klages/3/Gazelle/Betzes//Centennial	PED
+33	TR441	ALAS
+34	maturity	TRAT
+34	Klages	CVAR
+34	mid-tall	TRAT
+34	lodging	TRAT
+36	glume	PLAN
+36	hairs	PLAN
+36	glume awns	PLAN
+36	lemma	PLAN
+37	hull	PLAN
+38	aleurone	PLAN
+39	Rachilla hairs	PLAN
+40	Veins	PLAN
+41	barbs	PLAN
+41	lateral veins	PLAN
+42	Kernels	PLAN
+43	yield potential	PLAN
+43	Klages	CVAR
+44	susceptible	PPTD
+44	stripe rust	PATH
+44	stem rust	PATH
+44	net blotch	PATH
+44	speckled leaf blotch	PATH
+44	loose and covered smut	PATH
+44	moderately susceptible	PPTD
+44	common root rot	PATH
+46	Haxby	CVAR
+46	two-rowed	TRAT
+46	spring	TRAT
+46	feed	TRAT
+46	barley	CROP
+47	Montana AES	ORG
+47	2002	DATE
+48	MT950186	ALAS
+49	maturity	TRAT
+49	Baronesse	CVAR
+49	plant height	TRAT
+49	straw strength	TRAT
+50	Yield	TRAT
+50	Baronesse	CVAR
+50	test weight	TRAT
+53	Haybet	CVAR
+53	two-rowed	TRAT
+53	spring	TRAT
+53	hooded	TRAT
+53	forage	TRAT
+53	barley	CROP
+54	Montana AES	ORG
+54	USDA-ARS	ORG
+54	1989	DATE
+56	MT 4061	ALAS
+58	maturing	TRAT
+59	Horsford	CVAR
+59	tall	TRAT
+59	lodging	TRAT
+63	Hazen	CVAR
+63	six-rowed	TRAT
+63	spring	TRAT
+63	malting	TRAT
+63	feed	TRAT
+63	barley	CROP
+64	North Dakota AES	ORG
+64	1984	DATE
+67	ND 5569	ALAS
+68	maturing	TRAT
+68	mid-tall	TRAT
+68	straw	PLAN
+69	Spikes	PLAN
+70	Seeds	PLAN
+70	aleurone	PLAN
+71	Test weight	PLAN
+72	resistant	PPTD
+72	Glenn	CVAR
+72	Helminthosporium sativum	PATH
+72	resistance	PPTD
+72	net blotch	PATH
+72	stem rust	PATH
+72	susceptible	PPTD
+72	leaf rust	PATH
