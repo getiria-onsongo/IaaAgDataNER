@@ -22,6 +22,11 @@ a compendium of barley varieties.
 ## Getting started
 You can test the accuracy of the NER training with only N pages of the 37 page document. You will see that with only 5 pages, accuracy is good. Check for yourself!
 ```
+# Before you start, make sure you have SpaCy installed. The 
+# conda environment being activated below has SpaCy installed. 
+conda activate ner
+
+# Clone repository with NER training code
 git clone https://github.com/getiria-onsongo/IaaAgDataNER
 
 cd IaaAgDataNER
