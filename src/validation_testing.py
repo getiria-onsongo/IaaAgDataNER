@@ -8,6 +8,7 @@ import json
 import glob
 import csv
 import argparse
+import random
 import subprocess
 
 from sklearn.model_selection import train_test_split
@@ -45,33 +46,6 @@ def summarize_stats(fprefix):
                 total = tally[label]['total']
                 pcnt = round(100*count/total, 1)
                 sys.stderr.write(label+"\t"+state+"\t"+str(count)+"\t"+str(pcnt)+"\n")
-
-def leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix,test_size):
-   """ perform leave-one-out cross validation on the dataset. """
-
-   for i in range(1, maxn + 1):
-       dataset_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
-       model_dir = train_nth_model(i, dataset_file, output_dir, output_prefix, test_size)
-       print("model=",model_dir)
-       '''
-       test_file = input_dir + "/" + fprefix + str(i) + fsuffix
-       # Delete model folder no longer being used. Models consume a lot of disk space (about 1GB a model)
-       if i > 2:
-           deleteFolder(output_dir + "/" + output_prefix + "_model_" + str(i - 2))
-           deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + "_training_data.json")
-           deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + "_validate_data.json")
-           deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + ".json")
-
-       model_folder = output_dir + "/" + output_prefix + "_model_" + str(i)
-       prev_model = output_dir + "/" + output_prefix + "_model_" + str(i - 1) + "/model-best"
-
-       model_dir = train_nth_model(i, dataset_file, output_dir, output_prefix, test_size, pretrained_model, prev_model,model_folder)
-
-       accuracyFile_name = model_folder + "_stats.txt"
-       check_model_accuracy(test_file, model_dir, accuracyFile_name)
-       clear_tally()
-       '''
-       break
 
 def execute(cmd):
     """
@@ -216,6 +190,35 @@ def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_
     fo.close()
     return trainFile_name
 
+def leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix,validate,test_size):
+   """ perform leave-one-out cross validation on the dataset. """
+   if (not validate):
+       test_page = random.randint(1, maxn)
+       test_file = input_dir + "/" + fprefix + str(test_page) + fsuffix
+       #dataset_file = build_nth_dataset(test_page, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
+       #model_dir = train_nth_model(test_page, dataset_file, output_dir, output_prefix, test_size)
+       model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/ner_model/model-best"
+       accuracyFile_name = output_dir + "/" + output_prefix + str(test_page)+"_stats.txt"
+       check_model_accuracy(test_file, model_dir, accuracyFile_name)
+   else:
+       print("Here")
+       for i in range(1, maxn + 1):
+           train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
+           test_file = input_dir + "/" + fprefix + str(i) + fsuffix
+           # Delete model folder no longer being used. Models consume a lot of disk space (about 1GB a model)
+           if i > 2:
+               deleteFolder(output_dir + "/" + output_prefix + "_model_" + str(i - 2))
+               deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + "_training_data.json")
+               deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + "_validate_data.json")
+               deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + ".json")
+
+           model_folder = output_dir + "/" + output_prefix + "_model_" + str(i)
+           prev_model = output_dir + "/" + output_prefix + "_model_" + str(i - 1) + "/model-best"
+           model_dir = train_nth_model(i, train_file, output_dir, output_prefix, test_size, pretrained_model,prev_model, model_folder)
+
+           accuracyFile_name = model_folder + "_stats.txt"
+           check_model_accuracy(test_file, model_dir, accuracyFile_name)
+           clear_tally()
 
 if __name__ == "__main__":
 
@@ -247,8 +250,8 @@ if __name__ == "__main__":
         help='Output filename base prefix for combined training file that includes all chunks except the ith one.'
     )
     parser.add_argument(
-        '--titrate',
-        help='Flag to perform experiments where the number of chuncks used in training is titrated from 1 all the way up to maxn-1. Default=False',
+        '--validate',
+        help='Flag to perform leave one out cross-validation. Default=False which does a single test using one of the pages as the test page.',
         action='store_true', default=False
     )
 
@@ -257,14 +260,9 @@ if __name__ == "__main__":
         sys.exit()
 
     args = parser.parse_args()
-    maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix, titrate = int(
-        args.maxn), args.fprefix, args.fsuffix, args.input_dir, args.output_dir, args.output_prefix,  args.titrate
+    maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix, validate = int(args.maxn), args.fprefix, args.fsuffix, args.input_dir, args.output_dir, args.output_prefix,  args.validate
 
-    if titrate:
-        for i in range(2, maxn + 1):
-            leave_one_out_xval(i, fprefix, fsuffix, input_dir, output_dir, output_prefix + '.' + str(i) + '.', test_size=0.2)
-    else:
-        leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix, test_size=0.2)
+    leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix, validate, test_size=0.2)
 
     print("Summarizing statistics")
     summarize_stats(output_dir + '/' + output_prefix)
