@@ -21,6 +21,8 @@ nlp_agdata.add_pipe("parser", before="ner",source=source_nlp)
 nlp_agdata.add_pipe("tagger", before="parser",source=source_nlp)
 nlp_agdata.pipe_names
 
+tar -czvf ner_model.tar.gz ner_model
+
 
 # Activate NER environment
 conda activate ner
