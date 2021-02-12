@@ -104,11 +104,11 @@ for ent in doc.ents:
 ## Manual work done initially
 This required manually labeling all
 entities in the 37 pages so that we could have known 'truth' labels.
-This process was sped up using the Jupyter notebook `setupTraining.ipynb`
+This process was sped up using the Jupyter notebook `CreatingTrainingData.ipynb`
 to split a page of the document into sentences, and then manual work to
-yield files like `Data/barley_p1_td.py`. The output of `setupTraining.ipynb`
+yield files like `Data/barley_p1_td.py`. The output of `CreatingTrainingData.ipynb`
 at the bottom of the page was cut and pasted to append to the `agData.py`
-object. And this was used as input to the `setupTraning.ipynb` notebook.
+object. 
 
 ### TODO item
 
