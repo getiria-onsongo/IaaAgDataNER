@@ -73,12 +73,16 @@ accuracy statistcs. You can see how it is called from within
 `clear_tally()` before using it again in a loop context!
 
 This code uses pytest. You need to have the module pytest installed. You will need
-to have an NER model trained and passed in as a parameter (NerModel/model-best)
+to have an NER model trained e.g., /tmp/spacy/model-best. Open src/test_checkAccuracy.py
+and update mdir to point to your model i.e., mdir = "/tmp/spacy/model-best"
 
-You can test this code like this:
+You can then test this code like this:
 ```
-pytest -q test_checkAccuracy.py
+python -m pytest -q src/test_checkAccuracy.py
 ```
+NOTE: As of Feb 12 2021, the move to Spacy 3.0 resulted in 2 of the tests failing. If 
+you are seeing this note it means that issue has not been resolved. Need to chat with @kats
+who wrote the tests to figure out what the issue is. 
 
 If you wish to play with it on the interpreter line, try this:
 ```
