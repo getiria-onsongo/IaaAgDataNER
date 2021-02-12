@@ -1,3 +1,4 @@
+steps.txt
 Data/TrainingData/*.pdf
 Data/TrainingData/*.json
 Data/TrainingData/*.py
