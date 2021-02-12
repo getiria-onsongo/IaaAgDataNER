@@ -78,7 +78,8 @@ and update mdir to point to your model i.e., mdir = "/tmp/spacy/model-best"
 
 You can then test this code like this:
 ```
-python -m pytest -q src/test_checkAccuracy.py
+cd src
+python -m pytest -q test_checkAccuracy.py
 ```
 NOTE: As of Feb 12 2021, the move to Spacy 3.0 resulted in 2 of the tests failing. If 
 you are seeing this note it means that issue has not been resolved. Need to chat with @kats
