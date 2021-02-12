@@ -4,12 +4,13 @@ import os
 import shutil
 import pytest
 import subprocess
-from nerTraining import trainModel
-from checkAccuracy import *
+#from nerTraining import trainModel
+from src.checkAccuracy import *
 
 train_data = '[{"doc": "test", "url": "No source", "chunk": "1", "sentences": {"Eight-Twelve is a six-rowed winter feed barley.": {"entity 1": {"start": 0, "end": 12, "label": "CVAR"}, "entity 2": {"start": 18, "end": 27, "label": "TRAT"}, "entity 3": {"start": 28, "end": 34, "label": "TRAT"}, "entity 4": {"start": 35, "end": 39, "label": "TRAT"}, "entity 5": {"start": 40, "end": 46, "label": "CROP"}}, "Maja is a six-rowed winter feed barley.": {"entity 1": {"start": 0, "end": 4, "label": "CVAR"}, "entity 2": {"start": 10, "end": 19, "label": "TRAT"}, "entity 3": {"start": 20, "end": 26, "label": "TRAT"}, "entity 4": {"start": 27, "end": 31, "label": "TRAT"}, "entity 5": {"start": 32, "end": 38, "label": "CROP"}}}}, {"doc": "test", "url": "No source", "chunk": "2", "sentences": {"2   AC METCALFE  AC Metcalfe is a two-rowed spring malting barley.": {"entity 1": {"start": 17, "end": 28, "label": "CVAR"}, "entity 2": {"start": 34, "end": 43, "label": "TRAT"}, "entity 3": {"start": 44, "end": 50, "label": "TRAT"}, "entity 4": {"start": 51, "end": 58, "label": "TRAT"}, "entity 5": {"start": 59, "end": 65, "label": "CROP"}}}}]\n'
 
-train_file, mdir = "/tmp/sample_nlp_data.json", "/tmp/sample_nlp_model"
+train_file= "/tmp/sample_nlp_data.json"
+mdir = "/tmp/spacy/model-best"
 
 #
 # NOTE: look into get pytest.fixtures working. Without it, there is a lot
@@ -22,7 +23,8 @@ def setup_model():
     fo = open(train_file, "w")
     fo.write(train_data)
     fo.close()
-    trainModel(None, train_file, mdir, 100)
+    # trainModel does not work with SpaCy 3. Instead, train the model and the specify above using the mdir variable
+    #trainModel(None, train_file, mdir, 100)
 
 def test_overlap():
     """Generate an inexact match with an overlap to the original model"""
@@ -110,5 +112,5 @@ def test_falsepos():
     # first condition below ensures we didn't get multiple lines above
     assert res.find("\n") == -1 and res == "11.1"
 
-    if os.path.isdir(mdir):
-        shutil.rmtree(mdir)
+    #if os.path.isdir(mdir):
+    #    shutil.rmtree(mdir)
