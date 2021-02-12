@@ -84,6 +84,7 @@ NOTE: As of Feb 12 2021, the move to Spacy 3.0 resulted in 2 of the tests failin
 you are seeing this note it means that issue has not been resolved. Need to chat with @kats
 who wrote the tests to figure out what the issue is. 
 
+## Trying things out
 If you wish to play with it on the interpreter line, try this:
 ```
 
