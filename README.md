@@ -68,9 +68,12 @@ is output to STDERR.
 The script `checkAccuracy.py` contains the important code to take sentences and
 labels in JSON format and compare it to a spaCy model. It will then output
 accuracy statistcs. You can see how it is called from within
-`validateion_testing.py` and notice that the central tally of observations
+`validation_testing.py` and notice that the central tally of observations
 (e.g., `TRAT|mislabel: 36`, `CROP|false_pos: 17`) must be cleared with
 `clear_tally()` before using it again in a loop context!
+
+This code uses pytest. You need to have the module pytest installed. You will need
+to have an NER model trained and passed in as a parameter (NerModel/model-best)
 
 You can test this code like this:
 ```
@@ -79,10 +82,20 @@ pytest -q test_checkAccuracy.py
 
 If you wish to play with it on the interpreter line, try this:
 ```
-from agParse import *
-nlp = spacy.load('NerModelTest')
+
+from src.agParse import *
+
 text = 'Kold is a six-rowed winter feed barley obtained from the cross Triumph/Victor. It was released by the Oregon AES in 1993. It has rough awns and the aleurone is white. It has low lodging, matures early and its yield is low. Crop Science 25:1123 (1985).'
-nlp.add_pipe(compound_trait_entities, after='ner')
+
+# Set up the pipeline
+source_nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load('NerModel/model-best')
+nlp.add_pipe("parser", before="ner",source=source_nlp)
+nlp.add_pipe("tagger", before="parser",source=source_nlp)
+
+# Show components in pipeline
+nlp.pipe_names
+
 doc = nlp(text)
 for ent in doc.ents:
     print(ent.text, ent.start_char, ent.end_char, ent.label_)
