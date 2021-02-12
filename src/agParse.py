@@ -1,6 +1,7 @@
 #!/bin/env python3
 
 import spacy
+from spacy.language import Language
 from spacy.tokens import Span
 from spacy.matcher import Matcher
 
@@ -145,6 +146,7 @@ def add_ped_jrnl_entities(doc):
     doc.ents = all_ents
     return doc
 
+@Language.component("compound_trait_entities")
 def compound_trait_entities(doc):
     doc = adj_ent_entities(doc)
     doc = plan_adj_entities(doc)
