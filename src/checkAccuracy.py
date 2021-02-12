@@ -3,7 +3,7 @@
 import spacy
 import re
 import sys
-from src.json2py import *
+from json2py import *
 import argparse
 
 #
