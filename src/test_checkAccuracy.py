@@ -5,7 +5,7 @@ import shutil
 import pytest
 import subprocess
 #from nerTraining import trainModel
-from src.checkAccuracy import *
+from checkAccuracy import *
 
 train_data = '[{"doc": "test", "url": "No source", "chunk": "1", "sentences": {"Eight-Twelve is a six-rowed winter feed barley.": {"entity 1": {"start": 0, "end": 12, "label": "CVAR"}, "entity 2": {"start": 18, "end": 27, "label": "TRAT"}, "entity 3": {"start": 28, "end": 34, "label": "TRAT"}, "entity 4": {"start": 35, "end": 39, "label": "TRAT"}, "entity 5": {"start": 40, "end": 46, "label": "CROP"}}, "Maja is a six-rowed winter feed barley.": {"entity 1": {"start": 0, "end": 4, "label": "CVAR"}, "entity 2": {"start": 10, "end": 19, "label": "TRAT"}, "entity 3": {"start": 20, "end": 26, "label": "TRAT"}, "entity 4": {"start": 27, "end": 31, "label": "TRAT"}, "entity 5": {"start": 32, "end": 38, "label": "CROP"}}}}, {"doc": "test", "url": "No source", "chunk": "2", "sentences": {"2   AC METCALFE  AC Metcalfe is a two-rowed spring malting barley.": {"entity 1": {"start": 17, "end": 28, "label": "CVAR"}, "entity 2": {"start": 34, "end": 43, "label": "TRAT"}, "entity 3": {"start": 44, "end": 50, "label": "TRAT"}, "entity 4": {"start": 51, "end": 58, "label": "TRAT"}, "entity 5": {"start": 59, "end": 65, "label": "CROP"}}}}]\n'
 
