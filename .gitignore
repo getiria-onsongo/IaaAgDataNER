@@ -4,8 +4,6 @@ Data/TrainingData/*.py
 NerModel/*
 *pycache*
 *~
-agdata/*
 ExperimentalCode/*
 .idea/*
 .ipynb_checkpoints/*
-temp/*
