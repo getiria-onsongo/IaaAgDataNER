@@ -20,9 +20,12 @@ We are starting out by training the NER on the 37 pages of
 a compendium of barley varieties.
 
 ## Getting started
-You can test the accuracy of the NER training with only N pages of the 37 page document. You will see that with only 5 pages, accuracy is good. Check for yourself!
+You can test the accuracy of the NER training with N pages of the 37 page document. However, our experience with SpaCy training so far is it converges faster if you use more data. If you have a total of maxn pages, it is a good idea to use all the pages. 
+
+We wrote a script that does leave-one-out cross validation. Because training an NER model is time consuming, we do not recommend performing the full leave-one-out cross validation when testing. If you have a total on N pages, the NER model will be trained N times. Test the script without the --validate flag. If this flag is ommitted, the analysis will be done once. One of the pages will be randomly selected to be the test page. The remaining pages will be used for training. Check for yourself!
+
 ```
-# Before you start, make sure you have SpaCy installed. The 
+# Before you start, make sure you have Python3 and SpaCy (version 3.0 or higher) installed. The 
 # conda environment being activated below has SpaCy installed. 
 conda activate ner
 
@@ -34,16 +37,31 @@ cd IaaAgDataNER
 mkdir /tmp/spacy
 
 # To send output to a file (test_results.txt) instead of STDERR
-python3 validation_testing.py 5 'barley_p' '_td.json' Data/DavisLJ11 /tmp/spacy 'test_' 2> test_results.txt
+python3 src/validation_testing.py 37 'barley_p' '_td.json' Data/DavisLJ11  /tmp/spacy 'test_' 2> test_results.txt
 
 # To send output to STDERR
-python3 validation_testing.py 5 'barley_p' '_td.json' Data/DavisLJ11 /tmp/spacy 'test_'
+python3 src/validation_testing.py 37 'barley_p' '_td.json' Data/DavisLJ11  /tmp/spacy 'test_'
 
 ```
-This will generate 5 JSON training files in `/tmp/spacy`: one that has
-pages 2-5, one with page 1 and 3-5, one with pages 1-2 and 4-5, etc. A
-model directory is created for each, and training accuracy stats are computed
-for each one as well. Finally a compilation of statistics across all 5 runs
+This will randomly pick one of the pages (range 1 - 37) and set it aside as the test page. It
+will then use the remaining pages to train the NER model and test its performance on the test page. 
+Training accuracy stats are computed and sent to STDERR or to a file (test_results.txt) if one 
+is specified. 
+
+## Leave-one-out cross validation
+If you want to perform leave-one-out cross validation, execute the command above with the --validate flag. 
+NOTE: This will likely take a long time. We recommend testing the script without the --validate flag to
+determine how long a single training takes. If you have N pages, estimate the total running time before 
+you perform the actual cross-validation. Chances are you will need to run this overnight if you are using a
+machine with 4 or fewer cores. 
+
+```
+python3 src/validation_testing.py 37 'barley_p' '_td.json' Data/DavisLJ11  /tmp/spacy 'test_' --validate 2> test_results.txt
+```
+This will generate 37 training files in `/tmp/spacy`: one that has
+pages 2-37, one with page 1 and 3-37, one with pages 1-2 and 4-37, etc. A
+model is created for each, and training accuracy stats are computed
+for each one as well. Finally a compilation of statistics across all 37 runs
 is output to STDERR.
 
 ## Package testing
