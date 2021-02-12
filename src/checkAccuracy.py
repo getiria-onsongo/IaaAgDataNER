@@ -3,7 +3,7 @@
 import spacy
 import re
 import sys
-from json2py import *
+from src.json2py import *
 import argparse
 
 #
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description = "Compare predicted NER components with trained data",
-        epilog = 'Example: python3 checkAccuracy.py modelDir trainingFile (optional --outfile fname)'
+        epilog = 'Example: python3 checkAccuracy.py modelDir testFile (optional --outfile fname)'
     )
     parser.add_argument(
         'model_dir', help = 'model directory. This is the NLP model built by spaCy.'
