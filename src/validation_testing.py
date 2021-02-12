@@ -169,7 +169,7 @@ def train_nth_model(n, dataset_file, output_dir, outfile_prefix, test_size):
 def build_nth_dataset(n, maxn, fprefix, fsuffix, input_dir, output_dir, outfile_prefix):
     """Build a JSON training set that excludes the nth among maxn entries."""
 
-    sys.stderr.write("\n\n============================ Working on segment " + str(n) + " ===========================\n")
+    sys.stderr.write("\n\n============================ Testing segment " + str(n) + " ===========================\n")
     trainFile_name = output_dir + "/" + outfile_prefix + str(n) + ".json"
     fo = open(trainFile_name, 'w')
     fo.write("[")
@@ -195,39 +195,47 @@ def leave_one_out_xval(maxn, fprefix, fsuffix, input_dir, output_dir, output_pre
    if (not validate):
        test_page = random.randint(1, maxn)
        test_file = input_dir + "/" + fprefix + str(test_page) + fsuffix
-       #dataset_file = build_nth_dataset(test_page, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
-       #model_dir = train_nth_model(test_page, dataset_file, output_dir, output_prefix, test_size)
-       model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/ner_model/model-best"
+       dataset_file = build_nth_dataset(test_page, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
+       model_dir = train_nth_model(test_page, dataset_file, output_dir, output_prefix, test_size)
        accuracyFile_name = output_dir + "/" + output_prefix + str(test_page)+"_stats.txt"
        check_model_accuracy(test_file, model_dir, accuracyFile_name)
    else:
-       print("Here")
+       print("Run the validate code")
        for i in range(1, maxn + 1):
-           train_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
            test_file = input_dir + "/" + fprefix + str(i) + fsuffix
-           # Delete model folder no longer being used. Models consume a lot of disk space (about 1GB a model)
-           if i > 2:
-               deleteFolder(output_dir + "/" + output_prefix + "_model_" + str(i - 2))
-               deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + "_training_data.json")
-               deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + "_validate_data.json")
-               deleteFolder(output_dir + "/" + output_prefix + str(i - 2) + ".json")
-
-           model_folder = output_dir + "/" + output_prefix + "_model_" + str(i)
-           prev_model = output_dir + "/" + output_prefix + "_model_" + str(i - 1) + "/model-best"
-           model_dir = train_nth_model(i, train_file, output_dir, output_prefix, test_size, pretrained_model,prev_model, model_folder)
-
-           accuracyFile_name = model_folder + "_stats.txt"
+           dataset_file = build_nth_dataset(i, maxn, fprefix, fsuffix, input_dir, output_dir, output_prefix)
+           model_dir = train_nth_model(i, dataset_file, output_dir, output_prefix, test_size)
+           accuracyFile_name = output_dir + "/" + output_prefix + str(i) + "_stats.txt"
            check_model_accuracy(test_file, model_dir, accuracyFile_name)
            clear_tally()
+           # Delete temp files to save space
+           deleteFile(output_dir + "/" + output_prefix + str(i) + ".cfg")
+           deleteFile(output_dir + "/" + output_prefix + str(i) + ".json")
+           deleteFile(output_dir + "/" + output_prefix + str(i) + "_dev.json")
+           deleteFile(output_dir + "/" + output_prefix + str(i) + "_dev.spacy")
+           deleteFile(output_dir + "/" + output_prefix + str(i) + "_train.json")
+           deleteFile(output_dir + "/" + output_prefix + str(i) + "_train.spacy")
+           deleteFile(output_dir + "/model-best")
+           deleteFile(output_dir + "/model-last")
+
 
 if __name__ == "__main__":
 
     #
     # Parse out the arguments and assign them to variables
     #
+    # NOTE: The --validate flag is used if you want to perform leave-one-out cross validation. Because
+    # training is time consuming, for testing purposes do not use the --validate flag. Not using the --validate flag
+    # will result in a single analysis being performed where one of the pages in randomly chosen and used at the
+    # test page and the other pages are use for training. This is sufficient to test the code.
+    #
+    # Also note, the training will converge faster if you use more data. If the folder with your data contains 37 training pages
+    # we recommend setting maxn to 37.
+    # e.g., > python src/validation_testing.py 37 'barley_p' '_td.json' Data/DavisLJ11  /tmp/spacy 'test_'
+    #
     parser = argparse.ArgumentParser(
         description="Perform leave one out validation for NER training",
-        epilog='Example: python validation_testing.py maxn fprefix fsuffix input_dir output_dir output_prefix pretrained_model (optional --titrate)'
+        epilog='Example: python validation_testing.py maxn fprefix fsuffix input_dir output_dir output_prefix (optional --validate)'
     )
     parser.add_argument(
         'maxn', help='integer for max chunks the training data is broken into'
