@@ -1,6 +1,10 @@
 import tkinter as tk
 from tkinter import filedialog as fd
 from functools import partial
+from agParse import *
+
+# TO DO NEXT:
+# 1) Add code to load model, tag sentence and highlight text
 
 
 # create a NER GUI class
@@ -13,40 +17,64 @@ class NERgui:
 
         self.rootWin.geometry('1100x400')
 
-        self.content=["Pandemic has resulted in economic slowdown worldwide. People are tired. "]
+        self.content=["Eight-Twelve is a six-rowed winter feed barley",
+                      "Merit 57 is a two-rowed spring malting barley.",
+                      "It was released by Busch Agricultural Resources in 2009.",
+                      "It was selected from the cross Steveland/Luther//Wintermalt."]
+
+        # Load spacy model
+        source_nlp = spacy.load("en_core_web_sm")
+        model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
+        self.nlp_agdata = spacy.load(model_dir)
+        self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
+        self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
+        #self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
+
+        self.cust_ents = []
+        self.TRAIN_DATA = []
+
         self.line_num = 0
-        self.page_lines = 1
+        self.page_lines = len(self.content)
 
         self.topframe = tk.Frame(self.rootWin)
         self.topframe.grid(row=0, column=0)
 
         # Named entity buttons
-        self.alas_btn = tk.Button(self.topframe, text="ALAS", command=partial(self.get_ner, "ALAS","alas_color_tag"))
+        self.alas_btn = tk.Button(self.topframe, text="ALAS", command=partial(self.get_ner, "ALAS"))
         self.alas_btn.pack(side = tk.LEFT)
 
-        self.crop_btn = tk.Button(self.topframe, text="CROP", command=partial(self.get_ner, "CROP","crop_color_tag"))
+        self.crop_btn = tk.Button(self.topframe, text="CROP", command=partial(self.get_ner, "CROP"))
         self.crop_btn.pack(side = tk.LEFT)
 
-        self.cvar_btn = tk.Button(self.topframe, text="CVAR", command=partial(self.get_ner, "CVAR","cvar_color_tag"))
+        self.cvar_btn = tk.Button(self.topframe, text="CVAR", command=partial(self.get_ner, "CVAR"))
         self.cvar_btn.pack(side = tk.LEFT)
 
-        self.jrnl_btn = tk.Button(self.topframe, text="JRNL", command=partial(self.get_ner, "JRNL","jrnl_color_tag"))
+        self.jrnl_btn = tk.Button(self.topframe, text="JRNL", command=partial(self.get_ner, "JRNL"))
         self.jrnl_btn.pack(side = tk.LEFT)
 
-        self.path_btn = tk.Button(self.topframe, text="PATH", command=partial(self.get_ner, "PATH","path_color_tag"))
+        self.path_btn = tk.Button(self.topframe, text="PATH", command=partial(self.get_ner, "PATH"))
         self.path_btn.pack(side = tk.LEFT)
 
-        self.ped_btn = tk.Button(self.topframe, text="PED", command=partial(self.get_ner, "PED","ped_color_tag"))
+        self.ped_btn = tk.Button(self.topframe, text="PED", command=partial(self.get_ner, "PED"))
         self.ped_btn.pack(side = tk.LEFT)
 
-        self.plan_btn = tk.Button(self.topframe, text="PLAN", command=partial(self.get_ner, "PLAN","plan_color_tag"))
+        self.plan_btn = tk.Button(self.topframe, text="PLAN", command=partial(self.get_ner, "PLAN"))
         self.plan_btn.pack(side = tk.LEFT)
 
-        self.pptd_btn = tk.Button(self.topframe, text="PPTD", command=partial(self.get_ner, "PPTD","pptd_color_tag"))
+        self.pptd_btn = tk.Button(self.topframe, text="PPTD", command=partial(self.get_ner, "PPTD"))
         self.pptd_btn.pack(side = tk.LEFT)
 
-        self.trat_btn = tk.Button(self.topframe, text="TRAT", command=partial(self.get_ner, "TRAT","trat_color_tag"))
+        self.trat_btn = tk.Button(self.topframe, text="TRAT", command=partial(self.get_ner, "TRAT"))
         self.trat_btn.pack(side = tk.LEFT)
+
+        self.spaceLabel = tk.Label(self.topframe, text="    ", width=17)
+        self.spaceLabel.pack(side=tk.LEFT)
+
+        self.clearTag_btn = tk.Button(self.topframe, text="Remove-Tag", command=partial(self.clear_tag))
+        self.clearTag_btn.pack(side=tk.LEFT)
+
+        self.pretag_btn = tk.Button(self.topframe, text="Pre-Tag", command=partial(self.pre_tag))
+        self.pretag_btn.pack(side=tk.LEFT)
 
         # adding the text
         self.text = tk.Text(self.rootWin, height=8, font = "Times 24")
@@ -61,17 +89,18 @@ class NERgui:
         # configuring a tag called start which will be used to highlight the text
         self.text.tag_configure("highlight", foreground="black", background="red")
 
-        self.text.tag_configure("default_color_tag", foreground="black")
-        self.text.tag_configure("alas_color_tag", foreground="blue")
-        self.text.tag_configure("crop_color_tag", foreground="green")
-        self.text.tag_configure("cvar_color_tag", foreground="violet")
-        self.text.tag_configure("jrnl_color_tag", foreground="gold")
-        self.text.tag_configure("path_color_tag", foreground="red")
-        self.text.tag_configure("ped_color_tag", foreground="orange")
-        self.text.tag_configure("plan_color_tag", foreground="pink")
-        self.text.tag_configure("pptd_color_tag", foreground="brown")
-        self.text.tag_configure("trat_color_tag", foreground="purple")
+        self.text.tag_configure("default_color_tag", background="black")
+        self.text.tag_configure("ALAS", background="violet")
+        self.text.tag_configure("CROP", background="lawn green")
+        self.text.tag_configure("CVAR", background="deep sky blue")
+        self.text.tag_configure("JRNL", background="gold")
+        self.text.tag_configure("PATH", background="red")
+        self.text.tag_configure("PED", background="orange")
+        self.text.tag_configure("PLAN", background="pink")
+        self.text.tag_configure("PPTD", background="brown")
+        self.text.tag_configure("TRAT", background="MediumPurple1")
 
+        self.tags=["highlight","default_color_tag","ALA","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
 
         self.bottom_frame = tk.Frame(self.rootWin)
         self.bottom_frame.grid(row=2, column=0)
@@ -85,7 +114,7 @@ class NERgui:
         self.bold_btn.pack(side = tk.LEFT)
 
         # Clear button
-        self.clear_btn = tk.Button(self.bottom_frame, text="Clear",width=10, command=self.clear_highlight)
+        self.clear_btn = tk.Button(self.bottom_frame, text="Clear All Tags",width=10, command=self.clear_highlight)
         self.clear_btn.pack(side = tk.LEFT)
 
         # Clear message button
@@ -94,7 +123,7 @@ class NERgui:
 
         # Next line button
         self.next_btn = tk.Button(self.bottom_frame, text="Next Line", command=self.nextline)
-        self.next_btn.pack(side = tk.LEFT)
+        self.next_btn.pack(side = tk.RIGHT)
 
         self.msg_frame = tk.Frame(self.rootWin)
         self.msg_frame.grid(row=3, column=0)
@@ -103,16 +132,29 @@ class NERgui:
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
         self.msg.pack(side=tk.LEFT)
 
+        # Frame for selecting
+        self.open_frame = tk.Frame(self.rootWin)
+        self.open_frame.grid(row=4, column=0)
+
         # open file button
-        self.open_button = tk.Button(self.rootWin,text='Open a File',command=self.open_text_file )
-        self.open_button.grid(row=1,column=4,  sticky='w', padx=5, pady=5)
+        self.open_button = tk.Button(self.open_frame,text='Select File',width=17,command=self.open_text_file )
+        self.open_button.pack(side=tk.LEFT)
+
+        self.pageLabel = tk.Label(self.open_frame, text="PDF Page Num:",width=17)
+        self.pageLabel.pack(side=tk.LEFT)
+
+        self.pageEntry = tk.Entry(self.open_frame, width=10)
+        self.pageEntry.pack(side=tk.LEFT)
+
+        self.load_btn = tk.Button(self.open_frame, text="Load Data",command=partial(self.get_ner, "TRAT"))
+        self.load_btn.pack(side=tk.LEFT)
 
     # method to highlight the selected text
     def highlight_text(self):
         # if no text is selected then tk.TclError exception occurs
         try:
             self.text.tag_add("highlight", "sel.first", "sel.last")
-            print(self.text.get("sel.first", "sel.last"))
+            print(self.text.index("sel.first"), self.text.index("sel.last"))
         except tk.TclError:
             self.msg.config(text="Warning!! No text was selected.",foreground="red")
 
@@ -121,31 +163,96 @@ class NERgui:
 
     # method to clear all contents from text widget.
     def clear_highlight(self):
-        self.text.tag_remove("highlight", "1.0", 'end')
-
-        for tag in self.text.tag_names():
+        for tag in self.tags:
             self.text.tag_remove(tag, "1.0", "end")
 
         self.msg.config(text="")
 
 
-    def get_ner(self,label,tagLabel):
+    def clear_tag(self):
         # if no text is selected then tk.TclError exception occurs
         try:
-            self.text.tag_add(tagLabel, "sel.first", "sel.last")
-            print(self.line_num, self.text.get("sel.first", "sel.last"),label)
+            h_start = int(self.text.index("sel.first").split(".")[1])
+            h_end= int(self.text.index("sel.last").split(".")[1])
+
+            new_ents = []
+            for (start, end, label) in self.cust_ents:
+                if(not self.overlap([h_start,h_end],[start, end])):
+                    new_ents.append((start, end, label))
+            self.cust_ents = new_ents
+
+            for tag in self.tags:
+                self.text.tag_remove(tag, "sel.first", "sel.last")
         except tk.TclError:
             self.msg.config(text="Warning!! No text was selected.", foreground="red")
 
+
+
+    def get_ner(self,tagLabel):
+        # NOTE: We need to make this function more robust by first checking
+        # if there is an entity overlapping the selected text and remove it before
+        # adding a new entity.
+        try:
+            h_start = int(self.text.index("sel.first").split(".")[1])
+            h_end = int(self.text.index("sel.last").split(".")[1])
+
+            self.text.tag_add(tagLabel, "sel.first", "sel.last")
+            self.cust_ents.append((h_start,h_end,tagLabel))
+            self.cust_ents.sort()
+            print(self.cust_ents)
+        except tk.TclError:
+            self.msg.config(text="Warning!! No text was selected.", foreground="red")
+
+    def tag_ner_with_spacy(self, text):
+        doc = self.nlp_agdata(text)
+        return doc
+
+    def pre_tag(self):
+        input_text = self.text.get(1.0, tk.END)
+        doc = self.tag_ner_with_spacy(input_text)
+        for ent in doc.ents:
+            #print(ent.text, ent.start_char, ent.end_char, ent.label_)
+            if(ent.label_ in self.tags):
+                self.text.tag_add(ent.label_, "1."+str(ent.start_char), "1."+str(ent.end_char))
+            else:
+                self.text.tag_add("highlight", "1." + str(ent.start_char), "1." + str(ent.end_char))
+            self.cust_ents.append((ent.start_char, ent.end_char, ent.label_))
+
+
+    def overlap(self, interva1, interval2):
+        overlap = False
+        interva1start = interva1[0]
+        interva1end = interva1[1]
+
+        interval2start = interval2[0]
+        interval2end = interval2[1]
+
+        if(interval2start >= interva1start and interval2start <= interva1end):
+            overlap = True
+        elif (interval2end >= interva1start and interval2end <= interva1end):
+            overlap = True
+        elif (interval2start <= interva1start and interval2end >= interva1end):
+            overlap = True
+
+        return overlap
+
     def nextline(self):
-        # Delete contents
+
+        if(len(self.cust_ents)> 0):
+            text = self.content[self.line_num]
+            ents = {'entities': self.cust_ents}
+            self.TRAIN_DATA.append((text, ents))
+
         if(self.line_num == (self.page_lines - 1)):
             self.msg.config(text="Warning!! No more sentences.", foreground="red")
         else:
             # Add next line
+            self.cust_ents=[]
             self.line_num = self.line_num + 1
             self.text.delete(1.0, tk.END)
             self.text.insert(tk.END, self.content[self.line_num])
+
+        print("TRAIN DATA=\n",self.TRAIN_DATA)
 
     def open_text_file(self):
         # file type
