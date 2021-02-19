@@ -17,10 +17,7 @@ class NERgui:
 
         self.rootWin.geometry('1100x400')
 
-        self.content=["Eight-Twelve is a six-rowed winter feed barley",
-                      "Merit 57 is a two-rowed spring malting barley.",
-                      "It was released by Busch Agricultural Resources in 2009.",
-                      "It was selected from the cross Steveland/Luther//Wintermalt."]
+        self.content=[""]
 
         # Load spacy model
         source_nlp = spacy.load("en_core_web_sm")
@@ -32,7 +29,8 @@ class NERgui:
 
         self.cust_ents = []
         self.TRAIN_DATA = []
-
+        self.output_file_name = "sample_p0_td.py"
+        self.pageNumber=0
         self.line_num = 0
         self.page_lines = len(self.content)
 
@@ -40,31 +38,23 @@ class NERgui:
         self.topframe.grid(row=0, column=0)
 
         # Named entity buttons
-        self.alas_btn = tk.Button(self.topframe, text="ALAS", command=partial(self.get_ner, "ALAS"))
+        self.alas_btn = tk.Button(self.topframe, highlightbackground="violet",text="ALAS", command=partial(self.get_ner, "ALAS"))
         self.alas_btn.pack(side = tk.LEFT)
-
-        self.crop_btn = tk.Button(self.topframe, text="CROP", command=partial(self.get_ner, "CROP"))
+        self.crop_btn = tk.Button(self.topframe, highlightbackground="lawn green",text="CROP", command=partial(self.get_ner, "CROP"))
         self.crop_btn.pack(side = tk.LEFT)
-
-        self.cvar_btn = tk.Button(self.topframe, text="CVAR", command=partial(self.get_ner, "CVAR"))
+        self.cvar_btn = tk.Button(self.topframe, highlightbackground="deep sky blue",text="CVAR", command=partial(self.get_ner, "CVAR"))
         self.cvar_btn.pack(side = tk.LEFT)
-
-        self.jrnl_btn = tk.Button(self.topframe, text="JRNL", command=partial(self.get_ner, "JRNL"))
+        self.jrnl_btn = tk.Button(self.topframe, highlightbackground="yellow",text="JRNL", command=partial(self.get_ner, "JRNL"))
         self.jrnl_btn.pack(side = tk.LEFT)
-
-        self.path_btn = tk.Button(self.topframe, text="PATH", command=partial(self.get_ner, "PATH"))
+        self.path_btn = tk.Button(self.topframe, highlightbackground="red",text="PATH", command=partial(self.get_ner, "PATH"))
         self.path_btn.pack(side = tk.LEFT)
-
-        self.ped_btn = tk.Button(self.topframe, text="PED", command=partial(self.get_ner, "PED"))
+        self.ped_btn = tk.Button(self.topframe, highlightbackground="orange",text="PED", command=partial(self.get_ner, "PED"))
         self.ped_btn.pack(side = tk.LEFT)
-
-        self.plan_btn = tk.Button(self.topframe, text="PLAN", command=partial(self.get_ner, "PLAN"))
+        self.plan_btn = tk.Button(self.topframe, highlightbackground="pink",text="PLAN", command=partial(self.get_ner, "PLAN"))
         self.plan_btn.pack(side = tk.LEFT)
-
-        self.pptd_btn = tk.Button(self.topframe, text="PPTD", command=partial(self.get_ner, "PPTD"))
+        self.pptd_btn = tk.Button(self.topframe, highlightbackground="brown",text="PPTD", command=partial(self.get_ner, "PPTD"))
         self.pptd_btn.pack(side = tk.LEFT)
-
-        self.trat_btn = tk.Button(self.topframe, text="TRAT", command=partial(self.get_ner, "TRAT"))
+        self.trat_btn = tk.Button(self.topframe, highlightbackground="MediumPurple1",text="TRAT", command=partial(self.get_ner, "TRAT"))
         self.trat_btn.pack(side = tk.LEFT)
 
         self.spaceLabel = tk.Label(self.topframe, text="    ", width=17)
@@ -72,7 +62,6 @@ class NERgui:
 
         self.clearTag_btn = tk.Button(self.topframe, text="Remove-Tag", command=partial(self.clear_tag))
         self.clearTag_btn.pack(side=tk.LEFT)
-
         self.pretag_btn = tk.Button(self.topframe, text="Pre-Tag", command=partial(self.pre_tag))
         self.pretag_btn.pack(side=tk.LEFT)
 
@@ -93,7 +82,7 @@ class NERgui:
         self.text.tag_configure("ALAS", background="violet")
         self.text.tag_configure("CROP", background="lawn green")
         self.text.tag_configure("CVAR", background="deep sky blue")
-        self.text.tag_configure("JRNL", background="gold")
+        self.text.tag_configure("JRNL", background="yellow")
         self.text.tag_configure("PATH", background="red")
         self.text.tag_configure("PED", background="orange")
         self.text.tag_configure("PLAN", background="pink")
@@ -123,7 +112,11 @@ class NERgui:
 
         # Next line button
         self.next_btn = tk.Button(self.bottom_frame, text="Next Line", command=self.nextline)
-        self.next_btn.pack(side = tk.RIGHT)
+        self.next_btn.pack(side = tk.LEFT)
+
+        # Save button
+        self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save)
+        self.save_btn.pack(side=tk.LEFT)
 
         self.msg_frame = tk.Frame(self.rootWin)
         self.msg_frame.grid(row=3, column=0)
@@ -148,6 +141,8 @@ class NERgui:
 
         self.load_btn = tk.Button(self.open_frame, text="Load Data",command=partial(self.get_ner, "TRAT"))
         self.load_btn.pack(side=tk.LEFT)
+
+
 
     # method to highlight the selected text
     def highlight_text(self):
@@ -193,13 +188,26 @@ class NERgui:
         # if there is an entity overlapping the selected text and remove it before
         # adding a new entity.
         try:
+            # Get start and end char positions
             h_start = int(self.text.index("sel.first").split(".")[1])
             h_end = int(self.text.index("sel.last").split(".")[1])
 
+            # Check if selected area overlaps with another NER tag. If it does,
+            # delete the existing tag. SpaCy does not allow NER tags to overlap.
+            new_ents = []
+            for (start, end, label) in self.cust_ents:
+                if (not self.overlap([h_start, h_end], [start, end])):
+                    new_ents.append((start, end, label))
+            self.cust_ents = new_ents
+
+            # Add the new tag
             self.text.tag_add(tagLabel, "sel.first", "sel.last")
             self.cust_ents.append((h_start,h_end,tagLabel))
-            self.cust_ents.sort()
-            print(self.cust_ents)
+
+            # Print to make sure it worked. This code needs to be removed after
+            # code has been tested.
+            #self.cust_ents.sort()
+            #print(self.cust_ents)
         except tk.TclError:
             self.msg.config(text="Warning!! No text was selected.", foreground="red")
 
@@ -239,9 +247,11 @@ class NERgui:
     def nextline(self):
 
         if(len(self.cust_ents)> 0):
-            text = self.content[self.line_num]
+            text = self.content[self.line_num].strip()
+            self.cust_ents.sort()
             ents = {'entities': self.cust_ents}
             self.TRAIN_DATA.append((text, ents))
+            print(ents)
 
         if(self.line_num == (self.page_lines - 1)):
             self.msg.config(text="Warning!! No more sentences.", foreground="red")
@@ -252,7 +262,7 @@ class NERgui:
             self.text.delete(1.0, tk.END)
             self.text.insert(tk.END, self.content[self.line_num])
 
-        print("TRAIN DATA=\n",self.TRAIN_DATA)
+        #print("TRAIN DATA=\n",self.TRAIN_DATA)
 
     def open_text_file(self):
         # file type
@@ -272,6 +282,13 @@ class NERgui:
         self.line_num = 0
         self.page_lines = len(self.content)
         self.text.insert(tk.END, self.content[self.line_num])
+
+    def file_save(self):
+        f = fd.asksaveasfile(mode='w', defaultextension=".txt")
+        if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
+            return
+        f.write('TRAIN_DATA = '+str(self.TRAIN_DATA)+"\n")
+        f.close()
 
     def go(self):
         """This takes no inputs, and sets the GUI running"""
