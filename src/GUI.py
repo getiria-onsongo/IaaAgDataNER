@@ -13,7 +13,7 @@ class NERgui:
         # Create a GUI window
         self.rootWin = tk.Tk()
         #self.rootWin.option_add('*Font', 'Times 24')
-        self.rootWin.title("NER Annotation")
+        self.rootWin.title("GEMS NER Annotation Tool")
 
         self.rootWin.geometry('1100x400')
 
