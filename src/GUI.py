@@ -21,7 +21,7 @@ class NERgui:
 
         # Load spacy model
         source_nlp = spacy.load("en_core_web_sm")
-        model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
+        model_dir = "/Users/ahmedabdallaahmed/Desktop/Research/model-best"
         self.nlp_agdata = spacy.load(model_dir)
         self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
         self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
@@ -38,15 +38,15 @@ class NERgui:
         self.topframe.grid(row=0, column=0)
 
         # Named entity buttons
-        self.alas_btn = tk.Button(self.topframe, highlightbackground="violet",text="ALAS", command=partial(self.get_ner, "ALAS"))
+        self.alas_btn = tk.Button(self.topframe, highlightbackground ="violet", text="ALAS", command=partial(self.get_ner, "ALAS"))
         self.alas_btn.pack(side = tk.LEFT)
-        self.crop_btn = tk.Button(self.topframe, highlightbackground="lawn green",text="CROP", command=partial(self.get_ner, "CROP"))
+        self.crop_btn = tk.Button(self.topframe, highlightbackground="lawn green", text="CROP", command=partial(self.get_ner, "CROP"))
         self.crop_btn.pack(side = tk.LEFT)
-        self.cvar_btn = tk.Button(self.topframe, highlightbackground="deep sky blue",text="CVAR", command=partial(self.get_ner, "CVAR"))
+        self.cvar_btn = tk.Button(self.topframe, highlightbackground="deep sky blue", text="CVAR", command=partial(self.get_ner, "CVAR"))
         self.cvar_btn.pack(side = tk.LEFT)
-        self.jrnl_btn = tk.Button(self.topframe, highlightbackground="yellow",text="JRNL", command=partial(self.get_ner, "JRNL"))
+        self.jrnl_btn = tk.Button(self.topframe, highlightbackground="yellow", text="JRNL", command=partial(self.get_ner, "JRNL"))
         self.jrnl_btn.pack(side = tk.LEFT)
-        self.path_btn = tk.Button(self.topframe, highlightbackground="red",text="PATH", command=partial(self.get_ner, "PATH"))
+        self.path_btn = tk.Button(self.topframe, highlightbackground="red", text="PATH", command=partial(self.get_ner, "PATH"))
         self.path_btn.pack(side = tk.LEFT)
         self.ped_btn = tk.Button(self.topframe, highlightbackground="orange",text="PED", command=partial(self.get_ner, "PED"))
         self.ped_btn.pack(side = tk.LEFT)
@@ -130,7 +130,7 @@ class NERgui:
         self.open_frame.grid(row=4, column=0)
 
         # open file button
-        self.open_button = tk.Button(self.open_frame,text='Select File',width=17,command=self.open_text_file )
+        self.open_button = tk.Button(self.open_frame,text='Select File',width=17,command=self.open_text_file)
         self.open_button.pack(side=tk.LEFT)
 
         self.pageLabel = tk.Label(self.open_frame, text="PDF Page Num:",width=17)
@@ -224,6 +224,7 @@ class NERgui:
                 self.text.tag_add(ent.label_, "1."+str(ent.start_char), "1."+str(ent.end_char))
             else:
                 self.text.tag_add("highlight", "1." + str(ent.start_char), "1." + str(ent.end_char))
+                self.text.tag_config("highlight", background = "grey", foreground = "white")
             self.cust_ents.append((ent.start_char, ent.end_char, ent.label_))
 
 
@@ -284,7 +285,7 @@ class NERgui:
         self.text.insert(tk.END, self.content[self.line_num])
 
     def file_save(self):
-        f = fd.asksaveasfile(mode='w', defaultextension=".txt")
+        f = fd.asksaveasfile(mode='w', defaultextension="json")
         if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
             return
         f.write('TRAIN_DATA = '+str(self.TRAIN_DATA)+"\n")
