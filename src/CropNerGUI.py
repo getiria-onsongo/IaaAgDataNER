@@ -8,7 +8,7 @@ from agParse import *
 
 
 # create a NER GUI class
-class NERgui:
+class CropNerGUI:
     def __init__(self):
         # Create a GUI window
         self.rootWin = tk.Tk()
@@ -36,6 +36,12 @@ class NERgui:
 
         self.topframe = tk.Frame(self.rootWin)
         self.topframe.grid(row=0, column=0)
+
+        # NOTE: A partial function is created from another function, where some of the parameters are fixed.
+        # In the instance below, we want to call the function self.get_ner (which takes a single input) several
+        # times but each time we pass it a different value depending on the button that was clicked. If the ALAS
+        # button is clicked, we want to pass the text "ALAS" but if the "CROP" button was clicked we want to pass the
+        # text CROP. So, partial(self.get_ner, "ALAS") is the same as self.get_ner("ALAS")
 
         # Named entity buttons
         self.alas_btn = tk.Button(self.topframe, highlightbackground="violet",text="ALAS", command=partial(self.get_ner, "ALAS"))
@@ -301,5 +307,5 @@ class NERgui:
 
 # Driver code
 if __name__ == "__main__":
-    myGui = NERgui()
+    myGui = CropNerGUI()
     myGui.go()
