@@ -136,7 +136,7 @@ class CropNerGUI:
         self.open_frame.grid(row=4, column=0)
 
         # open file button
-        self.open_button = tk.Button(self.open_frame,text='Select File',width=17,command=self.open_text_file )
+        self.open_button = tk.Button(self.open_frame,text='Select File(PDF)',width=17,command=self.open_text_file)
         self.open_button.pack(side=tk.LEFT)
 
         self.pageLabel = tk.Label(self.open_frame, text="PDF Page Num:",width=17)
@@ -145,8 +145,8 @@ class CropNerGUI:
         self.pageEntry = tk.Entry(self.open_frame, width=10)
         self.pageEntry.pack(side=tk.LEFT)
 
-        self.load_btn = tk.Button(self.open_frame, text="Load Data",command=partial(self.get_ner, "TRAT"))
-        self.load_btn.pack(side=tk.LEFT)
+        self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation (JSON)",width=17,command=self.open_text_file)
+        self.annotation_btn.pack(side=tk.LEFT)
 
 
 

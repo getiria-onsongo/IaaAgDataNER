@@ -5,7 +5,7 @@ from spacy.language import Language
 from spacy.tokens import Span
 from spacy.matcher import Matcher
 
-from preparse import *
+from src.preparse import *
 
 nlp = spacy.load('en_core_web_sm')
 
