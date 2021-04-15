@@ -18,14 +18,9 @@ class CropNerGUI:
         self.rootWin.geometry('1100x400')
 
         self.content=[""]
-
-        # Load spacy model
-        source_nlp = spacy.load("en_core_web_sm")
-        model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
-        self.nlp_agdata = spacy.load(model_dir)
-        self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
-        self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
-        #self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
+        self.file=""
+        self.annotation_file = ""
+        self.nlp_agdata = ""
 
         self.cust_ents = []
         self.TRAIN_DATA = []
@@ -104,6 +99,12 @@ class CropNerGUI:
         self.exit_btn = tk.Button(self.bottom_frame, text="Exit",width=10,command=self.quit)
         self.exit_btn.pack(side = tk.LEFT)
 
+        # Load button
+        self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.LoadData)
+        self.load_btn.pack(side=tk.LEFT)
+
+
+
         # Highlight button
         self.bold_btn = tk.Button(self.bottom_frame, text="Highlight Text",width=10, command=self.highlight_text)
         self.bold_btn.pack(side = tk.LEFT)
@@ -136,19 +137,20 @@ class CropNerGUI:
         self.open_frame.grid(row=4, column=0)
 
         # open file button
-        self.open_button = tk.Button(self.open_frame,text='Select File(PDF)',width=17,command=self.open_text_file)
+        self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF/txt)',width=22,command=partial(self.open_file,"raw"))
         self.open_button.pack(side=tk.LEFT)
 
-        self.pageLabel = tk.Label(self.open_frame, text="PDF Page Num:",width=17)
+        self.pageLabel = tk.Label(self.open_frame, text="Raw Data File Page Num:",width=22)
         self.pageLabel.pack(side=tk.LEFT)
 
         self.pageEntry = tk.Entry(self.open_frame, width=10)
         self.pageEntry.pack(side=tk.LEFT)
 
-        self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation (JSON)",width=17,command=self.open_text_file)
+        self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=22,command=partial(self.open_file,"json"))
         self.annotation_btn.pack(side=tk.LEFT)
 
-
+        self.review_btn = tk.Button(self.open_frame, text="Review Annotations", command=partial(self.pre_tag))
+        self.review_btn.pack(side=tk.LEFT)
 
     # method to highlight the selected text
     def highlight_text(self):
@@ -212,10 +214,11 @@ class CropNerGUI:
 
             # Print to make sure it worked. This code needs to be removed after
             # code has been tested.
-            #self.cust_ents.sort()
-            #print(self.cust_ents)
+            self.cust_ents.sort()
+            print(self.cust_ents)
+
         except tk.TclError:
-            self.msg.config(text="Warning!! No text was selected.", foreground="red")
+            self.msg.config(text="Warning!! get_ner error.", foreground="red")
 
     def tag_ner_with_spacy(self, text):
         doc = self.nlp_agdata(text)
@@ -270,24 +273,59 @@ class CropNerGUI:
 
         #print("TRAIN DATA=\n",self.TRAIN_DATA)
 
-    def open_text_file(self):
+    def open_file(self, file_type):
         # file type
         filetypes = (
             ('text files', '*.txt'),
+            ('json files', '*.json'),
             ('All files', '*.*')
         )
 
         # show the open file dialog
         f = fd.askopenfile(filetypes=filetypes)
+        if(file_type == "json"):
+            self.annotation_file = f
+        else:
+            self.file=f
 
-        # Delete contents
-        self.text.delete(1.0, tk.END)
+    def LoadModel(self):
+        # Load spacy model
+        source_nlp = spacy.load("en_core_web_sm")
+        model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
+        self.nlp_agdata = spacy.load(model_dir)
+        self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
+        self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
+        # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
 
-        # read the text file and show its content on the Text
-        self.content = f.readlines()
-        self.line_num = 0
-        self.page_lines = len(self.content)
-        self.text.insert(tk.END, self.content[self.line_num])
+    def LoadFirstLine(self):
+        if isinstance(self.file, str):
+            self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
+        else:
+            self.LoadModel()
+            # Delete contents
+            self.text.delete(1.0, tk.END)
+
+            # read the text file and show its content on the Text
+            self.content = self.file.readlines()
+            self.line_num = 0
+            self.page_lines = len(self.content)
+            self.text.insert(tk.END, self.content[self.line_num])
+
+    def LoadData(self):
+        if isinstance(self.file, str):
+            self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
+        else:
+            self.LoadModel()
+            # Delete contents
+            self.text.delete(1.0, tk.END)
+
+            self.line_num = 0
+            file_content = self.file.readlines()
+            # read the text file and show its content on the Text
+            for line in file_content:
+                self.text.insert(tk.END, line)
+                self.line_num = self.line_num + 1
+            self.page_lines = self.line_num
 
     def file_save(self):
         f = fd.asksaveasfile(mode='w', defaultextension=".txt")
