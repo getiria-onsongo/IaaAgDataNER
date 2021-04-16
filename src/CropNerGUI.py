@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog as fd
 from functools import partial
 from agParse import *
+from py2json import *
 
 # TO DO NEXT:
 # 1) Add code to load model, tag sentence and highlight text
@@ -100,7 +101,7 @@ class CropNerGUI:
         self.exit_btn.pack(side = tk.LEFT)
 
         # Load button
-        self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.LoadData)
+        self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.LoadFirstLine)
         self.load_btn.pack(side=tk.LEFT)
 
 
@@ -215,7 +216,7 @@ class CropNerGUI:
             # Print to make sure it worked. This code needs to be removed after
             # code has been tested.
             self.cust_ents.sort()
-            print(self.cust_ents)
+            #print(self.cust_ents)
 
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
@@ -260,7 +261,7 @@ class CropNerGUI:
             self.cust_ents.sort()
             ents = {'entities': self.cust_ents}
             self.TRAIN_DATA.append((text, ents))
-            print(ents)
+            #print(ents)
 
         if(self.line_num == (self.page_lines - 1)):
             self.msg.config(text="Warning!! No more sentences.", foreground="red")
@@ -311,6 +312,12 @@ class CropNerGUI:
             self.page_lines = len(self.content)
             self.text.insert(tk.END, self.content[self.line_num])
 
+
+    '''
+    I COMMENTED THIS FUNCTION BECAUSE IT IS A LOT SIMPLER TO LOAD A SINGLE LINE AND ANNOTATE PER LINE.
+    THIS IS BECAUSE THE ANNOTATION GETS SAVED PER LINE (SENTENCE) 
+    WHILE IT MIGHT BE EASIER TO LOAD THE WHOLE PAGE AND VIEW SENTENCES IN CONTEXT, THIS APPROACH WILL MAKE
+    THINGS A BIT COMPLICATED. 
     def LoadData(self):
         if isinstance(self.file, str):
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
@@ -326,13 +333,28 @@ class CropNerGUI:
                 self.text.insert(tk.END, line)
                 self.line_num = self.line_num + 1
             self.page_lines = self.line_num
+    '''
 
     def file_save(self):
-        f = fd.asksaveasfile(mode='w', defaultextension=".txt")
-        if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
+        filepath = fd.asksaveasfilename(defaultextension=".json")
+        #print(filepath)
+        if ((filepath is None) or (len(filepath) == 0)):  # asksaveasfile return `None` if dialog closed with "cancel".
             return
-        f.write('TRAIN_DATA = '+str(self.TRAIN_DATA)+"\n")
-        f.close()
+
+        if(len(self.TRAIN_DATA) == 0):
+            # This means the user has not annotated anything
+            if (len(self.cust_ents) > 0):
+                # This means there were annotations that were not added to the training data.
+                # Annotations are added when a user clicks "Next Line"
+                text = self.content[self.line_num].strip()
+                self.cust_ents.sort()
+                ents = {'entities': self.cust_ents}
+                self.TRAIN_DATA.append((text, ents))
+        train_dict = mixed_type_2_dict(self.TRAIN_DATA, "args.chunk", "args.doc", "args.url")
+        dict_2_json(train_dict, filepath)
+
+        #f.write('TRAIN_DATA = '+str(self.TRAIN_DATA)+"\n")
+        #f.close()
 
     def go(self):
         """This takes no inputs, and sets the GUI running"""
