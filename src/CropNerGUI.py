@@ -3,6 +3,7 @@ from tkinter import filedialog as fd
 from functools import partial
 from agParse import *
 from py2json import *
+import pathlib
 
 # TO DO NEXT:
 # 1) Add code to load model, tag sentence and highlight text
@@ -19,9 +20,10 @@ class CropNerGUI:
         self.rootWin.geometry('1100x400')
 
         self.content=[""]
-        self.file=""
-        self.annotation_file = ""
-        self.nlp_agdata = ""
+        self.raw_file = None
+        self.annotation_file = None
+        self.file_extension = None
+        self.nlp_agdata = None
 
         self.cust_ents = []
         self.TRAIN_DATA = []
@@ -275,19 +277,24 @@ class CropNerGUI:
         #print("TRAIN DATA=\n",self.TRAIN_DATA)
 
     def open_file(self, file_type):
+
         # file type
         filetypes = (
             ('text files', '*.txt'),
             ('json files', '*.json'),
-            ('All files', '*.*')
+            ('PDF files', '*.pdf')
         )
 
         # show the open file dialog
         f = fd.askopenfile(filetypes=filetypes)
-        if(file_type == "json"):
+        self.file_extension = pathlib.Path(f.name).suffix
+
+        if self.file_extension == ".json":
             self.annotation_file = f
+        elif self.file_extension == ".txt" or self.file_extension == ".pdf":
+            self.raw_file=f
         else:
-            self.file=f
+            self.msg.config(text="Warning!! Please select a valid (pdf, txt or json) file.", foreground="red")
 
     def LoadModel(self):
         # Load spacy model
@@ -299,18 +306,30 @@ class CropNerGUI:
         # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
 
     def LoadFirstLine(self):
-        if isinstance(self.file, str):
+        if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
             self.LoadModel()
             # Delete contents
             self.text.delete(1.0, tk.END)
+            if self.file_extension == ".txt":
+                # read the text file and show its content on the Text
+                self.content = self.raw_file.readlines()
+                self.line_num = 0
+                self.page_lines = len(self.content)
+                self.text.insert(tk.END, self.content[self.line_num])
+            else:
+                page_num = self.pageEntry.get()
+                if not page_num.isdigit():
+                    self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
+                    self.pageNumber = 1
+                else:
+                    print("Pg=",page_num)
+                    self.pageNumber = int(page_num)
 
-            # read the text file and show its content on the Text
-            self.content = self.file.readlines()
-            self.line_num = 0
-            self.page_lines = len(self.content)
-            self.text.insert(tk.END, self.content[self.line_num])
+
+
+
 
 
     '''
@@ -319,7 +338,7 @@ class CropNerGUI:
     WHILE IT MIGHT BE EASIER TO LOAD THE WHOLE PAGE AND VIEW SENTENCES IN CONTEXT, THIS APPROACH WILL MAKE
     THINGS A BIT COMPLICATED. 
     def LoadData(self):
-        if isinstance(self.file, str):
+        if isinstance(self.text_file, None):
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
             self.LoadModel()
@@ -327,7 +346,7 @@ class CropNerGUI:
             self.text.delete(1.0, tk.END)
 
             self.line_num = 0
-            file_content = self.file.readlines()
+            file_content = self.text_file.readlines()
             # read the text file and show its content on the Text
             for line in file_content:
                 self.text.insert(tk.END, line)
