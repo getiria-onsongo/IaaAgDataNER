@@ -3,8 +3,10 @@ from tkinter import filedialog as fd
 from functools import partial
 from agParse import *
 from py2json import *
+from json2py import *
 import pathlib
-
+import PyPDF2
+import re
 # TO DO NEXT:
 # 1) Add code to load model, tag sentence and highlight text
 
@@ -152,7 +154,7 @@ class CropNerGUI:
         self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=22,command=partial(self.open_file,"json"))
         self.annotation_btn.pack(side=tk.LEFT)
 
-        self.review_btn = tk.Button(self.open_frame, text="Review Annotations", command=partial(self.pre_tag))
+        self.review_btn = tk.Button(self.open_frame, text="Review Annotations", command=self.ReviewAnnotations)
         self.review_btn.pack(side=tk.LEFT)
 
     # method to highlight the selected text
@@ -324,11 +326,56 @@ class CropNerGUI:
                     self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
                     self.pageNumber = 1
                 else:
+                    self.pageNumber = int(page_num)
+    def ReviewAnnotations(self):
+        if self.raw_file is None or self.annotation_file is None:
+            self.msg.config(text="Please select both a raw (pdf/txt) file and annotations file (json)", foreground="red")
+        else:
+            self.LoadModel()
+            # Delete contents
+            self.text.delete(1.0, tk.END)
+            if self.file_extension == ".txt":
+                # read the text file and show its content on the Text
+                self.content = self.raw_file.readlines()
+                self.line_num = 0
+                self.page_lines = len(self.content)
+                self.text.insert(tk.END, self.content[self.line_num])
+            else:
+                page_num = self.pageEntry.get()
+                if not page_num.isdigit():
+                    self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
+                    self.pageNumber = 1
+                else:
                     print("Pg=",page_num)
+                    print("Annotation=",self.annotation_file.name)
+                    print("Raw file =", self.raw_file.name)
                     self.pageNumber = int(page_num)
 
+                    # Load annotation data
+                    data = json_2_dict(self.annotation_file.name)
+                    train_data = dict_2_mixed_type(data)
+                    print(train_data[0])
+
+                    # Load PDF file
+                    pdf_file = open(self.raw_file.name,mode="rb")
+                    pdfReader = PyPDF2.PdfFileReader(pdf_file)
+                    # num_pages = pdfReader.numPages
+                    # Get  page. NOTE, page number for PDF reader start with 0
+                    OnePage = pdfReader.getPage(self.pageNumber-1)
+                    # Get text
+                    OnePageText = OnePage.extractText()
+                    # Close PDF file
+                    pdf_file.close()
 
 
+                    OnePageText = re.sub('\n', '', OnePageText)
+                    OnePageText = re.sub('\.\s', '.\n', OnePageText)
+                    OnePageText = re.sub('\s\s', '\n', OnePageText)
+                    #OnePageText = re.sub('\s+', ' ', OnePageText)
+                    #sentences = OnePageText.split('\s\.')
+                    sentences = OnePageText.split("\n")
+                    for sent in sentences:
+                        print(sent)
 
 
 
