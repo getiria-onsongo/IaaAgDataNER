@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog as fd
+from tkinter.scrolledtext import ScrolledText
 from functools import partial
 from agParse import *
 from py2json import *
@@ -19,11 +20,12 @@ class CropNerGUI:
         #self.rootWin.option_add('*Font', 'Times 24')
         self.rootWin.title("GEMS NER Annotation Tool")
 
-        self.rootWin.geometry('1100x400')
+        self.rootWin.geometry('1100x800')
 
         self.content=[""]
         self.raw_file = None
         self.annotation_file = None
+        self.annotation_dict = {}
         self.file_extension = None
         self.nlp_agdata = None
 
@@ -71,18 +73,23 @@ class CropNerGUI:
         self.pretag_btn = tk.Button(self.topframe, text="Pre-Tag", command=partial(self.pre_tag))
         self.pretag_btn.pack(side=tk.LEFT)
 
-        # adding the text
-        self.text = tk.Text(self.rootWin, height=8, font = "Times 24")
+        # adding the text: Note, height defines height if widget in lines based in font size
+        self.text = ScrolledText(self.rootWin, height=20, width=80, font = "Times 24")
         self.text.insert(tk.END, self.content[self.line_num])
         self.text.focus_force()
+        self.text.grid(row=1, column=0, columnspan=4, padx=5, pady=5)
+
+        # Create a scrollbar
+        #self.scroll_bar = tk.Scrollbar(self.rootWin)
+        #self.scroll_bar.grid(row=1, column=1,rowspan=5,  sticky='NSW')
 
         #self.text.tag_configure("test", background="yellow", foreground="red")
         #self.text.tag_add("test", "1.1", "1.5")
 
-        self.text.grid(row=1, column=0, columnspan = 4,padx=5, pady=5)
+
 
         # configuring a tag called start which will be used to highlight the text
-        self.text.tag_configure("highlight", foreground="black", background="red")
+        self.text.tag_configure("highlight", foreground="black", background="gray")
 
         self.text.tag_configure("default_color_tag", background="black")
         self.text.tag_configure("ALAS", background="violet")
@@ -354,7 +361,11 @@ class CropNerGUI:
                     # Load annotation data
                     data = json_2_dict(self.annotation_file.name)
                     train_data = dict_2_mixed_type(data)
-                    print(train_data[0])
+                    # Put annotations in a dictionary so we can easily O(1) find if a sentence has been annotated
+                    for annotation in train_data:
+                        sentence = annotation[0]
+                        entities = annotation[1]['entities']
+                        self.annotation_dict[sentence]= entities
 
                     # Load PDF file
                     pdf_file = open(self.raw_file.name,mode="rb")
@@ -371,11 +382,27 @@ class CropNerGUI:
                     OnePageText = re.sub('\n', '', OnePageText)
                     OnePageText = re.sub('\.\s', '.\n', OnePageText)
                     OnePageText = re.sub('\s\s', '\n', OnePageText)
-                    #OnePageText = re.sub('\s+', ' ', OnePageText)
-                    #sentences = OnePageText.split('\s\.')
                     sentences = OnePageText.split("\n")
+
+                    self.text.delete(1.0, tk.END)
+                    lineNo = 1
                     for sent in sentences:
-                        print(sent)
+                        if len(sent) > 0:
+                            annotation_exists = self.annotation_dict.get(sent,False)
+                            if annotation_exists:
+                                self.text.insert(str(lineNo)+".0", sent+'\n')
+
+                                for ent in annotation_exists:
+                                    start = ent[0]
+                                    end = ent[1]
+                                    label = ent[2]
+                                    if (label in self.tags):
+                                        self.text.tag_add(label, str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
+                                    else:
+                                        self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
+                            else:
+                                self.text.insert(str(lineNo)+".0", sent+'\n')
+                            lineNo = lineNo + 1
 
 
 
