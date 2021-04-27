@@ -30,6 +30,7 @@ class CropNerGUI:
         self.nlp_agdata = None
 
         self.cust_ents = []
+        self.cust_ents_dict = {}
         self.TRAIN_DATA = []
         self.output_file_name = "sample_p0_td.py"
         self.pageNumber=0
@@ -129,8 +130,8 @@ class CropNerGUI:
         self.msg_btn = tk.Button(self.bottom_frame, text="Clear Warning Message", width=20, command=self.clear_message)
         self.msg_btn.pack(side=tk.LEFT)
 
-        # Next line button
-        self.next_btn = tk.Button(self.bottom_frame, text="Next Line", command=self.nextline)
+        # Next page button
+        self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=self.nextPage)
         self.next_btn.pack(side = tk.LEFT)
 
         # Save button
@@ -209,8 +210,23 @@ class CropNerGUI:
         # adding a new entity.
         try:
             # Get start and end char positions
+
+            lineNo = int(self.text.index("sel.first").split(".")[0])
             h_start = int(self.text.index("sel.first").split(".")[1])
             h_end = int(self.text.index("sel.last").split(".")[1])
+            print("lineNo,start,end=",lineNo,h_start,h_end)
+            if(self.cust_ents_dict.get(lineNo,False)):
+                print("True")
+                self.cust_ents_dict[lineNo].append((h_start, h_end, tagLabel))
+            else:
+                print("False")
+                self.cust_ents_dict[lineNo] = [(h_start,h_end,tagLabel)]
+
+            print(self.cust_ents_dict[lineNo])
+
+
+
+
 
             # Check if selected area overlaps with another NER tag. If it does,
             # delete the existing tag. SpaCy does not allow NER tags to overlap.
@@ -264,6 +280,19 @@ class CropNerGUI:
             overlap = True
 
         return overlap
+
+    def nextPage(self):
+        lastLineIndex = self.text.index('end')
+        print("text.index('end')=", lastLineIndex)
+        lineNo = int(str(lastLineIndex).split(".")[0])
+        input_text = self.text.get(str(lineNo)+".0", str(lineNo)+".end")
+        print("LastLine=",input_text)
+
+        start = str(lineNo-2) + ".0"
+        end = str(lineNo-2) + ".end"
+        print("start,end=",start,end)
+        input_text_1 = self.text.get(start,end)
+        print("LastLine=", input_text_1)
 
     def nextline(self):
 
