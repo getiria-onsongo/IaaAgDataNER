@@ -223,6 +223,9 @@ class CropNerGUI:
             # Load Spacy Model
             self.LoadModel()
 
+            # Reset annotation dictionary
+            self.cust_ents_dict = {}
+
             # Update font size if it was entered
             font_size = self.fontEntry.get()
             if font_size.isdigit():
@@ -254,6 +257,9 @@ class CropNerGUI:
 
 
     def pre_tag(self):
+        # Reset annotation dictionary
+        self.cust_ents_dict = {}
+
         # Get the line number for the end of the text. This will tell us
         # how many total lines we have loaded
         lastLineIndex = int(self.text.index('end').split(".")[0])
@@ -284,7 +290,72 @@ class CropNerGUI:
                     tags = self.cust_ents_dict[lineNo]
                     self.cust_ents_dict[lineNo] = [input_text,tags]
 
+            #for x in self.cust_ents_dict:
+            #    print(self.cust_ents_dict[x])
+
+    def get_ner(self,tagLabel):
+        try:
+            # Get start and end char positions
+
+            lineNo = int(self.text.index("sel.first").split(".")[0])
+            lineNo_str = str(lineNo)
+            input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
+
+            h_start = int(self.text.index("sel.first").split(".")[1])
+            h_end = int(self.text.index("sel.last").split(".")[1])
+
+            if (self.cust_ents_dict.get(lineNo,False)):
+                # Check to see if the current line of text matches the one we have in the annotation dictionary.
+                # If not, warn the user about the conflict and make the update
+                if(input_text != self.cust_ents_dict[lineNo][0]):
+                    self.msg.config(text="Warning!! Text in annotation dictionary was different. It has been updated", foreground="red")
+                    self.cust_ents_dict[lineNo][0] = input_text
+
+                # Check if selected area overlaps with another NER tag. If it does,
+                # delete the existing tag. SpaCy does not allow NER tags to overlap.
+                new_ents = []
+                for (start, end, label) in self.cust_ents_dict[lineNo][1]:
+                    if (not self.overlap([h_start, h_end], [start, end])):
+                        new_ents.append((start, end, label))
+                self.cust_ents_dict[lineNo][1] = new_ents
+
+                # Add the new NER tag into the dictionary
+                self.cust_ents_dict[lineNo][1].append((h_start, h_end, tagLabel))
+            else:
+                self.cust_ents_dict[lineNo] = [input_text,[(h_start,h_end,tagLabel)]]
+
+            # Highlight the new NER  tag
+            self.text.tag_add(tagLabel, "sel.first", "sel.last")
+            #self.cust_ents.append((h_start,h_end,tagLabel))
+
+            # Print to make sure it worked. This code needs to be removed after
+            # code has been tested.
+            #self.cust_ents.sort()
+            #print("self.cust_ents_dict[lineNo]=\n",self.cust_ents_dict[lineNo])
+
+
+        except tk.TclError:
+            self.msg.config(text="Warning!! get_ner error.", foreground="red")
+
     # -------------------------------------------------------------- HERE
+
+    # UPDATE clear_tag TO WORK WITH PAGES AS OPPOSED TO LINES
+    def clear_tag(self):
+        # if no text is selected then tk.TclError exception occurs
+        try:
+            h_start = int(self.text.index("sel.first").split(".")[1])
+            h_end= int(self.text.index("sel.last").split(".")[1])
+
+            new_ents = []
+            for (start, end, label) in self.cust_ents:
+                if(not self.overlap([h_start,h_end],[start, end])):
+                    new_ents.append((start, end, label))
+            self.cust_ents = new_ents
+
+            for tag in self.tags:
+                self.text.tag_remove(tag, "sel.first", "sel.last")
+        except tk.TclError:
+            self.msg.config(text="Warning!! No text was selected.", foreground="red")
 
     # method to highlight the selected text
     def highlight_text(self):
@@ -306,68 +377,10 @@ class CropNerGUI:
         self.msg.config(text="")
 
 
-    def clear_tag(self):
-        # if no text is selected then tk.TclError exception occurs
-        try:
-            h_start = int(self.text.index("sel.first").split(".")[1])
-            h_end= int(self.text.index("sel.last").split(".")[1])
-
-            new_ents = []
-            for (start, end, label) in self.cust_ents:
-                if(not self.overlap([h_start,h_end],[start, end])):
-                    new_ents.append((start, end, label))
-            self.cust_ents = new_ents
-
-            for tag in self.tags:
-                self.text.tag_remove(tag, "sel.first", "sel.last")
-        except tk.TclError:
-            self.msg.config(text="Warning!! No text was selected.", foreground="red")
-
-
-
-    def get_ner(self,tagLabel):
-        # NOTE: We need to make this function more robust by first checking
-        # if there is an entity overlapping the selected text and remove it before
-        # adding a new entity.
-        try:
-            # Get start and end char positions
-
-            lineNo = int(self.text.index("sel.first").split(".")[0])
-            h_start = int(self.text.index("sel.first").split(".")[1])
-            h_end = int(self.text.index("sel.last").split(".")[1])
-            print("lineNo,start,end=",lineNo,h_start,h_end)
-            if(self.cust_ents_dict.get(lineNo,False)):
-                print("True")
-                self.cust_ents_dict[lineNo].append((h_start, h_end, tagLabel))
-            else:
-                print("False")
-                self.cust_ents_dict[lineNo] = [(h_start,h_end,tagLabel)]
-
-            print(self.cust_ents_dict[lineNo])
 
 
 
 
-
-            # Check if selected area overlaps with another NER tag. If it does,
-            # delete the existing tag. SpaCy does not allow NER tags to overlap.
-            new_ents = []
-            for (start, end, label) in self.cust_ents:
-                if (not self.overlap([h_start, h_end], [start, end])):
-                    new_ents.append((start, end, label))
-            self.cust_ents = new_ents
-
-            # Add the new tag
-            self.text.tag_add(tagLabel, "sel.first", "sel.last")
-            self.cust_ents.append((h_start,h_end,tagLabel))
-
-            # Print to make sure it worked. This code needs to be removed after
-            # code has been tested.
-            self.cust_ents.sort()
-            #print(self.cust_ents)
-
-        except tk.TclError:
-            self.msg.config(text="Warning!! get_ner error.", foreground="red")
 
     def tag_ner_with_spacy(self, text):
         doc = self.nlp_agdata(text)
