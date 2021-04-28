@@ -266,9 +266,24 @@ class CropNerGUI:
         # Loop through each of these line
         for lineIndex in range(lastLineIndex):
             lineNo = lineIndex + 1
-            input_text = self.text.get(str(lineNo) + ".0", str(lineNo) + ".end")
+            lineNo_str = str(lineNo)
+            input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
             print("lineNo=",lineNo)
             print("input_text=", input_text)
+
+            doc = self.tag_ner_with_spacy(input_text)
+            for ent in doc.ents:
+                # print(ent.text, ent.start_char, ent.end_char, ent.label_)
+                if (ent.label_ in self.tags):
+                    self.text.tag_add(ent.label_, lineNo_str+"." + str(ent.start_char), lineNo_str+"." + str(ent.end_char))
+                else:
+                    self.text.tag_add("highlight", lineNo_str+"." + str(ent.start_char), lineNo_str+"." + str(ent.end_char))
+
+
+
+                self.cust_ents.append((ent.start_char, ent.end_char, ent.label_))
+
+
 
 
         print("text.index('end')=", lastLineIndex)
