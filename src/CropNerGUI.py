@@ -253,55 +253,38 @@ class CropNerGUI:
                     lineNo = lineNo + 1
 
 
-
-
-
-
-    # -------------------------------------------------------------- HERE
     def pre_tag(self):
         # Get the line number for the end of the text. This will tell us
         # how many total lines we have loaded
         lastLineIndex = int(self.text.index('end').split(".")[0])
 
-        # Loop through each of these line
-        for lineIndex in range(lastLineIndex):
-            lineNo = lineIndex + 1
-            lineNo_str = str(lineNo)
-            input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
-            print("lineNo=",lineNo)
-            print("input_text=", input_text)
+        # Check to see if we have any text. We do not expect a sentence to
+        # be less than 5 characters. We will use 5 as the threshold. tk.Text
+        # does not appear to have a method for checking if tk.Text is empty
+        text = self.text.get("1.0", self.text.index('end'))
+        if(len(text) < 5):
+            self.msg.config(text="Text field appears to be empty. Please load or enter text to Pre-Tag", foreground="red")
+        else:
+            # Loop through each of these line
+            for lineIndex in range(lastLineIndex):
+                lineNo = lineIndex + 1
+                lineNo_str = str(lineNo)
+                input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
+                doc = self.tag_ner_with_spacy(input_text)
 
-            doc = self.tag_ner_with_spacy(input_text)
-            for ent in doc.ents:
-                # print(ent.text, ent.start_char, ent.end_char, ent.label_)
-                if (ent.label_ in self.tags):
-                    self.text.tag_add(ent.label_, lineNo_str+"." + str(ent.start_char), lineNo_str+"." + str(ent.end_char))
-                else:
-                    self.text.tag_add("highlight", lineNo_str+"." + str(ent.start_char), lineNo_str+"." + str(ent.end_char))
+                for ent in doc.ents:
+                    if (ent.label_ in self.tags):
+                        self.text.tag_add(ent.label_, lineNo_str+"." + str(ent.start_char), lineNo_str+"." + str(ent.end_char))
+                        if (self.cust_ents_dict.get(lineNo, False)):
+                            self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
+                        else:
+                            self.cust_ents_dict[lineNo] = [(ent.start_char, ent.end_char, ent.label_)]
 
+                if (self.cust_ents_dict.get(lineNo, False)):
+                    tags = self.cust_ents_dict[lineNo]
+                    self.cust_ents_dict[lineNo] = [input_text,tags]
 
-
-                self.cust_ents.append((ent.start_char, ent.end_char, ent.label_))
-
-
-
-
-        print("text.index('end')=", lastLineIndex)
-        lineNo = int(str(lastLineIndex).split(".")[0])
-        input_text = self.text.get(str(lineNo) + ".0", str(lineNo) + ".end")
-        print("LastLine=", input_text)
-
-        input_text = self.text.get(1.0, tk.END)
-        doc = self.tag_ner_with_spacy(input_text)
-        for ent in doc.ents:
-            #print(ent.text, ent.start_char, ent.end_char, ent.label_)
-            if(ent.label_ in self.tags):
-                self.text.tag_add(ent.label_, "1."+str(ent.start_char), "1."+str(ent.end_char))
-            else:
-                self.text.tag_add("highlight", "1." + str(ent.start_char), "1." + str(ent.end_char))
-            self.cust_ents.append((ent.start_char, ent.end_char, ent.label_))
-
-
+    # -------------------------------------------------------------- HERE
 
     # method to highlight the selected text
     def highlight_text(self):
@@ -617,3 +600,70 @@ class CropNerGUI:
 if __name__ == "__main__":
     myGui = CropNerGUI()
     myGui.go()
+
+
+
+'''
+    lineNo = int(self.text.index("sel.first").split(".")[0])
+    h_start = int(self.text.index("sel.first").split(".")[1])
+    h_end = int(self.text.index("sel.last").split(".")[1])
+    print("lineNo,start,end=", lineNo, h_start, h_end)
+    if (self.cust_ents_dict.get(lineNo, False)):
+        print("True")
+        self.cust_ents_dict[lineNo].append((h_start, h_end, tagLabel))
+    else:
+        print("False")
+        self.cust_ents_dict[lineNo] = [(h_start, h_end, tagLabel)]
+
+
+
+    # Check if selected area overlaps with another NER tag. If it does,
+    # delete the existing tag. SpaCy does not allow NER tags to overlap.
+    new_ents = []
+    for (start, end, label) in self.cust_ents:
+        if (not self.overlap([h_start, h_end], [start, end])):
+            new_ents.append((start, end, label))
+    self.cust_ents = new_ents
+
+    # Add the new tag
+    self.text.tag_add(tagLabel, "sel.first", "sel.last")
+    self.cust_ents.append((h_start,h_end,tagLabel))
+
+    # Print to make sure it worked. This code needs to be removed after
+    # code has been tested.
+    self.cust_ents.sort()
+    #print(self.cust_ents)
+
+    lineNo = int(self.text.index("sel.first").split(".")[0])
+    h_start = int(self.text.index("sel.first").split(".")[1])
+    h_end = int(self.text.index("sel.last").split(".")[1])
+    print("lineNo,start,end=", lineNo, h_start, h_end)
+    if (self.cust_ents_dict.get(lineNo, False)):
+        print("True")
+        self.cust_ents_dict[lineNo].append((h_start, h_end, tagLabel))
+    else:
+        print("False")
+        self.cust_ents_dict[lineNo] = [(h_start, h_end, tagLabel)]
+
+    print(self.cust_ents_dict[lineNo])
+
+
+
+
+
+
+print("text.index('end')=", lastLineIndex)
+lineNo = int(str(lastLineIndex).split(".")[0])
+input_text = self.text.get(str(lineNo) + ".0", str(lineNo) + ".end")
+print("LastLine=", input_text)
+
+input_text = self.text.get(1.0, tk.END)
+doc = self.tag_ner_with_spacy(input_text)
+for ent in doc.ents:
+    #print(ent.text, ent.start_char, ent.end_char, ent.label_)
+    if(ent.label_ in self.tags):
+        self.text.tag_add(ent.label_, "1."+str(ent.start_char), "1."+str(ent.end_char))
+    else:
+        self.text.tag_add("highlight", "1." + str(ent.start_char), "1." + str(ent.end_char))
+    self.cust_ents.append((ent.start_char, ent.end_char, ent.label_))
+'''
