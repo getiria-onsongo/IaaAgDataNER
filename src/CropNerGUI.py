@@ -20,7 +20,7 @@ class CropNerGUI:
         #self.rootWin.option_add('*Font', 'Times 24')
         self.rootWin.title("GEMS NER Annotation Tool")
 
-        self.rootWin.geometry('1100x800')
+        self.rootWin.geometry('1500x900')
 
         self.content=[""]
         self.raw_file = None
@@ -35,6 +35,7 @@ class CropNerGUI:
         self.output_file_name = "sample_p0_td.py"
         self.pageNumber=0
         self.line_num = 0
+        self.font_size = "20"
         self.page_lines = len(self.content)
 
         self.topframe = tk.Frame(self.rootWin)
@@ -75,7 +76,7 @@ class CropNerGUI:
         self.pretag_btn.pack(side=tk.LEFT)
 
         # adding the text: Note, height defines height if widget in lines based in font size
-        self.text = ScrolledText(self.rootWin, height=20, width=80, font = "Times 24")
+        self.text = ScrolledText(self.rootWin, height=25, width=140, font = "Times "+self.font_size)
         self.text.insert(tk.END, self.content[self.line_num])
         self.text.focus_force()
         self.text.grid(row=1, column=0, columnspan=4, padx=5, pady=5)
@@ -113,7 +114,7 @@ class CropNerGUI:
         self.exit_btn.pack(side = tk.LEFT)
 
         # Load button
-        self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.LoadFirstLine)
+        self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.LoadPage)
         self.load_btn.pack(side=tk.LEFT)
 
 
@@ -150,20 +151,125 @@ class CropNerGUI:
         self.open_frame.grid(row=4, column=0)
 
         # open file button
-        self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF/txt)',width=22,command=partial(self.open_file,"raw"))
+        self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF)',width=18,command=partial(self.open_file,"raw"))
         self.open_button.pack(side=tk.LEFT)
 
-        self.pageLabel = tk.Label(self.open_frame, text="Raw Data File Page Num:",width=22)
+        self.pageLabel = tk.Label(self.open_frame, text="Raw Data File Page Num:",width=18)
         self.pageLabel.pack(side=tk.LEFT)
 
-        self.pageEntry = tk.Entry(self.open_frame, width=10)
+        self.pageEntry = tk.Entry(self.open_frame, width=5)
         self.pageEntry.pack(side=tk.LEFT)
 
-        self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=22,command=partial(self.open_file,"json"))
+        self.fontLabel = tk.Label(self.open_frame, text="Font Size:", width=10)
+        self.fontLabel.pack(side=tk.LEFT)
+
+        self.fontEntry = tk.Entry(self.open_frame, width=5)
+        self.fontEntry.pack(side=tk.LEFT)
+
+        self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=20,command=partial(self.open_file,"json"))
         self.annotation_btn.pack(side=tk.LEFT)
 
         self.review_btn = tk.Button(self.open_frame, text="Review Annotations", command=self.ReviewAnnotations)
         self.review_btn.pack(side=tk.LEFT)
+
+
+    def open_file(self, file_type):
+        # file type
+        filetypes = (
+            ('json files', '*.json'),
+            ('PDF files', '*.pdf')
+        )
+        # show the open file dialog
+        f = fd.askopenfile(filetypes=filetypes)
+        self.file_extension = pathlib.Path(f.name).suffix
+
+        if self.file_extension == ".json":
+            self.annotation_file = f
+        elif self.file_extension == ".pdf":
+            self.raw_file=f
+        else:
+            self.msg.config(text="Warning!! Please select a valid (pdf, txt or json) file.", foreground="red")
+
+    def LoadModel(self):
+        # Load spacy model
+        source_nlp = spacy.load("en_core_web_sm")
+        model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
+        self.nlp_agdata = spacy.load(model_dir)
+        self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
+        self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
+        # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
+
+    def LoadPDF(self):
+        pdf_file = open(self.raw_file.name, mode="rb")
+        pdfReader = PyPDF2.PdfFileReader(pdf_file)
+        # num_pages = pdfReader.numPages
+        # Get  page. NOTE, page number for PDF reader start with 0
+        OnePage = pdfReader.getPage(self.pageNumber - 1)
+        # Get text
+        OnePageText = OnePage.extractText()
+        # Close PDF file
+        pdf_file.close()
+
+        OnePageText = re.sub('\n', '', OnePageText)
+        OnePageText = re.sub('\.\s', '.\n', OnePageText)
+        OnePageText = re.sub('\s\s', '\n', OnePageText)
+        sentences = OnePageText.split("\n")
+        return sentences
+
+    def LoadPage(self):
+        if self.raw_file is None:
+            self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
+        else:
+            # Load Spacy Model
+            self.LoadModel()
+
+            # Update font size if it was entered
+            font_size = self.fontEntry.get()
+            if font_size.isdigit():
+                self.text['font'] = "Times "+font_size
+                self.font_size = font_size
+            else:
+                self.fontEntry.delete(0, tk.END)
+                self.fontEntry.insert(0, self.font_size)
+
+            page_num = self.pageEntry.get()
+            if not page_num.isdigit():
+                self.msg.config(text="Page number not entered. Value initialized to 1", foreground="red")
+                self.pageNumber = 1
+                self.pageEntry.delete(0,tk.END)
+                self.pageEntry.insert(0, str(self.pageNumber))
+            else:
+                self.pageNumber = int(page_num)
+
+            # Delete contents
+            self.text.delete(1.0, tk.END)
+
+            # Load PDF file
+            sentences = self.LoadPDF()
+            lineNo = 1
+            for sent in sentences:
+                if len(sent) > 0:
+                    self.text.insert(str(lineNo) + ".0", sent + '\n')
+                    lineNo = lineNo + 1
+
+
+
+
+
+
+    # -------------------------------------------------------------- HERE
+    def pre_tag(self):
+        input_text = self.text.get(1.0, tk.END)
+        doc = self.tag_ner_with_spacy(input_text)
+        for ent in doc.ents:
+            #print(ent.text, ent.start_char, ent.end_char, ent.label_)
+            if(ent.label_ in self.tags):
+                self.text.tag_add(ent.label_, "1."+str(ent.start_char), "1."+str(ent.end_char))
+            else:
+                self.text.tag_add("highlight", "1." + str(ent.start_char), "1." + str(ent.end_char))
+            self.cust_ents.append((ent.start_char, ent.end_char, ent.label_))
+
+
 
     # method to highlight the selected text
     def highlight_text(self):
@@ -252,16 +358,7 @@ class CropNerGUI:
         doc = self.nlp_agdata(text)
         return doc
 
-    def pre_tag(self):
-        input_text = self.text.get(1.0, tk.END)
-        doc = self.tag_ner_with_spacy(input_text)
-        for ent in doc.ents:
-            #print(ent.text, ent.start_char, ent.end_char, ent.label_)
-            if(ent.label_ in self.tags):
-                self.text.tag_add(ent.label_, "1."+str(ent.start_char), "1."+str(ent.end_char))
-            else:
-                self.text.tag_add("highlight", "1." + str(ent.start_char), "1." + str(ent.end_char))
-            self.cust_ents.append((ent.start_char, ent.end_char, ent.label_))
+
 
 
     def overlap(self, interva1, interval2):
@@ -314,35 +411,46 @@ class CropNerGUI:
 
         #print("TRAIN DATA=\n",self.TRAIN_DATA)
 
-    def open_file(self, file_type):
 
-        # file type
-        filetypes = (
-            ('text files', '*.txt'),
-            ('json files', '*.json'),
-            ('PDF files', '*.pdf')
-        )
 
-        # show the open file dialog
-        f = fd.askopenfile(filetypes=filetypes)
-        self.file_extension = pathlib.Path(f.name).suffix
 
-        if self.file_extension == ".json":
-            self.annotation_file = f
-        elif self.file_extension == ".txt" or self.file_extension == ".pdf":
-            self.raw_file=f
-        else:
-            self.msg.config(text="Warning!! Please select a valid (pdf, txt or json) file.", foreground="red")
 
-    def LoadModel(self):
-        # Load spacy model
-        source_nlp = spacy.load("en_core_web_sm")
-        model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
-        self.nlp_agdata = spacy.load(model_dir)
-        self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
-        self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
-        # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
 
+
+
+
+
+    '''MISC
+     lastLineIndex = self.text.index('end')
+            print("text.index('end')=", lastLineIndex)
+            lineNo = int(str(lastLineIndex).split(".")[0])
+            input_text = self.text.get(str(lineNo) + ".0", str(lineNo) + ".end")
+            print("LastLine=", input_text)
+
+            start = str(lineNo - 2) + ".0"
+            end = str(lineNo - 2) + ".end"
+            print("start,end=", start, end)
+            input_text_1 = self.text.get(start, end)
+            print("LastLine=", input_text_1)
+
+            
+            # Delete contents
+            self.text.delete(1.0, tk.END)
+            if self.file_extension == ".txt":
+                # read the text file and show its content on the Text
+                self.content = self.raw_file.readlines()
+                self.line_num = 0
+                self.page_lines = len(self.content)
+                self.text.insert(tk.END, self.content[self.line_num])
+            else:
+                page_num = self.pageEntry.get()
+                if not page_num.isdigit():
+                    self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
+                    self.pageNumber = 1
+                else:
+                    self.pageNumber = int(page_num)
+     
+     '''
     def LoadFirstLine(self):
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
@@ -365,7 +473,7 @@ class CropNerGUI:
                     self.pageNumber = int(page_num)
     def ReviewAnnotations(self):
         if self.raw_file is None or self.annotation_file is None:
-            self.msg.config(text="Please select both a raw (pdf/txt) file and annotations file (json)", foreground="red")
+            self.msg.config(text="Please select both a raw (pdf) file and annotations file (json)", foreground="red")
         else:
             self.LoadModel()
             # Delete contents
@@ -397,25 +505,11 @@ class CropNerGUI:
                         self.annotation_dict[sentence]= entities
 
                     # Load PDF file
-                    pdf_file = open(self.raw_file.name,mode="rb")
-                    pdfReader = PyPDF2.PdfFileReader(pdf_file)
-                    # num_pages = pdfReader.numPages
-                    # Get  page. NOTE, page number for PDF reader start with 0
-                    OnePage = pdfReader.getPage(self.pageNumber-1)
-                    # Get text
-                    OnePageText = OnePage.extractText()
-                    # Close PDF file
-                    pdf_file.close()
-
-
-                    OnePageText = re.sub('\n', '', OnePageText)
-                    OnePageText = re.sub('\.\s', '.\n', OnePageText)
-                    OnePageText = re.sub('\s\s', '\n', OnePageText)
-                    sentences = OnePageText.split("\n")
+                    self.LoadPDF()
 
                     self.text.delete(1.0, tk.END)
                     lineNo = 1
-                    for sent in sentences:
+                    for sent in self.sentences:
                         if len(sent) > 0:
                             annotation_exists = self.annotation_dict.get(sent,False)
                             if annotation_exists:
