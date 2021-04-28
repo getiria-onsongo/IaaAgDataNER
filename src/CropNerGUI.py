@@ -259,6 +259,23 @@ class CropNerGUI:
 
     # -------------------------------------------------------------- HERE
     def pre_tag(self):
+        # Get the line number for the end of the text. This will tell us
+        # how many total lines we have loaded
+        lastLineIndex = int(self.text.index('end').split(".")[0])
+
+        # Loop through each of these line
+        for lineIndex in range(lastLineIndex):
+            lineNo = lineIndex + 1
+            input_text = self.text.get(str(lineNo) + ".0", str(lineNo) + ".end")
+            print("lineNo=",lineNo)
+            print("input_text=", input_text)
+
+
+        print("text.index('end')=", lastLineIndex)
+        lineNo = int(str(lastLineIndex).split(".")[0])
+        input_text = self.text.get(str(lineNo) + ".0", str(lineNo) + ".end")
+        print("LastLine=", input_text)
+
         input_text = self.text.get(1.0, tk.END)
         doc = self.tag_ner_with_spacy(input_text)
         for ent in doc.ents:
