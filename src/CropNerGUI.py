@@ -8,8 +8,12 @@ from json2py import *
 import pathlib
 import PyPDF2
 import re
-# TO DO NEXT:
-# 1) Add code to load model, tag sentence and highlight text
+
+# TO DO :
+# 1) Fix "Review Annotation". AT the moment, the user has to load data before they can review. No need to
+#   force the user to first load data. We can load it ourselves
+# 2) Be sure to add code that saves annotation if user clicks "EXIT"
+# 3) Add button to clear content
 
 
 # create a NER GUI class
@@ -25,6 +29,7 @@ class CropNerGUI:
         self.content=[""]
         self.raw_file = None
         self.annotation_file = None
+        self.sentences = None
         self.annotation_dict = {}
         self.file_extension = None
         self.nlp_agdata = None
@@ -70,7 +75,7 @@ class CropNerGUI:
         self.spaceLabel = tk.Label(self.topframe, text="    ", width=17)
         self.spaceLabel.pack(side=tk.LEFT)
 
-        self.clearTag_btn = tk.Button(self.topframe, text="Remove-Tag", command=partial(self.clear_tag))
+        self.clearTag_btn = tk.Button(self.topframe, text="Remove-Tag", command=partial(self.remove_tag))
         self.clearTag_btn.pack(side=tk.LEFT)
         self.pretag_btn = tk.Button(self.topframe, text="Pre-Tag", command=partial(self.pre_tag))
         self.pretag_btn.pack(side=tk.LEFT)
@@ -151,7 +156,7 @@ class CropNerGUI:
         self.open_frame.grid(row=4, column=0)
 
         # open file button
-        self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF)',width=18,command=partial(self.open_file,"raw"))
+        self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF)',width=18,command=partial(self.open_file,"pdf"))
         self.open_button.pack(side=tk.LEFT)
 
         self.pageLabel = tk.Label(self.open_frame, text="Raw Data File Page Num:",width=18)
@@ -181,14 +186,14 @@ class CropNerGUI:
         )
         # show the open file dialog
         f = fd.askopenfile(filetypes=filetypes)
-        self.file_extension = pathlib.Path(f.name).suffix
+        #self.file_extension = pathlib.Path(f.name).suffix
 
-        if self.file_extension == ".json":
+        if file_type == "json":
             self.annotation_file = f
-        elif self.file_extension == ".pdf":
+        elif file_type == "pdf":
             self.raw_file=f
         else:
-            self.msg.config(text="Warning!! Please select a valid (pdf, txt or json) file.", foreground="red")
+            self.msg.config(text="Warning!! Please select a valid (pdf or json) file.", foreground="red")
 
     def LoadModel(self):
         # Load spacy model
@@ -248,9 +253,9 @@ class CropNerGUI:
             self.text.delete(1.0, tk.END)
 
             # Load PDF file
-            sentences = self.LoadPDF()
+            self.sentences = self.LoadPDF()
             lineNo = 1
-            for sent in sentences:
+            for sent in self.sentences:
                 if len(sent) > 0:
                     self.text.insert(str(lineNo) + ".0", sent + '\n')
                     lineNo = lineNo + 1
@@ -293,6 +298,22 @@ class CropNerGUI:
             #for x in self.cust_ents_dict:
             #    print(self.cust_ents_dict[x])
 
+    def overlap(self, interva1, interval2):
+        overlap = False
+        interva1start = interva1[0]
+        interva1end = interva1[1]
+
+        interval2start = interval2[0]
+        interval2end = interval2[1]
+
+        if(interval2start >= interva1start and interval2start <= interva1end):
+            overlap = True
+        elif (interval2end >= interva1start and interval2end <= interva1end):
+            overlap = True
+        elif (interval2start <= interva1start and interval2end >= interva1end):
+            overlap = True
+        return overlap
+
     def get_ner(self,tagLabel):
         try:
             # Get start and end char positions
@@ -333,29 +354,101 @@ class CropNerGUI:
             #self.cust_ents.sort()
             #print("self.cust_ents_dict[lineNo]=\n",self.cust_ents_dict[lineNo])
 
-
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
 
-    # -------------------------------------------------------------- HERE
-
-    # UPDATE clear_tag TO WORK WITH PAGES AS OPPOSED TO LINES
-    def clear_tag(self):
+    def remove_tag(self):
         # if no text is selected then tk.TclError exception occurs
         try:
-            h_start = int(self.text.index("sel.first").split(".")[1])
-            h_end= int(self.text.index("sel.last").split(".")[1])
+            selection_line = int(self.text.index("sel.first").split(".")[0])
+            selection_start = int(self.text.index("sel.first").split(".")[1])
+            selection_end= int(self.text.index("sel.last").split(".")[1])
 
+            #print("selection=",selection_line,selection_start,selection_end)
+            #print(self.cust_ents_dict[selection_line])
+
+            # Update annotation to delete tag that was removed
             new_ents = []
-            for (start, end, label) in self.cust_ents:
-                if(not self.overlap([h_start,h_end],[start, end])):
+            for (start, end, label) in self.cust_ents_dict[selection_line][1]:
+                if(not self.overlap([selection_start,selection_end],[start, end])):
+                    #print("(start, end, label)=", start, end, label, "Did not overlap")
                     new_ents.append((start, end, label))
-            self.cust_ents = new_ents
+            self.cust_ents_dict[selection_line][1] = new_ents
 
             for tag in self.tags:
                 self.text.tag_remove(tag, "sel.first", "sel.last")
         except tk.TclError:
             self.msg.config(text="Warning!! No text was selected.", foreground="red")
+
+        #print("self.cust_ents_dict[selection_line]=\n", self.cust_ents_dict[selection_line])
+
+
+
+
+
+    # -------------------------------------------------------------- HERE
+    # Fix it to make sure user does not have to load data first and then extensively test it
+    def ReviewAnnotations(self):
+        if self.raw_file is None or self.annotation_file is None:
+            self.msg.config(text="Please select both a raw (pdf) file and annotations file (json)", foreground="red")
+        else:
+            self.LoadModel()
+            # Delete contents
+            self.text.delete(1.0, tk.END)
+            if self.file_extension == ".txt":
+                # read the text file and show its content on the Text
+                self.content = self.raw_file.readlines()
+                self.line_num = 0
+                self.page_lines = len(self.content)
+                self.text.insert(tk.END, self.content[self.line_num])
+            else:
+                page_num = self.pageEntry.get()
+                if not page_num.isdigit():
+                    self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
+                    self.pageNumber = 1
+                else:
+                    print("Pg=",page_num)
+                    print("Annotation=",self.annotation_file.name)
+                    print("Raw file =", self.raw_file.name)
+                    self.pageNumber = int(page_num)
+
+                    # Load annotation data
+                    data = json_2_dict(self.annotation_file.name)
+                    train_data = dict_2_mixed_type(data)
+                    # Put annotations in a dictionary so we can easily O(1) find if a sentence has been annotated
+                    for annotation in train_data:
+                        sentence = annotation[0]
+                        entities = annotation[1]['entities']
+                        self.annotation_dict[sentence]= entities
+
+                    # Load PDF file
+                    self.sentences = self.LoadPDF()
+
+                    self.text.delete(1.0, tk.END)
+                    lineNo = 1
+                    for sent in self.sentences:
+                        if len(sent) > 0:
+                            annotation_exists = self.annotation_dict.get(sent,False)
+                            if annotation_exists:
+                                self.text.insert(str(lineNo)+".0", sent+'\n')
+
+                                for ent in annotation_exists:
+                                    start = ent[0]
+                                    end = ent[1]
+                                    label = ent[2]
+                                    if (label in self.tags):
+                                        self.text.tag_add(label, str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
+                                    else:
+                                        self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
+                            else:
+                                self.text.insert(str(lineNo)+".0", sent+'\n')
+                            lineNo = lineNo + 1
+
+
+
+
+
+
 
     # method to highlight the selected text
     def highlight_text(self):
@@ -389,22 +482,7 @@ class CropNerGUI:
 
 
 
-    def overlap(self, interva1, interval2):
-        overlap = False
-        interva1start = interva1[0]
-        interva1end = interva1[1]
 
-        interval2start = interval2[0]
-        interval2end = interval2[1]
-
-        if(interval2start >= interva1start and interval2start <= interva1end):
-            overlap = True
-        elif (interval2end >= interva1start and interval2end <= interva1end):
-            overlap = True
-        elif (interval2start <= interva1start and interval2end >= interva1end):
-            overlap = True
-
-        return overlap
 
     def nextPage(self):
         lastLineIndex = self.text.index('end')
@@ -499,61 +577,6 @@ class CropNerGUI:
                     self.pageNumber = 1
                 else:
                     self.pageNumber = int(page_num)
-    def ReviewAnnotations(self):
-        if self.raw_file is None or self.annotation_file is None:
-            self.msg.config(text="Please select both a raw (pdf) file and annotations file (json)", foreground="red")
-        else:
-            self.LoadModel()
-            # Delete contents
-            self.text.delete(1.0, tk.END)
-            if self.file_extension == ".txt":
-                # read the text file and show its content on the Text
-                self.content = self.raw_file.readlines()
-                self.line_num = 0
-                self.page_lines = len(self.content)
-                self.text.insert(tk.END, self.content[self.line_num])
-            else:
-                page_num = self.pageEntry.get()
-                if not page_num.isdigit():
-                    self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
-                    self.pageNumber = 1
-                else:
-                    print("Pg=",page_num)
-                    print("Annotation=",self.annotation_file.name)
-                    print("Raw file =", self.raw_file.name)
-                    self.pageNumber = int(page_num)
-
-                    # Load annotation data
-                    data = json_2_dict(self.annotation_file.name)
-                    train_data = dict_2_mixed_type(data)
-                    # Put annotations in a dictionary so we can easily O(1) find if a sentence has been annotated
-                    for annotation in train_data:
-                        sentence = annotation[0]
-                        entities = annotation[1]['entities']
-                        self.annotation_dict[sentence]= entities
-
-                    # Load PDF file
-                    self.LoadPDF()
-
-                    self.text.delete(1.0, tk.END)
-                    lineNo = 1
-                    for sent in self.sentences:
-                        if len(sent) > 0:
-                            annotation_exists = self.annotation_dict.get(sent,False)
-                            if annotation_exists:
-                                self.text.insert(str(lineNo)+".0", sent+'\n')
-
-                                for ent in annotation_exists:
-                                    start = ent[0]
-                                    end = ent[1]
-                                    label = ent[2]
-                                    if (label in self.tags):
-                                        self.text.tag_add(label, str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
-                                    else:
-                                        self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
-                            else:
-                                self.text.insert(str(lineNo)+".0", sent+'\n')
-                            lineNo = lineNo + 1
 
 
 
