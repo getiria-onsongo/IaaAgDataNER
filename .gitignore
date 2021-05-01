@@ -1,3 +1,16 @@
+Data/Cranberry/
+YEDDA/
+ner-annotator/
+prodigy/
+src/antiqueTractors.jpg
+src/dev.py
+src/logo.png
+src/temp.json
+src/temp.py
+src/temp1.py
+test.jsonl
+test1.txt
+test2.jsonl
 steps.txt
 Data/TrainingData/*.pdf
 Data/TrainingData/*.json
