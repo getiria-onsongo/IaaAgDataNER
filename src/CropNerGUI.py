@@ -164,13 +164,11 @@ class CropNerGUI:
 
         self.pageLabel = tk.Label(self.open_frame, text="Raw Data File Page Num:",width=18)
         self.pageLabel.pack(side=tk.LEFT)
-
         self.pageEntry = tk.Entry(self.open_frame, width=5)
         self.pageEntry.pack(side=tk.LEFT)
 
         self.fontLabel = tk.Label(self.open_frame, text="Font Size:", width=10)
         self.fontLabel.pack(side=tk.LEFT)
-
         self.fontEntry = tk.Entry(self.open_frame, width=5)
         self.fontEntry.pack(side=tk.LEFT)
 
@@ -180,8 +178,19 @@ class CropNerGUI:
         self.review_btn = tk.Button(self.open_frame, text="Review Annotations", command=self.ReviewAnnotations)
         self.review_btn.pack(side=tk.LEFT)
 
+        # URL frame
+        self.url_frame = tk.Frame(self.rootWin)
+        self.url_frame.grid(row=5, column=0)
+
+        self.urlLabel = tk.Label(self.url_frame, text="Paste PDF URL (if known):", width=20)
+        self.urlLabel.pack(side=tk.LEFT)
+        self.urlEntry = tk.Entry(self.url_frame, width=40)
+        self.urlEntry.pack(side=tk.LEFT)
 
     def open_file(self, file_type):
+        # Clear warning message, if one exists
+        self.msg.config(text="")
+
         # file type
         filetypes = (
             ('json files', '*.json'),
@@ -225,6 +234,9 @@ class CropNerGUI:
         return sentences
 
     def LoadPage(self):
+        # Clear warning message, if one exists
+        self.msg.config(text="")
+
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
@@ -265,6 +277,9 @@ class CropNerGUI:
 
 
     def pre_tag(self):
+        # Clear warning message, if one exists
+        self.msg.config(text="")
+
         # Reset annotation dictionary
         self.cust_ents_dict = {}
 
@@ -318,6 +333,8 @@ class CropNerGUI:
         return overlap
 
     def get_ner(self,tagLabel):
+        # Clear warning message, if one exists
+        self.msg.config(text="")
         try:
             # Get start and end char positions
 
@@ -361,6 +378,8 @@ class CropNerGUI:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
 
     def remove_tag(self):
+        # Clear warning message, if one exists
+        self.msg.config(text="")
         # if no text is selected then tk.TclError exception occurs
         try:
             selection_line = int(self.text.index("sel.first").split(".")[0])
@@ -387,6 +406,9 @@ class CropNerGUI:
         print(self.cust_ents_dict[selection_line])
 
     def ReviewAnnotations(self):
+        # Clear warning message, if one exists
+        self.msg.config(text="")
+
         if self.raw_file is None or self.annotation_file is None:
             self.msg.config(text="Please select both a raw (pdf) file and annotations file (json)", foreground="red")
         else:
@@ -475,20 +497,20 @@ class CropNerGUI:
         doc = self.nlp_agdata(text)
         return doc
 
-    # -------------------------------------------------------------- HERE
-
     def file_save(self):
         #filepath = fd.asksaveasfilename(defaultextension=".json")
         # print(filepath)
 
-        output_filename = None
-        file_prefix = self.raw_file.name.split(".")[0]
-        output_filename = file_prefix+"_p"+str(self.pageNumber)+"_td.json"
         train_data = []
+        file_prefix = self.raw_file.name.split(".")[0]
+        pdf_name = self.raw_file.name.split("/")[-1]
+        chunk = str(self.pageNumber)
+        output_filename = file_prefix+"_p"+chunk+"_td.json"
+        url = ""
+        url = self.urlEntry.get()
 
         if (len(self.cust_ents_dict) == 0):
             self.msg.config(text="Warning!! No annotations to save.", foreground="red")
-
         else:
             for lineNo in self.cust_ents_dict:
                 text_ents = self.cust_ents_dict[lineNo]
@@ -496,50 +518,32 @@ class CropNerGUI:
                 ents_value = text_ents[1]
                 ents_value.sort()
                 ents = {'entities': ents_value}
+                #print((text_value, ents))
                 train_data.append((text_value, ents))
+        train_dict = mixed_type_2_dict(train_data, chunk, pdf_name, url)
+        dict_2_json(train_dict, output_filename)
 
-        print("Training data")
-        print(train_data)
-
-
-        '''
-            # This means the user has not annotated anything
-            if (len(self.cust_ents) > 0):
-                # This means there were annotations that were not added to the training data.
-                # Annotations are added when a user clicks "Next Line"
-                text = self.content[self.line_num].strip()
-                self.cust_ents.sort()
-                ents = {'entities': self.cust_ents}
-                self.TRAIN_DATA.append((text, ents))
-
-            train_dict = mixed_type_2_dict(self.TRAIN_DATA, "args.chunk", "args.doc", "args.url")
-            dict_2_json(train_dict, output_filename)
-
-        # f.write('TRAIN_DATA = '+str(self.TRAIN_DATA)+"\n")
-        # f.close()
-        '''
-
-
+    # -------------------------------------------------------------- HERE
     def nextPage(self):
 
-        train_data = []
-        for text_ents in self.cust_ents_dict:
-            text_value = text_ents[0]
-            ents = {'entities': text_ents[1].sort()}
-            train_data.append((text_value, ents))
+        # Clear warning message, if one exists
+        self.msg.config(text="")
+
+        # Save current annotation
+        self.file_save()
+
+        # Increment page number
+        self.pageNumber = self.pageNumber + 1
+        self.pageEntry.delete(0, tk.END)
+        self.pageEntry.insert(0, str(self.pageNumber))
+
+        # Reset annotation data
+        self.annotation_file = None
+
+        # Load data
+        self.LoadPage()
 
 
-        lastLineIndex = self.text.index('end')
-        print("text.index('end')=", lastLineIndex)
-        lineNo = int(str(lastLineIndex).split(".")[0])
-        input_text = self.text.get(str(lineNo)+".0", str(lineNo)+".end")
-        print("LastLine=",input_text)
-
-        start = str(lineNo-2) + ".0"
-        end = str(lineNo-2) + ".end"
-        print("start,end=",start,end)
-        input_text_1 = self.text.get(start,end)
-        print("LastLine=", input_text_1)
 
     def nextline(self):
 
