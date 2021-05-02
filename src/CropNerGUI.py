@@ -34,9 +34,8 @@ class CropNerGUI:
         self.file_extension = None
         self.nlp_agdata = None
 
-        self.cust_ents = []
         self.cust_ents_dict = {}
-        self.TRAIN_DATA = []
+
         self.output_file_name = "sample_p0_td.py"
         self.pageNumber=0
         self.line_num = 0
@@ -131,6 +130,10 @@ class CropNerGUI:
         # Clear button
         self.clear_btn = tk.Button(self.bottom_frame, text="Clear All Tags",width=10, command=self.clear_highlight)
         self.clear_btn.pack(side = tk.LEFT)
+
+        # Clear data button
+        self.clear_data_btn = tk.Button(self.bottom_frame, text="Clear Data", width=10, command=self.clear_data)
+        self.clear_data_btn.pack(side=tk.LEFT)
 
         # Clear message button
         self.msg_btn = tk.Button(self.bottom_frame, text="Clear Warning Message", width=20, command=self.clear_message)
@@ -351,8 +354,8 @@ class CropNerGUI:
 
             # Print to make sure it worked. This code needs to be removed after
             # code has been tested.
-            #self.cust_ents.sort()
-            #print("self.cust_ents_dict[lineNo]=\n",self.cust_ents_dict[lineNo])
+            self.cust_ents_dict[lineNo][1].sort()
+            print(self.cust_ents_dict[lineNo])
 
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
@@ -380,87 +383,86 @@ class CropNerGUI:
         except tk.TclError:
             self.msg.config(text="Warning!! No text was selected.", foreground="red")
 
-        #print("self.cust_ents_dict[selection_line]=\n", self.cust_ents_dict[selection_line])
+        self.cust_ents_dict[selection_line][1].sort()
+        print(self.cust_ents_dict[selection_line])
 
-
-
-
-
-    # -------------------------------------------------------------- HERE
-    # Fix it to make sure user does not have to load data first and then extensively test it
     def ReviewAnnotations(self):
         if self.raw_file is None or self.annotation_file is None:
             self.msg.config(text="Please select both a raw (pdf) file and annotations file (json)", foreground="red")
         else:
-            self.LoadModel()
-            # Delete contents
-            self.text.delete(1.0, tk.END)
-            if self.file_extension == ".txt":
-                # read the text file and show its content on the Text
-                self.content = self.raw_file.readlines()
-                self.line_num = 0
-                self.page_lines = len(self.content)
-                self.text.insert(tk.END, self.content[self.line_num])
-            else:
+
                 page_num = self.pageEntry.get()
                 if not page_num.isdigit():
                     self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
-                    self.pageNumber = 1
-                else:
-                    print("Pg=",page_num)
-                    print("Annotation=",self.annotation_file.name)
-                    print("Raw file =", self.raw_file.name)
-                    self.pageNumber = int(page_num)
+                    page_num = 1
 
-                    # Load annotation data
-                    data = json_2_dict(self.annotation_file.name)
-                    train_data = dict_2_mixed_type(data)
-                    # Put annotations in a dictionary so we can easily O(1) find if a sentence has been annotated
-                    for annotation in train_data:
-                        sentence = annotation[0]
-                        entities = annotation[1]['entities']
-                        self.annotation_dict[sentence]= entities
+                #print("Pg=",page_num)
+                #print("Annotation=",self.annotation_file.name)
+                #print("Raw file =", self.raw_file.name)
+                self.pageNumber = int(page_num)
 
-                    # Load PDF file
-                    self.sentences = self.LoadPDF()
+                # Reset dictionary containing current annotations
+                new_cust_ents_dict = {}
 
-                    self.text.delete(1.0, tk.END)
-                    lineNo = 1
-                    for sent in self.sentences:
-                        if len(sent) > 0:
-                            annotation_exists = self.annotation_dict.get(sent,False)
-                            if annotation_exists:
-                                self.text.insert(str(lineNo)+".0", sent+'\n')
+                # Load annotation data
+                data = json_2_dict(self.annotation_file.name)
+                train_data = dict_2_mixed_type(data)
+                # Put annotations in a dictionary so we can easily O(1) find if a sentence has been annotated
+                for annotation in train_data:
+                    sentence = annotation[0]
+                    entities = annotation[1]['entities']
+                    self.annotation_dict[sentence]= entities
 
-                                for ent in annotation_exists:
-                                    start = ent[0]
-                                    end = ent[1]
-                                    label = ent[2]
-                                    if (label in self.tags):
-                                        self.text.tag_add(label, str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
-                                    else:
-                                        self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
+                # Load PDF file
+                self.sentences = self.LoadPDF()
+
+                self.text.delete(1.0, tk.END)
+                lineNo = 1
+                for sent in self.sentences:
+                    annotation_exists = self.annotation_dict.get(sent,False)
+                    if annotation_exists:
+                        # Add sentence to text box
+                        self.text.insert(str(lineNo)+".0", sent+'\n')
+
+                        # Update dictionary containing current annotations
+                        annot_entry = [sent,annotation_exists]
+                        new_cust_ents_dict[lineNo] = annot_entry
+                        #self.cust_ents_dict[lineNo][1] = annotation_exists
+
+                        for ent in annotation_exists:
+                            start = ent[0]
+                            end = ent[1]
+                            label = ent[2]
+                            if (label in self.tags):
+                                self.text.tag_add(label, str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
                             else:
-                                self.text.insert(str(lineNo)+".0", sent+'\n')
-                            lineNo = lineNo + 1
+                                self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
+                    else:
+                        self.text.insert(str(lineNo)+".0", sent+'\n')
+                    lineNo = lineNo + 1
+        self.cust_ents_dict = new_cust_ents_dict
 
-
-
-
-
-
-
-    # method to highlight the selected text
     def highlight_text(self):
-        # if no text is selected then tk.TclError exception occurs
+        # method to highlight the selected text
         try:
             self.text.tag_add("highlight", "sel.first", "sel.last")
             print(self.text.index("sel.first"), self.text.index("sel.last"))
         except tk.TclError:
+            # if no text is selected then tk.TclError exception occurs
             self.msg.config(text="Warning!! No text was selected.",foreground="red")
 
     def clear_message(self):
         self.msg.config(text="")
+
+    def clear_data(self):
+        # Clear annotations
+        self.cust_ents_dict = {}
+
+        # Clear warning message
+        self.msg.config(text="")
+
+        # Clear content
+        self.text.delete(1.0, tk.END)
 
     # method to clear all contents from text widget.
     def clear_highlight(self):
@@ -469,22 +471,64 @@ class CropNerGUI:
 
         self.msg.config(text="")
 
-
-
-
-
-
-
     def tag_ner_with_spacy(self, text):
         doc = self.nlp_agdata(text)
         return doc
 
+    # -------------------------------------------------------------- HERE
+
+    def file_save(self):
+        #filepath = fd.asksaveasfilename(defaultextension=".json")
+        # print(filepath)
+
+        output_filename = None
+        file_prefix = self.raw_file.name.split(".")[0]
+        output_filename = file_prefix+"_p"+str(self.pageNumber)+"_td.json"
+        train_data = []
+
+        if (len(self.cust_ents_dict) == 0):
+            self.msg.config(text="Warning!! No annotations to save.", foreground="red")
+
+        else:
+            for lineNo in self.cust_ents_dict:
+                text_ents = self.cust_ents_dict[lineNo]
+                text_value = text_ents[0].strip()
+                ents_value = text_ents[1]
+                ents_value.sort()
+                ents = {'entities': ents_value}
+                train_data.append((text_value, ents))
+
+        print("Training data")
+        print(train_data)
 
 
+        '''
+            # This means the user has not annotated anything
+            if (len(self.cust_ents) > 0):
+                # This means there were annotations that were not added to the training data.
+                # Annotations are added when a user clicks "Next Line"
+                text = self.content[self.line_num].strip()
+                self.cust_ents.sort()
+                ents = {'entities': self.cust_ents}
+                self.TRAIN_DATA.append((text, ents))
 
+            train_dict = mixed_type_2_dict(self.TRAIN_DATA, "args.chunk", "args.doc", "args.url")
+            dict_2_json(train_dict, output_filename)
+
+        # f.write('TRAIN_DATA = '+str(self.TRAIN_DATA)+"\n")
+        # f.close()
+        '''
 
 
     def nextPage(self):
+
+        train_data = []
+        for text_ents in self.cust_ents_dict:
+            text_value = text_ents[0]
+            ents = {'entities': text_ents[1].sort()}
+            train_data.append((text_value, ents))
+
+
         lastLineIndex = self.text.index('end')
         print("text.index('end')=", lastLineIndex)
         lineNo = int(str(lastLineIndex).split(".")[0])
@@ -602,26 +646,7 @@ class CropNerGUI:
             self.page_lines = self.line_num
     '''
 
-    def file_save(self):
-        filepath = fd.asksaveasfilename(defaultextension=".json")
-        #print(filepath)
-        if ((filepath is None) or (len(filepath) == 0)):  # asksaveasfile return `None` if dialog closed with "cancel".
-            return
 
-        if(len(self.TRAIN_DATA) == 0):
-            # This means the user has not annotated anything
-            if (len(self.cust_ents) > 0):
-                # This means there were annotations that were not added to the training data.
-                # Annotations are added when a user clicks "Next Line"
-                text = self.content[self.line_num].strip()
-                self.cust_ents.sort()
-                ents = {'entities': self.cust_ents}
-                self.TRAIN_DATA.append((text, ents))
-        train_dict = mixed_type_2_dict(self.TRAIN_DATA, "args.chunk", "args.doc", "args.url")
-        dict_2_json(train_dict, filepath)
-
-        #f.write('TRAIN_DATA = '+str(self.TRAIN_DATA)+"\n")
-        #f.close()
 
     def go(self):
         """This takes no inputs, and sets the GUI running"""
