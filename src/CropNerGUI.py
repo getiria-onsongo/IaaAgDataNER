@@ -567,8 +567,9 @@ class CropNerGUI:
         """This is a callback method attached to the quit button.
         It destroys the main window, which ends the program"""
 
-        # Save current annotation
-        self.file_save()
+        if(self.raw_file is not None):
+            # Save current annotation
+            self.file_save()
 
         self.rootWin.destroy()
 
