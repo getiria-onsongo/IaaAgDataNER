@@ -1,20 +1,14 @@
+from agParse import *
+from datetime import datetime
+from functools import partial
+from json2py import *
+import os.path
+from py2json import *
+import PyPDF2
+import re
 import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
-from functools import partial
-from agParse import *
-from py2json import *
-from json2py import *
-import pathlib
-import PyPDF2
-import re
-
-# TO DO :
-# 1) Fix "Review Annotation". AT the moment, the user has to load data before they can review. No need to
-#   force the user to first load data. We can load it ourselves
-# 2) Be sure to add code that saves annotation if user clicks "EXIT"
-# 3) Add button to clear content
-
 
 # create a NER GUI class
 class CropNerGUI:
@@ -188,6 +182,8 @@ class CropNerGUI:
         self.urlEntry.pack(side=tk.LEFT)
 
     def open_file(self, file_type):
+        """ Get file from user. """
+
         # Clear warning message, if one exists
         self.msg.config(text="")
 
@@ -208,7 +204,9 @@ class CropNerGUI:
             self.msg.config(text="Warning!! Please select a valid (pdf or json) file.", foreground="red")
 
     def LoadModel(self):
-        # Load spacy model
+        """
+        Load spacy model
+        """
         source_nlp = spacy.load("en_core_web_sm")
         model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
         self.nlp_agdata = spacy.load(model_dir)
@@ -217,6 +215,7 @@ class CropNerGUI:
         # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
 
     def LoadPDF(self):
+        """ Get data from PDF file"""
         pdf_file = open(self.raw_file.name, mode="rb")
         pdfReader = PyPDF2.PdfFileReader(pdf_file)
         # num_pages = pdfReader.numPages
@@ -234,9 +233,9 @@ class CropNerGUI:
         return sentences
 
     def LoadPage(self):
-        # Clear warning message, if one exists
-        self.msg.config(text="")
-
+        """
+        Load content into text box
+        """
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
@@ -277,6 +276,8 @@ class CropNerGUI:
 
 
     def pre_tag(self):
+        """ Pre-tag content in text box with NER tags. """
+
         # Clear warning message, if one exists
         self.msg.config(text="")
 
@@ -317,6 +318,7 @@ class CropNerGUI:
             #    print(self.cust_ents_dict[x])
 
     def overlap(self, interva1, interval2):
+        """ Check to see if two intervals overlap. """
         overlap = False
         interva1start = interva1[0]
         interva1end = interva1[1]
@@ -333,6 +335,7 @@ class CropNerGUI:
         return overlap
 
     def get_ner(self,tagLabel):
+        """ Extract NER tag"""
         # Clear warning message, if one exists
         self.msg.config(text="")
         try:
@@ -378,6 +381,7 @@ class CropNerGUI:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
 
     def remove_tag(self):
+        """ Delete selection from annotations. """
         # Clear warning message, if one exists
         self.msg.config(text="")
         # if no text is selected then tk.TclError exception occurs
@@ -406,6 +410,9 @@ class CropNerGUI:
         print(self.cust_ents_dict[selection_line])
 
     def ReviewAnnotations(self):
+        """
+        Review annotations
+        """
         # Clear warning message, if one exists
         self.msg.config(text="")
 
@@ -465,7 +472,7 @@ class CropNerGUI:
         self.cust_ents_dict = new_cust_ents_dict
 
     def highlight_text(self):
-        # method to highlight the selected text
+        """ Highlight selected text """
         try:
             self.text.tag_add("highlight", "sel.first", "sel.last")
             print(self.text.index("sel.first"), self.text.index("sel.last"))
@@ -474,9 +481,11 @@ class CropNerGUI:
             self.msg.config(text="Warning!! No text was selected.",foreground="red")
 
     def clear_message(self):
+        """ Clear warning message"""
         self.msg.config(text="")
 
     def clear_data(self):
+        """ Clear data in text box"""
         # Clear annotations
         self.cust_ents_dict = {}
 
@@ -486,28 +495,34 @@ class CropNerGUI:
         # Clear content
         self.text.delete(1.0, tk.END)
 
-    # method to clear all contents from text widget.
     def clear_highlight(self):
+        """ Highlight text"""
         for tag in self.tags:
             self.text.tag_remove(tag, "1.0", "end")
 
         self.msg.config(text="")
 
     def tag_ner_with_spacy(self, text):
+        """ Use SpaCy to identify NER in text"""
         doc = self.nlp_agdata(text)
         return doc
 
     def file_save(self):
-        #filepath = fd.asksaveasfilename(defaultextension=".json")
-        # print(filepath)
-
+        """ Save current annotation"""
         train_data = []
         file_prefix = self.raw_file.name.split(".")[0]
         pdf_name = self.raw_file.name.split("/")[-1]
         chunk = str(self.pageNumber)
         output_filename = file_prefix+"_p"+chunk+"_td.json"
-        url = ""
+
+        if(os.path.isfile(output_filename) and len(self.cust_ents_dict) != 0):
+            now = datetime.now()
+            date_time = now.strftime("%Y_%m_%d_%H_%M_%S")
+            output_filename = file_prefix+"_"+date_time+"_p"+chunk+"_td.json"
+            self.msg.config(text="Warning!! Annotation file for this page already exists. A copy created.", foreground="red")
+
         url = self.urlEntry.get()
+        #print("len(self.cust_ents_dict)=",len(self.cust_ents_dict))
 
         if (len(self.cust_ents_dict) == 0):
             self.msg.config(text="Warning!! No annotations to save.", foreground="red")
@@ -520,17 +535,18 @@ class CropNerGUI:
                 ents = {'entities': ents_value}
                 #print((text_value, ents))
                 train_data.append((text_value, ents))
-        train_dict = mixed_type_2_dict(train_data, chunk, pdf_name, url)
-        dict_2_json(train_dict, output_filename)
+            train_dict = mixed_type_2_dict(train_data, chunk, pdf_name, url)
+            dict_2_json(train_dict, output_filename)
 
-    # -------------------------------------------------------------- HERE
+
     def nextPage(self):
-
-        # Clear warning message, if one exists
-        self.msg.config(text="")
-
-        # Save current annotation
-        self.file_save()
+        """ Load the next page"""
+        if (len(self.cust_ents_dict) == 0):
+            self.msg.config(text="Warning!! No annotations to save.", foreground="red")
+        else:
+            self.msg.config(text="")
+            # Save current annotation
+            self.file_save()
 
         # Increment page number
         self.pageNumber = self.pageNumber + 1
@@ -543,115 +559,6 @@ class CropNerGUI:
         # Load data
         self.LoadPage()
 
-
-
-    def nextline(self):
-
-        if(len(self.cust_ents)> 0):
-            text = self.content[self.line_num].strip()
-            self.cust_ents.sort()
-            ents = {'entities': self.cust_ents}
-            self.TRAIN_DATA.append((text, ents))
-            #print(ents)
-
-        if(self.line_num == (self.page_lines - 1)):
-            self.msg.config(text="Warning!! No more sentences.", foreground="red")
-        else:
-            # Add next line
-            self.cust_ents=[]
-            self.line_num = self.line_num + 1
-            self.text.delete(1.0, tk.END)
-            self.text.insert(tk.END, self.content[self.line_num])
-
-        #print("TRAIN DATA=\n",self.TRAIN_DATA)
-
-
-
-
-
-
-
-
-
-
-    '''MISC
-     lastLineIndex = self.text.index('end')
-            print("text.index('end')=", lastLineIndex)
-            lineNo = int(str(lastLineIndex).split(".")[0])
-            input_text = self.text.get(str(lineNo) + ".0", str(lineNo) + ".end")
-            print("LastLine=", input_text)
-
-            start = str(lineNo - 2) + ".0"
-            end = str(lineNo - 2) + ".end"
-            print("start,end=", start, end)
-            input_text_1 = self.text.get(start, end)
-            print("LastLine=", input_text_1)
-
-            
-            # Delete contents
-            self.text.delete(1.0, tk.END)
-            if self.file_extension == ".txt":
-                # read the text file and show its content on the Text
-                self.content = self.raw_file.readlines()
-                self.line_num = 0
-                self.page_lines = len(self.content)
-                self.text.insert(tk.END, self.content[self.line_num])
-            else:
-                page_num = self.pageEntry.get()
-                if not page_num.isdigit():
-                    self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
-                    self.pageNumber = 1
-                else:
-                    self.pageNumber = int(page_num)
-     
-     '''
-    def LoadFirstLine(self):
-        if self.raw_file is None:
-            self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
-        else:
-            self.LoadModel()
-            # Delete contents
-            self.text.delete(1.0, tk.END)
-            if self.file_extension == ".txt":
-                # read the text file and show its content on the Text
-                self.content = self.raw_file.readlines()
-                self.line_num = 0
-                self.page_lines = len(self.content)
-                self.text.insert(tk.END, self.content[self.line_num])
-            else:
-                page_num = self.pageEntry.get()
-                if not page_num.isdigit():
-                    self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
-                    self.pageNumber = 1
-                else:
-                    self.pageNumber = int(page_num)
-
-
-
-    '''
-    I COMMENTED THIS FUNCTION BECAUSE IT IS A LOT SIMPLER TO LOAD A SINGLE LINE AND ANNOTATE PER LINE.
-    THIS IS BECAUSE THE ANNOTATION GETS SAVED PER LINE (SENTENCE) 
-    WHILE IT MIGHT BE EASIER TO LOAD THE WHOLE PAGE AND VIEW SENTENCES IN CONTEXT, THIS APPROACH WILL MAKE
-    THINGS A BIT COMPLICATED. 
-    def LoadData(self):
-        if isinstance(self.text_file, None):
-            self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
-        else:
-            self.LoadModel()
-            # Delete contents
-            self.text.delete(1.0, tk.END)
-
-            self.line_num = 0
-            file_content = self.text_file.readlines()
-            # read the text file and show its content on the Text
-            for line in file_content:
-                self.text.insert(tk.END, line)
-                self.line_num = self.line_num + 1
-            self.page_lines = self.line_num
-    '''
-
-
-
     def go(self):
         """This takes no inputs, and sets the GUI running"""
         self.rootWin.mainloop()
@@ -659,76 +566,13 @@ class CropNerGUI:
     def quit(self):
         """This is a callback method attached to the quit button.
         It destroys the main window, which ends the program"""
+
+        # Save current annotation
+        self.file_save()
+
         self.rootWin.destroy()
 
 # Driver code
 if __name__ == "__main__":
     myGui = CropNerGUI()
     myGui.go()
-
-
-
-'''
-    lineNo = int(self.text.index("sel.first").split(".")[0])
-    h_start = int(self.text.index("sel.first").split(".")[1])
-    h_end = int(self.text.index("sel.last").split(".")[1])
-    print("lineNo,start,end=", lineNo, h_start, h_end)
-    if (self.cust_ents_dict.get(lineNo, False)):
-        print("True")
-        self.cust_ents_dict[lineNo].append((h_start, h_end, tagLabel))
-    else:
-        print("False")
-        self.cust_ents_dict[lineNo] = [(h_start, h_end, tagLabel)]
-
-
-
-    # Check if selected area overlaps with another NER tag. If it does,
-    # delete the existing tag. SpaCy does not allow NER tags to overlap.
-    new_ents = []
-    for (start, end, label) in self.cust_ents:
-        if (not self.overlap([h_start, h_end], [start, end])):
-            new_ents.append((start, end, label))
-    self.cust_ents = new_ents
-
-    # Add the new tag
-    self.text.tag_add(tagLabel, "sel.first", "sel.last")
-    self.cust_ents.append((h_start,h_end,tagLabel))
-
-    # Print to make sure it worked. This code needs to be removed after
-    # code has been tested.
-    self.cust_ents.sort()
-    #print(self.cust_ents)
-
-    lineNo = int(self.text.index("sel.first").split(".")[0])
-    h_start = int(self.text.index("sel.first").split(".")[1])
-    h_end = int(self.text.index("sel.last").split(".")[1])
-    print("lineNo,start,end=", lineNo, h_start, h_end)
-    if (self.cust_ents_dict.get(lineNo, False)):
-        print("True")
-        self.cust_ents_dict[lineNo].append((h_start, h_end, tagLabel))
-    else:
-        print("False")
-        self.cust_ents_dict[lineNo] = [(h_start, h_end, tagLabel)]
-
-    print(self.cust_ents_dict[lineNo])
-
-
-
-
-
-
-print("text.index('end')=", lastLineIndex)
-lineNo = int(str(lastLineIndex).split(".")[0])
-input_text = self.text.get(str(lineNo) + ".0", str(lineNo) + ".end")
-print("LastLine=", input_text)
-
-input_text = self.text.get(1.0, tk.END)
-doc = self.tag_ner_with_spacy(input_text)
-for ent in doc.ents:
-    #print(ent.text, ent.start_char, ent.end_char, ent.label_)
-    if(ent.label_ in self.tags):
-        self.text.tag_add(ent.label_, "1."+str(ent.start_char), "1."+str(ent.end_char))
-    else:
-        self.text.tag_add("highlight", "1." + str(ent.start_char), "1." + str(ent.end_char))
-    self.cust_ents.append((ent.start_char, ent.end_char, ent.label_))
-'''
