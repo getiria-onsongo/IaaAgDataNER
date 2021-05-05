@@ -8,6 +8,7 @@ import PyPDF2
 import re
 import tkinter as tk
 from tkinter import filedialog as fd
+
 from tkinter.scrolledtext import ScrolledText
 
 # create a NER GUI class
@@ -20,6 +21,7 @@ class CropNerGUI:
 
         self.rootWin.geometry('1500x900')
 
+        self.model_dir = None
         self.content=[""]
         self.raw_file = None
         self.annotation_file = None
@@ -156,6 +158,11 @@ class CropNerGUI:
         self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF)',width=18,command=partial(self.open_file,"pdf"))
         self.open_button.pack(side=tk.LEFT)
 
+        self.nermodel_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,command=self.get_nermodel_dir)
+        self.nermodel_button.pack(side=tk.LEFT)
+
+
+
         self.pageLabel = tk.Label(self.open_frame, text="Raw Data File Page Num:",width=18)
         self.pageLabel.pack(side=tk.LEFT)
         self.pageEntry = tk.Entry(self.open_frame, width=5)
@@ -180,6 +187,13 @@ class CropNerGUI:
         self.urlLabel.pack(side=tk.LEFT)
         self.urlEntry = tk.Entry(self.url_frame, width=40)
         self.urlEntry.pack(side=tk.LEFT)
+
+    def get_nermodel_dir(self):
+        self.model_dir = fd.askdirectory()
+        source_nlp = spacy.load("en_core_web_sm")
+        self.nlp_agdata = spacy.load(self.model_dir)
+        self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
+        self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
 
     def open_file(self, file_type):
         """ Get file from user. """
@@ -207,12 +221,19 @@ class CropNerGUI:
         """
         Load spacy model
         """
-        source_nlp = spacy.load("en_core_web_sm")
-        model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
-        self.nlp_agdata = spacy.load(model_dir)
-        self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
-        self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
-        # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
+        # model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
+
+        if self.nlp_agdata is None:
+            source_nlp = spacy.load("en_core_web_sm")
+            if self.model_dir is not None:
+                self.nlp_agdata = spacy.load(self.model_dir)
+                self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
+                self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
+                # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
+            else:
+                self.nlp_agdata = spacy.load("en_core_web_sm")
+
+
 
     def LoadPDF(self):
         """ Get data from PDF file"""
@@ -280,39 +301,41 @@ class CropNerGUI:
 
         # Clear warning message, if one exists
         self.msg.config(text="")
-
-        # Reset annotation dictionary
-        self.cust_ents_dict = {}
-
-        # Get the line number for the end of the text. This will tell us
-        # how many total lines we have loaded
-        lastLineIndex = int(self.text.index('end').split(".")[0])
-
-        # Check to see if we have any text. We do not expect a sentence to
-        # be less than 5 characters. We will use 5 as the threshold. tk.Text
-        # does not appear to have a method for checking if tk.Text is empty
-        text = self.text.get("1.0", self.text.index('end'))
-        if(len(text) < 5):
-            self.msg.config(text="Text field appears to be empty. Please load or enter text to Pre-Tag", foreground="red")
+        if self.model_dir is None:
+            self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
         else:
-            # Loop through each of these line
-            for lineIndex in range(lastLineIndex):
-                lineNo = lineIndex + 1
-                lineNo_str = str(lineNo)
-                input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
-                doc = self.tag_ner_with_spacy(input_text)
+            # Reset annotation dictionary
+            self.cust_ents_dict = {}
 
-                for ent in doc.ents:
-                    if (ent.label_ in self.tags):
-                        self.text.tag_add(ent.label_, lineNo_str+"." + str(ent.start_char), lineNo_str+"." + str(ent.end_char))
-                        if (self.cust_ents_dict.get(lineNo, False)):
-                            self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
-                        else:
-                            self.cust_ents_dict[lineNo] = [(ent.start_char, ent.end_char, ent.label_)]
+            # Get the line number for the end of the text. This will tell us
+            # how many total lines we have loaded
+            lastLineIndex = int(self.text.index('end').split(".")[0])
 
-                if (self.cust_ents_dict.get(lineNo, False)):
-                    tags = self.cust_ents_dict[lineNo]
-                    self.cust_ents_dict[lineNo] = [input_text,tags]
+            # Check to see if we have any text. We do not expect a sentence to
+            # be less than 5 characters. We will use 5 as the threshold. tk.Text
+            # does not appear to have a method for checking if tk.Text is empty
+            text = self.text.get("1.0", self.text.index('end'))
+            if(len(text) < 5):
+                self.msg.config(text="Text field appears to be empty. Please load or enter text to Pre-Tag", foreground="red")
+            else:
+                # Loop through each of these line
+                for lineIndex in range(lastLineIndex):
+                    lineNo = lineIndex + 1
+                    lineNo_str = str(lineNo)
+                    input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
+                    doc = self.tag_ner_with_spacy(input_text)
+
+                    for ent in doc.ents:
+                        if (ent.label_ in self.tags):
+                            self.text.tag_add(ent.label_, lineNo_str+"." + str(ent.start_char), lineNo_str+"." + str(ent.end_char))
+                            if (self.cust_ents_dict.get(lineNo, False)):
+                                self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
+                            else:
+                                self.cust_ents_dict[lineNo] = [(ent.start_char, ent.end_char, ent.label_)]
+
+                    if (self.cust_ents_dict.get(lineNo, False)):
+                        tags = self.cust_ents_dict[lineNo]
+                        self.cust_ents_dict[lineNo] = [input_text,tags]
 
             #for x in self.cust_ents_dict:
             #    print(self.cust_ents_dict[x])
