@@ -1,7 +1,6 @@
 #!/bin/env python3
 import spacy
 
-import warnings
 from json2py import *
 from sklearn.model_selection import train_test_split
 from spacy.training import offsets_to_biluo_tags
@@ -40,7 +39,7 @@ def convertJsonToSpacyJsonl(outputFileName=None, filePaths=None):
     file.write("]")
     file.close()
 
-def rawJsonToSpacyJson(dir=None, fileSuffix=".json", splitTrainValidationTest=True, trainValidationTestRatio="0.7:0.2:0.1",outputFileName=None):
+def rawJsonToSpacyJson(dir=None, suffix=".json", split=True, input_test_size=0.2,outputFileName=None):
     """Add docstring"""
 
     # Walk through the directory and retrieve all files ending in fileSuffix
@@ -48,43 +47,69 @@ def rawJsonToSpacyJson(dir=None, fileSuffix=".json", splitTrainValidationTest=Tr
     filePaths = []
     for root, directories, files in path:
         for name in files:
-            if name.endswith(fileSuffix):
+            if name.endswith(suffix):
                 filePaths.append(os.path.join(root, name))
         for name in directories:
-            if name.endswith(fileSuffix):
+            if name.endswith(suffix):
                 filePaths.append(os.path.join(root, name))
 
     # Check to see if a user wants to split data into train, validate and test set
-    if splitTrainValidationTest:
-        dataSizes = trainValidationTestRatio.split(":")
-        ratioTotal=float(dataSizes[0]) + float(dataSizes[1]) + float(dataSizes[2])
+    if split:
 
-        if(ratioTotal < 0.999):
-            dataSizes = trainValidationTestRatio.split("0.7:0.2:0.1")
-            warnings.warn(''' Warning!: Fraction for the training, validation and test sets should add to 1 \n e.g., 
-            "0.7:0.2:0.1". Default values of 0.7:0.2:0.1" used.''')
-
-        validationRatio = float(dataSizes[1])
-        testRatio = float(dataSizes[2])
-        train, validateTest = train_test_split(filePaths, test_size=validationRatio+testRatio, shuffle=True)
+        train, validate = train_test_split(filePaths, test_size=input_test_size, shuffle=True)
 
         trainFile = outputFileName+"_training_data.jsonl"
         validateFile = outputFileName + "_validate_data.jsonl"
-        inputs = [[trainFile,train]]
 
-        # Check to see if a user wants a test set
-        if(testRatio > 0):
-            newSplit = testRatio/(validationRatio+testRatio)
-            testFile = outputFileName + "_test_data.jsonl"
-            validate, test = train_test_split(validateTest, test_size=newSplit, shuffle=True)
-            inputs.append([validateFile, validate])
-            inputs.append([testFile, test])
-        else:
-            inputs.append([validateFile,validateTest])
+        # Create training set
+        convertJsonToSpacyJsonl(trainFile, train)
 
-        # Loop through and create jsonl files for train, validate and test sets
-        for vals in inputs:
-            convertJsonToSpacyJsonl(vals[0], vals[1])
+        # Create validate set
+        convertJsonToSpacyJsonl(validateFile, validate)
     else:
         convertJsonToSpacyJsonl(outputFileName+".jsonl", filePaths)
 
+
+if __name__ == "__main__":
+
+    #
+    # Parse out the arguments and assign them to variables
+    #
+    parser = argparse.ArgumentParser(
+        description="convert raw JSON to the JSON format used by SpaCy for training ",
+        epilog="Example: python3 json2SpacyJson.py jsonInput jsonOutput (optional --suffix '.json' ; --split 'True' ; --test_size 0.2"
+    )
+    parser.add_argument(
+        'jsonFolder', help='Folder containing json files'
+    )
+    parser.add_argument(
+        'outputFileName', help='Output Filename'
+    )
+    parser.add_argument(
+        '--suffix', default=".json", type=str, help='Suffix the files ends in. Default=".json" '
+    )
+    parser.add_argument(
+        '--split', help='Whether to split dataset into training, validation and test sets. Default = True'
+    )
+    parser.add_argument(
+        '--test_size', help='Size of validate set. Should be a value between 0 and 1. Default = 0.2'
+    )
+
+    if len(sys.argv) < 2:
+        parser.print_usage()
+        sys.exit()
+
+    args = parser.parse_args()
+
+    if args.split.lower() == 'false':
+        args.split = False
+    else:
+        args.split = True
+
+    if args.suffix is None:
+        args.suffix = ".json"
+    if args.test_size is None:
+        args.test_size = 0.2
+
+    print("args=",args)
+    rawJsonToSpacyJson(dir=args.jsonFolder, suffix=args.suffix, split=args.split, input_test_size=args.test_size,outputFileName=args.outputFileName)
