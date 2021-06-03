@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from spacy.training import offsets_to_biluo_tags
 from spacy.training import docs_to_json
 
-def convertJsonToSpacyJson(outputFileName=None, filePaths=None):
+def convertJsonToSpacyJsonl(outputFileName=None, filePaths=None):
     # Load spacy pipeline
     nlp = spacy.load('en_core_web_md')
     # Create a file to contain the jsonl format for SpaCy
@@ -84,7 +84,7 @@ def rawJsonToSpacyJson(dir=None, fileSuffix=".json", splitTrainValidationTest=Tr
 
         # Loop through and create jsonl files for train, validate and test sets
         for vals in inputs:
-            convertJsonToSpacyJson(vals[0], vals[1])
+            convertJsonToSpacyJsonl(vals[0], vals[1])
     else:
-        convertJsonToSpacyJson(outputFileName+".jsonl", filePaths)
+        convertJsonToSpacyJsonl(outputFileName+".jsonl", filePaths)
 
