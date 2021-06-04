@@ -1,3 +1,6 @@
+ner.cfg
+ner_2021_06_*
+*temp*
 Data/Cranberry/
 YEDDA/
 ner-annotator/

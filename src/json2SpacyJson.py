@@ -77,7 +77,7 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description="convert raw JSON to the JSON format used by SpaCy for training ",
-        epilog="Example: python3 json2SpacyJson.py jsonInput jsonOutput (optional --suffix '.json' ; --split 'True' ; --test_size 0.2"
+        epilog="Example: python3 json2SpacyJson.py jsonInput jsonOutput (optional --suffix '.json' ; --split True ; --test_size 0.2"
     )
     parser.add_argument(
         'jsonFolder', help='Folder containing json files'
@@ -106,10 +106,12 @@ if __name__ == "__main__":
     else:
         args.split = True
 
-    if args.suffix is None:
-        args.suffix = ".json"
     if args.test_size is None:
         args.test_size = 0.2
+    else:
+        args.test_size = float(args.test_size)
 
-    print("args=",args)
+    if args.suffix is None:
+        args.suffix = ".json"
+        
     rawJsonToSpacyJson(dir=args.jsonFolder, suffix=args.suffix, split=args.split, input_test_size=args.test_size,outputFileName=args.outputFileName)
