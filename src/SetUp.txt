@@ -49,6 +49,8 @@ python -m spacy train ner.cfg --output ner_2021_06_08_model --paths.train ner_20
 
 # HERE
 
+# Start GUI and select "ner_2021_06_08_model" as the model
+
 # Deactivate
 conda deactivate
 
