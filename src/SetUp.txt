@@ -1,0 +1,56 @@
+# Move NER working space
+cd /Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER
+
+# Install conda. If you already had conda installed, update it.
+conda update --all
+
+# Create an environment
+conda create -n ner_june_2021 python=3.8.10 -y
+
+# To activate environment
+conda activate ner_june_2021
+
+# Install spacy
+conda install -c conda-forge spacy -y
+
+# Download language models
+python -m spacy download en_core_web_sm
+python -m spacy download en_core_web_md
+python -m spacy download en_core_web_lg
+
+# Install transformer package. It is sometimes using in training
+pip3 install spacy-transformers
+
+# Install scikit-learn
+conda install -c conda-forge scikit-learn -y
+
+
+# Take as input a folder containing raw json files and convert them into
+# jsonl format used by Spacy
+python src/json2SpacyJson.py Data ner_2021_06_08  --suffix '.json' --split True --test_size 0.1
+
+# Create directory. Spacy program to convert jsonl to Spacy format needs an output directory
+mkdir ner_2021_06_08
+
+# Convert to spacy binary format
+python -m spacy convert --converter json ner_2021_06_08_training_data.jsonl ner_2021_06_08
+python -m spacy convert --converter json ner_2021_06_08_validate_data.jsonl ner_2021_06_08
+
+# Create a config file to use for training
+# --lang: Two-letter code of the language to use
+# --pipeline: Comma-separated names of trainable pipeline components to include [default: tagger,parser,ner]
+# --optimize: Whether to optimize for efficiency or accuracy
+# --force: Overwrite output file if it exists
+# ner.cfg:
+python -m spacy init config --lang en --pipeline ner --optimize accuracy --force ner.cfg
+
+# Train a model
+python -m spacy train ner.cfg --output ner_2021_06_08_model --paths.train ner_2021_06_08/ner_2021_06_08_training_data.spacy --paths.dev ner_2021_06_08/ner_2021_06_08_validate_data.spacy
+
+# HERE
+
+# Deactivate
+conda deactivate
+
+# To remove an environment
+conda remove --name ner_june_2021 --all -y
