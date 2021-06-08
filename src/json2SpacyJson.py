@@ -113,5 +113,5 @@ if __name__ == "__main__":
 
     if args.suffix is None:
         args.suffix = ".json"
-        
+
     rawJsonToSpacyJson(dir=args.jsonFolder, suffix=args.suffix, split=args.split, input_test_size=args.test_size,outputFileName=args.outputFileName)
