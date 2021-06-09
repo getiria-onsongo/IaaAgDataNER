@@ -23,6 +23,7 @@ pip3 install spacy-transformers
 
 # Install scikit-learn
 conda install -c conda-forge scikit-learn -y
+conda install -c conda-forge PyPDF2 -y
 
 
 # Take as input a folder containing raw json files and convert them into
@@ -47,9 +48,8 @@ python -m spacy init config --lang en --pipeline ner --optimize accuracy --force
 # Train a model
 python -m spacy train ner.cfg --output ner_2021_06_08_model --paths.train ner_2021_06_08/ner_2021_06_08_training_data.spacy --paths.dev ner_2021_06_08/ner_2021_06_08_validate_data.spacy
 
-# HERE
-
-# Start GUI and select "ner_2021_06_08_model" as the model
+# Start GUI and select "ner_2021_06_08_model/model-best" as the model
+python src/CropNerGUI.py
 
 # Deactivate
 conda deactivate
