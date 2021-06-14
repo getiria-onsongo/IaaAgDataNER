@@ -179,18 +179,37 @@ class CropNerGUI:
         self.review_btn = tk.Button(self.open_frame, text="Review Annotations", command=self.ReviewAnnotations)
         self.review_btn.pack(side=tk.LEFT)
 
-        # URL frame
+        # Model frame
         self.url_frame = tk.Frame(self.rootWin)
         self.url_frame.grid(row=5, column=0)
+        self.spacyModel = tk.Label(self.url_frame, text="Spacy Model e.g.,en_core_web_lg  (same model used for training):", width=50)
+        self.spacyModel.pack(side=tk.LEFT)
+        self.spacyModel = tk.Entry(self.url_frame, width=20)
+        self.spacyModel.pack(side=tk.LEFT)
 
+        # URL frame
+        self.url_frame = tk.Frame(self.rootWin)
+        self.url_frame.grid(row=6, column=0)
         self.urlLabel = tk.Label(self.url_frame, text="Paste PDF URL (if known):", width=20)
         self.urlLabel.pack(side=tk.LEFT)
         self.urlEntry = tk.Entry(self.url_frame, width=40)
         self.urlEntry.pack(side=tk.LEFT)
 
     def get_nermodel_dir(self):
+        model = self.spacyModel.get()
+        model_name = "en_core_web_lg"
+        if len(model) == 0:
+            self.fontEntry.delete(0, tk.END)
+            self.fontEntry.insert(0, model_name)
+        else:
+            if(model.lowercase() == "en_core_web_sm"):
+                model_name = "en_core_web_sm"
+            elif(model.lowercase() == "en_core_web_md"):
+                model_name = "en_core_web_md"
+        source_nlp = spacy.load(model_name)
+
         self.model_dir = fd.askdirectory()
-        source_nlp = spacy.load("en_core_web_sm")
+
         self.nlp_agdata = spacy.load(self.model_dir)
         self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
         self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
@@ -224,7 +243,18 @@ class CropNerGUI:
         # model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
 
         if self.nlp_agdata is None:
-            source_nlp = spacy.load("en_core_web_md")
+            model = self.spacyModel.get()
+            model_name = "en_core_web_lg"
+            if len(model) == 0:
+                self.fontEntry.delete(0, tk.END)
+                self.fontEntry.insert(0, model_name)
+            else:
+                if (model.lowercase() == "en_core_web_sm"):
+                    model_name = "en_core_web_sm"
+                elif (model.lowercase() == "en_core_web_md"):
+                    model_name = "en_core_web_md"
+            source_nlp = spacy.load(model_name)
+
             if self.model_dir is not None:
                 self.nlp_agdata = spacy.load(self.model_dir)
                 self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
