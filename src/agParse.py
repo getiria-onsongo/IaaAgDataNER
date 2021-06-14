@@ -7,8 +7,6 @@ from spacy.matcher import Matcher
 
 from preparse import *
 
-nlp = spacy.load('en_core_web_sm')
-
 def adj_ent_entities(doc):
     # only deals with ADJ TRAT (or PLAN) = TRAT entities (e.g, 'low lodging' or 'rough awns')
     new_ents = []
@@ -77,8 +75,8 @@ def plan_adj_entities(doc):
     doc.ents = new_ents
     return doc
 
-def get_matched_spans(doc, substring):
-
+def get_matched_spans(doc, substring, model):
+    nlp = spacy.load(model)
     matcher = Matcher(nlp.vocab)
     
     sdoc = nlp(substring)
@@ -117,7 +115,7 @@ def add_non_ovlp_ent(new_ent, master_ents):
     result.append(new_ent)
     return result
 
-def add_ped_jrnl_entities(doc):
+def add_ped_jrnl_entities(doc, model):
     '''add PED and JRNL entities derived from regex code'''
 
     # add in regex-derived PED & JRNL entries, being sure to remove other 
@@ -133,7 +131,7 @@ def add_ped_jrnl_entities(doc):
         # the following returns a list of spans in the original doc that
         # match ent_data['substring'], each indexed as
         # span_list[0].text, span_list[0].start, and span_list[0].end
-        span_list = get_matched_spans(doc, ent_data['substring'])
+        span_list = get_matched_spans(doc, ent_data['substring'], model)
 
         # Although there might be multiple matches, just work with the
         # first one for now
