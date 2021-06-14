@@ -224,7 +224,7 @@ class CropNerGUI:
         # model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
 
         if self.nlp_agdata is None:
-            source_nlp = spacy.load("en_core_web_sm")
+            source_nlp = spacy.load("en_core_web_md")
             if self.model_dir is not None:
                 self.nlp_agdata = spacy.load(self.model_dir)
                 self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)

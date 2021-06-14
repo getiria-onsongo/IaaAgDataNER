@@ -6,9 +6,9 @@ from sklearn.model_selection import train_test_split
 from spacy.training import offsets_to_biluo_tags
 from spacy.training import docs_to_json
 
-def convertJsonToSpacyJsonl(outputFileName=None, filePaths=None):
+def convertJsonToSpacyJsonl(model="en_core_web_lg",outputFileName=None, filePaths=None):
     # Load spacy pipeline
-    nlp = spacy.load('en_core_web_md')
+    nlp = spacy.load(model)
     # Create a file to contain the jsonl format for SpaCy
     file = open(outputFileName, "w")
     file.write("[")
@@ -39,7 +39,7 @@ def convertJsonToSpacyJsonl(outputFileName=None, filePaths=None):
     file.write("]")
     file.close()
 
-def rawJsonToSpacyJson(dir=None, suffix=".json", split=True, input_test_size=0.2,outputFileName=None):
+def rawJsonToSpacyJson(dir=None, model="en_core_web_lg", suffix=".json", split=True, input_test_size=0.2,outputFileName=None):
     """Add docstring"""
 
     # Walk through the directory and retrieve all files ending in fileSuffix
@@ -62,12 +62,12 @@ def rawJsonToSpacyJson(dir=None, suffix=".json", split=True, input_test_size=0.2
         validateFile = outputFileName + "_validate_data.jsonl"
 
         # Create training set
-        convertJsonToSpacyJsonl(trainFile, train)
+        convertJsonToSpacyJsonl(model,trainFile, train)
 
         # Create validate set
-        convertJsonToSpacyJsonl(validateFile, validate)
+        convertJsonToSpacyJsonl(model,validateFile, validate)
     else:
-        convertJsonToSpacyJsonl(outputFileName+".jsonl", filePaths)
+        convertJsonToSpacyJsonl(model,outputFileName+".jsonl", filePaths)
 
 
 if __name__ == "__main__":
@@ -77,13 +77,16 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description="convert raw JSON to the JSON format used by SpaCy for training ",
-        epilog="Example: python3 json2SpacyJson.py jsonInput jsonOutput (optional --suffix '.json' ; --split True ; --test_size 0.2"
+        epilog="Example: python3 json2SpacyJson.py jsonInput jsonOutput en_core_web_lg (optional --suffix '.json' ; --split True ; --test_size 0.2"
     )
     parser.add_argument(
         'jsonFolder', help='Folder containing json files'
     )
     parser.add_argument(
         'outputFileName', help='Output Filename'
+    )
+    parser.add_argument(
+        'spacyModel', help='Spacy Model'
     )
     parser.add_argument(
         '--suffix', default=".json", type=str, help='Suffix the files ends in. Default=".json" '
@@ -95,7 +98,8 @@ if __name__ == "__main__":
         '--test_size', help='Size of validate set. Should be a value between 0 and 1. Default = 0.2'
     )
 
-    if len(sys.argv) < 2:
+
+    if len(sys.argv) < 3:
         parser.print_usage()
         sys.exit()
 
@@ -114,4 +118,4 @@ if __name__ == "__main__":
     if args.suffix is None:
         args.suffix = ".json"
 
-    rawJsonToSpacyJson(dir=args.jsonFolder, suffix=args.suffix, split=args.split, input_test_size=args.test_size,outputFileName=args.outputFileName)
+    rawJsonToSpacyJson(dir=args.jsonFolder, model=args.spacyModel, suffix=args.suffix, split=args.split, input_test_size=args.test_size,outputFileName=args.outputFileName)
