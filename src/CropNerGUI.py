@@ -199,8 +199,8 @@ class CropNerGUI:
         model = self.spacyModel.get()
         model_name = "en_core_web_lg"
         if len(model) == 0:
-            self.fontEntry.delete(0, tk.END)
-            self.fontEntry.insert(0, model_name)
+            self.spacyModel.delete(0, tk.END)
+            self.spacyModel.insert(0, model_name)
         else:
             if(model.lowercase() == "en_core_web_sm"):
                 model_name = "en_core_web_sm"
@@ -246,8 +246,8 @@ class CropNerGUI:
             model = self.spacyModel.get()
             model_name = "en_core_web_lg"
             if len(model) == 0:
-                self.fontEntry.delete(0, tk.END)
-                self.fontEntry.insert(0, model_name)
+                self.spacyModel.delete(0, tk.END)
+                self.spacyModel.insert(0, model_name)
             else:
                 if (model.lowercase() == "en_core_web_sm"):
                     model_name = "en_core_web_sm"
@@ -261,7 +261,7 @@ class CropNerGUI:
                 self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
                 # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
             else:
-                self.nlp_agdata = spacy.load("en_core_web_sm")
+                self.nlp_agdata = spacy.load(model_name)
 
 
 
