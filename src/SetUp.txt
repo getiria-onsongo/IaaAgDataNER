@@ -1,5 +1,5 @@
-# Move NER working space
-cd /Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER
+# Move NER working space (repo containing this code)
+cd IaaAgDataNER
 
 # For some reason download spacy using conda is not working correctly.
 # pip appears to work with no problems.
