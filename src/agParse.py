@@ -75,13 +75,13 @@ def plan_adj_entities(doc):
     doc.ents = new_ents
     return doc
 
-def get_matched_spans(doc, substring, model):
-    nlp = spacy.load(model)
+def get_matched_spans(doc, substring):
+    nlp = spacy.load("en_core_web_lg")
     matcher = Matcher(nlp.vocab)
     
     sdoc = nlp(substring)
     pattern = [{"ORTH": token.text} for token in sdoc] #allows matching multi-word pattern
-    matcher.add(substring, None, pattern)
+    matcher.add(substring,[pattern])
     
     result = []
     matches = matcher(doc)
@@ -115,7 +115,7 @@ def add_non_ovlp_ent(new_ent, master_ents):
     result.append(new_ent)
     return result
 
-def add_ped_jrnl_entities(doc, model):
+def add_ped_jrnl_entities(doc):
     '''add PED and JRNL entities derived from regex code'''
 
     # add in regex-derived PED & JRNL entries, being sure to remove other 
@@ -131,7 +131,7 @@ def add_ped_jrnl_entities(doc, model):
         # the following returns a list of spans in the original doc that
         # match ent_data['substring'], each indexed as
         # span_list[0].text, span_list[0].start, and span_list[0].end
-        span_list = get_matched_spans(doc, ent_data['substring'], model)
+        span_list = get_matched_spans(doc, ent_data['substring'])
 
         # Although there might be multiple matches, just work with the
         # first one for now
