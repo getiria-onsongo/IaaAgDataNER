@@ -211,8 +211,6 @@ class CropNerGUI:
         self.model_dir = fd.askdirectory()
 
         self.nlp_agdata = spacy.load(self.model_dir)
-        self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
-        self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
 
     def open_file(self, file_type):
         """ Get file from user. """
@@ -257,12 +255,13 @@ class CropNerGUI:
 
             if self.model_dir is not None:
                 self.nlp_agdata = spacy.load(self.model_dir)
-                self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
-                self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
             else:
                 self.nlp_agdata = spacy.load(model_name)
 
-        self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
+        # Spacy3 seems to be doing really well extracting PEDS and Journals. Comment out
+        # the custome component for now.
+        #self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
+
         print("self.nlp_agdata.pipe_names=",self.nlp_agdata.pipe_names)
 
 
