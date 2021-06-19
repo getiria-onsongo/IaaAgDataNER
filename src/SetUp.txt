@@ -36,11 +36,15 @@ python3 -m spacy convert --converter json ner_2021_06_validate_data.jsonl ner_20
 # --pipeline: Comma-separated names of trainable pipeline components to include [default: tagger,parser,ner]
 # --optimize: Whether to optimize for efficiency or accuracy
 # --force: Overwrite output file if it exists
-# ner.cfg:
-python3 -m spacy init config --lang en --pipeline ner --optimize accuracy --force ner.cfg
+# train.cfg:
+python3 -m spacy init config --lang en  --optimize accuracy --force train.cfg
+
+# NOTE: If you just have ner in the pipeline as below, you will not get things such as POS which
+# we need. Ensure tagger and parser are in the pipeline you are training
+# python3 -m spacy init config --lang en --pipeline ner --optimize accuracy --force ner.cfg
 
 # Train a model
-python3 -m spacy train ner.cfg --output ner_2021_06_model --paths.train ner_2021_06/ner_2021_06_training_data.spacy --paths.dev ner_2021_06/ner_2021_06_validate_data.spacy
+python3 -m spacy train train.cfg --output ner_2021_06_model --paths.train ner_2021_06/ner_2021_06_training_data.spacy --paths.dev ner_2021_06/ner_2021_06_validate_data.spacy
 
 
 # Start GUI and select "ner_2021_06_model/model-best" as the model

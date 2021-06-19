@@ -60,7 +60,10 @@ def find_jrnl(text):
     # Crop Science 30(2): 421 (1990)
     # Journal of American Society of Agronomy 33:252 (1941)
 
-    citation = r'(?:[A-Z][\w\.]+)(?:\s+[\w\.]+){0,5}\s+\d+(?:\(\d+\))?\s*:\s*\d+(?:-\d+)?\s+\(\d+\)'
+    # citation = r'(?:[A-Z][\w\.]+)(?:\s+[\w\.]+){0,5}\s+\d+(?:\(\d+\))?\s*:\s*\d+(?:-\d+)?\s+\(\d+\)'
+    # The above regex is grabbing in some instances the whole sentence. I am going to attempt to just grab the
+    # citation without journal name using regex and then use SpaCy to extract the journal name.
+    citation = r'\d+(?:\(\d+\))?\s*:\s*\d+(?:-\d+)?\s+\(\d+\)'
     cit_re = re.compile(citation)
     return cit_re.findall(text)
 
@@ -71,6 +74,7 @@ def preparse(text):
         TODO: also consider outputting to STDERR the input text with matched 
         entities replaced by simple IDs (PED1, PED2, JRNL1, JRNL2, ...) """
 
+    #print("Text=",text)
     result = dict()
     result[text] = dict()
 

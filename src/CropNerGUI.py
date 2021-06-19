@@ -259,9 +259,11 @@ class CropNerGUI:
                 self.nlp_agdata = spacy.load(self.model_dir)
                 self.nlp_agdata.add_pipe("parser", before="ner", source=source_nlp)
                 self.nlp_agdata.add_pipe("tagger", before="parser", source=source_nlp)
-                # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
             else:
                 self.nlp_agdata = spacy.load(model_name)
+
+        self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
+        print("self.nlp_agdata.pipe_names=",self.nlp_agdata.pipe_names)
 
 
 
@@ -620,9 +622,16 @@ class CropNerGUI:
         """This is a callback method attached to the quit button.
         It destroys the main window, which ends the program"""
 
+        '''
+        # This seemed like a good idea to save the annotation file everytime 
+        # the application quit, just in case the user forgot to save. However, 
+        # when testing a ton of unnecessary files were being generated. We will comment
+        # this out for now and if this features becomes necessary in the future, we can 
+        # just uncomment.  
         if(self.raw_file is not None):
             # Save current annotation
             self.file_save()
+        '''
 
         self.rootWin.destroy()
 
