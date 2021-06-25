@@ -262,7 +262,7 @@ class CropNerGUI:
         # the custome component for now.
         #self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
 
-        print("self.nlp_agdata.pipe_names=",self.nlp_agdata.pipe_names)
+        #print("self.nlp_agdata.pipe_names=",self.nlp_agdata.pipe_names)
 
 
 
@@ -600,7 +600,9 @@ class CropNerGUI:
         else:
             self.msg.config(text="")
             # Save current annotation
-            self.file_save()
+            # Uncomment this for now. Initially it seemed like a good idea but there are a lot of
+            # Instances where a user might not want to save annotations when they click next page
+            # self.file_save()
 
         # Increment page number
         self.pageNumber = self.pageNumber + 1
