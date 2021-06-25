@@ -149,7 +149,7 @@ def compound_trait_entities(doc):
     doc = adj_ent_entities(doc)
     doc = plan_adj_entities(doc)
     doc = trat_adj_entities(doc)
-    doc = add_ped_jrnl_entities(doc)
+    #doc = add_ped_jrnl_entities(doc)
     return doc
 
 if __name__ == "__main__":
