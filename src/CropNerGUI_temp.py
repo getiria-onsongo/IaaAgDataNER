@@ -13,7 +13,8 @@ class App(tk.Frame):
 
         super().__init__()
 
-        self.master.title("Hello World")
+        self.master.title("GEMS NER Annotation Tool")
+        self.master.geometry('1500x900')
 
         self.count = 0
         self.labels = {}
@@ -22,7 +23,9 @@ class App(tk.Frame):
 
     def init_ui(self):
 
-        self.f = tk.Frame()
+        self.f = tk.Frame(self.master)
+        self.f.grid(row=0, column=0)
+
 
         w = tk.Frame()
 
@@ -31,6 +34,10 @@ class App(tk.Frame):
 
         w.pack(side=tk.RIGHT, fill=tk.BOTH, expand=0)
         self.f.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+
+
+
+
 
     def callback(self):
 
