@@ -8,6 +8,7 @@ import PyPDF2
 import re
 import tkinter as tk
 from tkinter import filedialog as fd
+import random
 
 from tkinter.scrolledtext import ScrolledText
 
@@ -24,6 +25,7 @@ class CropNerGUIv2:
         self.font_size = "20"
         self.content = [""]
         self.custom_ents = {}
+        self.custom_ents_color = {}
         self.line_num = 0
 
         self.topframe = tk.Frame(self.rootWin)
@@ -74,9 +76,12 @@ class CropNerGUIv2:
 
     def add_ent(self):
         ent_label = self.traitEntry.get().upper()
-        ent_btn = tk.Button(self.topframe, highlightbackground="lawn green", text=ent_label,command=partial(self.get_ner, ent_label))
+        color = "#" + ("%06x" % random.randint(0, 16777215))
+        ent_btn = tk.Button(self.topframe, highlightbackground=color, text=ent_label,command=partial(self.get_ner, ent_label))
         ent_btn.pack(side=tk.LEFT)
         self.custom_ents[ent_label] = ent_btn
+        self.custom_ents_color[ent_label] = color
+
 
     def remove_ent(self):
         ent_label = self.traitEntry.get().upper()

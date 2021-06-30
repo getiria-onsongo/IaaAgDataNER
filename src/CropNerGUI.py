@@ -6,6 +6,7 @@ import os.path
 from py2json import *
 import PyPDF2
 import re
+import random
 import tkinter as tk
 from tkinter import filedialog as fd
 
@@ -31,6 +32,8 @@ class CropNerGUI:
         self.nlp_agdata = None
 
         self.cust_ents_dict = {}
+        self.custom_ents_labels = {}
+        self.custom_ents_labels_color = {}
 
         self.output_file_name = "sample_p0_td.py"
         self.pageNumber=0
@@ -75,11 +78,32 @@ class CropNerGUI:
         self.pretag_btn = tk.Button(self.topframe, text="Pre-Tag", command=partial(self.pre_tag))
         self.pretag_btn.pack(side=tk.LEFT)
 
+        self.cust_ent_frame = tk.Frame(self.rootWin)
+        self.cust_ent_frame.grid(row=1, column=0)
+        self.blankLabel = tk.Label(self.cust_ent_frame, text="")
+        self.blankLabel.pack(side=tk.LEFT)
+
+
+        self.edit_ent_frame = tk.Frame(self.rootWin)
+        self.edit_ent_frame.grid(row=2, column=0)
+        self.traitLabel = tk.Label(self.edit_ent_frame, text="Enter Entity Label:", width=20)
+        self.traitLabel.pack(side=tk.LEFT)
+        self.traitEntry = tk.Entry(self.edit_ent_frame, width=10)
+        self.traitEntry.pack(side=tk.LEFT)
+
+        # Add entity button
+        self.add_ent_btn = tk.Button(self.edit_ent_frame, text="Add Entity", width=10, command=self.add_ent)
+        self.add_ent_btn.pack(side=tk.LEFT)
+
+        # Remove entity button
+        self.remove_ent_btn = tk.Button(self.edit_ent_frame, text="Remove Entity", width=10, command=self.remove_ent)
+        self.remove_ent_btn.pack(side=tk.LEFT)
+
         # adding the text: Note, height defines height if widget in lines based in font size
         self.text = ScrolledText(self.rootWin, height=25, width=140, font = "Times "+self.font_size)
         self.text.insert(tk.END, self.content[self.line_num])
         self.text.focus_force()
-        self.text.grid(row=1, column=0, columnspan=4, padx=5, pady=5)
+        self.text.grid(row=3, column=0, columnspan=4, padx=5, pady=5)
 
         # Create a scrollbar
         #self.scroll_bar = tk.Scrollbar(self.rootWin)
@@ -107,7 +131,7 @@ class CropNerGUI:
         self.tags=["highlight","default_color_tag","ALA","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
 
         self.bottom_frame = tk.Frame(self.rootWin)
-        self.bottom_frame.grid(row=2, column=0)
+        self.bottom_frame.grid(row=4, column=0)
 
         # Exit button
         self.exit_btn = tk.Button(self.bottom_frame, text="Exit",width=10,command=self.quit)
@@ -116,8 +140,6 @@ class CropNerGUI:
         # Load button
         self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.LoadPage)
         self.load_btn.pack(side=tk.LEFT)
-
-
 
         # Highlight button
         self.bold_btn = tk.Button(self.bottom_frame, text="Highlight Text",width=10, command=self.highlight_text)
@@ -144,7 +166,7 @@ class CropNerGUI:
         self.save_btn.pack(side=tk.LEFT)
 
         self.msg_frame = tk.Frame(self.rootWin)
-        self.msg_frame.grid(row=3, column=0)
+        self.msg_frame.grid(row=5, column=0)
 
         # Label to display messages
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
@@ -152,7 +174,7 @@ class CropNerGUI:
 
         # Frame for selecting
         self.open_frame = tk.Frame(self.rootWin)
-        self.open_frame.grid(row=4, column=0)
+        self.open_frame.grid(row=6, column=0)
 
         # open file button
         self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF)',width=18,command=partial(self.open_file,"pdf"))
@@ -181,7 +203,7 @@ class CropNerGUI:
 
         # Model frame
         self.url_frame = tk.Frame(self.rootWin)
-        self.url_frame.grid(row=5, column=0)
+        self.url_frame.grid(row=7, column=0)
         self.spacyModel = tk.Label(self.url_frame, text="Spacy Model e.g.,en_core_web_lg  (same model used for training):", width=50)
         self.spacyModel.pack(side=tk.LEFT)
         self.spacyModel = tk.Entry(self.url_frame, width=20)
@@ -189,11 +211,24 @@ class CropNerGUI:
 
         # URL frame
         self.url_frame = tk.Frame(self.rootWin)
-        self.url_frame.grid(row=6, column=0)
+        self.url_frame.grid(row=8, column=0)
         self.urlLabel = tk.Label(self.url_frame, text="Paste PDF URL (if known):", width=20)
         self.urlLabel.pack(side=tk.LEFT)
         self.urlEntry = tk.Entry(self.url_frame, width=40)
         self.urlEntry.pack(side=tk.LEFT)
+
+    def remove_ent(self):
+        ent_label = self.traitEntry.get().upper()
+        ent_btn = self.custom_ents_labels[ent_label]
+        ent_btn.pack_forget()
+
+    def add_ent(self):
+        ent_label = self.traitEntry.get().upper()
+        color = "#" + ("%06x" % random.randint(0, 16777215))
+        ent_btn = tk.Button(self.cust_ent_frame, highlightbackground=color, text=ent_label,command=partial(self.get_ner, ent_label))
+        ent_btn.pack(side=tk.LEFT)
+        self.custom_ents_labels[ent_label] = ent_btn
+        self.custom_ents_labels_color[ent_label] = color
 
     def get_nermodel_dir(self):
         model = self.spacyModel.get()
