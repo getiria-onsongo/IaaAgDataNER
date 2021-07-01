@@ -42,7 +42,7 @@ class CropNerGUI:
         self.page_lines = len(self.content)
 
         self.topframe = tk.Frame(self.rootWin)
-        self.topframe.grid(row=0, column=0)
+        self.topframe.pack(side=tk.TOP,fill="x")
 
         # NOTE: A partial function is created from another function, where some of the parameters are fixed.
         # In the instance below, we want to call the function self.get_ner (which takes a single input) several
@@ -50,6 +50,8 @@ class CropNerGUI:
         # button is clicked, we want to pass the text "ALAS" but if the "CROP" button was clicked we want to pass the
         # text CROP. So, partial(self.get_ner, "ALAS") is the same as self.get_ner("ALAS")
 
+        self.blankLabel_one = tk.Label(self.topframe, text="   ")
+        self.blankLabel_one.pack(side=tk.LEFT)
         # Named entity buttons
         self.alas_btn = tk.Button(self.topframe, highlightbackground="violet",text="ALAS", command=partial(self.get_ner, "ALAS"))
         self.alas_btn.pack(side = tk.LEFT)
@@ -79,13 +81,13 @@ class CropNerGUI:
         self.pretag_btn.pack(side=tk.LEFT)
 
         self.cust_ent_frame = tk.Frame(self.rootWin)
-        self.cust_ent_frame.grid(row=1, column=0)
-        self.blankLabel = tk.Label(self.cust_ent_frame, text="")
-        self.blankLabel.pack(side=tk.LEFT)
+        self.cust_ent_frame.pack(side=tk.TOP,fill="x")
+        self.blankLabel_two = tk.Label(self.cust_ent_frame, text="   ")
+        self.blankLabel_two.pack(side=tk.LEFT)
 
 
         self.edit_ent_frame = tk.Frame(self.rootWin)
-        self.edit_ent_frame.grid(row=2, column=0)
+        self.edit_ent_frame.pack(side=tk.TOP,fill="x")
         self.traitLabel = tk.Label(self.edit_ent_frame, text="Enter Entity Label:", width=20)
         self.traitLabel.pack(side=tk.LEFT)
         self.traitEntry = tk.Entry(self.edit_ent_frame, width=10)
@@ -103,7 +105,7 @@ class CropNerGUI:
         self.text = ScrolledText(self.rootWin, height=25, width=140, font = "Times "+self.font_size)
         self.text.insert(tk.END, self.content[self.line_num])
         self.text.focus_force()
-        self.text.grid(row=3, column=0, columnspan=4, padx=5, pady=5)
+        self.text.pack(side=tk.TOP)
 
         # Create a scrollbar
         #self.scroll_bar = tk.Scrollbar(self.rootWin)
@@ -131,8 +133,10 @@ class CropNerGUI:
         self.tags=["highlight","default_color_tag","ALA","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
 
         self.bottom_frame = tk.Frame(self.rootWin)
-        self.bottom_frame.grid(row=4, column=0)
+        self.bottom_frame.pack(side=tk.TOP,fill="x")
 
+        self.blankLabel_three = tk.Label(self.bottom_frame, text="   ")
+        self.blankLabel_three.pack(side=tk.LEFT)
         # Exit button
         self.exit_btn = tk.Button(self.bottom_frame, text="Exit",width=10,command=self.quit)
         self.exit_btn.pack(side = tk.LEFT)
@@ -166,7 +170,7 @@ class CropNerGUI:
         self.save_btn.pack(side=tk.LEFT)
 
         self.msg_frame = tk.Frame(self.rootWin)
-        self.msg_frame.grid(row=5, column=0)
+        self.msg_frame.pack(side=tk.TOP)
 
         # Label to display messages
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
@@ -174,8 +178,10 @@ class CropNerGUI:
 
         # Frame for selecting
         self.open_frame = tk.Frame(self.rootWin)
-        self.open_frame.grid(row=6, column=0)
+        self.open_frame.pack(side=tk.TOP,fill="x")
 
+        self.blankLabel_four = tk.Label(self.open_frame, text="   ")
+        self.blankLabel_four.pack(side=tk.LEFT)
         # open file button
         self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF)',width=18,command=partial(self.open_file,"pdf"))
         self.open_button.pack(side=tk.LEFT)
@@ -202,17 +208,25 @@ class CropNerGUI:
         self.review_btn.pack(side=tk.LEFT)
 
         # Model frame
-        self.url_frame = tk.Frame(self.rootWin)
-        self.url_frame.grid(row=7, column=0)
-        self.spacyModel = tk.Label(self.url_frame, text="Spacy Model e.g.,en_core_web_lg  (same model used for training):", width=50)
+        self.model_frame = tk.Frame(self.rootWin)
+        self.model_frame.pack(side=tk.TOP,fill="x")
+
+        self.blankLabel_five = tk.Label(self.model_frame, text="     ")
+        self.blankLabel_five.pack(side=tk.LEFT)
+
+        self.spacyModel = tk.Label(self.model_frame, text="Spacy Model e.g.,en_core_web_lg  (same model used for training):", width=50,anchor="w")
         self.spacyModel.pack(side=tk.LEFT)
-        self.spacyModel = tk.Entry(self.url_frame, width=20)
+        self.spacyModel = tk.Entry(self.model_frame, width=20)
         self.spacyModel.pack(side=tk.LEFT)
 
         # URL frame
         self.url_frame = tk.Frame(self.rootWin)
-        self.url_frame.grid(row=8, column=0)
-        self.urlLabel = tk.Label(self.url_frame, text="Paste PDF URL (if known):", width=20)
+        self.url_frame.pack(side=tk.TOP,fill="x")
+
+        self.blankLabel_six = tk.Label(self.url_frame, text="     ")
+        self.blankLabel_six.pack(side=tk.LEFT)
+
+        self.urlLabel = tk.Label(self.url_frame, text="Paste PDF URL (if known):", width=20,anchor="w")
         self.urlLabel.pack(side=tk.LEFT)
         self.urlEntry = tk.Entry(self.url_frame, width=40)
         self.urlEntry.pack(side=tk.LEFT)
