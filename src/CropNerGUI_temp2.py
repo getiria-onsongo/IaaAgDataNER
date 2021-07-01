@@ -29,20 +29,20 @@ class CropNerGUIv2:
         self.line_num = 0
 
         self.topframe = tk.Frame(self.rootWin)
-        self.topframe.grid(row=0, column=0)
+        self.topframe.pack(side=tk.TOP,fill="x")
 
-        self.alas_btn = tk.Button(self.topframe, highlightbackground="violet", text="ALAS",
-                                  command=partial(self.get_ner, "ALAS"))
+        self.alas_btn = tk.Button(self.topframe, highlightbackground="violet", text="ALAS",command=partial(self.get_ner, "ALAS"))
         self.alas_btn.pack(side=tk.LEFT)
 
         # adding the text: Note, height defines height if widget in lines based in font size
         self.text = ScrolledText(self.rootWin, height=25, width=140, font="Times " + self.font_size)
         self.text.insert(tk.END, self.content[self.line_num])
         self.text.focus_force()
-        self.text.grid(row=1, column=0, columnspan=4, padx=5, pady=5)
+        #self.text.grid(row=1, column=0, columnspan=4, padx=5, pady=5)
+        self.text.pack(side=tk.TOP)
 
         self.bottom_frame = tk.Frame(self.rootWin)
-        self.bottom_frame.grid(row=2, column=0)
+        self.bottom_frame.pack(side=tk.TOP)
 
         # Exit button
         self.exit_btn = tk.Button(self.bottom_frame, text="Exit", width=10, command=self.quit)
