@@ -1,3 +1,6 @@
+# NEXT: Change how we create the buttons and instead of a single line
+# for each button we will use a loop function
+
 from agParse import *
 from datetime import datetime
 from functools import partial
@@ -24,6 +27,10 @@ class CropNerGUI:
 
         self.model_dir = None
         self.content=[""]
+        self.tags=["highlight","default_color_tag","ALA","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
+        self.colors=["gray","black","violet","lawn green","deep sky blue","yellow","red","orange","pink","brown","MediumPurple1"]
+        self.tag_colors = {}
+
         self.raw_file = None
         self.annotation_file = None
         self.sentences = None
@@ -40,6 +47,14 @@ class CropNerGUI:
         self.line_num = 0
         self.font_size = "20"
         self.page_lines = len(self.content)
+
+        # Create a dictionary with a tag as key and color as value to pair tags with colors.
+        # This will make it easy to retrieve the color for a tag. The loop does the equivalent
+        # of
+        # self.tag_colors["highlight"] = "gray"
+        # in an iteration
+        for i in range(len(self.tags)):
+            self.tag_colors[self.tags[i]] = self.colors[i]
 
         self.topframe = tk.Frame(self.rootWin)
         self.topframe.pack(side=tk.TOP,fill="x")
@@ -85,7 +100,6 @@ class CropNerGUI:
         self.blankLabel_two = tk.Label(self.cust_ent_frame, text="   ")
         self.blankLabel_two.pack(side=tk.LEFT)
 
-
         self.edit_ent_frame = tk.Frame(self.rootWin)
         self.edit_ent_frame.pack(side=tk.TOP,fill="x")
         self.traitLabel = tk.Label(self.edit_ent_frame, text="Enter Entity Label:", width=20)
@@ -114,23 +128,18 @@ class CropNerGUI:
         #self.text.tag_configure("test", background="yellow", foreground="red")
         #self.text.tag_add("test", "1.1", "1.5")
 
-
-
-        # configuring a tag called start which will be used to highlight the text
         self.text.tag_configure("highlight", foreground="black", background="gray")
+        # We need to repeat the configuration on the line above for all the tags. Except we will
+        # not change the foreground. It is the equivalent of
+        #
+        # self.text.tag_configure("ALAS", background="violet")
+        #
+        # in one iteration but instead of 10 statements we will use a loop
 
-        self.text.tag_configure("default_color_tag", background="black")
-        self.text.tag_configure("ALAS", background="violet")
-        self.text.tag_configure("CROP", background="lawn green")
-        self.text.tag_configure("CVAR", background="deep sky blue")
-        self.text.tag_configure("JRNL", background="yellow")
-        self.text.tag_configure("PATH", background="red")
-        self.text.tag_configure("PED", background="orange")
-        self.text.tag_configure("PLAN", background="pink")
-        self.text.tag_configure("PPTD", background="brown")
-        self.text.tag_configure("TRAT", background="MediumPurple1")
-
-        self.tags=["highlight","default_color_tag","ALA","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
+        for tag, color in self.tag_colors.items():
+            if(tag != "highlight"):
+                # self.text.tag_configure("ALAS", background="violet")
+                self.text.tag_configure(tag, background=color)
 
         self.bottom_frame = tk.Frame(self.rootWin)
         self.bottom_frame.pack(side=tk.TOP,fill="x")
@@ -228,7 +237,7 @@ class CropNerGUI:
 
         self.urlLabel = tk.Label(self.url_frame, text="Paste PDF URL (if known):", width=20,anchor="w")
         self.urlLabel.pack(side=tk.LEFT)
-        self.urlEntry = tk.Entry(self.url_frame, width=40)
+        self.urlEntry = tk.Entry(self.url_frame, width=50)
         self.urlEntry.pack(side=tk.LEFT)
 
     def remove_ent(self):
@@ -239,9 +248,11 @@ class CropNerGUI:
     def add_ent(self):
         ent_label = self.traitEntry.get().upper()
         color = "#" + ("%06x" % random.randint(0, 16777215))
+        print("color=",color)
         ent_btn = tk.Button(self.cust_ent_frame, highlightbackground=color, text=ent_label,command=partial(self.get_ner, ent_label))
         ent_btn.pack(side=tk.LEFT)
         self.custom_ents_labels[ent_label] = ent_btn
+        print("self.custom_ents_labels[ent_label]=",ent_btn)
         self.custom_ents_labels_color[ent_label] = color
 
     def get_nermodel_dir(self):
