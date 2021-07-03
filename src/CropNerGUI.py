@@ -1,7 +1,5 @@
-# NEXT: Change how we create the buttons and instead of a single line
-# for each button we will use a loop function
-
 from agParse import *
+from tkinterColorList import  *
 from datetime import datetime
 from functools import partial
 from json2py import *
@@ -247,12 +245,30 @@ class CropNerGUI:
 
     def add_ent(self):
         ent_label = self.traitEntry.get().upper()
-        color = "#" + ("%06x" % random.randint(0, 16777215))
+
+        # The code below select a color from color_list which is defined in tkinterColorList.py
+        # If it loops through the lenth of the colors in color_list and does not find a color
+        # that has not already been used, it generates a random color.
+        color = None
+        n = len(color_list)
+        for i in range(n):
+            # Randomly pick a color. This will hopefully get one that contrasts well with existing colors.
+            i_color = color_list[random.randint(0, n)]
+            # Check to see of the color selected has not been used
+            if i_color not in self.colors:
+                color = i_color
+                break
+        # Note, because we are selecting colors randomly from color_list, there is a chance we will not
+        # find a color that has not already been used. This can happen if by chance we keep randomnly
+        # selecting colors that have been used. If this happens, just create a random color.
+        if(color is None):
+            color = "#" + ("%06x" % random.randint(0, 16777215))
+
+        self.colors.append(color)
         print("color=",color)
         ent_btn = tk.Button(self.cust_ent_frame, highlightbackground=color, text=ent_label,command=partial(self.get_ner, ent_label))
         ent_btn.pack(side=tk.LEFT)
         self.custom_ents_labels[ent_label] = ent_btn
-        print("self.custom_ents_labels[ent_label]=",ent_btn)
         self.custom_ents_labels_color[ent_label] = color
 
     def get_nermodel_dir(self):
