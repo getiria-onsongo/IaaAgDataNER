@@ -13,7 +13,6 @@ from tkinter import filedialog as fd
 
 from tkinter.scrolledtext import ScrolledText
 
-# HERE: Go through the code to make sure changes did not break anything
 
 # create a NER GUI class
 class CropNerGUI:
@@ -22,7 +21,6 @@ class CropNerGUI:
         self.rootWin = tk.Tk()
         #self.rootWin.option_add('*Font', 'Times 24')
         self.rootWin.title("GEMS NER Annotation Tool")
-
         self.rootWin.geometry('1500x900')
 
         self.model_dir = None
@@ -30,6 +28,8 @@ class CropNerGUI:
         self.tags=["highlight","default_color_tag","ALAS","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
         self.colors=["gray","black","violet","lawn green","deep sky blue","yellow","red","orange","pink","brown","MediumPurple1"]
         self.tag_colors_buttonID = {}
+        self.crop_cnt = {}
+        self.cvar_cnt = {}
 
         self.raw_file = None
         self.annotation_file = None
@@ -81,8 +81,11 @@ class CropNerGUI:
 
         self.clearTag_btn = tk.Button(self.topframe, text="Remove-Tag", command=partial(self.remove_tag))
         self.clearTag_btn.pack(side=tk.LEFT)
-        self.pretag_btn = tk.Button(self.topframe, text="Pre-Tag", command=partial(self.pre_tag))
-        self.pretag_btn.pack(side=tk.LEFT)
+        self.pretagSelection_btn = tk.Button(self.topframe, text="Pre-Tag Selection", command=partial(self.pre_tag, "Selection"))
+        self.pretagSelection_btn.pack(side=tk.LEFT)
+        self.pretagPage_btn = tk.Button(self.topframe, text="Pre-Tag Page", command=partial(self.pre_tag, "Page"))
+        self.pretagPage_btn.pack(side=tk.LEFT)
+
 
         self.cust_ent_frame = tk.Frame(self.rootWin)
         self.cust_ent_frame.pack(side=tk.TOP,fill="x")
@@ -169,12 +172,17 @@ class CropNerGUI:
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
         self.msg.pack(side=tk.LEFT)
 
+        # Continue button
+        self.continue_btn = tk.Button(self.msg_frame, text="Continue", width=10, command=self.file_save)
+        self.continue_btn.pack(side=tk.LEFT)
+        self.continue_btn.pack_forget()
+
         # Frame for selecting
         self.open_frame = tk.Frame(self.rootWin)
         self.open_frame.pack(side=tk.TOP,fill="x")
 
-        self.blankLabel_four = tk.Label(self.open_frame, text="   ")
-        self.blankLabel_four.pack(side=tk.LEFT)
+        self.blankLabel_five = tk.Label(self.open_frame, text="   ")
+        self.blankLabel_five.pack(side=tk.LEFT)
         # open file button
         self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF)',width=18,command=partial(self.open_file,"pdf"))
         self.open_button.pack(side=tk.LEFT)
@@ -202,24 +210,34 @@ class CropNerGUI:
         self.model_frame = tk.Frame(self.rootWin)
         self.model_frame.pack(side=tk.TOP,fill="x")
 
-        self.blankLabel_five = tk.Label(self.model_frame, text="     ")
-        self.blankLabel_five.pack(side=tk.LEFT)
+        self.blankLabel_six = tk.Label(self.model_frame, text="     ")
+        self.blankLabel_six.pack(side=tk.LEFT)
 
         self.spacyModel = tk.Label(self.model_frame, text="Spacy Model e.g.,en_core_web_lg  (same model used for training):", width=50,anchor="w")
         self.spacyModel.pack(side=tk.LEFT)
         self.spacyModel = tk.Entry(self.model_frame, width=20)
         self.spacyModel.pack(side=tk.LEFT)
 
-        # URL frame
-        self.url_frame = tk.Frame(self.rootWin)
-        self.url_frame.pack(side=tk.TOP,fill="x")
+        # Annotation Data
+        self.annotation_data_frame = tk.Frame(self.rootWin)
+        self.annotation_data_frame.pack(side=tk.TOP,fill="x")
 
-        self.blankLabel_six = tk.Label(self.url_frame, text="     ")
-        self.blankLabel_six.pack(side=tk.LEFT)
+        self.blankLabel_seven = tk.Label(self.annotation_data_frame, text="     ")
+        self.blankLabel_seven.pack(side=tk.LEFT)
 
-        self.urlLabel = tk.Label(self.url_frame, text="Paste PDF URL (if known):", width=20,anchor="w")
+        self.cropLabel = tk.Label(self.annotation_data_frame, text="Crop Label:", width=10, anchor="w")
+        self.cropLabel.pack(side=tk.LEFT)
+        self.cropEntry = tk.Entry(self.annotation_data_frame, width=15)
+        self.cropEntry.pack(side=tk.LEFT)
+
+        self.varietyLabel = tk.Label(self.annotation_data_frame, text="Crop Variety Label:", width=15, anchor="w")
+        self.varietyLabel.pack(side=tk.LEFT)
+        self.varietyEntry = tk.Entry(self.annotation_data_frame, width=15)
+        self.varietyEntry.pack(side=tk.LEFT)
+
+        self.urlLabel = tk.Label(self.annotation_data_frame, text="PDF URL (if known):", width=20,anchor="w")
         self.urlLabel.pack(side=tk.LEFT)
-        self.urlEntry = tk.Entry(self.url_frame, width=50)
+        self.urlEntry = tk.Entry(self.annotation_data_frame, width=50)
         self.urlEntry.pack(side=tk.LEFT)
 
     def remove_ent(self):
@@ -269,11 +287,12 @@ class CropNerGUI:
             self.spacyModel.delete(0, tk.END)
             self.spacyModel.insert(0, model_name)
         else:
-            if(model.lowercase() == "en_core_web_sm"):
+            if(model.lower() == "en_core_web_sm"):
                 model_name = "en_core_web_sm"
-            elif(model.lowercase() == "en_core_web_md"):
+            elif(model.lower() == "en_core_web_md"):
                 model_name = "en_core_web_md"
-        # source_nlp = spacy.load(model_name)
+            self.spacyModel.delete(0, tk.END)
+            self.spacyModel.insert(0, model_name)
         self.model_dir = fd.askdirectory()
         self.nlp_agdata = spacy.load(self.model_dir)
 
@@ -303,7 +322,6 @@ class CropNerGUI:
         """
         Load spacy model
         """
-        # model_dir = "/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/NerModel/model-best"
 
         if self.nlp_agdata is None:
             model = self.spacyModel.get()
@@ -312,11 +330,10 @@ class CropNerGUI:
                 self.spacyModel.delete(0, tk.END)
                 self.spacyModel.insert(0, model_name)
             else:
-                if (model.lowercase() == "en_core_web_sm"):
+                if (model.lower() == "en_core_web_sm"):
                     model_name = "en_core_web_sm"
-                elif (model.lowercase() == "en_core_web_md"):
+                elif (model.lower() == "en_core_web_md"):
                     model_name = "en_core_web_md"
-            #source_nlp = spacy.load(model_name)
 
             if self.model_dir is not None:
                 self.nlp_agdata = spacy.load(self.model_dir)
@@ -326,9 +343,6 @@ class CropNerGUI:
         # Spacy3 seems to be doing really well extracting PEDS and Journals. Comment out
         # the custome component for now.
         #self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
-
-        #print("self.nlp_agdata.pipe_names=",self.nlp_agdata.pipe_names)
-
 
 
     def LoadPDF(self):
@@ -392,8 +406,8 @@ class CropNerGUI:
                     lineNo = lineNo + 1
 
 
-    def pre_tag(self):
-        """ Pre-tag content in text box with NER tags. """
+    def pre_tag(self, selection):
+        """ Pre-tag selected content or all the text in text box with NER tags. """
 
         # Clear warning message, if one exists
         self.msg.config(text="")
@@ -403,19 +417,29 @@ class CropNerGUI:
             # Reset annotation dictionary
             self.cust_ents_dict = {}
 
-            # Get the line number for the end of the text. This will tell us
-            # how many total lines we have loaded
-            lastLineIndex = int(self.text.index('end').split(".")[0])
+            # By default, start annotating the first line.
+            firstLineNo = 1
 
+            # Get the line number for the beginning and end of the text.
+            if (selection == "Selection"):
+                firstLineNo = int(self.text.index("sel.first").split(".")[0])
+                lastLineIndex = int(self.text.index('sel.last').split(".")[0])
+            else:
+                # firstLineNo will remain the default value set above.
+                lastLineIndex = int(self.text.index('end').split(".")[0])
+
+            #print("firstLineNo,lastLineIndex",firstLineNo,lastLineIndex)
             # Check to see if we have any text. We do not expect a sentence to
-            # be less than 5 characters. We will use 5 as the threshold. tk.Text
-            # does not appear to have a method for checking if tk.Text is empty
-            text = self.text.get("1.0", self.text.index('end'))
+            # be less than 5 characters. We will use 5 as the threshold.
+            text = self.text.get(str(firstLineNo)+".0", self.text.index('end'))
             if(len(text) < 5):
                 self.msg.config(text="Text field appears to be empty. Please load or enter text to Pre-Tag", foreground="red")
             else:
+                # Start annotating the line before the selection.
+                if(firstLineNo > 1):
+                    firstLineNo = firstLineNo - 1
                 # Loop through each of these line
-                for lineIndex in range(lastLineIndex):
+                for lineIndex in range(firstLineNo, lastLineIndex, 1):
                     lineNo = lineIndex + 1
                     lineNo_str = str(lineNo)
                     input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
@@ -423,6 +447,21 @@ class CropNerGUI:
 
                     for ent in doc.ents:
                         if (ent.label_ in self.tags):
+                            # Add tag to crop or cvar if it is one of the two.
+                            if(ent.label_ == 'CROP'):
+                                cropValue = input_text[ent.start_char:ent.end_char].lower()
+                                if (self.crop_cnt.get(cropValue, False)):
+                                    self.crop_cnt[cropValue]= self.crop_cnt[cropValue] + 1
+                                else:
+                                    self.crop_cnt[cropValue]= 1
+
+                            if (ent.label_ == 'CVAR'):
+                                cvarValue = input_text[ent.start_char:ent.end_char].lower()
+                                if (self.cvar_cnt.get(cvarValue, False)):
+                                    self.cvar_cnt[cvarValue] = self.cvar_cnt[cvarValue] + 1
+                                else:
+                                    self.cvar_cnt[cvarValue] = 1
+
                             self.text.tag_add(ent.label_, lineNo_str+"." + str(ent.start_char), lineNo_str+"." + str(ent.end_char))
                             if (self.cust_ents_dict.get(lineNo, False)):
                                 self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
@@ -433,8 +472,6 @@ class CropNerGUI:
                         tags = self.cust_ents_dict[lineNo]
                         self.cust_ents_dict[lineNo] = [input_text,tags]
 
-            #for x in self.cust_ents_dict:
-            #    print(self.cust_ents_dict[x])
 
     def overlap(self, interva1, interval2):
         """ Check to see if two intervals overlap. """
@@ -491,10 +528,25 @@ class CropNerGUI:
             self.text.tag_add(tagLabel, "sel.first", "sel.last")
             #self.cust_ents.append((h_start,h_end,tagLabel))
 
+            # Add tag to crop or cvar if it is one of the two.
+            if (tagLabel == 'CROP'):
+                cropValue = input_text[h_start:h_end].lower()
+                if (self.crop_cnt.get(cropValue, False)):
+                    self.crop_cnt[cropValue] = self.crop_cnt[cropValue] + 1
+                else:
+                    self.crop_cnt[cropValue] = 1
+
+            if (tagLabel == 'CVAR'):
+                cvarValue = input_text[h_start:h_end].lower()
+                if (self.cvar_cnt.get(cvarValue, False)):
+                    self.cvar_cnt[cvarValue] = self.cvar_cnt[cvarValue] + 1
+                else:
+                    self.cvar_cnt[cvarValue] = 1
+
             # Print to make sure it worked. This code needs to be removed after
             # code has been tested.
-            self.cust_ents_dict[lineNo][1].sort()
-            print(self.cust_ents_dict[lineNo])
+            #self.cust_ents_dict[lineNo][1].sort()
+            #print(self.cust_ents_dict[lineNo])
 
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
@@ -526,7 +578,7 @@ class CropNerGUI:
             self.msg.config(text="Warning!! No text was selected.", foreground="red")
 
         self.cust_ents_dict[selection_line][1].sort()
-        print(self.cust_ents_dict[selection_line])
+        #print(self.cust_ents_dict[selection_line])
 
     def ReviewAnnotations(self):
         """
@@ -626,8 +678,20 @@ class CropNerGUI:
         doc = self.nlp_agdata(text)
         return doc
 
+    def continue_func(self):
+        """" Add comment """
+        self.continue_btn.pack(side=tk.LEFT)
+        self.msg.config(text="Warning!! Press Continue", foreground="red")
+
     def file_save(self):
         """ Save current annotation"""
+
+        crop=self.cropEntry.get()
+        variety=self.varietyEntry.get()
+        print("crop,variety=",len(crop),len(variety))
+        print("self.cvar_cnt=",self.cvar_cnt)
+        print("self.crop_cnt=", self.crop_cnt)
+
         train_data = []
         file_prefix = self.raw_file.name.split(".")[0]
         pdf_name = self.raw_file.name.split("/")[-1]
@@ -655,7 +719,9 @@ class CropNerGUI:
                 #print((text_value, ents))
                 train_data.append((text_value, ents))
             train_dict = mixed_type_2_dict(train_data, chunk, pdf_name, url)
-            dict_2_json(train_dict, output_filename)
+
+            # UNCOMMENT AFTER TESTING
+            #dict_2_json(train_dict, output_filename)
 
 
     def nextPage(self):
