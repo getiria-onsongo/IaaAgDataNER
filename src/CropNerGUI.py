@@ -13,6 +13,8 @@ from tkinter import filedialog as fd
 
 from tkinter.scrolledtext import ScrolledText
 
+# HERE: Go through the code to make sure changes did not break anything
+
 # create a NER GUI class
 class CropNerGUI:
     def __init__(self):
@@ -25,9 +27,9 @@ class CropNerGUI:
 
         self.model_dir = None
         self.content=[""]
-        self.tags=["highlight","default_color_tag","ALA","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
+        self.tags=["highlight","default_color_tag","ALAS","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
         self.colors=["gray","black","violet","lawn green","deep sky blue","yellow","red","orange","pink","brown","MediumPurple1"]
-        self.tag_colors = {}
+        self.tag_colors_buttonID = {}
 
         self.raw_file = None
         self.annotation_file = None
@@ -37,22 +39,12 @@ class CropNerGUI:
         self.nlp_agdata = None
 
         self.cust_ents_dict = {}
-        self.custom_ents_labels = {}
-        self.custom_ents_labels_color = {}
 
         self.output_file_name = "sample_p0_td.py"
         self.pageNumber=0
         self.line_num = 0
         self.font_size = "20"
         self.page_lines = len(self.content)
-
-        # Create a dictionary with a tag as key and color as value to pair tags with colors.
-        # This will make it easy to retrieve the color for a tag. The loop does the equivalent
-        # of
-        # self.tag_colors["highlight"] = "gray"
-        # in an iteration
-        for i in range(len(self.tags)):
-            self.tag_colors[self.tags[i]] = self.colors[i]
 
         self.topframe = tk.Frame(self.rootWin)
         self.topframe.pack(side=tk.TOP,fill="x")
@@ -65,25 +57,24 @@ class CropNerGUI:
 
         self.blankLabel_one = tk.Label(self.topframe, text="   ")
         self.blankLabel_one.pack(side=tk.LEFT)
-        # Named entity buttons
-        self.alas_btn = tk.Button(self.topframe, highlightbackground="violet",text="ALAS", command=partial(self.get_ner, "ALAS"))
-        self.alas_btn.pack(side = tk.LEFT)
-        self.crop_btn = tk.Button(self.topframe, highlightbackground="lawn green",text="CROP", command=partial(self.get_ner, "CROP"))
-        self.crop_btn.pack(side = tk.LEFT)
-        self.cvar_btn = tk.Button(self.topframe, highlightbackground="deep sky blue",text="CVAR", command=partial(self.get_ner, "CVAR"))
-        self.cvar_btn.pack(side = tk.LEFT)
-        self.jrnl_btn = tk.Button(self.topframe, highlightbackground="yellow",text="JRNL", command=partial(self.get_ner, "JRNL"))
-        self.jrnl_btn.pack(side = tk.LEFT)
-        self.path_btn = tk.Button(self.topframe, highlightbackground="red",text="PATH", command=partial(self.get_ner, "PATH"))
-        self.path_btn.pack(side = tk.LEFT)
-        self.ped_btn = tk.Button(self.topframe, highlightbackground="orange",text="PED", command=partial(self.get_ner, "PED"))
-        self.ped_btn.pack(side = tk.LEFT)
-        self.plan_btn = tk.Button(self.topframe, highlightbackground="pink",text="PLAN", command=partial(self.get_ner, "PLAN"))
-        self.plan_btn.pack(side = tk.LEFT)
-        self.pptd_btn = tk.Button(self.topframe, highlightbackground="brown",text="PPTD", command=partial(self.get_ner, "PPTD"))
-        self.pptd_btn.pack(side = tk.LEFT)
-        self.trat_btn = tk.Button(self.topframe, highlightbackground="MediumPurple1",text="TRAT", command=partial(self.get_ner, "TRAT"))
-        self.trat_btn.pack(side = tk.LEFT)
+
+        # Create a dictionary with a tag as key and [color, buttonID] as value.
+        # This will make it easy to retrieve the color for a tag. The loop does the equivalent
+        # of
+        # self.tag_colors["highlight"] = ["gray", buttonID]
+        # in an iteration
+        for i in range(len(self.tags)):
+            tagValue = self.tags[i]
+            colorValue = self.colors[i]
+            # We don't need to create a button for the first two tags
+            if i < 2:
+                self.tag_colors_buttonID[tagValue] = [colorValue, None]
+            else:
+                # Create button
+                # self.alas_btn = tk.Button(self.topframe, highlightbackground="violet",text="ALAS", command=partial(self.get_ner, "ALAS"))
+                btn = tk.Button(self.topframe, highlightbackground=colorValue,text=tagValue, command=partial(self.get_ner, tagValue))
+                btn.pack(side=tk.LEFT)
+                self.tag_colors_buttonID[tagValue] = [colorValue, btn]
 
         self.spaceLabel = tk.Label(self.topframe, text="    ", width=17)
         self.spaceLabel.pack(side=tk.LEFT)
@@ -119,13 +110,6 @@ class CropNerGUI:
         self.text.focus_force()
         self.text.pack(side=tk.TOP)
 
-        # Create a scrollbar
-        #self.scroll_bar = tk.Scrollbar(self.rootWin)
-        #self.scroll_bar.grid(row=1, column=1,rowspan=5,  sticky='NSW')
-
-        #self.text.tag_configure("test", background="yellow", foreground="red")
-        #self.text.tag_add("test", "1.1", "1.5")
-
         self.text.tag_configure("highlight", foreground="black", background="gray")
         # We need to repeat the configuration on the line above for all the tags. Except we will
         # not change the foreground. It is the equivalent of
@@ -134,8 +118,10 @@ class CropNerGUI:
         #
         # in one iteration but instead of 10 statements we will use a loop
 
-        for tag, color in self.tag_colors.items():
+        for tag, color_buttonID in self.tag_colors_buttonID.items():
+            color = color_buttonID[0]
             if(tag != "highlight"):
+                # One iteration does the equivalent of:
                 # self.text.tag_configure("ALAS", background="violet")
                 self.text.tag_configure(tag, background=color)
 
@@ -196,8 +182,6 @@ class CropNerGUI:
         self.nermodel_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,command=self.get_nermodel_dir)
         self.nermodel_button.pack(side=tk.LEFT)
 
-
-
         self.pageLabel = tk.Label(self.open_frame, text="Raw Data File Page Num:",width=18)
         self.pageLabel.pack(side=tk.LEFT)
         self.pageEntry = tk.Entry(self.open_frame, width=5)
@@ -240,36 +224,43 @@ class CropNerGUI:
 
     def remove_ent(self):
         ent_label = self.traitEntry.get().upper()
-        ent_btn = self.custom_ents_labels[ent_label]
+        color = self.tag_colors_buttonID[ent_label][0]
+        ent_btn = self.tag_colors_buttonID[ent_label][1]
         ent_btn.pack_forget()
+        # Remove elements from dictionary and arrays
+        self.tag_colors_buttonID.pop(ent_label)
+        self.colors.remove(color)
+        self.tags.remove(ent_label)
 
     def add_ent(self):
         ent_label = self.traitEntry.get().upper()
+        if ent_label in self.tags:
+            self.msg.config(text="Warning!! Cannot add entity. Another entity with the same label already exists!", foreground="red")
+        else:
+            # The code below select a color from color_list which is defined in tkinterColorList.py
+            # If it loops through the lenth of the colors in color_list and does not find a color
+            # that has not already been used, it generates a random color.
+            color = None
+            n = len(color_list)
+            for i in range(n):
+                # Randomly pick a color. This will hopefully get one that contrasts well with existing colors.
+                i_color = color_list[random.randint(0, n)]
+                # Check to see of the color selected has not been used
+                if i_color not in self.colors:
+                    color = i_color
+                    break
+            # Note, because we are selecting colors randomly from color_list, there is a chance we will not
+            # find a color that has not already been used. This can happen if by chance we keep randomnly
+            # selecting colors that have been used. If this happens, just create a random color.
+            if(color is None):
+                color = "#" + ("%06x" % random.randint(0, 16777215))
+            self.colors.append(color)
+            self.tags.append(ent_label)
+            btn = tk.Button(self.cust_ent_frame, highlightbackground=color, text=ent_label,command=partial(self.get_ner, ent_label))
+            btn.pack(side=tk.LEFT)
+            self.text.tag_configure(ent_label, background=color)
+            self.tag_colors_buttonID[ent_label] = [color, btn]
 
-        # The code below select a color from color_list which is defined in tkinterColorList.py
-        # If it loops through the lenth of the colors in color_list and does not find a color
-        # that has not already been used, it generates a random color.
-        color = None
-        n = len(color_list)
-        for i in range(n):
-            # Randomly pick a color. This will hopefully get one that contrasts well with existing colors.
-            i_color = color_list[random.randint(0, n)]
-            # Check to see of the color selected has not been used
-            if i_color not in self.colors:
-                color = i_color
-                break
-        # Note, because we are selecting colors randomly from color_list, there is a chance we will not
-        # find a color that has not already been used. This can happen if by chance we keep randomnly
-        # selecting colors that have been used. If this happens, just create a random color.
-        if(color is None):
-            color = "#" + ("%06x" % random.randint(0, 16777215))
-
-        self.colors.append(color)
-        print("color=",color)
-        ent_btn = tk.Button(self.cust_ent_frame, highlightbackground=color, text=ent_label,command=partial(self.get_ner, ent_label))
-        ent_btn.pack(side=tk.LEFT)
-        self.custom_ents_labels[ent_label] = ent_btn
-        self.custom_ents_labels_color[ent_label] = color
 
     def get_nermodel_dir(self):
         model = self.spacyModel.get()
@@ -282,10 +273,8 @@ class CropNerGUI:
                 model_name = "en_core_web_sm"
             elif(model.lowercase() == "en_core_web_md"):
                 model_name = "en_core_web_md"
-        source_nlp = spacy.load(model_name)
-
+        # source_nlp = spacy.load(model_name)
         self.model_dir = fd.askdirectory()
-
         self.nlp_agdata = spacy.load(self.model_dir)
 
     def open_file(self, file_type):
@@ -327,7 +316,7 @@ class CropNerGUI:
                     model_name = "en_core_web_sm"
                 elif (model.lowercase() == "en_core_web_md"):
                     model_name = "en_core_web_md"
-            source_nlp = spacy.load(model_name)
+            #source_nlp = spacy.load(model_name)
 
             if self.model_dir is not None:
                 self.nlp_agdata = spacy.load(self.model_dir)
