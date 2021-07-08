@@ -167,7 +167,7 @@ class CropNerGUI:
         self.msg.pack(side=tk.LEFT)
 
         # Continue button
-        self.continue_btn = tk.Button(self.msg_frame, text="Continue", width=10, command=self.file_save)
+        self.continue_btn = tk.Button(self.msg_frame, text="Continue", width=10, command=self.continue_func)
         self.continue_btn.pack(side=tk.LEFT)
         self.continue_btn.pack_forget()
 
@@ -224,15 +224,24 @@ class CropNerGUI:
         self.cropEntry = tk.Entry(self.annotation_data_frame, width=15)
         self.cropEntry.pack(side=tk.LEFT)
 
-        self.varietyLabel = tk.Label(self.annotation_data_frame, text="Crop Variety Label:", width=15, anchor="w")
-        self.varietyLabel.pack(side=tk.LEFT)
-        self.varietyEntry = tk.Entry(self.annotation_data_frame, width=15)
-        self.varietyEntry.pack(side=tk.LEFT)
+        self.cvarLabel = tk.Label(self.annotation_data_frame, text="Crop Variety Label:", width=15, anchor="w")
+        self.cvarLabel.pack(side=tk.LEFT)
+        self.cvarEntry = tk.Entry(self.annotation_data_frame, width=15)
+        self.cvarEntry.pack(side=tk.LEFT)
 
         self.urlLabel = tk.Label(self.annotation_data_frame, text="PDF URL (if known):", width=20,anchor="w")
         self.urlLabel.pack(side=tk.LEFT)
         self.urlEntry = tk.Entry(self.annotation_data_frame, width=50)
         self.urlEntry.pack(side=tk.LEFT)
+
+    def get_max_dict_value(self, dictionary):
+        """ Add documentation"""
+        maxKey = None
+        maxValue = 0
+        for key, value in dictionary.items():
+            if value > maxValue:
+                maxKey = key
+        return maxKey
 
     def add_to_dict(self, dictionary, ent_value):
         """ Add documentation"""
@@ -669,32 +678,35 @@ class CropNerGUI:
 
     def continue_func(self):
         """" Add comment """
-        self.continue_btn.pack(side=tk.LEFT)
-        self.msg.config(text="Warning!! Press Continue", foreground="red")
 
-    def file_save(self):
-        """ Save current annotation"""
+        # Clear warning message, if one exists
+        self.msg.config(text="")
 
-        crop=self.cropEntry.get()
-        variety=self.varietyEntry.get()
-        print("crop,variety=",len(crop),len(variety))
-        print("self.cvar_cnt=",self.cvar_cnt)
-        print("self.crop_cnt=", self.crop_cnt)
+        # Hide continue button after it was pressed
+        self.continue_btn.pack_forget()
+
+        chunk = str(self.pageNumber)
+        url = self.urlEntry.get()
+        crop = self.cropEntry.get()
+        cvar = self.cvarEntry.get()
 
         train_data = []
         file_prefix = self.raw_file.name.split(".")[0]
         pdf_name = self.raw_file.name.split("/")[-1]
-        chunk = str(self.pageNumber)
-        output_filename = file_prefix+"_p"+chunk+"_td.json"
+
+        file_prefix = file_prefix+"_p"+chunk
+
+        if(len(crop) > 0):
+            file_prefix = file_prefix+"_"+crop
+        if(len(cvar) > 0):
+            file_prefix = file_prefix+"_"+cvar
+        output_filename = file_prefix + "_td.json"
 
         if(os.path.isfile(output_filename) and len(self.cust_ents_dict) != 0):
             now = datetime.now()
             date_time = now.strftime("%Y_%m_%d_%H_%M_%S")
-            output_filename = file_prefix+"_"+date_time+"_p"+chunk+"_td.json"
-            self.msg.config(text="Warning!! Annotation file for this page already exists. A copy created.", foreground="red")
-
-        url = self.urlEntry.get()
-        #print("len(self.cust_ents_dict)=",len(self.cust_ents_dict))
+            output_filename = file_prefix+"_"+date_time+"_td.json"
+            self.msg.config(text="Warning!! Annotation file with the same name already exists. A copy created.", foreground="red")
 
         if (len(self.cust_ents_dict) == 0):
             self.msg.config(text="Warning!! No annotations to save.", foreground="red")
@@ -705,12 +717,36 @@ class CropNerGUI:
                 ents_value = text_ents[1]
                 ents_value.sort()
                 ents = {'entities': ents_value}
-                #print((text_value, ents))
                 train_data.append((text_value, ents))
-            train_dict = mixed_type_2_dict(train_data, chunk, pdf_name, url)
+            train_dict = mixed_type_2_dict(train_data, chunk, pdf_name, url, crop, cvar)
+            dict_2_json(train_dict, output_filename)
 
-            # UNCOMMENT AFTER TESTING
-            #dict_2_json(train_dict, output_filename)
+    def file_save(self):
+        """ Save current annotation"""
+        cropOrcvarUpdated = 0
+
+        crop=self.cropEntry.get()
+        cvar=self.cvarEntry.get()
+        if len(crop) == 0:
+            if(self.get_max_dict_value(self.crop_cnt) is not None):
+                cropValue = self.get_max_dict_value(self.crop_cnt)
+                self.cropEntry.delete(0, tk.END)
+                self.cropEntry.insert(0, str(cropValue))
+                cropOrcvarUpdated = 1
+        if len(cvar) == 0:
+            if(self.get_max_dict_value(self.cvar_cnt) is not None):
+                cvarValue = self.get_max_dict_value(self.cvar_cnt)
+                self.cvarEntry.delete(0, tk.END)
+                self.cvarEntry.insert(0, str(cvarValue))
+                cropOrcvarUpdated = 1
+
+        if(cropOrcvarUpdated == 1):
+            self.continue_btn.pack(side=tk.LEFT)
+            self.msg.config(text="Warning!! 'Crop Label' or 'Crop Variety Label' automatically detected. \nMake corrections if necessary then press 'Continue' to Save file", foreground="red",anchor="w")
+        else:
+            self.continue_func()
+
+
 
 
     def nextPage(self):
