@@ -10,9 +10,7 @@ import re
 import random
 import tkinter as tk
 from tkinter import filedialog as fd
-
 from tkinter.scrolledtext import ScrolledText
-
 
 # create a NER GUI class
 class CropNerGUI:
@@ -54,7 +52,6 @@ class CropNerGUI:
         # times but each time we pass it a different value depending on the button that was clicked. If the ALAS
         # button is clicked, we want to pass the text "ALAS" but if the "CROP" button was clicked we want to pass the
         # text CROP. So, partial(self.get_ner, "ALAS") is the same as self.get_ner("ALAS")
-
         self.blankLabel_one = tk.Label(self.topframe, text="   ")
         self.blankLabel_one.pack(side=tk.LEFT)
 
@@ -78,14 +75,12 @@ class CropNerGUI:
 
         self.spaceLabel = tk.Label(self.topframe, text="    ", width=17)
         self.spaceLabel.pack(side=tk.LEFT)
-
         self.clearTag_btn = tk.Button(self.topframe, text="Remove-Tag", command=partial(self.remove_tag))
         self.clearTag_btn.pack(side=tk.LEFT)
         self.pretagSelection_btn = tk.Button(self.topframe, text="Pre-Tag Selection", command=partial(self.pre_tag, "Selection"))
         self.pretagSelection_btn.pack(side=tk.LEFT)
         self.pretagPage_btn = tk.Button(self.topframe, text="Pre-Tag Page", command=partial(self.pre_tag, "Page"))
         self.pretagPage_btn.pack(side=tk.LEFT)
-
 
         self.cust_ent_frame = tk.Frame(self.rootWin)
         self.cust_ent_frame.pack(side=tk.TOP,fill="x")
@@ -120,7 +115,6 @@ class CropNerGUI:
         # self.text.tag_configure("ALAS", background="violet")
         #
         # in one iteration but instead of 10 statements we will use a loop
-
         for tag, color_buttonID in self.tag_colors_buttonID.items():
             color = color_buttonID[0]
             if(tag != "highlight"):
@@ -240,10 +234,6 @@ class CropNerGUI:
         self.urlEntry = tk.Entry(self.annotation_data_frame, width=50)
         self.urlEntry.pack(side=tk.LEFT)
 
-    def delete_crop_cvar_dict(self, dictionary, tag):
-        """ Add documentation"""
-        pass
-
     def add_to_dict(self, dictionary, ent_value):
         """ Add documentation"""
         if (dictionary.get(ent_value, False)):
@@ -336,7 +326,6 @@ class CropNerGUI:
         """
         Load spacy model
         """
-
         if self.nlp_agdata is None:
             model = self.spacyModel.get()
             model_name = "en_core_web_lg"
@@ -462,7 +451,7 @@ class CropNerGUI:
                     for ent in doc.ents:
                         if (ent.label_ in self.tags):
                             # Add tag to crop or cvar if it is one of the two.
-                            ent_value = input_text[ent.start_char:ent.end_char].lower()
+                            ent_value = input_text[ent.start_char:ent.end_char].strip().lower()
                             if(ent.label_ == 'CROP'):
                                 self.add_to_dict(self.crop_cnt,ent_value)
 
@@ -548,13 +537,6 @@ class CropNerGUI:
             if (tagLabel == 'CVAR'):
                 self.add_to_dict(self.cvar_cnt, ent_value)
 
-            # Print to make sure it worked. This code needs to be removed after
-            # code has been tested.
-            #self.cust_ents_dict[lineNo][1].sort()
-            #print(self.cust_ents_dict[lineNo])
-            print("self.crop_cnt=",self.crop_cnt)
-            print("self.cvar_cnt=",self.cvar_cnt)
-
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
 
@@ -568,46 +550,27 @@ class CropNerGUI:
             selection_start = int(self.text.index("sel.first").split(".")[1])
             selection_end= int(self.text.index("sel.last").split(".")[1])
 
-            #print("selection=",selection_line,selection_start,selection_end)
-            #print(self.cust_ents_dict[selection_line])
-
             # Update annotation to delete tag that was removed
             new_ents = []
             for (start, end, label) in self.cust_ents_dict[selection_line][1]:
                 if(not self.overlap([selection_start,selection_end],[start, end])):
-                    #print("(start, end, label)=", start, end, label, "Did not overlap")
                     new_ents.append((start, end, label))
                 else:
-                    # HERE: IN TAG BEING REMOVED IS CROP OR CVAR, MAKE SURE TO REMOVE IT FROM LIST
                     entValue = self.cust_ents_dict[selection_line][0][start:end]
-                    print("entValue=",entValue)
-                    print("label=", label)
-                    '''
-                    #----------------
-                    if (tagLabel == 'CROP'):
-                        cropValue = input_text[h_start:h_end].lower()
-                        if (self.crop_cnt.get(cropValue, False)):
-                            self.crop_cnt[cropValue] = self.crop_cnt[cropValue] + 1
-                        else:
-                            self.crop_cnt[cropValue] = 1
+                    entValue = entValue.strip().lower()
+                    if (label == 'CROP'):
+                        self.crop_cnt[entValue] = self.crop_cnt[entValue] - 1
+                    if (label == 'CVAR'):
+                        self.cvar_cnt[entValue] = self.cvar_cnt[entValue] - 1
 
-                    if (tagLabel == 'CVAR'):
-                        cvarValue = input_text[h_start:h_end].lower()
-                        if (self.cvar_cnt.get(cvarValue, False)):
-                            self.cvar_cnt[cvarValue] = self.cvar_cnt[cvarValue] + 1
-                        else:
-                            self.cvar_cnt[cvarValue] = 1
-                    #----------------
-                    '''
             self.cust_ents_dict[selection_line][1] = new_ents
 
             for tag in self.tags:
                 self.text.tag_remove(tag, "sel.first", "sel.last")
         except tk.TclError:
             self.msg.config(text="Warning!! No text was selected.", foreground="red")
-
         self.cust_ents_dict[selection_line][1].sort()
-        #print(self.cust_ents_dict[selection_line])
+
 
     def ReviewAnnotations(self):
         """
@@ -625,9 +588,6 @@ class CropNerGUI:
                     self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
                     page_num = 1
 
-                #print("Pg=",page_num)
-                #print("Annotation=",self.annotation_file.name)
-                #print("Raw file =", self.raw_file.name)
                 self.pageNumber = int(page_num)
 
                 # Reset dictionary containing current annotations
@@ -750,7 +710,7 @@ class CropNerGUI:
             train_dict = mixed_type_2_dict(train_data, chunk, pdf_name, url)
 
             # UNCOMMENT AFTER TESTING
-            dict_2_json(train_dict, output_filename)
+            #dict_2_json(train_dict, output_filename)
 
 
     def nextPage(self):
