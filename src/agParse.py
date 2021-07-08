@@ -4,7 +4,6 @@ import spacy
 from spacy.language import Language
 from spacy.tokens import Span
 from spacy.matcher import Matcher
-
 from preparse import *
 
 def adj_ent_entities(doc):

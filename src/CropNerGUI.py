@@ -240,7 +240,19 @@ class CropNerGUI:
         self.urlEntry = tk.Entry(self.annotation_data_frame, width=50)
         self.urlEntry.pack(side=tk.LEFT)
 
+    def delete_crop_cvar_dict(self, dictionary, tag):
+        """ Add documentation"""
+        pass
+
+    def add_to_dict(self, dictionary, ent_value):
+        """ Add documentation"""
+        if (dictionary.get(ent_value, False)):
+            dictionary[ent_value] = dictionary[ent_value] + 1
+        else:
+            dictionary[ent_value] = 1
+
     def remove_ent(self):
+        """ Add documentation"""
         ent_label = self.traitEntry.get().upper()
         color = self.tag_colors_buttonID[ent_label][0]
         ent_btn = self.tag_colors_buttonID[ent_label][1]
@@ -251,6 +263,7 @@ class CropNerGUI:
         self.tags.remove(ent_label)
 
     def add_ent(self):
+        """ Add documentation"""
         ent_label = self.traitEntry.get().upper()
         if ent_label in self.tags:
             self.msg.config(text="Warning!! Cannot add entity. Another entity with the same label already exists!", foreground="red")
@@ -281,6 +294,7 @@ class CropNerGUI:
 
 
     def get_nermodel_dir(self):
+        """ Add documentation"""
         model = self.spacyModel.get()
         model_name = "en_core_web_lg"
         if len(model) == 0:
@@ -448,19 +462,12 @@ class CropNerGUI:
                     for ent in doc.ents:
                         if (ent.label_ in self.tags):
                             # Add tag to crop or cvar if it is one of the two.
+                            ent_value = input_text[ent.start_char:ent.end_char].lower()
                             if(ent.label_ == 'CROP'):
-                                cropValue = input_text[ent.start_char:ent.end_char].lower()
-                                if (self.crop_cnt.get(cropValue, False)):
-                                    self.crop_cnt[cropValue]= self.crop_cnt[cropValue] + 1
-                                else:
-                                    self.crop_cnt[cropValue]= 1
+                                self.add_to_dict(self.crop_cnt,ent_value)
 
                             if (ent.label_ == 'CVAR'):
-                                cvarValue = input_text[ent.start_char:ent.end_char].lower()
-                                if (self.cvar_cnt.get(cvarValue, False)):
-                                    self.cvar_cnt[cvarValue] = self.cvar_cnt[cvarValue] + 1
-                                else:
-                                    self.cvar_cnt[cvarValue] = 1
+                                self.add_to_dict(self.cvar_cnt, ent_value)
 
                             self.text.tag_add(ent.label_, lineNo_str+"." + str(ent.start_char), lineNo_str+"." + str(ent.end_char))
                             if (self.cust_ents_dict.get(lineNo, False)):
@@ -471,7 +478,6 @@ class CropNerGUI:
                     if (self.cust_ents_dict.get(lineNo, False)):
                         tags = self.cust_ents_dict[lineNo]
                         self.cust_ents_dict[lineNo] = [input_text,tags]
-
 
     def overlap(self, interva1, interval2):
         """ Check to see if two intervals overlap. """
@@ -496,7 +502,6 @@ class CropNerGUI:
         self.msg.config(text="")
         try:
             # Get start and end char positions
-
             lineNo = int(self.text.index("sel.first").split(".")[0])
             lineNo_str = str(lineNo)
             input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
@@ -528,25 +533,27 @@ class CropNerGUI:
             self.text.tag_add(tagLabel, "sel.first", "sel.last")
             #self.cust_ents.append((h_start,h_end,tagLabel))
 
+            # Currently, this tool is designed to do crop and variety based annotation.
+            # Named entities will be linked to a crop and a variety. If multiple entries
+            # exist, the most common term will be used. If there are ties, the first one
+            # encountered will be used.
+
             # Add tag to crop or cvar if it is one of the two.
+            ent_value = input_text[h_start:h_end].lower()
+            # Remove leading and trailing spaces if the user selected spaces
+            ent_value = ent_value.strip()
             if (tagLabel == 'CROP'):
-                cropValue = input_text[h_start:h_end].lower()
-                if (self.crop_cnt.get(cropValue, False)):
-                    self.crop_cnt[cropValue] = self.crop_cnt[cropValue] + 1
-                else:
-                    self.crop_cnt[cropValue] = 1
+                self.add_to_dict(self.crop_cnt, ent_value)
 
             if (tagLabel == 'CVAR'):
-                cvarValue = input_text[h_start:h_end].lower()
-                if (self.cvar_cnt.get(cvarValue, False)):
-                    self.cvar_cnt[cvarValue] = self.cvar_cnt[cvarValue] + 1
-                else:
-                    self.cvar_cnt[cvarValue] = 1
+                self.add_to_dict(self.cvar_cnt, ent_value)
 
             # Print to make sure it worked. This code needs to be removed after
             # code has been tested.
             #self.cust_ents_dict[lineNo][1].sort()
             #print(self.cust_ents_dict[lineNo])
+            print("self.crop_cnt=",self.crop_cnt)
+            print("self.cvar_cnt=",self.cvar_cnt)
 
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
@@ -570,6 +577,28 @@ class CropNerGUI:
                 if(not self.overlap([selection_start,selection_end],[start, end])):
                     #print("(start, end, label)=", start, end, label, "Did not overlap")
                     new_ents.append((start, end, label))
+                else:
+                    # HERE: IN TAG BEING REMOVED IS CROP OR CVAR, MAKE SURE TO REMOVE IT FROM LIST
+                    entValue = self.cust_ents_dict[selection_line][0][start:end]
+                    print("entValue=",entValue)
+                    print("label=", label)
+                    '''
+                    #----------------
+                    if (tagLabel == 'CROP'):
+                        cropValue = input_text[h_start:h_end].lower()
+                        if (self.crop_cnt.get(cropValue, False)):
+                            self.crop_cnt[cropValue] = self.crop_cnt[cropValue] + 1
+                        else:
+                            self.crop_cnt[cropValue] = 1
+
+                    if (tagLabel == 'CVAR'):
+                        cvarValue = input_text[h_start:h_end].lower()
+                        if (self.cvar_cnt.get(cvarValue, False)):
+                            self.cvar_cnt[cvarValue] = self.cvar_cnt[cvarValue] + 1
+                        else:
+                            self.cvar_cnt[cvarValue] = 1
+                    #----------------
+                    '''
             self.cust_ents_dict[selection_line][1] = new_ents
 
             for tag in self.tags:
@@ -721,7 +750,7 @@ class CropNerGUI:
             train_dict = mixed_type_2_dict(train_data, chunk, pdf_name, url)
 
             # UNCOMMENT AFTER TESTING
-            #dict_2_json(train_dict, output_filename)
+            dict_2_json(train_dict, output_filename)
 
 
     def nextPage(self):
