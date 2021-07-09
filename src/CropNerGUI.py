@@ -421,7 +421,7 @@ class CropNerGUI:
 
     def pre_tag(self, selection):
         """ Pre-tag selected content or all the text in text box with NER tags. """
-        
+
         # Clear warning message, if one exists
         self.msg.config(text="")
         if self.model_dir is None:
