@@ -421,11 +421,13 @@ class CropNerGUI:
 
     def pre_tag(self, selection):
         """ Pre-tag selected content or all the text in text box with NER tags. """
-
+        
         # Clear warning message, if one exists
         self.msg.config(text="")
         if self.model_dir is None:
             self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
+        elif len(self.text.tag_ranges("sel")) == 0:
+            self.msg.config(text="Warning!! No text was selected.", foreground="red")
         else:
             # Reset annotation dictionary
             self.cust_ents_dict = {}
@@ -705,9 +707,9 @@ class CropNerGUI:
         file_prefix = file_prefix+"_p"+chunk
 
         if(len(crop) > 0):
-            file_prefix = file_prefix+"_"+crop
+            file_prefix = file_prefix+"_crop_"+crop
         if(len(cvar) > 0):
-            file_prefix = file_prefix+"_"+cvar
+            file_prefix = file_prefix+"_cvar_"+cvar
         output_filename = file_prefix + "_td.json"
 
         if(os.path.isfile(output_filename) and len(self.cust_ents_dict) != 0):
