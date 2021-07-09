@@ -140,7 +140,7 @@ class CropNerGUI:
         self.bold_btn.pack(side = tk.LEFT)
 
         # Clear button
-        self.clear_btn = tk.Button(self.bottom_frame, text="Clear All Tags",width=10, command=self.clear_highlight)
+        self.clear_btn = tk.Button(self.bottom_frame, text="Remove All Tags",width=20, command=self.remove_all_tags)
         self.clear_btn.pack(side = tk.LEFT)
 
         # Clear data button
@@ -241,6 +241,7 @@ class CropNerGUI:
         for key, value in dictionary.items():
             if value > maxValue:
                 maxKey = key
+                maxValue = value
         return maxKey
 
     def add_to_dict(self, dictionary, ent_value):
@@ -664,12 +665,22 @@ class CropNerGUI:
         # Clear content
         self.text.delete(1.0, tk.END)
 
-    def clear_highlight(self):
+    def remove_all_tags(self):
         """ Highlight text"""
         for tag in self.tags:
             self.text.tag_remove(tag, "1.0", "end")
 
+        # Clear annotations
+        self.cust_ents_dict = {}
+
+        # Clear warning message
         self.msg.config(text="")
+
+        # Clear cvar and crop entries
+        self.cropEntry.delete(0, tk.END)
+        self.cvarEntry.delete(0, tk.END)
+        self.crop_cnt = {}
+        self.cvar_cnt = {}
 
     def tag_ner_with_spacy(self, text):
         """ Use SpaCy to identify NER in text"""
@@ -678,9 +689,6 @@ class CropNerGUI:
 
     def continue_func(self):
         """" Add comment """
-
-        # Clear warning message, if one exists
-        self.msg.config(text="")
 
         # Hide continue button after it was pressed
         self.continue_btn.pack_forget()
@@ -721,12 +729,16 @@ class CropNerGUI:
             train_dict = mixed_type_2_dict(train_data, chunk, pdf_name, url, crop, cvar)
             dict_2_json(train_dict, output_filename)
 
+        # Clear data after saving
+        self.remove_all_tags()
+
     def file_save(self):
         """ Save current annotation"""
         cropOrcvarUpdated = 0
 
         crop=self.cropEntry.get()
         cvar=self.cvarEntry.get()
+
         if len(crop) == 0:
             if(self.get_max_dict_value(self.crop_cnt) is not None):
                 cropValue = self.get_max_dict_value(self.crop_cnt)
