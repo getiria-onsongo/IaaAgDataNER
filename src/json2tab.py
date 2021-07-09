@@ -77,7 +77,7 @@ if __name__ == "__main__":
     #
     parser = argparse.ArgumentParser(
         description="convert raw JSON to tab delimited text file that can be loaded into a database ",
-        epilog="Example: python3 json2tab.py jsonInput tabOutput (optional --suffix '.json' ; --split True ; --test_size 0.2"
+        epilog="Example: python3 json2tab.py jsonFolder outputFileName (optional --suffix '.json' ; --filename_substring '_cvar_' "
     )
     parser.add_argument(
         'jsonFolder', help='Folder containing json files'
@@ -86,13 +86,10 @@ if __name__ == "__main__":
         'outputFileName', help='Output Filename'
     )
     parser.add_argument(
-        'spacyModel', help='Spacy Model'
-    )
-    parser.add_argument(
         '--suffix', default=".json", type=str, help='Suffix the files ends in. Default=".json" '
     )
     parser.add_argument(
-        '--split', help='Whether to split dataset into training, validation and test sets. Default = True'
+        '--filename_substring', help='Substring to look for in filename to identify qualifying files. Default = _cvar_'
     )
     parser.add_argument(
         '--test_size', help='Size of validate set. Should be a value between 0 and 1. Default = 0.2'
