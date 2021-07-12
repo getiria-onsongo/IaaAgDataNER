@@ -11,7 +11,6 @@ def convertJsonToCSV(outputFileName=None, filePaths=None):
     """
 
     # Header
-    #fieldnames = ['CROP','CVAR','ALAS', 'PATH', 'PLAN', 'TRAT', 'PPTD', 'PED', 'JRNL']
     fieldnames = ['CROP', 'CVAR', 'NER_TAG', 'ENTRY_VALUE']
 
     # Create a file to contain the CSV file
@@ -25,23 +24,18 @@ def convertJsonToCSV(outputFileName=None, filePaths=None):
         data = json_2_dict(fileName)
         crop=data['crop']
         cvar=data['cvar']
-        print("crop,cvar=",crop,cvar)
         mixed_data = dict_2_mixed_type(data)
 
         # Extract each entry with annotated NER tags
         for entry in mixed_data:
             text_data = entry[0]
             ents = entry[1]['entities']
-            ner_dict={}
-            for (start, end, ner_tag) in ents:
-                if (ner_dict.get(ner_tag, False)):
-                    ner_dict[ner_tag].append(text_data[start:end].lower())
-                else:
-                    ner_dict[ner_tag] = [text_data[start:end].lower()]
-            print("ner_dict=",ner_dict)
-            break
-        break
 
+            # This loops goes through the entities and writes them out into a CSV file.
+            for (start, end, ner_tag) in ents:
+                if(ner_tag != 'CROP' and ner_tag != 'CVAR'):
+                    writer.writerow({'CROP':crop, 'CVAR':cvar, 'NER_TAG':ner_tag, 'ENTRY_VALUE':text_data[start:end].lower()})
+                    
     output_file.close()
 
 
