@@ -41,7 +41,7 @@ class CropNerGUI:
         self.output_file_name = "sample_p0_td.py"
         self.pageNumber=0
         self.line_num = 0
-        self.font_size = "20"
+        self.font_size = "12"
         self.page_lines = len(self.content)
 
         self.topframe = tk.Frame(self.rootWin)
