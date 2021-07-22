@@ -12,6 +12,12 @@ import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
 
+# WRITE A DOCUMENT AND PUT IT INTO GITHUB AND DOCUMENT SCHEMA
+# DECISIONS AND VIEWS AND HOW WE WILL LIKELY IMPLEMENT APIs.
+
+# ANOTHER THING WE NEED TO RESOLVE IS STANDARDIZING THINGS SUCH AS
+# ROUGH AWNS OR AWNS ARE ROUGH.
+
 # create a NER GUI class
 class CropNerGUI:
     def __init__(self):

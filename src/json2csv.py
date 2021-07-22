@@ -11,7 +11,7 @@ def convertJsonToCSV(outputFileName=None, filePaths=None):
     """
 
     # Header
-    fieldnames = ['CROP', 'CVAR', 'NER_TAG', 'ENTRY_VALUE']
+    fieldnames = ['CROP','DOCUMENT','CHUNK','CVAR_DATA_SOURCE_ID','CVAR','NER_TAG','ENTRY_VALUE']
 
     # Create a file to contain the CSV file
     output_file = open(outputFileName, 'w')
@@ -22,8 +22,16 @@ def convertJsonToCSV(outputFileName=None, filePaths=None):
     for fileName in filePaths:
         # Convert it to mixed_type (see json2py.py for details on mixed_type)
         data = json_2_dict(fileName)
+        doc_value = data['doc']
+        chunk = data['chunk']
         crop=data['crop']
         cvar=data['cvar']
+
+        # To try and save space, we are going to create an integer ID that should be
+        # unique to each document, chunk and crop variety set using the hash
+        # function
+        id_str = doc_value + ":" + chunk + ":" + cvar
+        id_value = hash(id_str)
         mixed_data = dict_2_mixed_type(data)
 
         # Extract each entry with annotated NER tags
@@ -34,7 +42,7 @@ def convertJsonToCSV(outputFileName=None, filePaths=None):
             # This loops goes through the entities and writes them out into a CSV file.
             for (start, end, ner_tag) in ents:
                 if(ner_tag != 'CROP' and ner_tag != 'CVAR'):
-                    writer.writerow({'CROP':crop, 'CVAR':cvar, 'NER_TAG':ner_tag, 'ENTRY_VALUE':text_data[start:end].lower()})
+                    writer.writerow({'CROP':crop, 'DOCUMENT':doc_value, 'CHUNK':chunk,'CVAR_DATA_SOURCE_ID':id_value, 'CVAR':cvar, 'NER_TAG':ner_tag, 'ENTRY_VALUE':text_data[start:end].lower()})
                     
     output_file.close()
 
@@ -64,7 +72,7 @@ if __name__ == "__main__":
 
     #
     # Parse out the arguments and assign them to variables
-    #
+    # Example: python3 $path_to_src/json2csv.py subdir1 temp.out
     parser = argparse.ArgumentParser(
         description="convert raw JSON to csv file that can be loaded into a database ",
         epilog="Example: python3 json2csv.py jsonFolder outputFileName (optional --suffix '.json' ; --filename_substring '_cvar_' "
