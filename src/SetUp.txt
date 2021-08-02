@@ -53,3 +53,35 @@ python3 src/CropNerGUI.py
 
 # To remove an environment
 conda remove --name ner_june_2021 --all -y
+
+# Convert JSON to CSV
+path_to_src=/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/src/
+python3 $path_to_src/json2csv.py subdir1 temp.csv
+
+# POSTGRESQL
+# To create a database run the command below from the terminal. This creates the
+# database ner
+> createdb ner
+
+# Log in
+psql -h localhost -d ner
+
+# Exit postgreSQL then create tables (relations)
+> path_to_sql=/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/src/CreateTables.sql
+> psql -h localhost -d ner -f $path_to_sql
+
+# Log into PostgreSQL and load raw data.
+psql -h localhost -d ner
+\COPY raw_data FROM '/Users/gonsongo/Desktop/BarCvDescLJ11/temp.csv' DELIMITER ',' CSV HEADER;
+
+# Create CSV files from raw_data
+\COPY (SELECT DISTINCT crop_name FROM raw_data) to 'crop.csv' CSV;
+\COPY (SELECT DISTINCT doc_name, url FROM raw_data) to 'document.csv' CSV;
+
+# Load data to tables
+\COPY crop FROM 'crop.csv' DELIMITER ',';
+\COPY document FROM 'document.csv' DELIMITER ',';
+
+
+
+
