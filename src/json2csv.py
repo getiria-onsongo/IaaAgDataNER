@@ -11,7 +11,7 @@ def convertJsonToCSV(outputFileName=None, filePaths=None):
     """
 
     # Header
-    fieldnames = ['CROP','DOCUMENT','CHUNK','CVAR_DATA_SOURCE_ID','CVAR','NER_TAG','ENTRY_VALUE']
+    fieldnames = ['CROP_NAME','DOC_NAME','URL','CHUNK','CVAR_DATA_SOURCE_ID','CVAR','NER_TAG_LABEL','CROP_ATTRIBUTE_VALUE']
 
     # Create a file to contain the CSV file
     output_file = open(outputFileName, 'w')
@@ -23,6 +23,7 @@ def convertJsonToCSV(outputFileName=None, filePaths=None):
         # Convert it to mixed_type (see json2py.py for details on mixed_type)
         data = json_2_dict(fileName)
         doc_value = data['doc']
+        url_value = data['url']
         chunk = data['chunk']
         crop=data['crop']
         cvar=data['cvar']
@@ -42,7 +43,7 @@ def convertJsonToCSV(outputFileName=None, filePaths=None):
             # This loops goes through the entities and writes them out into a CSV file.
             for (start, end, ner_tag) in ents:
                 if(ner_tag != 'CROP' and ner_tag != 'CVAR'):
-                    writer.writerow({'CROP':crop, 'DOCUMENT':doc_value, 'CHUNK':chunk,'CVAR_DATA_SOURCE_ID':id_value, 'CVAR':cvar, 'NER_TAG':ner_tag, 'ENTRY_VALUE':text_data[start:end].lower()})
+                    writer.writerow({'CROP_NAME':crop, 'DOC_NAME':doc_value, 'URL':url_value,'CHUNK':chunk,'CVAR_DATA_SOURCE_ID':id_value, 'CVAR':cvar, 'NER_TAG_LABEL':ner_tag, 'CROP_ATTRIBUTE_VALUE':text_data[start:end].lower()})
                     
     output_file.close()
 
@@ -72,7 +73,7 @@ if __name__ == "__main__":
 
     #
     # Parse out the arguments and assign them to variables
-    # Example: python3 $path_to_src/json2csv.py subdir1 temp.out
+    # Example: python3 $path_to_src/json2csv.py subdir1 temp.csv
     parser = argparse.ArgumentParser(
         description="convert raw JSON to csv file that can be loaded into a database ",
         epilog="Example: python3 json2csv.py jsonFolder outputFileName (optional --suffix '.json' ; --filename_substring '_cvar_' "
