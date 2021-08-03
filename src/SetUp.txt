@@ -77,11 +77,17 @@ psql -h localhost -d ner
 # Create CSV files from raw_data
 \COPY (SELECT DISTINCT crop_name FROM raw_data) to 'crop.csv' CSV;
 \COPY (SELECT DISTINCT doc_name, url FROM raw_data) to 'document.csv' CSV;
+\COPY (SELECT DISTINCT cvar, crop_name FROM raw_data) to 'crop_variety.csv' CSV;
+\COPY (SELECT DISTINCT id, chunk, doc_name, cvar FROM raw_data) to 'cvar_data_source.csv' CSV;
+\COPY (SELECT DISTINCT id, label FROM raw_data) to 'ner_tag.csv' CSV;
+\COPY (SELECT DISTINCT value, id, label FROM raw_data) to 'crop_attribute.csv' CSV;
 
 # Load data to tables
 \COPY crop FROM 'crop.csv' DELIMITER ',';
 \COPY document FROM 'document.csv' DELIMITER ',';
-
-
+\COPY crop_variety FROM 'crop_variety.csv' DELIMITER ',';
+\COPY cvar_data_source FROM 'cvar_data_source.csv' DELIMITER ',';
+\COPY ner_tag FROM 'ner_tag.csv' DELIMITER ',';
+\COPY crop_attribute FROM 'crop_attribute.csv' DELIMITER ',';
 
 
