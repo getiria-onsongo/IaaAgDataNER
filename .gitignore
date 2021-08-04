@@ -2,8 +2,7 @@ temp.out
 src/temp.txt
 temp.txt
 train.cfg
-ner.cfg
-ner_2021_06_*
+ner_2021_08_*
 Data/Cranberry/
 YEDDA/
 ner-annotator/
