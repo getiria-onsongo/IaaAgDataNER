@@ -9,10 +9,11 @@ from preparse import *
 def adj_ent_entities(doc):
     # only deals with ADJ TRAT (or PLAN) = TRAT entities (e.g, 'low lodging' or 'rough awns')
     new_ents = []
+
     for ent in doc.ents:
         if ent.label_ in ('PLAN', 'TRAT') and ent.start != 0:
             prev_token = doc[ent.start - 1]
-            # print('DEBUG: ', ent.text, ent.start, ent.label_, prev_token.text, prev_token.pos_, prev_token.dep_)
+            print('DEBUG: ', ent.text, ent.start, ent.label_, "| prev_token.text=",prev_token.text, "| prev_token.pos_=",prev_token.pos_, "| prev_token.dep_=",prev_token.dep_)
             if prev_token.pos_ == 'ADJ' and prev_token.dep_ == 'amod':
                 new_ent = Span(doc, ent.start - 1, ent.end, label='TRAT')
                 new_ents.append(new_ent)
@@ -148,6 +149,8 @@ def compound_trait_entities(doc):
     doc = adj_ent_entities(doc)
     doc = plan_adj_entities(doc)
     doc = trat_adj_entities(doc)
+    # Spacy3 seems to be doing really well extracting PEDS and Journals. Comment out
+    # part of the custom component that fixes PED and JRNL for now.
     #doc = add_ped_jrnl_entities(doc)
     return doc
 

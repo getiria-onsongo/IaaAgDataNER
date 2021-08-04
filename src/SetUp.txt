@@ -21,15 +21,16 @@ pip3 install -U PyPDF2
 
 # Take as input a folder containing raw json files and convert them into
 # jsonl format used by Spacy
-python3 src/json2SpacyJson.py Data ner_2021_07 en_core_web_lg --suffix '.json' --split True --test_size 0.1
-
+path_to_src=/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/src/
+cd /Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER
+python3 src/json2SpacyJson.py Data ner_2021_08 en_core_web_lg --suffix '.json' --split True --test_size 0.1
 
 # Create directory. Spacy program to convert jsonl to Spacy format needs an output directory
-mkdir ner_2021_06
+mkdir ner_2021_08
 
 # Convert to spacy binary format
-python3 -m spacy convert --converter json ner_2021_06_training_data.jsonl ner_2021_06
-python3 -m spacy convert --converter json ner_2021_06_validate_data.jsonl ner_2021_06
+python3 -m spacy convert --converter json ner_2021_08_training_data.jsonl ner_2021_08
+python3 -m spacy convert --converter json ner_2021_08_validate_data.jsonl ner_2021_08
 
 # Create a config file to use for training
 # --lang: Two-letter code of the language to use
@@ -37,17 +38,39 @@ python3 -m spacy convert --converter json ner_2021_06_validate_data.jsonl ner_20
 # --optimize: Whether to optimize for efficiency or accuracy
 # --force: Overwrite output file if it exists
 # train.cfg:
-python3 -m spacy init config --lang en  --optimize accuracy --force train.cfg
+# python3 -m spacy init config --lang en  --optimize accuracy --force train.cfg
+
+python3 -m spacy init config --lang en --pipeline ner  --optimize accuracy --force ner.cfg
 
 # NOTE: If you just have ner in the pipeline as below, you will not get things such as POS which
-# we need. Ensure tagger and parser are in the pipeline you are training
-# python3 -m spacy init config --lang en --pipeline ner --optimize accuracy --force ner.cfg
+# we need. Ensure tagger and parser are in the pipeline you are training, add the following lines
+# to include other components in the pipeline. Another side note, "attribute_ruler" is the one
+# that creates POS in SpaCY 3.
+pipeline = ["tok2vec","tagger","parser","attribute_ruler","lemmatizer","ner"]
+
+[components.tagger]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+[components.parser]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+[components.attribute_ruler]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+[components.lemmatizer]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+frozen_components = ["tagger","parser","attribute_ruler","lemmatizer"]
 
 # Train a model
-python3 -m spacy train train.cfg --output ner_2021_06_model --paths.train ner_2021_06/ner_2021_06_training_data.spacy --paths.dev ner_2021_06/ner_2021_06_validate_data.spacy
+python3 -m spacy train ner.cfg --output ner_2021_08_model --paths.train ner_2021_08/ner_2021_08_training_data.spacy --paths.dev ner_2021_08/ner_2021_08_validate_data.spacy
 
 
-# Start GUI and select "ner_2021_06_model/model-best" as the model
+# Start GUI and select "ner_2021_08_model/model-best" as the model
 python3 src/CropNerGUI.py
 
 
