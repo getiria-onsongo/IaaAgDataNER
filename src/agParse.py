@@ -13,7 +13,7 @@ def adj_ent_entities(doc):
     for ent in doc.ents:
         if ent.label_ in ('PLAN', 'TRAT') and ent.start != 0:
             prev_token = doc[ent.start - 1]
-            print('DEBUG: ', ent.text, ent.start, ent.label_, "| prev_token.text=",prev_token.text, "| prev_token.pos_=",prev_token.pos_, "| prev_token.dep_=",prev_token.dep_)
+            #print('DEBUG: ', ent.text, ent.start, ent.label_, "| prev_token.text=",prev_token.text, "| prev_token.pos_=",prev_token.pos_, "| prev_token.dep_=",prev_token.dep_)
             if prev_token.pos_ == 'ADJ' and prev_token.dep_ == 'amod':
                 new_ent = Span(doc, ent.start - 1, ent.end, label='TRAT')
                 new_ents.append(new_ent)
