@@ -692,7 +692,7 @@ class CropNerGUI:
 
     def tag_ner_with_spacy(self, text):
         """ Use SpaCy to identify NER in text"""
-        print("Pipeline=",self.nlp_agdata.pipe_names)
+        #print("Pipeline=",self.nlp_agdata.pipe_names)
         doc = self.nlp_agdata(text)
         return doc
 
