@@ -79,7 +79,7 @@ conda remove --name ner_june_2021 --all -y
 
 # Convert JSON to CSV
 path_to_src=/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/src/
-python3 $path_to_src/json2csv.py subdir1 temp.csv
+python3 $path_to_src/json2csv.py AnnotatedData BarCvDescLJ11.csv
 
 # POSTGRESQL
 # To create a database run the command below from the terminal. This creates the
@@ -95,7 +95,7 @@ psql -h localhost -d ner
 
 # Log into PostgreSQL and load raw data.
 psql -h localhost -d ner
-\COPY raw_data FROM '/Users/gonsongo/Desktop/BarCvDescLJ11/temp.csv' DELIMITER ',' CSV HEADER;
+\COPY raw_data FROM '/Users/gonsongo/Desktop/BarCvDescLJ11/BarCvDescLJ11.csv' DELIMITER ',' CSV HEADER;
 
 # Create CSV files from raw_data
 \COPY (SELECT DISTINCT crop_name FROM raw_data) to 'crop.csv' CSV;
@@ -106,11 +106,11 @@ psql -h localhost -d ner
 \COPY (SELECT DISTINCT value, id, label FROM raw_data) to 'crop_attribute.csv' CSV;
 
 # Load data to tables
-\COPY crop FROM 'crop.csv' DELIMITER ',';
-\COPY document FROM 'document.csv' DELIMITER ',';
-\COPY crop_variety FROM 'crop_variety.csv' DELIMITER ',';
-\COPY cvar_data_source FROM 'cvar_data_source.csv' DELIMITER ',';
-\COPY ner_tag FROM 'ner_tag.csv' DELIMITER ',';
-\COPY crop_attribute FROM 'crop_attribute.csv' DELIMITER ',';
+\COPY crop FROM 'crop.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY document FROM 'document.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY crop_variety FROM 'crop_variety.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY cvar_data_source FROM 'cvar_data_source.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY ner_tag FROM 'ner_tag.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY crop_attribute FROM 'crop_attribute.csv' DELIMITER ',' QUOTE '"' CSV;
 
 

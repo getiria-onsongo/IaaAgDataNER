@@ -361,7 +361,7 @@ class CropNerGUI:
                 self.nlp_agdata = spacy.load(model_name)
 
 
-        self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
+            self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
 
 
     def LoadPDF(self):
