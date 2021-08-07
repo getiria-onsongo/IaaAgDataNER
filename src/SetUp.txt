@@ -113,4 +113,20 @@ psql -h localhost -d ner
 \COPY ner_tag FROM 'ner_tag.csv' DELIMITER ',' QUOTE '"' CSV;
 \COPY crop_attribute FROM 'crop_attribute.csv' DELIMITER ',' QUOTE '"' CSV;
 
+# Create indexes to help views. If queries using views start slowing down, consider
+# materialized views
+CREATE INDEX crop_attribute_id_idx ON crop_attribute USING BTREE(id);
+
+# Create view
+CREATE VIEW crop_data AS
+SELECT DISTINCT crop_name, cvar, label, value FROM
+(SELECT crop_name, cvar, id FROM crop_variety JOIN cvar_data_source USING(cvar)) A
+JOIN
+crop_attribute B
+USING(ID);
+
+select value from crop_data where crop_name = 'barley' and cvar = 'strider' and label = 'TRAT';
+
+
+
 

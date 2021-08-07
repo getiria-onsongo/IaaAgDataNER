@@ -1,3 +1,5 @@
+#!/bin/env python3
+
 from agParse import *
 from tkinterColorList import  *
 from datetime import datetime
