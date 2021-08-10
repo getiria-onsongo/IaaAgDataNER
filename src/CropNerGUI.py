@@ -14,11 +14,19 @@ import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
 
-# WRITE A DOCUMENT AND PUT IT INTO GITHUB AND DOCUMENT SCHEMA
+# 1) WRITE A DOCUMENT AND PUT IT INTO GITHUB AND DOCUMENT SCHEMA
 # DECISIONS AND VIEWS AND HOW WE WILL LIKELY IMPLEMENT APIs.
 
-# ANOTHER THING WE NEED TO RESOLVE IS STANDARDIZING THINGS SUCH AS
-# ROUGH AWNS OR AWNS ARE ROUGH.
+# 2) WE NEED TO RESOLVE IS STANDARDIZING THINGS SUCH AS
+# ROUGH AWNS OR AWNS ARE ROUGH. NOTE: May be compoud traits
+# do not make sense because we need to be able to know
+# relationships. See item 3 below. We should look at co-reference resolution.
+# It might help. (https://medium.com/huggingface/state-of-the-art-neural-coreference-resolution-for-chatbots-3302365dcf30)
+
+# 3) WE NEED TO GROUP ANNOTATIONS SUCH AS TRAITS INTO CATEGORIES THAT
+# MAKE SENSE TO THE USER. RIGHT KNOW WE HAVE "early maturity" AND "winter"
+# AS TRAITS WHILE ACCORDING TO THE SPECS WE SHOULD BE RETURNING
+# “Maturity” : “early maturity”, “Season”: “winter”
 
 # create a NER GUI class
 class CropNerGUI:
