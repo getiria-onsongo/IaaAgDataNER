@@ -2,9 +2,9 @@
 Parse and categorize agricultural related data
 
 ## Background
-So far, the approach has been to take the existing spaCy English trained
-model and to build on it so that its Named Entity Recognizer (NER) can
-recognize instances of the following agricultural terms:
+The approach we will use for NER tagging is to take the existing spaCy English trained
+model and to build on it to recognize agricultural specific NER terms. We are currently working 
+on training it to  recognize these terms: 
 - ALAS = varietal alias
 - CROP = crop
 - CVAR = crop_variety
