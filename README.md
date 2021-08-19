@@ -2,8 +2,8 @@
 Parse and categorize agricultural related data
 
 ## Background
-The approach we will use for NER tagging is to take the existing spaCy English trained
-model and to build on it to recognize agricultural specific NER terms. We are currently working 
+The approach we will use for NER tagging is to take the existing spaCy English language
+model build on it to recognize agricultural specific NER terms. We are currently working 
 on training it to  recognize the following terms: 
 - ALAS = varietal alias
 - CROP = crop
@@ -15,9 +15,11 @@ on training it to  recognize the following terms:
 - PPTD = plant predisposition to disease
 - TRAT = trait
 
+<!---
 We are starting out by training the NER on the 37 pages of
 [BarCvDescLJ11.pdf](https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf),
 a compendium of barley varieties.
+-->
 
 ## Getting started
 You can test the accuracy of the NER training with N pages of the 37 page document. However, our experience with SpaCy training so far is it converges faster if you use more data. If you have a total of maxn pages, it is a good idea to use all the pages. 
