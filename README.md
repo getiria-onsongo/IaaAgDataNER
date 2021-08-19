@@ -19,18 +19,21 @@ on training it to  recognize the following terms:
 We are starting out by training the NER on the 37 pages of
 [BarCvDescLJ11.pdf](https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf),
 a compendium of barley varieties.
--->
+
 
 ## Getting started
 You can test the accuracy of the NER training with N pages of the 37 page document. However, our experience with SpaCy training so far is it converges faster if you use more data. If you have a total of maxn pages, it is a good idea to use all the pages. 
 
 We wrote a script that does leave-one-out cross validation. Because training an NER model is time consuming, we do not recommend performing the full leave-one-out cross validation when testing. If you have a total on N pages, the NER model will be trained N times. Test the script without the --validate flag. If this flag is ommitted, the analysis will be done once. One of the pages will be randomly selected to be the test page. The remaining pages will be used for training. Check for yourself!
+-->
 
+## Clone repository
+Before you start, make sure you have Python3 installed. If you are reading this README file it means you 
+have cloned this repository. If not, clone this repo using the steps shown below. 
+
+
+<!---
 ```
-# Before you start, make sure you have Python3 and SpaCy (version 3.0 or higher) installed. The 
-# conda environment being activated below has SpaCy installed. 
-conda activate ner
-
 # Clone repository with NER training code
 git clone https://github.com/getiria-onsongo/IaaAgDataNER
 
@@ -130,3 +133,4 @@ items:
    * Handle TRAT (be) ADJ constructs like 'its yield is low'
 4. Create a python module to deal with compound traits using lessons learned in the CompoundTerms python notebook.
 5. Clean up all the code and move academic exercises and failed experiments to an ARCHIVE folder
+-->
