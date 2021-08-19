@@ -34,7 +34,11 @@ have cloned this repository. If not, clone this repo using the steps shown below
 # Clone repository with NER training code
 git clone https://github.com/getiria-onsongo/IaaAgDataNER
 
+# Switch to the repo directory
 cd IaaAgDataNER
+
+# If you had already cloned the repo, use git pull to get the latest version. 
+git pull
 ```
 
 ## Install spaCy 3
@@ -60,14 +64,27 @@ To update spaCy's model to recognize NER terms, we need training data. The folde
 in this repo contains sample json files with training data. During training, spaCy 
 expects two sets of data: training set and test set. The scripts "json2SpacyJson.py"
 converts a set of json files into these two sets. NOTE, "ner_2021_08" in the command 
-below is the name of the folder that will contain the training and test sets. It is 
-created by the script "json2SpacyJson.py". You can use a different name for this folder. 
+below will be the prefix of the output files. You can use whatever name you would like. 
 The --test-size option sets size of the test set as a fraction of the total number of json
 file. 0.1 means the test set will be approximately 10 percent of data in the folder "Data". 
 
 ```
 python3 src/json2SpacyJson.py Data ner_2021_08 en_core_web_lg --suffix '.json' --split True --test_size 0.1
 
+```
+
+## Create directory to store training data in spaCy format.
+The program in spaCy that converts jsonl to spaCy format which is the input format for training 
+models needs an output directory. 
+
+```
+mkdir ner_2021_08
+```
+
+# Convert to jsonl to spaCy binary format
+```
+python3 -m spacy convert --converter json ner_2021_08_training_data.jsonl ner_2021_08
+python3 -m spacy convert --converter json ner_2021_08_validate_data.jsonl ner_2021_08
 ```
 
 HERE
