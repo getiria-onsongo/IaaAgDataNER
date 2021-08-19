@@ -30,7 +30,47 @@ We wrote a script that does leave-one-out cross validation. Because training an 
 ## Clone repository
 Before you start, make sure you have Python3 installed. If you are reading this README file it means you 
 have cloned this repository. If not, clone this repo using the steps shown below. 
+```
+# Clone repository with NER training code
+git clone https://github.com/getiria-onsongo/IaaAgDataNER
 
+cd IaaAgDataNER
+```
+
+## Install spaCy 3
+Install  spaCy 3 and other packages needed to annotate PDF files. 
+```
+pip3 install -U pip setuptools wheel
+pip3 install -U spacy
+pip3 install spacy-transformers
+pip3 install -U scikit-learn
+pip3 install -U PyPDF2
+
+```
+
+## Download language models
+```
+python3 -m spacy download en_core_web_sm
+python3 -m spacy download en_core_web_md
+python3 -m spacy download en_core_web_lg
+```
+
+## Generate training data
+To update spaCy's model to recognize NER terms, we need training data. The folder "Data"
+in this repo contains sample json files with training data. During training, spaCy 
+expects two sets of data: training set and test set. The scripts "json2SpacyJson.py"
+converts a set of json files into these two sets. NOTE, "ner_2021_08" in the command 
+below is the name of the folder that will contain the training and test sets. It is 
+created by the script "json2SpacyJson.py". You can use a different name for this folder. 
+The --test-size option sets size of the test set as a fraction of the total number of json
+file. 0.1 means the test set will be approximately 10 percent of data in the folder "Data". 
+
+```
+python3 src/json2SpacyJson.py Data ner_2021_08 en_core_web_lg --suffix '.json' --split True --test_size 0.1
+
+```
+
+HERE
 
 <!---
 ```
