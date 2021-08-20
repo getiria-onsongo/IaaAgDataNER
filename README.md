@@ -102,12 +102,13 @@ train.cfg: name of config file
 python3 -m spacy init config --lang en --pipeline ner  --optimize accuracy --force train.cfg
 ```
 NOTE: If you just have ner in the pipeline as is the case above, you will not get things such as POS which
-we need. Ensure tagger and parser are in the pipeline you are training. You will need to edit the resulting 
+we need. You will need to edit the resulting 
 config file (train.cfg) to include other components in the pipeline. Also, in spaCy 3, 
 "attribute_ruler" is the one that creates POS. Below I am showing the fields I edited to make sure the 
 resulting trained model does POS tagging. We are freezing all the components except NER from training 
 because our training data is for updating NER tagging. See spaCy 3 documentation for more details. 
 
+```
 pipeline = ["tok2vec","tagger","parser","attribute_ruler","lemmatizer","ner"]
 
 [components.tagger]
@@ -127,6 +128,7 @@ source = "en_core_web_lg"
 replace_listeners = ["model.tok2vec"]
 
 frozen_components = ["tagger","parser","attribute_ruler","lemmatizer"]
+```
 
 HERE
 
