@@ -1,4 +1,4 @@
-# IaaAgDataNER
+# NER tagging using spaCy
 Parse and categorize agricultural related data
 
 ## Background
@@ -62,7 +62,7 @@ python3 -m spacy download en_core_web_lg
 ## Generate training data
 To update spaCy's model to recognize NER terms, we need training data. The folder "Data"
 in this repo contains sample json files with training data. During training, spaCy 
-expects two sets of data: training set and test set. The scripts "json2SpacyJson.py"
+expects two sets of data: training set and test or development set. The scripts "json2SpacyJson.py"
 converts a set of json files into these two sets. NOTE, "ner_2021_08" in the command 
 below will be the prefix of the output files. You can use whatever name you would like. 
 The --test-size option sets size of the test set as a fraction of the total number of json
@@ -95,15 +95,15 @@ spaCy for more details.
 --pipeline: Comma-separated names of trainable pipeline components to include
 --optimize: Whether to optimize for efficiency or accuracy
 --force: Overwrite output file if it exists
-train.cfg: name of config file
+ner.cfg: name of config file
 
 
 ```
-python3 -m spacy init config --lang en --pipeline ner  --optimize accuracy --force train.cfg
+python3 -m spacy init config --lang en --pipeline ner  --optimize accuracy --force ner.cfg
 ```
 NOTE: If you just have ner in the pipeline as is the case above, you will not get things such as POS which
 we need. You will need to edit the resulting 
-config file (train.cfg) to include other components in the pipeline. Also, in spaCy 3, 
+config file (ner.cfg) to include other components in the pipeline. Also, in spaCy 3, 
 "attribute_ruler" is the one that creates POS. Below I am showing the fields I edited to make sure the 
 resulting trained model does POS tagging. We are freezing all the components except NER from training 
 because our training data is for updating NER tagging. See spaCy 3 documentation for more details. 
@@ -131,11 +131,61 @@ frozen_components = ["tagger","parser","attribute_ruler","lemmatizer"]
 ```
 
 ## Train model
-Now that we have the config file (train.cfg) and training data (ner_2021_08) ready, we can now train the 
+Now that we have the config file (ner.cfg) and training data (ner_2021_08) ready, we can now train the 
 english model to recognize our custom NER tags. 
 
 ```
 python3 -m spacy train ner.cfg --output ner_2021_08_model --paths.train ner_2021_08/ner_2021_08_training_data.spacy --paths.dev ner_2021_08/ner_2021_08_validate_data.spacy
+```
+
+## Annotating more data using GUI
+Included in this code is a graphical user interface for annotating data with custom NER tags. The GUI should 
+work with both PDF and text files. It has been extensively tested on PDF files. To speed the annotation 
+process, the GUI takes as one of its inputs a folder containing a model that can identify custome NER tags (output
+from the training command above, ner_2021_08_model). It then pre-tags PDFs and the user can verify and correct 
+pre-tagged annotations. The command below displays the GUI. 
+
+```
+# Start GUI and select "ner_2021_08_model/model-best" as the model
+python3 src/CropNerGUI.py
+```
+
+## Convert new annotated data into CSV format
+The GUI above will save new annotations in .json format. Users have the option of converting the annotated data 
+into CSV format and loading it into a PostgreSQL database. The command below takes as input a folder (AnnotatedData)
+containing NER annotations in json format and converts it into a CSV file. 
+
+```
+python3 src/json2csv.py AnnotatedData BarCvDescLJ11.csv
+```
+
+# Loading NER data into PostgreSQL
+If you have access to a PostgreSQL database, the next series of steps illustrate how to load NER tagged data 
+into a PostgreSQL database. 
+
+## Create PostgreSQL
+To create a database run the command below from the terminal. It will creates the database ner
+
+```
+createdb ner
+```
+
+## Create tables (relations)
+Included in the code is an SQL script (CreateTables.sql) that creates tables for storing the 
+9 NER tags (ALAS,CROP,CVAR,JRN,PATH,PED,PLAN,PPTD,TRAT) annoted by default. This script 
+implements the schema below: 
+
+![NER Database Schema](images/CropNer.png)
+
+
+If you added your own 
+NER tags, you will need to update this SQL script. Use this script to create tables in PostgreSQL. 
+
+
+```
+# hostname: would be localhost if the database is on your machine. Otherwise it is the IP address of your database. 
+# ner: name of the database we created using the createdb command above. 
+psql -h hostname -d ner -f src/CreateTables.sql
 ```
 
 HERE
