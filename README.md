@@ -130,6 +130,14 @@ replace_listeners = ["model.tok2vec"]
 frozen_components = ["tagger","parser","attribute_ruler","lemmatizer"]
 ```
 
+## Train model
+Now that we have the config file (train.cfg) and training data (ner_2021_08) ready, we can now train the 
+english model to recognize our custom NER tags. 
+
+```
+python3 -m spacy train ner.cfg --output ner_2021_08_model --paths.train ner_2021_08/ner_2021_08_training_data.spacy --paths.dev ner_2021_08/ner_2021_08_validate_data.spacy
+```
+
 HERE
 
 <!---
