@@ -73,7 +73,7 @@ python3 src/json2SpacyJson.py Data ner_2021_08 en_core_web_lg --suffix '.json' -
 
 ```
 
-## Create directory to store training data in spaCy format.
+## Create directory to store training data in spaCy format
 The program in spaCy that converts jsonl to spaCy format which is the input format for training 
 models needs an output directory. 
 
@@ -86,6 +86,47 @@ mkdir ner_2021_08
 python3 -m spacy convert --converter json ner_2021_08_training_data.jsonl ner_2021_08
 python3 -m spacy convert --converter json ner_2021_08_validate_data.jsonl ner_2021_08
 ```
+
+## Create config file with training parameters
+Below is a description of some of the key options for creating the config file. See
+spaCy for more details. 
+
+--lang: Two-letter code of the language to use
+--pipeline: Comma-separated names of trainable pipeline components to include
+--optimize: Whether to optimize for efficiency or accuracy
+--force: Overwrite output file if it exists
+train.cfg: name of config file
+
+
+```
+python3 -m spacy init config --lang en --pipeline ner  --optimize accuracy --force train.cfg
+```
+NOTE: If you just have ner in the pipeline as is the case above, you will not get things such as POS which
+we need. Ensure tagger and parser are in the pipeline you are training. You will need to edit the resulting 
+config file (train.cfg) to include other components in the pipeline. Also, in spaCy 3, 
+"attribute_ruler" is the one that creates POS. Below I am showing the fields I edited to make sure the 
+resulting trained model does POS tagging. We are freezing all the components except NER from training 
+because our training data is for updating NER tagging. See spaCy 3 documentation for more details. 
+
+pipeline = ["tok2vec","tagger","parser","attribute_ruler","lemmatizer","ner"]
+
+[components.tagger]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+[components.parser]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+[components.attribute_ruler]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+[components.lemmatizer]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+frozen_components = ["tagger","parser","attribute_ruler","lemmatizer"]
 
 HERE
 
