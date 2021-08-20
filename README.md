@@ -178,8 +178,7 @@ implements the schema below:
 ![NER Database Schema](images/CropNer.png)
 
 
-If you added your own 
-NER tags, you will need to update this SQL script. Use this script to create tables in PostgreSQL. 
+If you added your own NER tags, you might need to update this SQL script. Use this script to create tables in PostgreSQL. 
 
 
 ```
@@ -188,7 +187,80 @@ NER tags, you will need to update this SQL script. Use this script to create tab
 psql -h hostname -d ner -f src/CreateTables.sql
 ```
 
-HERE
+## Load Data
+There is more than one way to load data into each of the tables created by the SQL script above. One way is to load data
+directly from the spreadsheet into the different tables. This approach is somewhat complicated because with each load, 
+you will have to tell PostgreSQL which columns to load and which ones to ignore. An easier approach, I think, would be to
+create separate CSV files for each of the tables. The steps below shows how to create these separate CSV files for 
+each table. 
+```
+# Log into PostgreSQL and load raw data (BarCvDescLJ11.csv)
+psql -h hostname -d ner
+\COPY raw_data FROM 'BarCvDescLJ11.csv' DELIMITER ',' CSV HEADER;
+
+# Create CSV files for each table from raw_data
+\COPY (SELECT DISTINCT crop_name FROM raw_data) to 'crop.csv' CSV;
+\COPY (SELECT DISTINCT doc_name, url FROM raw_data) to 'document.csv' CSV;
+\COPY (SELECT DISTINCT cvar, crop_name FROM raw_data) to 'crop_variety.csv' CSV;
+\COPY (SELECT DISTINCT id, chunk, doc_name, cvar FROM raw_data) to 'cvar_data_source.csv' CSV;
+\COPY (SELECT DISTINCT id, label FROM raw_data) to 'ner_tag.csv' CSV;
+\COPY (SELECT DISTINCT value, id, label FROM raw_data) to 'crop_attribute.csv' CSV;
+
+# Load data to tables
+\COPY crop FROM 'crop.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY document FROM 'document.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY crop_variety FROM 'crop_variety.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY cvar_data_source FROM 'cvar_data_source.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY ner_tag FROM 'ner_tag.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY crop_attribute FROM 'crop_attribute.csv' DELIMITER ',' QUOTE '"' CSV;
+
+```
+
+## Do some basic optimization
+The schema above is good for reducing data duplication in the database. It is, however, not 
+suitable for the kind of queries a typical user might be interested in. The commands below
+create a view that aggregates data into a view that is easier to query. NOTE: If performance 
+becomes an issue, we will need to use materialized viewa instead of plain views. 
+
+```
+# Log into PostgreSQL 
+psql -h hostname -d ner
+
+# Create indexes to speed up query that creates the view. As noted, if queries against 
+# views start slowing down, transition to materialized views. 
+CREATE INDEX crop_attribute_id_idx ON crop_attribute USING BTREE(id);
+
+# Create view
+CREATE VIEW crop_data AS
+SELECT DISTINCT crop_name, cvar, label, value FROM
+(SELECT crop_name, cvar, id FROM crop_variety JOIN cvar_data_source USING(cvar)) A
+JOIN
+crop_attribute B
+USING(ID);
+
+```
+
+## Sample Query
+Try a sample query. This query is a back-end SQL implementation that will serve one the sample API calls in the [Crop Trait Explorer](https://docs.google.com/document/d/1nb6cxjrVUWXbs-tpyjO7WLdkQyHqd-CjnGhY5NPkYJc/edit?usp=sharing) document. 
+
+```
+# Log into PostgreSQL 
+psql -h hostname -d ner
+
+# Create indexes to speed up query that creates the view. As noted, if queries against 
+# views start slowing down, transition to materialized views. 
+CREATE INDEX crop_attribute_id_idx ON crop_attribute USING BTREE(id);
+
+# Create view
+CREATE VIEW crop_data AS
+SELECT DISTINCT crop_name, cvar, label, value FROM
+(SELECT crop_name, cvar, id FROM crop_variety JOIN cvar_data_source USING(cvar)) A
+JOIN
+crop_attribute B
+USING(ID);
+
+```
+
 
 <!---
 ```
