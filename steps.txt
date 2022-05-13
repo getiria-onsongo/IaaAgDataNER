@@ -12,8 +12,6 @@ At the bottom of the page, click Generate Token.
 > git clone https://getiria-onsongo@github.com/getiria-onsongo/IaaAgDataNER.git
 
 
-python src/CropNerGUI.py 
-
 # Switch to this folder
 
 cd /Users/gonsongo/Desktop/research/gems/IaaAgDataNER
@@ -23,14 +21,14 @@ conda activate ner
 
 # Take as input a folder containing raw json files and convert them into
 # jsonl format used by Spacy. You can ignore the warnings
-python3 src/json2SpacyJson.py Data ner_2022_05_12  en_core_web_trf --suffix '.json' --split True --test_size 0.1 
+python3 src/json2SpacyJson.py Data ner_2022_05_13  en_core_web_trf --suffix '.json' --split True --test_size 0.1 
 
 # Create directory. Spacy program to convert jsonl to Spacy format needs an output directory
-mkdir ner_2022_05_12
+mkdir ner_2022_05_13
 
 # Convert to spacy binary format
-python3 -m spacy convert --converter json ner_2022_05_12_training_data.jsonl ner_2022_05_12
-python3 -m spacy convert --converter json ner_2022_05_12_validate_data.jsonl ner_2022_05_12
+python3 -m spacy convert --converter json ner_2022_05_13_training_data.jsonl ner_2022_05_13
+python3 -m spacy convert --converter json ner_2022_05_13_validate_data.jsonl ner_2022_05_13
 
 # Create a config file to use for training
 # --lang: Two-letter code of the language to use
@@ -41,11 +39,14 @@ python3 -m spacy convert --converter json ner_2022_05_12_validate_data.jsonl ner
 python3 -m spacy init config --lang en --pipeline ner --optimize accuracy --force ner.cfg
 
 # Train a model
-python3 -m spacy train ner.cfg --output ner_2022_05_12_model --paths.train ner_2022_05_12/ner_2022_05_12_training_data.spacy --paths.dev ner_2022_05_12/ner_2022_05_12_validate_data.spacy 
+python3 -m spacy train ner.cfg --output ner_2022_05_13_model --paths.train ner_2022_05_13/ner_2022_05_13_training_data.spacy --paths.dev ner_2022_05_13/ner_2022_05_13_validate_data.spacy 
 
 
 
 HERE
+
+# Open GUI
+python3 src/CropNerGUI.py 
 
 
 python -m spacy train ner.cfg --paths.train ./train.spacy --paths.dev ./dev.spacy
