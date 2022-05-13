@@ -16,6 +16,7 @@ def convertJsonToSpacyJsonl(model="en_core_web_lg",outputFileName=None, filePath
 
     # Iterate through each file
     for fileName in filePaths:
+        print("Working on file:", fileName)
         # Convert it to mixed_type (see json2py.py for details on mixed_type)
         data = json_2_dict(fileName)
         mixed_data = dict_2_mixed_type(data)

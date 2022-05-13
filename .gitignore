@@ -1,8 +1,10 @@
+.DS_Store
 temp.out
 src/temp.txt
 temp.txt
 train.cfg
 ner_2021_08_*
+ner_2022_05_13*
 Data/Cranberry/
 YEDDA/
 ner-annotator/
