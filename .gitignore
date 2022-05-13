@@ -16,7 +16,6 @@ src/temp1.py
 test.jsonl
 test1.txt
 test2.jsonl
-steps.txt
 Data/TrainingData/*.pdf
 Data/TrainingData/*.json
 Data/TrainingData/*.py

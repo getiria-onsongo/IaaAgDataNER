@@ -1,0 +1,116 @@
+# Clone the repo
+# Creating a GitHub Access Token
+1. In GitHub, go to Settings --> Developer Settings --> Personal access tokens.
+2. Click Generate new token and assign the token a name.
+3. Grant the token privilege to the repo group.
+4. Copy the token to a secure location. You won't be able to view the token again.
+
+At the bottom of the page, click Generate Token.
+
+
+# Clone repo
+> git clone https://getiria-onsongo@github.com/getiria-onsongo/IaaAgDataNER.git
+
+
+python src/CropNerGUI.py 
+
+# Switch to this folder
+
+cd /Users/gonsongo/Desktop/research/gems/IaaAgDataNER
+
+conda activate ner
+
+
+# Take as input a folder containing raw json files and convert them into
+# jsonl format used by Spacy. You can ignore the warnings
+python3 src/json2SpacyJson.py Data ner_2022_05_12  en_core_web_trf --suffix '.json' --split True --test_size 0.1 
+
+# Create directory. Spacy program to convert jsonl to Spacy format needs an output directory
+mkdir ner_2022_05_12
+
+# Convert to spacy binary format
+python3 -m spacy convert --converter json ner_2022_05_12_training_data.jsonl ner_2022_05_12
+python3 -m spacy convert --converter json ner_2022_05_12_validate_data.jsonl ner_2022_05_12
+
+# Create a config file to use for training
+# --lang: Two-letter code of the language to use
+# --pipeline: Comma-separated names of trainable pipeline components to include [default: tagger,parser,ner]
+# --optimize: Whether to optimize for efficiency or accuracy
+# --force: Overwrite output file if it exists
+# ner.cfg:
+python3 -m spacy init config --lang en --pipeline ner --optimize accuracy --force ner.cfg
+
+# Train a model
+python3 -m spacy train ner.cfg --output ner_2022_05_12_model --paths.train ner_2022_05_12/ner_2022_05_12_training_data.spacy --paths.dev ner_2022_05_12/ner_2022_05_12_validate_data.spacy 
+
+
+
+HERE
+
+
+python -m spacy train ner.cfg --paths.train ./train.spacy --paths.dev ./dev.spacy
+# Prodigy
+> 
+
+
+python3 src/validation_testing.py 57 'dataset_p' '_td.json' Data/TrainingData/  NerModel 'ner_' 
+
+# Create a config file to use for training
+python -m spacy init config ner.cfg --lang "en" --pipeline "ner" --optimize "accuracy" --force
+
+# Create test data
+python -m spacy convert --converter json devData.json TrainingData
+
+# Create training data
+python -m spacy convert --converter json trainData.json TrainingData
+
+# Train
+python -m spacy train ner.cfg --output ner_model --paths.train TrainingData/trainData.spacy --paths.dev TrainingData/devData.spacy
+
+# HERE
+source_nlp = spacy.load("en_core_web_sm")
+nlp_agdata = spacy.load("ner_model/model-best")
+nlp_agdata.add_pipe("parser", before="ner",source=source_nlp)
+nlp_agdata.add_pipe("tagger", before="parser",source=source_nlp)
+nlp_agdata.add_pipe("compound_trait_entities", after='ner')
+
+nlp_agdata.pipe_names
+
+tar -czvf ner_model.tar.gz ner_model
+
+
+# Activate NER environment
+conda activate ner
+
+# Create an environment
+conda create -n ner python=3.7 spacy=3.0.3 -y
+
+# Download language model
+python -m spacy download en_core_web_sm
+python -m spacy download en_core_web_lg
+
+conda create -n nerSpacy2 spacy=2 -y
+
+# To activate this environment
+conda activate ner
+
+# Download English model
+python3.8 -m spacy download en_core_web_sm
+
+# Install transformer package. It is sometimes using in training
+pip install spacy-transformers
+
+
+# To deactivate an active environment
+conda deactivate
+
+# To remove an environment
+conda remove --name ner --all -y
+
+# To list environments
+conda env list
+
+
+# To delete files from git
+git rm -r --cached src/__pycache__/
+ 
