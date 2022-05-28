@@ -240,33 +240,25 @@ class CropNerGUI:
         self.cropEntry = tk.Entry(self.annotation_data_frame, width=15)
         self.cropEntry.pack(side=tk.LEFT)
 
-        '''
-        # Format text
-        self.format_frame = tk.Frame(self.rootWin)
-        self.format_frame.pack(side=tk.TOP,fill="x")
-
-        self.blankLabel_eight = tk.Label(self.format_frame, text="     ")
-        self.blankLabel_eight.pack(side=tk.LEFT)
-
         # Font +
-        self.font_plus = tk.Button(self.format_frame, text="Font +",width=10,command=self.font_plus)
+        self.font_plus = tk.Button(self.annotation_data_frame, text="Font +",width=10,command=self.font_plus)
         self.font_plus.pack(side = tk.LEFT)
 
         # Font -
-        self.font_minus = tk.Button(self.format_frame, text="Font -",width=10,command=self.font_minus)
+        self.font_minus = tk.Button(self.annotation_data_frame, text="Font -",width=10,command=self.font_minus)
         self.font_minus.pack(side = tk.LEFT)
-        '''
+
 
     def font_plus(self):
         """ Add documentation"""
-        self.font_size = str(int(self.font_size) + 2)
-        self.text = ScrolledText(self.rootWin, height=25, width=140, font = "Times "+self.font_size)
-        self.text.focus_force()
-        print("font_plus")
+        self.font_size = str(int(self.font_size) + 1)
+        self.text['font'] = "Times "+self.font_size
+        
 
     def font_minus(self):
         """ Add documentation"""
-        pass
+        self.font_size = str(int(self.font_size) - 1)
+        self.text['font'] = "Times "+self.font_size
 
     def get_max_dict_value(self, dictionary):
         """ Add documentation"""
@@ -628,6 +620,12 @@ class CropNerGUI:
         if self.annotation_file is None:
             self.msg.config(text="Please select an annotations file (json)", foreground="red")
         else:
+            # Update font size if it was entered
+            font_size = self.fontEntry.get()
+            if font_size.isdigit():
+                self.text['font'] = "Times "+font_size
+                self.font_size = font_size
+
             # Load annotation data
             data = json_2_dict(self.annotation_file.name)
             train_data = dict_2_mixed_type(data)
