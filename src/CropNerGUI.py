@@ -57,7 +57,7 @@ class CropNerGUI:
         self.output_file_name = "sample_p0_td.py"
         self.pageNumber=0
         self.line_num = 0
-        self.font_size = "12"
+        self.font_size = "14"
         self.page_lines = len(self.content)
 
         self.topframe = tk.Frame(self.rootWin)
@@ -240,15 +240,33 @@ class CropNerGUI:
         self.cropEntry = tk.Entry(self.annotation_data_frame, width=15)
         self.cropEntry.pack(side=tk.LEFT)
 
-        self.cvarLabel = tk.Label(self.annotation_data_frame, text="Crop Variety Label:", width=15, anchor="w")
-        self.cvarLabel.pack(side=tk.LEFT)
-        self.cvarEntry = tk.Entry(self.annotation_data_frame, width=15)
-        self.cvarEntry.pack(side=tk.LEFT)
+        '''
+        # Format text
+        self.format_frame = tk.Frame(self.rootWin)
+        self.format_frame.pack(side=tk.TOP,fill="x")
 
-        self.urlLabel = tk.Label(self.annotation_data_frame, text="PDF URL (if known):", width=20,anchor="w")
-        self.urlLabel.pack(side=tk.LEFT)
-        self.urlEntry = tk.Entry(self.annotation_data_frame, width=50)
-        self.urlEntry.pack(side=tk.LEFT)
+        self.blankLabel_eight = tk.Label(self.format_frame, text="     ")
+        self.blankLabel_eight.pack(side=tk.LEFT)
+
+        # Font +
+        self.font_plus = tk.Button(self.format_frame, text="Font +",width=10,command=self.font_plus)
+        self.font_plus.pack(side = tk.LEFT)
+
+        # Font -
+        self.font_minus = tk.Button(self.format_frame, text="Font -",width=10,command=self.font_minus)
+        self.font_minus.pack(side = tk.LEFT)
+        '''
+
+    def font_plus(self):
+        """ Add documentation"""
+        self.font_size = str(int(self.font_size) + 2)
+        self.text = ScrolledText(self.rootWin, height=25, width=140, font = "Times "+self.font_size)
+        self.text.focus_force()
+        print("font_plus")
+
+    def font_minus(self):
+        """ Add documentation"""
+        pass
 
     def get_max_dict_value(self, dictionary):
         """ Add documentation"""
@@ -606,58 +624,84 @@ class CropNerGUI:
         """
         # Clear warning message, if one exists
         self.msg.config(text="")
-
-        if self.raw_file is None or self.annotation_file is None:
-            self.msg.config(text="Please select both a raw (pdf) file and annotations file (json)", foreground="red")
+        # self.raw_file is None or self.annotation_file is None:
+        if self.annotation_file is None:
+            self.msg.config(text="Please select an annotations file (json)", foreground="red")
         else:
+            # Load annotation data
+            data = json_2_dict(self.annotation_file.name)
+            train_data = dict_2_mixed_type(data)
 
-                page_num = self.pageEntry.get()
-                if not page_num.isdigit():
-                    self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
-                    page_num = 1
-
-                self.pageNumber = int(page_num)
-
-                # Reset dictionary containing current annotations
-                new_cust_ents_dict = {}
-
-                # Load annotation data
-                data = json_2_dict(self.annotation_file.name)
-                train_data = dict_2_mixed_type(data)
-                # Put annotations in a dictionary so we can easily O(1) find if a sentence has been annotated
-                for annotation in train_data:
-                    sentence = annotation[0]
-                    entities = annotation[1]['entities']
-                    self.annotation_dict[sentence]= entities
-
-                # Load PDF file
-                self.sentences = self.LoadPDF()
-
-                self.text.delete(1.0, tk.END)
-                lineNo = 1
-                for sent in self.sentences:
-                    annotation_exists = self.annotation_dict.get(sent,False)
-                    if annotation_exists:
-                        # Add sentence to text box
-                        self.text.insert(str(lineNo)+".0", sent+'\n')
-
-                        # Update dictionary containing current annotations
-                        annot_entry = [sent,annotation_exists]
-                        new_cust_ents_dict[lineNo] = annot_entry
-                        #self.cust_ents_dict[lineNo][1] = annotation_exists
-
-                        for ent in annotation_exists:
-                            start = ent[0]
-                            end = ent[1]
-                            label = ent[2]
-                            if (label in self.tags):
-                                self.text.tag_add(label, str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
-                            else:
-                                self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
+            # Delete contents and reset line number 
+            self.text.delete(1.0, tk.END)
+            lineNo = 1
+            
+            # Review annotation
+            for annotation in train_data:
+                sentence = annotation[0]
+                entities = annotation[1]['entities']
+                self.text.insert(str(lineNo)+".0", sentence+'\n')
+                for ent in entities:
+                    start = ent[0]
+                    end = ent[1]
+                    label = ent[2]
+                    if (label in self.tags):
+                        self.text.tag_add(label, str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
                     else:
-                        self.text.insert(str(lineNo)+".0", sent+'\n')
-                    lineNo = lineNo + 1
+                        self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
+                lineNo = lineNo + 1
+                
+            # Below is code I had started writing to highlight a PDF file if it has an annotation. Code is not
+            # working. Needs to be fixed. 
+
+            '''
+            page_num = self.pageEntry.get()
+            if not page_num.isdigit():
+                self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
+                page_num = 1
+
+            self.pageNumber = int(page_num)
+
+            # Put annotations in a dictionary so we can easily O(1) find if a sentence has been annotated
+            for annotation in train_data:
+                sentence = annotation[0]
+                entities = annotation[1]['entities']
+                self.annotation_dict[sentence]= entities
+
+            
+
+            # Reset dictionary containing current annotations
+            new_cust_ents_dict = {}
+
+            # Load PDF file
+            self.sentences = self.LoadPDF()
+
+            self.text.delete(1.0, tk.END)
+            lineNo = 1
+            for sent in self.sentences:
+                annotation_exists = self.annotation_dict.get(sent,False)
+                if annotation_exists:
+                    # Add sentence to text box
+                    self.text.insert(str(lineNo)+".0", sent+'\n')
+
+                    # Update dictionary containing current annotations
+                    annot_entry = [sent,annotation_exists]
+                    new_cust_ents_dict[lineNo] = annot_entry
+                    #self.cust_ents_dict[lineNo][1] = annotation_exists
+
+                    for ent in annotation_exists:
+                        start = ent[0]
+                        end = ent[1]
+                        label = ent[2]
+                        if (label in self.tags):
+                            self.text.tag_add(label, str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
+                        else:
+                            self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
+                else:
+                    self.text.insert(str(lineNo)+".0", sent+'\n')
+                lineNo = lineNo + 1
         self.cust_ents_dict = new_cust_ents_dict
+        '''
 
     def highlight_text(self):
         """ Highlight selected text """
