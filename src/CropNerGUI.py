@@ -28,10 +28,12 @@ from tkinter.scrolledtext import ScrolledText
 # AS TRAITS WHILE ACCORDING TO THE SPECS WE SHOULD BE RETURNING
 # “Maturity” : “early maturity”, “Season”: “winter”
 
+# 4) Need to start thinking about an ontology
+
 # create a NER GUI class
 class CropNerGUI:
     def __init__(self):
-        # Create a GUI window
+        # Create a GUI window.
         self.rootWin = tk.Tk()
         # self.rootWin.option_add('*Font', 'Times 24')
         self.rootWin.title("GEMS NER Annotation Tool")
