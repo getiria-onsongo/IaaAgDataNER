@@ -18,13 +18,13 @@ from tkinter.scrolledtext import ScrolledText
 # DECISIONS AND VIEWS AND HOW WE WILL LIKELY IMPLEMENT APIs.
 
 # 2) WE NEED TO RESOLVE IS STANDARDIZING THINGS SUCH AS
-# ROUGH AWNS OR AWNS ARE ROUGH. NOTE: May be compoud traits
+# ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
 # do not make sense because we need to be able to know
 # relationships. See item 3 below. We should look at co-reference resolution.
 # It might help. (https://medium.com/huggingface/state-of-the-art-neural-coreference-resolution-for-chatbots-3302365dcf30)
 
 # 3) WE NEED TO GROUP ANNOTATIONS SUCH AS TRAITS INTO CATEGORIES THAT
-# MAKE SENSE TO THE USER. RIGHT KNOW WE HAVE "early maturity" AND "winter"
+# MAKE SENSE TO THE USER. RIGHT NOW WE HAVE "early maturity" AND "winter"
 # AS TRAITS WHILE ACCORDING TO THE SPECS WE SHOULD BE RETURNING
 # “Maturity” : “early maturity”, “Season”: “winter”
 
@@ -33,7 +33,7 @@ class CropNerGUI:
     def __init__(self):
         # Create a GUI window
         self.rootWin = tk.Tk()
-        #self.rootWin.option_add('*Font', 'Times 24')
+        # self.rootWin.option_add('*Font', 'Times 24')
         self.rootWin.title("GEMS NER Annotation Tool")
         self.rootWin.geometry('1500x900')
 
