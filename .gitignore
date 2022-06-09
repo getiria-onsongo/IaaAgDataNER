@@ -29,8 +29,11 @@ src/.idea/*
 .ipynb_checkpoints/*
 .env
 env/*
-.ner_2021_08_model
+.ner_2021_08_mode
+ner_2021_08_model/*
 .senter_ner_2021_08_model
-.ner_2021_08
+senter_ner_2021_08_model/*
+.ner_2021_08_model
+ner_2021_08/*
 
 
