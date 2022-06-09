@@ -12,22 +12,19 @@ import re
 import random
 import tkinter as tk
 from tkinter import filedialog as fd
-from collections import defaultdict
 from tkinter.scrolledtext import ScrolledText
-import os
-import sys
 
 # 1) WRITE A DOCUMENT AND PUT IT INTO GITHUB AND DOCUMENT SCHEMA
 # DECISIONS AND VIEWS AND HOW WE WILL LIKELY IMPLEMENT APIs.
 
 # 2) WE NEED TO RESOLVE IS STANDARDIZING THINGS SUCH AS
-# ROUGH AWNS OR AWNS ARE ROUGH. NOTE: May be compoud traits
+# ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
 # do not make sense because we need to be able to know
 # relationships. See item 3 below. We should look at co-reference resolution.
 # It might help. (https://medium.com/huggingface/state-of-the-art-neural-coreference-resolution-for-chatbots-3302365dcf30)
 
 # 3) WE NEED TO GROUP ANNOTATIONS SUCH AS TRAITS INTO CATEGORIES THAT
-# MAKE SENSE TO THE USER. RIGHT KNOW WE HAVE "early maturity" AND "winter"
+# MAKE SENSE TO THE USER. RIGHT NOW WE HAVE "early maturity" AND "winter"
 # AS TRAITS WHILE ACCORDING TO THE SPECS WE SHOULD BE RETURNING
 # “Maturity” : “early maturity”, “Season”: “winter”
 
@@ -36,40 +33,24 @@ class CropNerGUI:
     def __init__(self):
         # Create a GUI window
         self.rootWin = tk.Tk()
-        #self.rootWin.option_add('*Font', 'Times 24')
+        # self.rootWin.option_add('*Font', 'Times 24')
         self.rootWin.title("GEMS NER Annotation Tool")
         self.rootWin.geometry('1500x900')
 
+        self.model_dir = None
         self.content=[""]
-
         self.tags=["highlight","default_color_tag","ALAS","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
         self.colors=["gray","black","violet","lawn green","deep sky blue","yellow","red","orange","pink","brown","MediumPurple1"]
-
         self.tag_colors_buttonID = {}
         self.crop_cnt = {}
         self.cvar_cnt = {}
 
-        # allows default options for model and file for when the GUI is run, the first arg is the model path and the second arg is the file path
-        if len(sys.argv) >= 2:
-            self.model_dir = sys.argv[1]
-        else:
-            self.model_dir = None
-
-        if len(sys.argv) >= 3:
-            self.raw_file = sys.argv[2]
-            # flag to take care of loading pdfs from a default path which is a tiny bit different from loading a user selected path
-            self.default_file = True
-        else:
-            self.raw_file = None
-            self.default_file = False
-
-
+        self.raw_file = None
         self.annotation_file = None
         self.sentences = None
         self.annotation_dict = {}
         self.file_extension = None
         self.nlp_agdata = None
-        self.nlp_pos = spacy.load("en_core_web_lg") # spacy model to use for pos
 
         self.cust_ents_dict = {}
 
@@ -150,7 +131,6 @@ class CropNerGUI:
         # self.text.tag_configure("ALAS", background="violet")
         #
         # in one iteration but instead of 10 statements we will use a loop
-        # this code updates colors
         for tag, color_buttonID in self.tag_colors_buttonID.items():
             color = color_buttonID[0]
             if(tag != "highlight"):
@@ -273,7 +253,7 @@ class CropNerGUI:
         """ Add documentation"""
         self.font_size = str(int(self.font_size) + 1)
         self.text['font'] = "Times "+self.font_size
-
+        
 
     def font_minus(self):
         """ Add documentation"""
@@ -358,8 +338,8 @@ class CropNerGUI:
 
 
     def open_file(self, file_type):
-        self.default_file = False
         """ Get file from user. """
+
         # Clear warning message, if one exists
         self.msg.config(text="")
 
@@ -400,15 +380,13 @@ class CropNerGUI:
             else:
                 self.nlp_agdata = spacy.load(model_name)
 
+
             self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
 
 
     def LoadPDF(self):
         """ Get data from PDF file"""
-        if self.default_file or type(self.raw_file) is str:
-            pdf_file = open(self.raw_file, mode="rb")
-        else:
-            pdf_file = open(self.raw_file.name, mode="rb")
+        pdf_file = open(self.raw_file.name, mode="rb")
         pdfReader = PyPDF2.PdfFileReader(pdf_file)
         # num_pages = pdfReader.numPages
         # Get  page. NOTE, page number for PDF reader start with 0
@@ -466,101 +444,15 @@ class CropNerGUI:
                     self.text.insert(str(lineNo) + ".0", sent + '\n')
                     lineNo = lineNo + 1
 
-    def get_pos(self, ent, nlp):
-        '''
-        Proceses a given entity with rules that use pos tag data to expand the entity span if needed.
-
-        :param ent: entity to possibly expand span of
-        :param nlp: spacy model for pos tagging
-        :returns: entity, with an expanded span if needed
-        '''
-        doc = nlp(ent.sent.text)
-        if(len(doc[ent.start:ent.end]) > 0):
-            current_index = doc[ent.start:ent.end][0].i
-            label = ent.label_
-            # functions that contain rules to expand the entity's span
-            ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
-            ent = self.num_combine_ent(doc, current_index, ent, label)
-        return ent
-
-
-    def adj_combine_noun_ent(self, doc, current_index, ent, label):
-        '''
-        If the first token in an entity is a noun or proper noun, finds all adjectives proceeding the entity and expands the span to contain all of them.
-
-        :param doc: sentence entity belongs to passed through spacy model
-        :param current_index: index of first token in the doc
-        :param ent: entity to possibly expand span of
-        :param label: label of ent
-        :returns: entity, which has been expanded if needed
-        '''
-        if current_index >= 1:
-            current = doc[current_index]
-            left = doc[current_index-1]
-            pos_current = current.pos_
-            pos_left = left.pos_
-
-            if pos_current == "NOUN" or pos_current == "PROPN":
-                if pos_left == "ADJ":
-                        print("Adj expanding...")
-                        print("entity: "+ str(ent))
-                        i = current_index
-                        start_index = ent.start
-                        # keeps searching until all adjectives are found, for nouns described by mutiple entities
-                        while i >= 1:
-                            i = i - 1
-                            if doc[i].pos_ == "ADJ":
-                                start_index = i
-                            else:
-                                break
-                        first_tok = doc[start_index]
-                        ent = doc[first_tok.i:ent.end]
-                        ent.label_ = label
-                        print("new: " + str(ent))
-                        print("label: " + str(ent.label_))
-                        print()
-        return ent
-
-    def num_combine_ent(self, doc, current_index, ent, label):
-        '''
-        If the first token in an entity is a noun, proper noun, or adjective, finds expands the span to include a numerical measurment that comes before the entity. The measurment is found by seeing if it conforms to the format num-noun-entity. So, "30 mg wheat" would be fulfill the rule but "12 wheat" would not.
-
-        :param doc: sentence entity belongs to passed through spacy model
-        :param current_index: index of first token in the doc
-        :param ent: entity to possibly expand span of
-        :param label: label of ent
-        :returns: entity, which has been expanded if needed
-        '''
-        if current_index >= 2:
-            current = doc[current_index]
-            left = doc[current_index-1]
-            left_left = doc[current_index-2]
-            pos_current = current.pos_
-            pos_left = left.pos_
-            pos_left_left = left_left.pos_
-            if pos_current == "ADJ" or pos_current == "NOUN" or pos_current == "PROPN" :
-                if pos_left == "PROPN" or pos_left == "NOUN":
-                    if pos_left_left == "NUM":
-                        print("Num expanding...")
-                        print("entity: " + str(ent))
-                        ent = doc[left_left.i:ent.end]
-                        ent.label_ = label
-                        print("new: " + str(ent))
-                        print("label: " + str(ent.label_))
-                        print()
-        return ent
-
 
     def pre_tag(self, selection):
         """ Pre-tag selected content or all the text in text box with NER tags. """
-        print("\n\nTagging new pdf...\n")
 
         # Clear warning message, if one exists
         self.msg.config(text="")
         if self.model_dir is None:
             self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
-        # modified this so the error is not displayed when selection is eqaul to page in order for the pre-tag page feature to be able to work properly
-        elif len(self.text.tag_ranges("sel")) == 0 and selection == "Selection":
+        elif len(self.text.tag_ranges("sel")) == 0:
             self.msg.config(text="Warning!! No text was selected.", foreground="red")
         else:
             # Reset annotation dictionary
@@ -593,10 +485,9 @@ class CropNerGUI:
                     lineNo_str = str(lineNo)
                     input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
                     doc = self.tag_ner_with_spacy(input_text)
+
                     for ent in doc.ents:
                         if (ent.label_ in self.tags):
-                            # does pos tagging and expaning the ent span if needed
-                            ent = self.get_pos(ent, self.nlp_pos)
                             # Add tag to crop or cvar if it is one of the two.
                             ent_value = input_text[ent.start_char:ent.end_char].strip().lower()
                             if(ent.label_ == 'CROP'):
@@ -739,10 +630,10 @@ class CropNerGUI:
             data = json_2_dict(self.annotation_file.name)
             train_data = dict_2_mixed_type(data)
 
-            # Delete contents and reset line number
+            # Delete contents and reset line number 
             self.text.delete(1.0, tk.END)
             lineNo = 1
-
+            
             # Review annotation
             for annotation in train_data:
                 sentence = annotation[0]
@@ -757,9 +648,9 @@ class CropNerGUI:
                     else:
                         self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
                 lineNo = lineNo + 1
-
+                
             # Below is code I had started writing to highlight a PDF file if it has an annotation. Code is not
-            # working. Needs to be fixed.
+            # working. Needs to be fixed. 
 
             '''
             page_num = self.pageEntry.get()
@@ -775,7 +666,7 @@ class CropNerGUI:
                 entities = annotation[1]['entities']
                 self.annotation_dict[sentence]= entities
 
-
+            
 
             # Reset dictionary containing current annotations
             new_cust_ents_dict = {}
@@ -962,11 +853,11 @@ class CropNerGUI:
         It destroys the main window, which ends the program"""
 
         '''
-        # This seemed like a good idea to save the annotation file everytime
-        # the application quit, just in case the user forgot to save. However,
+        # This seemed like a good idea to save the annotation file everytime 
+        # the application quit, just in case the user forgot to save. However, 
         # when testing a ton of unnecessary files were being generated. We will comment
-        # this out for now and if this features becomes necessary in the future, we can
-        # just uncomment.
+        # this out for now and if this features becomes necessary in the future, we can 
+        # just uncomment.  
         if(self.raw_file is not None):
             # Save current annotation
             self.file_save()

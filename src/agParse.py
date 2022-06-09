@@ -29,7 +29,7 @@ def trat_adj_entities(doc):
     # CAVEAT: we still need to do deal with TRAT (be) ADJ (e.g., 'its protein levels are low')
     new_ents = []
     for ent in doc.ents:
-        # this line has been changed to make sure the index is within bounds to not throw an error on the pdfs where that use to happen 
+        # this line has been changed to make sure the index is within bounds to not throw an error on the pdfs where that use to happen
         if ent.label_ in ('TRAT') and len(doc) - 1 >= ent.start + 1:
             next_token = doc[ent.start + 1]
                 # print('DEBUG: ', ent.text, ent.start, ent.label_, next_token.text, next_token.pos_, next_token.dep_)
@@ -150,7 +150,6 @@ def compound_trait_entities(doc):
     doc = adj_ent_entities(doc)
     doc = plan_adj_entities(doc)
     doc = trat_adj_entities(doc)
-
     # Spacy3 seems to be doing really well extracting PEDS and Journals. Comment out
     # part of the custom component that fixes PED and JRNL for now.
     #doc = add_ped_jrnl_entities(doc)
