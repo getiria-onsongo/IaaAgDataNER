@@ -1,0 +1,132 @@
+# Move NER working space (repo containing this code)
+cd IaaAgDataNER
+
+# For some reason download spacy using conda is not working correctly.
+# pip appears to work with no problems.
+pip3 install -U pip setuptools wheel
+pip3 install -U spacy
+
+# Download language models
+python3 -m spacy download en_core_web_sm
+python3 -m spacy download en_core_web_md
+python3 -m spacy download en_core_web_lg
+
+# Install transformer package. It is sometimes using in training
+pip3 install spacy-transformers
+
+# Install scikit-learn
+pip3 install -U scikit-learn
+pip3 install -U PyPDF2
+
+
+# Take as input a folder containing raw json files and convert them into
+# jsonl format used by Spacy
+path_to_src=/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/src/
+cd /Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER
+python3 src/json2SpacyJson.py Data ner_2021_08 en_core_web_lg --suffix '.json' --split True --test_size 0.1
+
+# Create directory. Spacy program to convert jsonl to Spacy format needs an output directory
+mkdir ner_2021_08
+
+# Convert to spacy binary format
+python3 -m spacy convert --converter json ner_2021_08_training_data.jsonl ner_2021_08
+python3 -m spacy convert --converter json ner_2021_08_validate_data.jsonl ner_2021_08
+
+# Create a config file to use for training
+# --lang: Two-letter code of the language to use
+# --pipeline: Comma-separated names of trainable pipeline components to include [default: tagger,parser,ner]
+# --optimize: Whether to optimize for efficiency or accuracy
+# --force: Overwrite output file if it exists
+# train.cfg:
+# python3 -m spacy init config --lang en  --optimize accuracy --force train.cfg
+
+python3 -m spacy init config --lang en --pipeline ner  --optimize accuracy --force ner.cfg
+
+# NOTE: If you just have ner in the pipeline as below, you will not get things such as POS which
+# we need. Ensure tagger and parser are in the pipeline you are training, add the following lines
+# to include other components in the pipeline. Another side note, "attribute_ruler" is the one
+# that creates POS in SpaCY 3.
+pipeline = ["tok2vec","tagger","parser","attribute_ruler","lemmatizer","ner"]
+
+[components.tagger]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+[components.parser]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+[components.attribute_ruler]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+[components.lemmatizer]
+source = "en_core_web_lg"
+replace_listeners = ["model.tok2vec"]
+
+frozen_components = ["tagger","parser","attribute_ruler","lemmatizer"]
+
+# Train a model
+python3 -m spacy train ner.cfg --output ner_2021_08_model --paths.train ner_2021_08/ner_2021_08_training_data.spacy --paths.dev ner_2021_08/ner_2021_08_validate_data.spacy
+
+
+# Start GUI and select "ner_2021_08_model/model-best" as the model
+python3 src/CropNerGUI.py
+
+
+# To remove an environment
+conda remove --name ner_june_2021 --all -y
+
+# Convert JSON to CSV
+path_to_src=/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/src/
+python3 $path_to_src/json2csv.py AnnotatedData BarCvDescLJ11.csv
+
+# POSTGRESQL
+# To create a database run the command below from the terminal. This creates the
+# database ner
+> createdb ner
+
+# Log in
+psql -h localhost -d ner
+
+# Exit postgreSQL then create tables (relations)
+> path_to_sql=/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/src/CreateTables.sql
+> psql -h localhost -d ner -f $path_to_sql
+
+# Log into PostgreSQL and load raw data.
+psql -h localhost -d ner
+\COPY raw_data FROM '/Users/gonsongo/Desktop/BarCvDescLJ11/BarCvDescLJ11.csv' DELIMITER ',' CSV HEADER;
+
+# Create CSV files from raw_data
+\COPY (SELECT DISTINCT crop_name FROM raw_data) to 'crop.csv' CSV;
+\COPY (SELECT DISTINCT doc_name, url FROM raw_data) to 'document.csv' CSV;
+\COPY (SELECT DISTINCT cvar, crop_name FROM raw_data) to 'crop_variety.csv' CSV;
+\COPY (SELECT DISTINCT id, chunk, doc_name, cvar FROM raw_data) to 'cvar_data_source.csv' CSV;
+\COPY (SELECT DISTINCT id, label FROM raw_data) to 'ner_tag.csv' CSV;
+\COPY (SELECT DISTINCT value, id, label FROM raw_data) to 'crop_attribute.csv' CSV;
+
+# Load data to tables
+\COPY crop FROM 'crop.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY document FROM 'document.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY crop_variety FROM 'crop_variety.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY cvar_data_source FROM 'cvar_data_source.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY ner_tag FROM 'ner_tag.csv' DELIMITER ',' QUOTE '"' CSV;
+\COPY crop_attribute FROM 'crop_attribute.csv' DELIMITER ',' QUOTE '"' CSV;
+
+# Create indexes to help views. If queries using views start slowing down, consider
+# materialized views
+CREATE INDEX crop_attribute_id_idx ON crop_attribute USING BTREE(id);
+
+# Create view
+CREATE VIEW crop_data AS
+SELECT DISTINCT crop_name, cvar, label, value FROM
+(SELECT crop_name, cvar, id FROM crop_variety JOIN cvar_data_source USING(cvar)) A
+JOIN
+crop_attribute B
+USING(ID);
+
+select value from crop_data where crop_name = 'barley' and cvar = 'strider' and label = 'TRAT';
+
+
+
+

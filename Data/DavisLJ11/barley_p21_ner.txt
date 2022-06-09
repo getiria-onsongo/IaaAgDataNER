@@ -1,0 +1,117 @@
+2	Crop Science 24:1210 (1984)	JRNL
+3	Heavyweight	CVAR
+3	two-rowed	TRAT
+3	spring	TRAT
+3	feed	TRAT
+3	barley	CROP
+4	Greenway Seeds, Idaho	ORG
+5	PB 29	ALAS
+6	maturing	TRAT
+6	plant height	TRAT
+6	straw strength	TRAT
+8	Hector	CVAR
+8	two-rowed	TRAT
+8	spring	TRAT
+8	feed	TRAT
+8	barley	CROP
+9	Agriculture Canada	ORG
+9	Lethbridge, Alberta	GPE
+9	1973	DATE
+10	Betzes/Palliser	PED
+11	maturing	TRAT
+11	plant height	TRAT
+11	straw strength	TRAT
+12	Hector	CVAR
+12	awn	PLAN
+12	aleurone	PLAN
+12	crease	PLAN
+13	kernel	PLAN
+13	rachilla	PLAN
+13	hairs	PLAN
+16	Hockett	CVAR
+16	two-rowed	TRAT
+16	spring	TRAT
+16	malting	TRAT
+16	barley	CROP
+17	Montana AES	ORG
+17	2008	DATE
+18	ND7293/Bearpaw	PED
+19	Harrington	CVAR
+19	Hockett	CVAR
+19	yield	TRAT
+19	malt quality	TRAT
+20	plant height	TRAT
+20	straw strength	TRAT
+20	lodging	TRAT
+21	susceptible	PPTD
+21	stripe rust	PATH
+23	Horsford	CVAR
+23	six-rowed	TRAT
+23	spring	TRAT
+23	hooded	TRAT
+23	forage	TRAT
+23	barley	CROP
+28	maturing	TRAT
+28	tall	TRAT
+28	lodging	TRAT
+29	basal rachis internode	PLAN
+30	rachis	PLAN
+30	edges	PLAN
+31	spike	PLAN
+32	lemma	PLAN
+33	glume awn	PLAN
+33	glume	PLAN
+34	Glumes	PLAN
+34	lemma	PLAN
+34	hairs	PLAN
+35	rachilla	PLAN
+36	Kernels	PLAN
+36	hulls	PLAN
+40	Idagold	CVAR
+40	two-rowed	TRAT
+40	spring	TRAT
+40	feed	TRAT
+40	barley	CROP
+41	Coors Brewing Company	ORG
+41	1993	DATE
+42	maturing	TRAT
+42	short	TRAT
+42	stiff-straw	TRAT
+43	test weight	TRAT
+43	feed quality	TRAT
+44	moderately resistant	PPTD
+44	BYD	PATH
+44	moderately susceptible	PPTD
+44	stripe rust	PATH
+47	Idagold 2	CVAR
+47	two-rowed	TRAT
+47	spring	TRAT
+47	feed	TRAT
+47	barley	CROP
+48	Coors Brewing Company	ORG
+48	2001	DATE
+49	C32	ALAS
+50	maturing	TRAT
+50	Idagold	CVAR
+50	short	TRAT
+50	stiff-straw	TRAT
+51	height	TRAT
+51	Idagold	CVAR
+51	straw strength	TRAT
+52	test weight	TRAT
+52	Idagold	CVAR
+54	Jersey	CVAR
+54	two-rowed	TRAT
+54	spring	TRAT
+54	feed	TRAT
+54	barley	CROP
+55	Western Plant Breeders	ORG
+55	Cebeco Seeds	ORG
+56	Apex/Alexis	PED
+57	Cebeco 9538	ALAS
+58	maturing	TRAT
+58	plant height	TRAT
+58	straw strength	TRAT
+59	resistant	PPTD
+59	stripe rust	PATH
+59	BYD	PATH

@@ -1,0 +1,145 @@
+1	Devora	CVAR
+1	two-rowed	TRAT
+1	winter	TRAT
+1	feed	TRAT
+1	barley	CROP
+2	Cebeco Seeds	ORG
+2	Netherlands	GPE
+3	Mosar x E82011-8805 x Magie	PED
+5	maturing	TRAT
+5	straw strength	TRAT
+6	resistant	PPTD
+6	net blotch	PATH
+6	stripe rust	PATH
+6	leaf rust	PATH
+9	Gwen	CVAR
+9	six-rowed	TRAT
+9	winter	TRAT
+9	feed	TRAT
+9	barley	CROP
+10	Oregon AES	ORG
+10	1991	DATE
+11	Ohio 67-23/Lakeland	PED
+12	ORFB 77796	ALAS
+13	headed	TRAT
+13	maturing	TRAT
+13	height	TRAT
+13	lodging resistance	TRAT
+13	winter hardiness	TRAT
+13	Boyer	CVAR
+15	tolerant	PPTD
+15	BYD	PATH
+15	moderately susceptible	PPTD
+15	scald	PATH
+15	susceptible	PPTD
+15	stripe rust	PATH
+17	Hesk	CVAR
+17	six-rowed	TRAT
+17	winter	TRAT
+17	feed	TRAT
+17	barley	CROP
+18	Oregon AES	ORG
+18	1980	DATE
+19	Ione/Luther	PED
+20	maturity	TRAT
+20	height	TRAT
+20	lodging resistance	TRAT
+20	winter hardiness	TRAT
+22	Spikes	PLAN
+23	Rachis edge hairs	PLAN
+24	Awns	PLAN
+25	Glumes	PLAN
+25	hairs	PLAN
+26	glume awn	PLAN
+26	glume length	TRAT
+27	Hulls	PLAN
+28	kernel	PLAN
+29	Aleurone	PLAN
+30	Rachilla hairs	PLAN
+31	Kernel veins	PLAN
+31	lateral veins	PLAN
+32	crease	PLAN
+33	susceptible	PPTD
+33	scald	PATH
+33	BYD	PATH
+33	covered smut	PATH
+33	stripe rust	PATH
+35	Hoody	CVAR
+35	six-rowed	TRAT
+35	winter	TRAT
+35	forage	TRAT
+35	barley	CROP
+36	Oregon AES	ORG
+36	1995	DATE
+37	Dicktoo/Cascade//Hiproly	PED
+42	Fbw1001hdd	ALAS
+43	winter hardy	TRAT
+43	BYD tolerance	TRAT
+44	tall	TRAT
+44	maturity	TRAT
+44	straw strength	TRAT
+45	spike	PLAN
+46	rachis	PLAN
+47	collar	PLAN
+48	glume	PLAN
+49	rachis edge	PLAN
+49	hairs	PLAN
+50	kernel	PLAN
+51	Lemma nerves	PLAN
+52	Rachilla hairs	PLAN
+53	hull	PLAN
+54	aleurone	PLAN
+55	moderately resistant	PPTD
+55	scald	PATH
+55	moderately susceptible	PPTD
+55	net blotch	PATH
+55	susceptible	PPTD
+55	stripe rust	PATH
+55	leaf rust	PATH
+58	Hundred	CVAR
+58	six-rowed	TRAT
+58	winter	TRAT
+58	feed	TRAT
+58	barley	CROP
+59	Washington Agricultural Research Center	ORG
+59	Idaho and Oregon AESs	ORG
+59	1989	DATE
+60	Luther/Hudson//Alpine/Svalof//White Winter/Triple Bearded Mariout-305	PED
+62	WA 066739	ALAS
+62	WA1574-77	ALAS
+63	semi-dwarf	TRAT
+63	height	TRAT
+63	maturity	TRAT
+64	shorter	TRAT
+64	Boyer	CVAR
+64	maturity	TRAT
+64	lodging resistance	TRAT
+64	winter-hardiness	TRAT
+66	spikes	PLAN
+66	awns	PLAN
+67	kernels	PLAN
+67	hulls	PLAN
+67	aleurone	PLAN
+67	rachilla hairs	PLAN
+67	veins	PLAN
+68	crease	PLAN
+68	awn	PLAN
+69	resistant	PPTD
+69	scald	PATH
+69	Cephalosporium stripe	PATH
+69	powdery mildew	PATH
+69	Kamiak	CVAR
+69	Boyer	CVAR
+69	Showin	CVAR
+69	moderately resistant	PPTD
+69	BYD	PATH
+69	susceptible	PPTD
+69	stripe rust	PATH
+71	Crop Science 31(1): 227 (1991)	JRNL
+72	Kamiak	CVAR
+72	six-rowed	TRAT
+72	winter	TRAT
+72	feed	TRAT
+72	barley	CROP
+73	Washington, Idaho and Oregon AESs	ORG
+73	1971	DATE

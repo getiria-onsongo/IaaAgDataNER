@@ -1,0 +1,30 @@
+# Move to working directory
+> cd /Users/gonsongo/Desktop/research/gems/IaaAgDataNER
+
+# Update conda
+> conda update -n base -c defaults conda -y
+
+# Create virtual env. Some of Spacy's packages seem to be
+# have issues with Python 3.8 or higher. Everything worked just fine
+# with 3.7 so I am reverting to 3.7
+> conda create -n ner python=3.7 -y
+
+# Activate conda environment
+> conda activate ner
+
+# Install spacy
+> conda install -c conda-forge spacy -y
+> conda install -c conda-forge pypdf2 -y
+> conda install -c conda-forge  scikit-learn -y
+> conda install -c conda-forge spacy-transformers -y
+
+> python3 -m spacy download en_core_web_trf
+> python3 -m spacy download en_core_web_sm
+> python3 -m spacy download en_core_web_lg
+
+# Start GUI
+> python3 src/CropNerGUI.py
+
+
+# Decactivate conda env
+> conda deactivate

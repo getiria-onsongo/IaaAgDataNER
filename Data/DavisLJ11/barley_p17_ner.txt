@@ -1,0 +1,151 @@
+0	tall	TRAT
+0	height	TRAT
+0	Stander	CVAR
+0	Robust	CVAR
+0	straw strength	TRAT
+0	Foster	CVAR
+1	maturing	TRAT
+1	heading date	TRAT
+1	Robust	CVAR
+2	Drummond	CVAR
+2	awns	PLAN
+2	kernels	PLAN
+2	rachilla hairs	PLAN
+2	aleurone	PLAN
+3	Spikes	PLAN
+4	kernels	PLAN
+4	malt extract	TRAT
+4	Morex	CVAR
+5	Grain protein	TRAT
+5	wort protein	TRAT
+5	ratio of wort protein to total protein	TRAT
+5	Drummond	CVAR
+6	Morex	CVAR
+7	Enzymatic activity	TRAT
+7	Drummond	CVAR
+7	Morex	CVAR
+8	Drummond	CVAR
+8	resistant	PPTD
+8	spot blotch	PATH
+8	moderately susceptible	PPTD
+8	stem rust	PATH
+8	net blotch	PATH
+8	BYD	PATH
+8	susceptible	PPTD
+8	loose smut	PATH
+8	scald	PATH
+8	Septoria sp	PATH
+8	Fusarium spp	PATH
+10	Crop Science 42: 664-665 (2002)	JRNL
+11	Early 28	CVAR
+11	six-rowed	TRAT
+11	spring	TRAT
+11	feed	TRAT
+11	barley	CROP
+12	University of Arizona	ORG
+14	80-MA-666-172	ALAS
+15	maturing	TRAT
+18	Early 32	CVAR
+18	six-rowed	TRAT
+18	spring	TRAT
+18	feed	TRAT
+18	barley	CROP
+19	University of Arizona	ORG
+21	80-MA-666-173	ALAS
+22	maturing	TRAT
+22	plant height	TRAT
+22	straw strength	TRAT
+23	moderately resistant	PPTD
+23	net blotch	PATH
+23	moderately susceptible	PPTD
+23	leaf rust	PATH
+23	susceptible	PPTD
+23	scald	PATH
+23	BYD	PATH
+23	powdery mildew	PATH
+26	Ellinor	CVAR
+26	two-rowed	TRAT
+26	spring	TRAT
+26	malting	TRAT
+26	feed	TRAT
+26	barley	CROP
+27	UC Davis	ORG
+27	1999	DATE
+28	maturing	TRAT
+28	plant height	TRAT
+28	straw strength	TRAT
+29	moderately susceptible	PPTD
+29	BYD	PATH
+32	Excel	CVAR
+32	six-rowed	TRAT
+32	spring	TRAT
+32	malting	TRAT
+32	barley	CROP
+33	Minnesota AES	ORG
+33	1990	DATE
+34	Cree/Bonanza//Manker/3/2*Robust	PED
+35	MN 52	ALAS
+36	maturing	TRAT
+36	Robust	CVAR
+36	mid-tall	TRAT
+36	Morex	CVAR
+36	straw strength	TRAT
+36	lodging	TRAT
+37	Spikes	PLAN
+38	Excel	CVAR
+38	smooth-awns	PLAN
+38	kernels	PLAN
+38	hairs	PLAN
+38	rachilla	PLAN
+38	aleurone	PLAN
+39	Hulls	PLAN
+40	lateral veins	PLAN
+41	barbs	PLAN
+41	lateral veins	PLAN
+42	crease	PLAN
+42	base	PLAN
+42	beard	PLAN
+43	Lateral kernels	PLAN
+44	Excel	CVAR
+44	malting quality	TRAT
+44	Morex	CVAR
+45	resistant	PPTD
+45	stem rust	PATH
+45	spot blotch	PATH
+45	moderately resistant	PPTD
+45	net blotch	PATH
+45	susceptible	PPTD
+45	loose smut	PATH
+47	Crop Science 31:227 (1991)	JRNL
+47	Farmington	CVAR
+47	two-rowed	TRAT
+47	spring	TRAT
+47	feed	TRAT
+47	barley	CROP
+48	Washington State University Agricultural Research Center	ORG
+48	Idaho and Oregon AESs	ORG
+48	USDA-ARS	ORG
+48	2001	DATE
+49	Klages/WA8189-69//Piroline SD Mutant/Valticky SD Mutant/3/Maresi	PED
+50	WA9504-94	ALAS
+52	plant height	TRAT
+53	Baronesse	CVAR
+53	straw strength	TRAT
+54	maturity	TRAT
+54	Baronesse	CVAR
+55	Spikes	PLAN
+56	Awns	PLAN
+57	Kernels	PLAN
+57	aleurone	PLAN
+57	rachilla hairs	PLAN
+57	crease	PLAN
+57	veins	PLAN
+57	lemma	PLAN
+57	palea	PLAN
+58	Kernels	PLAN
+59	resistant	PPTD
+59	leaf rust	PATH
+59	partial resistance	PPTD
+59	tolerance	PPTD
+59	stripe rust	PATH
+61	Crop Science 42:2209-2210 (2002)	JRNL

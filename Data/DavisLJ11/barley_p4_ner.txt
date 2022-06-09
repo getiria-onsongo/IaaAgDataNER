@@ -1,0 +1,171 @@
+1	Millennium	CVAR
+1	erect-growing	TRAT
+1	semi-dwarf	TRAT
+2	plant height	TRAT
+2	straw strength	TRAT
+2	early to midseason maturity	TRAT
+3	Steptoe	CVAR
+4	Spikes	PLAN
+4	lateral kernels	PLAN
+4	head	PLAN
+5	Rachis edges	PLAN
+5	hairs	PLAN
+6	Millennium	CVAR
+6	leaves	PLAN
+6	spikes	PLAN
+7	Glumes	PLAN
+7	glume awns	PLAN
+8	Glumes	PLAN
+8	hairs	PLAN
+9	Lemma awns	PLAN
+10	seed	PLAN
+10	rachilla hairs	PLAN
+10	base	PLAN
+11	Aleurone	PLAN
+12	stems	PLAN
+12	spikes	PLAN
+12	collar	PLAN
+12	base	PLAN
+13	resistant	PPTD
+13	loose smut	PATH
+13	covered smut	PATH
+13	moderately susceptible	PPTD
+13	powdery mildew	PATH
+13	susceptible	PPTD
+13	stripe rust	PATH
+13	BYD	PATH
+15	Crop Science 42:665-666 (2002)	JRNL
+15	Pinnacle	CVAR
+15	two-rowed	TRAT
+15	spring	TRAT
+15	malting	TRAT
+15	barley	CROP
+16	North Dakota AES	ORG
+16	2006	DATE
+17	ND18172/ND19130	PED
+18	yielding	TRAT
+18	protein	TRAT
+18	accumulates about 40% less DON	TRAT
+18	Robust	CVAR
+19	Pinnacle	CVAR
+19	quality	TRAT
+20	Conlon	CVAR
+20	Pinnacle	CVAR
+20	protein	TRAT
+20	kernels	PLAN
+21	Pinnacle	CVAR
+21	resistance	PPTD
+21	spot blotch	PATH
+21	Conlon	CVAR
+21	Lacey	CVAR
+21	Drummond	CVAR
+22	Pinnacle	CVAR
+22	hull	PLAN
+22	rachilla hairs	PLAN
+22	awns	PLAN
+22	aleurone	PLAN
+22	maturity	TRAT
+22	height	TRAT
+22	straw strength	TRAT
+23	moderately resistant	PPTD
+23	spot blotch	PATH
+23	moderately susceptible	PPTD
+23	net blotch	PATH
+23	susceptible	PPTD
+23	stem rust	PATH
+23	loose smut	PATH
+25	Solar	CVAR
+25	six-rowed	TRAT
+25	spring	TRAT
+25	feed	TRAT
+25	barley	CROP
+26	Arizona AES	ORG
+26	2006	DATE
+28	Entry 2	ALAS
+29	winter	TRAT
+29	water use	TRAT
+29	Southwestern United States	GPE
+29	Arizona	GPE
+30	early maturing	TRAT
+30	Solum	CVAR
+31	tall	TRAT
+31	plant height	TRAT
+31	Solum	CVAR
+31	erect early growth	TRAT
+31	straw strength	TRAT
+32	spikes	PLAN
+32	awns	PLAN
+33	glumes	PLAN
+33	lemma	PLAN
+33	hairs	PLAN
+34	glume awns	PLAN
+34	glumes	PLAN
+35	Kernels	PLAN
+35	hulls	PLAN
+36	susceptible	PPTD
+36	stripe rust	PATH
+36	scald	PATH
+38	Arizona AES	ORG
+38	2006	DATE
+38	Stellar-ND	CVAR
+38	six-rowed	TRAT
+38	spring	TRAT
+38	malting	TRAT
+38	barley	CROP
+39	North Dakota AES	ORG
+39	2006	DATE
+40	Foster//ND12200/6B88-3213	PED
+41	awns	PLAN
+41	kernels	PLAN
+41	rachilla hairs	PLAN
+41	aleurone	PLAN
+42	shorter	TRAT
+42	Drummond	CVAR
+43	straw	PLAN
+43	Robust	CVAR
+44	resistant	PPTD
+44	spot blotch	PATH
+44	wheat stem rust	PATH
+44	Pgt-QCC	PATH
+44	moderately susceptible	PPTD
+44	net blotch	PATH
+44	susceptible	PPTD
+44	loose smut	PATH
+46	Crop Sci 46(2):980	JRNL
+48	Steptoe	CVAR
+48	six-rowed	TRAT
+48	spring	TRAT
+48	feed	TRAT
+48	barley	CROP
+49	Washington State University	ORG
+49	1973	DATE
+50	WA 3564/Unitan	PED
+50	1959	DATE
+51	6428-66	CVAR
+51	1966	DATE
+52	1972	DATE
+53	WA6428-66	ALAS
+54	Steptoe	CVAR
+54	tall	TRAT
+54	lodging	TRAT
+54	maturity	TRAT
+55	fall-seeded	TRAT
+56	spikes	PLAN
+56	awns	PLAN
+57	Kernels	PLAN
+57	aleurone	PLAN
+57	rachilla hairs	PLAN
+58	eastern Washington	GPE
+58	Idaho	GPE
+58	eastern Oregon	GPE
+58	Montana	GPE
+60	moderately resistant	PPTD
+60	powdery mildew	PATH
+60	moderately susceptible	PPTD
+60	scald	PATH
+60	leaf rust	PATH
+60	susceptible	PPTD
+60	net blotch	PATH
+60	BYD	PATH
+60	stripe rust	PATH
+62	Crop Science 13:770 (1973)	JRNL

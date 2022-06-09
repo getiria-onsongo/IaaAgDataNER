@@ -1,0 +1,138 @@
+1	Dayn	CVAR
+1	yielding	TRAT
+1	hard	TRAT
+1	white	TRAT
+1	spring	TRAT
+1	wheat	CROP
+2	Test weight	TRAT
+2	heading date	TRAT
+3	Protein	TRAT
+4	Dayn	CVAR
+4	taller	TRAT
+4	lodging resistance	TRAT
+5	End use	TRAT
+6	Dayn	CVAR
+6	resistant	PPTD
+6	stripe rust	PATH
+6	susceptible	PPTD
+6	hard	TRAT
+6	white	TRAT
+6	spring	TRAT
+6	wheat	CROP
+6	FHB	PATH
+7	Duclair	CVAR
+8	hard	TRAT
+8	red	TRAT
+8 	spring	TRAT
+8	Montana AES	ORG
+8	solid stem	TRAT
+8	wheat stem sawfly	PATH
+9	wheat stem sawfly	PATH
+10	Duclair	CVAR
+10	awned	TRAT
+10	semi-dwarf	TRAT
+10	Choteau	CVAR
+10	heading	TRAT
+10	taller	TRAT
+11	Yield	TRAT
+11	Duclair	CVAR
+11	Soda Springs	GPE
+11	2019	DATE
+11	SY Selway	CVAR
+11	test weight	TRAT
+11	protein	TRAT
+11	heading date	TRAT
+12	Duclair	CVAR
+13	Glee	CVAR
+13	WA8074	ALAS
+13	hard	TRAT
+13	red	TRAT
+13	spring	TRAT
+13	wheat	CROP
+13	2012	DATE
+13	Washington State University	ORG
+13	end use quality	TRAT
+13	resistance	PPTD
+13	stripe rust	PATH
+14	Glee	CVAR
+15	Yield	TRAT
+15	Glee	CVAR
+15	WB9411	CVAR
+16	Glee	CVAR
+16	test weight	TRAT
+16	taller	TRAT
+16	WB9411	CVAR
+16	protein	TRAT
+17	Imperial	CVAR
+18	durum	TRAT
+18	grain	PLAN
+18	awns	PLAN
+18	black	TRAT
+18	Imperial	CVAR
+18	yields	TRAT
+18	Alzada	CVAR
+19	Imperial	CVAR
+19	test weight	TRAT
+19	grain	PLAN
+19	protein	TRAT
+20	Jefferson	CVAR
+20	IDO462	ALAS
+21	hard	TRAT
+21	red	TRAT
+21	spring	TRAT
+21	wheat	CROP
+21	Idaho AES	ORG
+21	USDA-ARS	ORG
+21	1998	DATE
+22	Jefferson	CVAR
+22	taller	TRAT
+22	susceptible to lodging	TRAT
+23	yields	TRAT
+25	Jefferson	CVAR
+25	quality	TRAT
+25	grain	PLAN
+25	protein	TRAT
+26	Jefferson	CVAR
+26	susceptible	PPTD
+26	stripe rust	PATH
+26	FHB	PATH
+26	resistant	PPTD
+26	Hessian Fly	PATH
+27	Klasic	CVAR
+27	NK77S1817	ALAS
+28	hard	TRAT
+28	white	TRAT
+28	spring	TRAT
+28	wheat	CROP
+28	quality	TRAT
+29	Klasic	CVAR
+29	1982	DATE
+29	Northrup-King	ORG
+29	yields	TRAT
+30	Klasic	CVAR
+30	test weight	TRAT
+30	shorter	TRAT
+30	heading	TRAT
+30	maturity	TRAT
+31	Klasic	CVAR
+31	susceptible	PPTD
+31	stripe rust	PATH
+31	FHB	PATH
+31	Cereal Cyst nematode	PATH
+32	FHB	PATH
+32	heading	TRAT
+32	2016	DATE
+33	flowering	TRAT
+33	Klasic	CVAR
+34	Klasic	CVAR
+34	seeding rates	TRAT
+34	yield	TRAT
+35	Klasic	CVAR
+36	seeding	TRAT
+37	yield	TRAT
+37	seeding rates	TRAT
+38	Net CL+	CVAR
+38	WA8280 CL+	ALAS
+39	2019	DATE
+39	Washington State University	ORG
+39	Net CL+	CVAR

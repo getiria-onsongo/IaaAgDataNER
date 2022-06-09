@@ -1,0 +1,168 @@
+2	Spikes	PLAN
+3	awns	PLAN
+4	Glumes	PLAN
+4	hairs	PLAN
+4	glume awn	PLAN
+4	glume	PLAN
+5	Hulls	PLAN
+6	rachilla hairs	PLAN
+6	aleurone	PLAN
+7	Lateral veins	PLAN
+7	central vein	PLAN
+7	germ	PLAN
+7	kernel	PLAN
+8	barbs	PLAN
+8	lateral veins	PLAN
+9	crease	PLAN
+9	base	PLAN
+10	Kernels	PLAN
+11	Lateral kernels	PLAN
+12	resistant	PPTD
+12	stem rust	PATH
+12	tolerant	PPTD
+12	BYD	PATH
+12	moderately susceptible	PPTD
+12	spot blotch	PATH
+12	net blotch	PATH
+12	loose smut	PATH
+12	susceptible	PPTD
+12	Septoria leaf blotch	PATH
+12	powdery mildew	PATH
+14	Crop Science 4:239 (1964)	JRNL
+15	Legacy	CVAR
+15	six-rowed	TRAT
+15	spring	TRAT
+15	malting	TRAT
+15	barley	CROP
+16	Busch Agricultural Resources	ORG
+16	2000	DATE
+17	6B86-3517/Excel	PED
+17	Bumper	CVAR
+17	Manker	CVAR
+17	Karl	CVAR
+17	Excel	CVAR
+18	6B93-2978	ALAS
+19	tall	TRAT
+19	lodging resistance	TRAT
+19	maturity	TRAT
+20	awns	PLAN
+20	rachilla hairs	PLAN
+20	aleurone	PLAN
+21	resistant	PPTD
+21	spot blotch	PATH
+21	net blotch	PATH
+21	resistance	PPTD
+21	Robust	CVAR
+22	susceptible	PPTD
+22	scald	PATH
+22	BYD	PATH
+22	stripe rust	PATH
+24	Lewis	CVAR
+24	two-rowed	TRAT
+24	spring	TRAT
+24	feed	TRAT
+24	malting	TRAT
+24	barley	CROP
+25	USDA-ARS	ORG
+25	Montana AES	ORG
+25	1985	DATE
+26	Hector/Klages	PED
+27	MT 547123	ALAS
+29	yields	TRAT
+29	Klages	CVAR
+29	malting quality	TRAT
+30	maturity	TRAT
+30	heads	TRAT
+30	Klages	CVAR
+31	kernels	PLAN
+31	height	TRAT
+31	lodging resistance	TRAT
+31	Klages	CVAR
+32	spikes	PLAN
+32	awns	PLAN
+33	Glume awns	PLAN
+33	glume	PLAN
+33	glumes	PLAN
+33	hairs	PLAN
+34	Rachis edges	PLAN
+34	hairs	PLAN
+35	hulls	PLAN
+35	barbs	PLAN
+35	lateral veins	PLAN
+35	rachilla	PLAN
+35	aleurone	PLAN
+36	crease	PLAN
+36	base	PLAN
+36	awn	PLAN
+37	tolerance	PPTD
+37	spot	PATH
+37	net blotch	PATH
+37	common root rot	PATH
+37	Klages	CVAR
+39	Crop Science 25:570-571 (1985)	PED
+41	Lindy	CVAR
+41	six-rowed	TRAT
+41	spring	TRAT
+41	feed	TRAT
+41	barley	CROP
+42	CENEX, Oregon	ORG
+43	maturing	TRAT
+43	plant height	TRAT
+43	straw strength	TRAT
+44	resistant	PPTD
+44	scald	PATH
+44	leaf rust	PATH
+44	susceptible	PPTD
+44	BYD	PATH
+46	Lud	CVAR
+46	two-rowed	TRAT
+46	spring	TRAT
+46	feed	TRAT
+46	barley	CROP
+47	North American Plant Breeders	ORG
+47	1975	ORG
+48	Vada/Zephyr//RMGH 59114	PED
+49	maturity	TRAT
+49	Klages	CVAR
+49	plant height	TRAT
+49	straw	PLAN
+50	awns	PLAN
+51	Glumes	PLAN
+51	hairs	PLAN
+52	Hulls	PLAN
+53	aleurone	PLAN
+54	Rachilla hairs	PLAN
+55	Veins	PLAN
+55	barbs	PLAN
+55	lateral veins	PLAN
+56	crease	PLAN
+56	kernel	PLAN
+56	awn	PLAN
+57	resistant	PPTD
+57	powdery mildew	PATH
+57	loose smut	PATH
+57	covered smut	PATH
+57	susceptible	PPTD
+57	scald	PATH
+57	stem rust	PATH
+57	net blotch	PATH
+57	spot blotch	PATH
+59	Madera	CVAR
+59	six-rowed	TRAT
+59	spring	TRAT
+59	feed	TRAT
+59	barley	CROP
+60	Western Plant Breeders	ORG
+60	1992	DATE
+62	DA 587- 71	ALAS
+63	maturing	TRAT
+63	plant height	TRAT
+63	straw strength	TRAT
+64	moderately resistant	PPTD
+64	scald	PATH
+64	net blotch	PATH
+64	BYD	PATH
+64	stripe rust	PATH
+64	powdery mildew	PATH
+64	moderately susceptible	PPTD
+64	leaf rust	PATH
