@@ -7,7 +7,6 @@ from functools import partial
 from json2py import *
 import os.path
 from py2json import *
-# import PyPDF2
 from pyxpdf import Document, Page, Config
 from pyxpdf.xpdf import TextControl
 import re
@@ -54,6 +53,7 @@ class CropNerGUI:
         self.pdf_document = None
         self.sentences = None
         self.annotation_dict = {}
+        self.scrollText_line_content = [] # Store index of characters in this line
         self.file_extension = None
         self.nlp_agdata = None
 
@@ -124,7 +124,7 @@ class CropNerGUI:
         self.remove_ent_btn.pack(side=tk.LEFT)
 
         # adding the text: Note, height defines height if widget in lines based in font size
-        self.text = ScrolledText(self.rootWin, height=25, width=140, font = "Times "+self.font_size)
+        self.text = ScrolledText(self.rootWin, height=25, width=140, font = "Times "+self.font_size, wrap='word')
         self.text.insert(tk.END, self.content[self.line_num])
         self.text.focus_force()
         self.text.pack(side=tk.TOP)
@@ -209,11 +209,6 @@ class CropNerGUI:
         self.pageLabel.pack(side=tk.LEFT)
         self.pageEntry = tk.Entry(self.open_frame, width=5)
         self.pageEntry.pack(side=tk.LEFT)
-
-        self.fontLabel = tk.Label(self.open_frame, text="Font Size:", width=10)
-        self.fontLabel.pack(side=tk.LEFT)
-        self.fontEntry = tk.Entry(self.open_frame, width=5)
-        self.fontEntry.pack(side=tk.LEFT)
 
         self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=20,command=partial(self.open_file,"json"))
         self.annotation_btn.pack(side=tk.LEFT)
@@ -391,26 +386,10 @@ class CropNerGUI:
 
     def LoadPDF(self):
         """ Get data from PDF file"""
-
-        '''
-        pdf_file = open(self.raw_file.name, mode="rb")
-        pdfReader = PyPDF2.PdfFileReader(pdf_file)
-        # num_pages = pdfReader.numPages
-        # Get  page. NOTE, page number for PDF reader start with 0
-        OnePage = pdfReader.getPage(self.pageNumber - 1)
-        # Get text
-        OnePageText = OnePage.extractText()
-        # Close PDF file
-        pdf_file.close()
-
-        OnePageText = re.sub('\n', '', OnePageText)
-        OnePageText = re.sub('\.\s', '.\n', OnePageText)
-        OnePageText = re.sub('\s\s', '\n', OnePageText)
-        sentences = OnePageText.split("\n")
-        return sentences
-        '''
-
+        if self.raw_file is None:
+            self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         self.pdf_document = Document(self.raw_file.name)
+
 
 
 
@@ -427,15 +406,6 @@ class CropNerGUI:
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
-
-            # Update font size if it was entered
-            font_size = self.fontEntry.get()
-            if font_size.isdigit():
-                self.text['font'] = "Times "+font_size
-                self.font_size = font_size
-            else:
-                self.fontEntry.delete(0, tk.END)
-                self.fontEntry.insert(0, self.font_size)
 
             page_num = self.pageEntry.get()
             if not page_num.isdigit():
@@ -460,7 +430,6 @@ class CropNerGUI:
             txt = page.text(control=control)
             # print(txt)
             self.text.insert("1.0",txt)
-            print(self.text.get("1.0", "1.end"))
 
             '''
             self.sentences = self.LoadPDF()
@@ -471,8 +440,58 @@ class CropNerGUI:
                     lineNo = lineNo + 1
             '''
 
-
     def pre_tag(self, selection):
+        """ Pre-tag selected content or all the text in text box with NER tags. """
+
+        # Clear warning message, if one exists
+        self.msg.config(text="")
+        if self.model_dir is None:
+            self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
+        elif self.pdf_document is None:
+            self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
+            self.LoadPDF()
+        else:
+            # Reset annotation dictionary
+            self.cust_ents_dict = {}
+
+            # Get page number
+            page_num = self.pageEntry.get()
+            if not page_num.isdigit():
+                self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
+                page_num = 1
+            self.pageNumber = int(page_num)
+
+            # Extract text from pdf while maintaining layout
+            control = TextControl(mode="physical")
+
+            page = self.pdf_document[self.pageNumber - 1]
+            txt = page.text(control=control)
+            self.text.insert("1.0", txt)
+            doc = self.tag_ner_with_spacy(txt)
+
+            # Trying to figure out where entities are on scrollTextbox is a little tricky because tKinter uses newline
+            # characters to split text. Here we are keeping track of how many characters appear before a line in the 
+            # GUI. This should make it easier to figure out where a token is given its
+            # start and end indices. Given (Steveland/Luther//Wintermalt 1001 1029 PED)  named entity, it is 1001, 1029
+            lines = txt.splitlines()
+            lineNo = 0
+            numChar = 0
+            for line in lines:
+                lineLen = len(line)
+                interval = (numChar,numChar+lineLen)
+                self.scrollText_line_content.append(interval)
+                numChar = numChar + lineLen + 1  # The 1 we are adding is for newline character
+                lineNo =  lineNo  + 1
+                if numChar >= 1000:
+                    print("line:",line)
+                    print("lineNo:",lineNo)
+                    print("self.scrollText_line_content[lineNo]:",self.scrollText_line_content[lineNo-1])
+                    #text = self.text.get(str(firstLineNo) + ".0", self.text.index('end'))
+                    break
+
+
+
+    def pre_tag_old(self, selection):
         """ Pre-tag selected content or all the text in text box with NER tags. """
 
         # Clear warning message, if one exists
@@ -636,40 +655,28 @@ class CropNerGUI:
             self.msg.config(text="Warning!! No text was selected.", foreground="red")
         self.cust_ents_dict[selection_line][1].sort()
 
+    def show_ents(doc):
+        if doc.ents:
+            for ent in doc.ents:
+                print(ent.text + ' - ' + str(ent.start_char) + ' - ' + str(ent.end_char) + ' - ' + ent.label_ + ' - ' + str(spacy.explain(ent.label_)))
+            else:
+                 print('No named entities found.')
 
     def ReviewAnnotations(self):
         """
         Review annotations
         """
-        print("Hello!")
         # Clear warning message, if one exists
         self.msg.config(text="")
         # self.raw_file is None or self.annotation_file is None:
         if self.annotation_file is None:
             self.msg.config(text="Please select an annotations file (json)", foreground="red")
         else:
-            # Update font size if it was entered
-            font_size = self.fontEntry.get()
-            if font_size.isdigit():
-                self.text['font'] = "Times "+font_size
-                self.font_size = font_size
-
             # Load annotation data
             data = json_2_dict(self.annotation_file.name)
             train_data = dict_2_mixed_type(data)
 
-            # Delete contents and reset line number 
-            self.text.delete(1.0, tk.END)
-            lineNo = 1
-
-            page_num = self.pageEntry.get()
-            if not page_num.isdigit():
-                self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
-                page_num = 1
-
-            self.pageNumber = int(page_num)
-
-            # Put annotations in a dictionary so we can easily O(1) find if a sentence has been annotated
+            # Put annotations in a dictionary. It make it easier to determine if a sentence has been annotated
             for annotation in train_data:
                 sentence = annotation[0]
                 entities = annotation[1]['entities']
@@ -678,10 +685,76 @@ class CropNerGUI:
             # Reset dictionary containing current annotations
             new_cust_ents_dict = {}
 
-            # Load PDF file
-            self.sentences = self.LoadPDF()
+            if self.pdf_document is None:
+                # If user is trying to annotate and a PDF file has not been annotated, we will make the
+                # assumption they are just reviewing annotations in the json file.
+                # Delete contents and reset line number
+                self.text.delete(1.0, tk.END)
+                lineNo = 1
 
+                # Review annotation
+                for annotation in train_data:
+                    sentence = annotation[0]
+                    entities = annotation[1]['entities']
+                    self.text.insert(str(lineNo) + ".0", sentence + '\n')
+                    for ent in entities:
+                        start = ent[0]
+                        end = ent[1]
+                        label = ent[2]
+                        if (label in self.tags):
+                            self.text.tag_add(label, str(lineNo) + "." + str(start), str(lineNo) + "." + str(end))
+                        else:
+                            self.text.tag_add("highlight", str(lineNo) + "." + str(start), str(lineNo) + "." + str(end))
+                    lineNo = lineNo + 1
+            else:
+                # Get page number
+                page_num = self.pageEntry.get()
+                if not page_num.isdigit():
+                    self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
+                    page_num = 1
+                self.pageNumber = int(page_num)
+
+                # Extract text from pdf while maintaining layout
+                control = TextControl(mode="physical")
+
+                page = self.pdf_document[self.pageNumber - 1]
+                txt = page.text(control=control)
+                self.text.insert("1.0",txt)
+                print("type(txt):",type(txt))
+
+                sent_list = list(self.annotation_dict.keys())
+                sent_temp = sent_list[0]
+                print("sent_list [0]:", sent_temp)
+                print("page.find_text(sent_temp):",page.find_text(sent_temp))
+                line20 = self.text.get("20.0", "20.end").split(".")
+                print("line20[0]:", line20[0])
+
+                doc = self.tag_ner_with_spacy(txt)
+                ''''
+                for ent in doc.ents:
+                    print(ent.text, ent.start_char, ent.end_char, ent.label_)
+                '''
+                print("---------")
+                #print(doc.text)
+                lines = txt.splitlines()
+                print(lines[19])
+                print("---------")
+
+                print("\n--------- START")
+                x = 0
+                for sent in doc.sents:
+                    if x > 2 and x < 10:
+                        print(sent.text,"|")
+                    x = x + 1
+                print("--------- END")
+
+
+
+            '''
+             # Delete contents and reset line number 
             self.text.delete(1.0, tk.END)
+            lineNo = 1
+            
             lineNo = 1
             for sent in self.sentences:
                 annotation_exists = self.annotation_dict.get(sent,False)
@@ -706,6 +779,7 @@ class CropNerGUI:
                     self.text.insert(str(lineNo)+".0", sent+'\n')
                 lineNo = lineNo + 1
         self.cust_ents_dict = new_cust_ents_dict
+        '''
 
 
     def highlight_text(self):
