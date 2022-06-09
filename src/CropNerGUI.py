@@ -7,7 +7,9 @@ from functools import partial
 from json2py import *
 import os.path
 from py2json import *
-import PyPDF2
+# import PyPDF2
+from pyxpdf import Document, Page, Config
+from pyxpdf.xpdf import TextControl
 import re
 import random
 import tkinter as tk
@@ -49,6 +51,7 @@ class CropNerGUI:
 
         self.raw_file = None
         self.annotation_file = None
+        self.pdf_document = None
         self.sentences = None
         self.annotation_dict = {}
         self.file_extension = None
@@ -388,6 +391,8 @@ class CropNerGUI:
 
     def LoadPDF(self):
         """ Get data from PDF file"""
+
+        '''
         pdf_file = open(self.raw_file.name, mode="rb")
         pdfReader = PyPDF2.PdfFileReader(pdf_file)
         # num_pages = pdfReader.numPages
@@ -403,6 +408,12 @@ class CropNerGUI:
         OnePageText = re.sub('\s\s', '\n', OnePageText)
         sentences = OnePageText.split("\n")
         return sentences
+        '''
+
+        self.pdf_document = Document(self.raw_file.name)
+
+
+
 
     def LoadPage(self):
         """
@@ -439,12 +450,26 @@ class CropNerGUI:
             self.text.delete(1.0, tk.END)
 
             # Load PDF file
+            if self.pdf_document is None:
+                self.LoadPDF()
+
+            # Extract text from pdf while maintaining layout
+            control = TextControl(mode="physical")
+
+            page = self.pdf_document[self.pageNumber - 1]
+            txt = page.text(control=control)
+            # print(txt)
+            self.text.insert("1.0",txt)
+            print(self.text.get("1.0", "1.end"))
+
+            '''
             self.sentences = self.LoadPDF()
             lineNo = 1
             for sent in self.sentences:
                 if len(sent) > 0:
                     self.text.insert(str(lineNo) + ".0", sent + '\n')
                     lineNo = lineNo + 1
+            '''
 
 
     def pre_tag(self, selection):
@@ -616,6 +641,7 @@ class CropNerGUI:
         """
         Review annotations
         """
+        print("Hello!")
         # Clear warning message, if one exists
         self.msg.config(text="")
         # self.raw_file is None or self.annotation_file is None:
@@ -635,26 +661,7 @@ class CropNerGUI:
             # Delete contents and reset line number 
             self.text.delete(1.0, tk.END)
             lineNo = 1
-            
-            # Review annotation
-            for annotation in train_data:
-                sentence = annotation[0]
-                entities = annotation[1]['entities']
-                self.text.insert(str(lineNo)+".0", sentence+'\n')
-                for ent in entities:
-                    start = ent[0]
-                    end = ent[1]
-                    label = ent[2]
-                    if (label in self.tags):
-                        self.text.tag_add(label, str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
-                    else:
-                        self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
-                lineNo = lineNo + 1
-                
-            # Below is code I had started writing to highlight a PDF file if it has an annotation. Code is not
-            # working. Needs to be fixed. 
 
-            '''
             page_num = self.pageEntry.get()
             if not page_num.isdigit():
                 self.msg.config(text="Page number not entered. Value initialized to 1",foreground="red")
@@ -667,8 +674,6 @@ class CropNerGUI:
                 sentence = annotation[0]
                 entities = annotation[1]['entities']
                 self.annotation_dict[sentence]= entities
-
-            
 
             # Reset dictionary containing current annotations
             new_cust_ents_dict = {}
@@ -701,7 +706,7 @@ class CropNerGUI:
                     self.text.insert(str(lineNo)+".0", sent+'\n')
                 lineNo = lineNo + 1
         self.cust_ents_dict = new_cust_ents_dict
-        '''
+
 
     def highlight_text(self):
         """ Highlight selected text """
