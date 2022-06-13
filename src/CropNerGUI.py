@@ -53,7 +53,7 @@ class CropNerGUI:
         self.pdf_document = None
         self.sentences = None
         self.annotation_dict = {}
-        self.scrollText_line_content = [] # Store index of characters in this line
+        self.scrollText_line_content_index = {} # Store index of characters in this line
         self.file_extension = None
         self.nlp_agdata = None
 
@@ -63,7 +63,7 @@ class CropNerGUI:
         self.pageNumber=0
         self.line_num = 0
         self.font_size = "16"
-        self.page_lines = len(self.content)
+        self.num_page_lines = len(self.content)
 
         self.topframe = tk.Frame(self.rootWin)
         self.topframe.pack(side=tk.TOP,fill="x")
@@ -465,31 +465,45 @@ class CropNerGUI:
             control = TextControl(mode="physical")
 
             page = self.pdf_document[self.pageNumber - 1]
-            txt = page.text(control=control)
-            self.text.insert("1.0", txt)
-            doc = self.tag_ner_with_spacy(txt)
+            input_text = page.text(control=control)
+            self.text.insert("1.0", input_text)
 
             # Trying to figure out where entities are on scrollTextbox is a little tricky because tKinter uses newline
             # characters to split text. Here we are keeping track of how many characters appear before a line in the 
             # GUI. This should make it easier to figure out where a token is given its
             # start and end indices. Given (Steveland/Luther//Wintermalt 1001 1029 PED)  named entity, it is 1001, 1029
-            lines = txt.splitlines()
-            lineNo = 0
-            numChar = 0
+            lines = input_text.splitlines()
+            self.num_page_lines = len(lines)
+            line_no = 0
+            num_char = 0
             for line in lines:
-                lineLen = len(line)
-                interval = (numChar,numChar+lineLen)
-                self.scrollText_line_content.append(interval)
-                numChar = numChar + lineLen + 1  # The 1 we are adding is for newline character
-                lineNo =  lineNo  + 1
-                if numChar >= 1000:
-                    print("line:",line)
-                    print("lineNo:",lineNo)
-                    print("self.scrollText_line_content[lineNo]:",self.scrollText_line_content[lineNo-1])
-                    #text = self.text.get(str(firstLineNo) + ".0", self.text.index('end'))
-                    break
+                line_len = len(line)
+                interval = (num_char, num_char+line_len)
+                self.scrollText_line_content_index[line_no] = interval
+                num_char = num_char + line_len + 1  # The 1 we are adding is for newline character
+                line_no = line_no + 1
+
+            for key, value in self.scrollText_line_content_index.items():
+                print(key,":",value)
+
+            doc = self.tag_ner_with_spacy(input_text)
+            for ent in doc.ents:
+                if (ent.label_ in self.tags): # NER is in our list of custom tags
+                    # Find where it is in the text boox and highlight it.
 
 
+                    print(ent.text, ent.start_char, ent.end_char,ent.label_)
+                    '''
+                    self.text.tag_add(ent.label_, lineNo_str + "." + str(ent.start_char),lineNo_str + "." + str(ent.end_char))
+                    if (self.cust_ents_dict.get(lineNo, False)):
+                        self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
+                    else:
+                        self.cust_ents_dict[lineNo] = [(ent.start_char, ent.end_char, ent.label_)]
+
+            if (self.cust_ents_dict.get(lineNo, False)):
+                tags = self.cust_ents_dict[lineNo]
+                self.cust_ents_dict[lineNo] = [input_text, tags]
+                '''
 
     def pre_tag_old(self, selection):
         """ Pre-tag selected content or all the text in text box with NER tags. """
