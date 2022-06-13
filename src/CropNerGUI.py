@@ -483,16 +483,35 @@ class CropNerGUI:
                 num_char = num_char + line_len + 1  # The 1 we are adding is for newline character
                 line_no = line_no + 1
 
-            for key, value in self.scrollText_line_content_index.items():
-                print(key,":",value)
+            #for key, value in self.scrollText_line_content_index.items():
+            #    print(key,":",value)
 
             doc = self.tag_ner_with_spacy(input_text)
+
             for ent in doc.ents:
                 if (ent.label_ in self.tags): # NER is in our list of custom tags
+                    print("\n\n----------------- START IF")
                     # Find where it is in the text boox and highlight it.
+                    print("ENT:",ent.text, ent.start_char, ent.end_char,ent.label_)
+                    index = self.tags.index(ent.label_)
+                    ner_tag=self.tags[index]
+                    color = self.colors[index]
 
+                    # Loop through lines in the text field and find where this tag is.
+                    for key, value in self.scrollText_line_content_index.items():
+                        (start,end) = value
+                        if(ent.start_char >= start and ent.end_char <= end):
+                            # We need to add 1 because index starts with 0 while line numbers start with 1
+                            ent_num_char = ent.end_char - ent.start_char
+                            char_start = ent.start_char - start
+                            char_end = char_start + ent_num_char
 
-                    print(ent.text, ent.start_char, ent.end_char,ent.label_)
+                            print("key:value=", key, value)
+                            print(self.text.get(str(key+1) + ".0", str(key+1) + ".end"))
+                            print("tag=",self.text.get(str(key+1) + "."+str(char_start), str(key+1) + "."+str(char_end)))
+                            break
+
+                    print("----------------- END IF")
                     '''
                     self.text.tag_add(ent.label_, lineNo_str + "." + str(ent.start_char),lineNo_str + "." + str(ent.end_char))
                     if (self.cust_ents_dict.get(lineNo, False)):
