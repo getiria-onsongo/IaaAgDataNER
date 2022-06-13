@@ -464,6 +464,8 @@ class CropNerGUI:
             # Extract text from pdf while maintaining layout
             control = TextControl(mode="physical")
 
+            self.text.delete(1.0, tk.END)
+
             page = self.pdf_document[self.pageNumber - 1]
             input_text = page.text(control=control)
             self.text.insert("1.0", input_text)
@@ -490,34 +492,43 @@ class CropNerGUI:
 
             for ent in doc.ents:
                 if (ent.label_ in self.tags): # NER is in our list of custom tags
-                    print("\n\n----------------- START IF")
+                    # print("\n\n----------------- START IF")
                     # Find where it is in the text boox and highlight it.
-                    print("ENT:",ent.text, ent.start_char, ent.end_char,ent.label_)
+                    # print("ENT:",ent.text, ent.start_char, ent.end_char,ent.label_)
                     index = self.tags.index(ent.label_)
                     ner_tag=self.tags[index]
                     color = self.colors[index]
-
+                    line_start = -1
+                    char_start = -1
+                    line_end = -1
+                    char_end = -1
                     # Loop through lines in the text field and find where this tag is.
                     for key, value in self.scrollText_line_content_index.items():
                         (start,end) = value
-                        if(ent.start_char >= start and ent.end_char <= end):
-                            # We need to add 1 because index starts with 0 while line numbers start with 1
-                            ent_num_char = ent.end_char - ent.start_char
+                        if(ent.start_char >= start):
+                            line_start = key + 1
                             char_start = ent.start_char - start
-                            char_end = char_start + ent_num_char
-
-                            print("key:value=", key, value)
-                            print(self.text.get(str(key+1) + ".0", str(key+1) + ".end"))
-                            print("tag=",self.text.get(str(key+1) + "."+str(char_start), str(key+1) + "."+str(char_end)))
+                        if(ent.end_char <= end and line_start > 0):
+                            line_end = key + 1
+                            ent_num_char = ent.end_char - ent.start_char
+                            if(line_start == line_end):
+                                char_end = char_start + ent_num_char
+                            else:
+                                char_end = ent.end_char - start
+                            #print(self.text.get(str(line_start) + ".0", str(line_end) + ".end"))
+                            #print("tag=",self.text.get(str(line_start) + "."+str(char_start), str(line_end) + "."+str(char_end)))
                             break
 
-                    print("----------------- END IF")
+                    #print("----------------- END IF")
+
+                    self.text.tag_add(ent.label_, str(line_start) + "."+str(char_start),str(line_end) + "."+str(char_end))
+
                     '''
-                    self.text.tag_add(ent.label_, lineNo_str + "." + str(ent.start_char),lineNo_str + "." + str(ent.end_char))
                     if (self.cust_ents_dict.get(lineNo, False)):
                         self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
                     else:
                         self.cust_ents_dict[lineNo] = [(ent.start_char, ent.end_char, ent.label_)]
+                
 
             if (self.cust_ents_dict.get(lineNo, False)):
                 tags = self.cust_ents_dict[lineNo]
