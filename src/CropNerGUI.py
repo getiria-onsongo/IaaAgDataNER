@@ -60,7 +60,7 @@ class CropNerGUI:
         self.cust_ents_dict = {}
 
         self.output_file_name = "sample_p0_td.py"
-        self.pageNumber=0
+        self.page_number=0
         self.line_num = 0
         self.font_size = "16"
         self.num_page_lines = len(self.content)
@@ -410,11 +410,11 @@ class CropNerGUI:
             page_num = self.pageEntry.get()
             if not page_num.isdigit():
                 self.msg.config(text="Page number not entered. Value initialized to 1", foreground="red")
-                self.pageNumber = 1
+                self.page_number = 1
                 self.pageEntry.delete(0,tk.END)
-                self.pageEntry.insert(0, str(self.pageNumber))
+                self.pageEntry.insert(0, str(self.page_number))
             else:
-                self.pageNumber = int(page_num)
+                self.page_number = int(page_num)
 
             # Delete contents
             self.text.delete(1.0, tk.END)
@@ -426,7 +426,7 @@ class CropNerGUI:
             # Extract text from pdf while maintaining layout
             control = TextControl(mode="physical")
 
-            page = self.pdf_document[self.pageNumber - 1]
+            page = self.pdf_document[self.page_number - 1]
             txt = page.text(control=control)
             # print(txt)
             self.text.insert("1.0",txt)
@@ -459,14 +459,14 @@ class CropNerGUI:
             if not page_num.isdigit():
                 self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
                 page_num = 1
-            self.pageNumber = int(page_num)
+            self.page_number = int(page_num)
 
             # Extract text from pdf while maintaining layout
             control = TextControl(mode="physical")
 
             self.text.delete(1.0, tk.END)
 
-            page = self.pdf_document[self.pageNumber - 1]
+            page = self.pdf_document[self.page_number - 1]
             input_text = page.text(control=control)
             self.text.insert("1.0", input_text)
 
@@ -523,17 +523,17 @@ class CropNerGUI:
 
                     self.text.tag_add(ent.label_, str(line_start) + "."+str(char_start),str(line_end) + "."+str(char_end))
 
-                    '''
-                    if (self.cust_ents_dict.get(lineNo, False)):
-                        self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
+                    if (self.cust_ents_dict.get(self.page_number, False)):
+                        self.cust_ents_dict[self.page_number].append((ent.start_char, ent.end_char, ent.label_))
                     else:
-                        self.cust_ents_dict[lineNo] = [(ent.start_char, ent.end_char, ent.label_)]
+                        self.cust_ents_dict[self.page_number] = [(ent.start_char, ent.end_char, ent.label_)]
                 
 
-            if (self.cust_ents_dict.get(lineNo, False)):
-                tags = self.cust_ents_dict[lineNo]
-                self.cust_ents_dict[lineNo] = [input_text, tags]
-                '''
+            if (self.cust_ents_dict.get(self.page_number, False)):
+                tags = self.cust_ents_dict[self.page_number]
+                self.cust_ents_dict[self.page_number] = [input_text, tags]
+            # HERE: UPDATED BUT DID NOT TEST THIS FUNCTION
+
 
     def pre_tag_old(self, selection):
         """ Pre-tag selected content or all the text in text box with NER tags. """
@@ -756,12 +756,12 @@ class CropNerGUI:
                 if not page_num.isdigit():
                     self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
                     page_num = 1
-                self.pageNumber = int(page_num)
+                self.page_number = int(page_num)
 
                 # Extract text from pdf while maintaining layout
                 control = TextControl(mode="physical")
 
-                page = self.pdf_document[self.pageNumber - 1]
+                page = self.pdf_document[self.page_number - 1]
                 txt = page.text(control=control)
                 self.text.insert("1.0",txt)
                 print("type(txt):",type(txt))
@@ -879,7 +879,7 @@ class CropNerGUI:
         # Hide continue button after it was pressed
         self.continue_btn.pack_forget()
 
-        chunk = str(self.pageNumber)
+        chunk = str(self.page_number)
         url = self.urlEntry.get()
         crop = self.cropEntry.get()
         cvar = self.cvarEntry.get()
@@ -959,9 +959,9 @@ class CropNerGUI:
             # self.file_save()
 
         # Increment page number
-        self.pageNumber = self.pageNumber + 1
+        self.page_number = self.page_number + 1
         self.pageEntry.delete(0, tk.END)
-        self.pageEntry.insert(0, str(self.pageNumber))
+        self.pageEntry.insert(0, str(self.page_number))
 
         # Reset annotation data
         self.annotation_file = None
