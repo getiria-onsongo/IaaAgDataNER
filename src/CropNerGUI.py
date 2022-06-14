@@ -45,12 +45,15 @@ class CropNerGUI:
         self.tags=["highlight","default_color_tag","ALAS","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
         self.colors=["gray","black","violet","lawn green","deep sky blue","yellow","red","orange","pink","brown","MediumPurple1"]
         self.tag_colors_buttonID = {}
-        self.crop_cnt = {}
+
         self.cvar_cnt = {}
 
         self.raw_file = None
         self.annotation_file = None
         self.pdf_document = None
+        self.file_prefix = None
+        self.pdf_name = None
+
         self.sentences = None
         self.annotation_dict = {}
         self.scrollText_line_content_index = {} # Store index of characters in this line
@@ -188,9 +191,31 @@ class CropNerGUI:
         self.msg.pack(side=tk.LEFT)
 
         # Continue button
-        self.continue_btn = tk.Button(self.msg_frame, text="Continue", width=10, command=self.continue_func)
+        self.continue_btn = tk.Button(self.msg_frame, text="Continue", width=10, command=partial(self.continue_func, "save"))
         self.continue_btn.pack(side=tk.LEFT)
         self.continue_btn.pack_forget()
+
+        self.copy_btn = tk.Button(self.msg_frame, text="Create Copy", width=10, command=partial(self.continue_func, "copy"))
+        self.copy_btn.pack(side=tk.LEFT)
+        self.copy_btn.pack_forget()
+
+        # Meta Data Frame
+        self.metadata_frame = tk.Frame(self.rootWin)
+        self.metadata_frame.pack(side=tk.TOP)
+
+        self.ann_file_label = tk.Label(self.metadata_frame, text="Annotation File Name (json):", width=20, anchor="w")
+        self.ann_file_label.pack(side=tk.LEFT)
+        self.ann_file_label.pack_forget()
+        self.ann_file_entry = tk.Entry(self.metadata_frame, width=30)
+        self.ann_file_entry.pack(side=tk.LEFT)
+        self.ann_file_entry.pack_forget()
+
+        self.source_label = tk.Label(self.metadata_frame, text="PDF/Text URL (source):", width=15, anchor="w")
+        self.source_label.pack(side=tk.LEFT)
+        self.source_label.pack_forget()
+        self.source_entry = tk.Entry(self.metadata_frame, width=30)
+        self.source_entry.pack(side=tk.LEFT)
+        self.source_entry.pack_forget()
 
         # Frame for selecting
         self.open_frame = tk.Frame(self.rootWin)
@@ -216,6 +241,14 @@ class CropNerGUI:
         self.review_btn = tk.Button(self.open_frame, text="Review Annotations", command=self.ReviewAnnotations)
         self.review_btn.pack(side=tk.LEFT)
 
+        # Font +
+        self.font_plus = tk.Button(self.open_frame, text="Font +", width=10, command=self.font_plus)
+        self.font_plus.pack(side=tk.LEFT)
+
+        # Font -
+        self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
+        self.font_minus.pack(side=tk.LEFT)
+
         # Model frame
         self.model_frame = tk.Frame(self.rootWin)
         self.model_frame.pack(side=tk.TOP,fill="x")
@@ -223,30 +256,10 @@ class CropNerGUI:
         self.blankLabel_six = tk.Label(self.model_frame, text="     ")
         self.blankLabel_six.pack(side=tk.LEFT)
 
-        self.spacyModel = tk.Label(self.model_frame, text="Spacy Model e.g.,en_core_web_lg  (same model used for training):", width=50,anchor="w")
-        self.spacyModel.pack(side=tk.LEFT)
-        self.spacyModel = tk.Entry(self.model_frame, width=20)
-        self.spacyModel.pack(side=tk.LEFT)
-
-        # Annotation Data
-        self.annotation_data_frame = tk.Frame(self.rootWin)
-        self.annotation_data_frame.pack(side=tk.TOP,fill="x")
-
-        self.blankLabel_seven = tk.Label(self.annotation_data_frame, text="     ")
-        self.blankLabel_seven.pack(side=tk.LEFT)
-
-        self.cropLabel = tk.Label(self.annotation_data_frame, text="Crop Label:", width=10, anchor="w")
-        self.cropLabel.pack(side=tk.LEFT)
-        self.cropEntry = tk.Entry(self.annotation_data_frame, width=15)
-        self.cropEntry.pack(side=tk.LEFT)
-
-        # Font +
-        self.font_plus = tk.Button(self.annotation_data_frame, text="Font +",width=10,command=self.font_plus)
-        self.font_plus.pack(side = tk.LEFT)
-
-        # Font -
-        self.font_minus = tk.Button(self.annotation_data_frame, text="Font -",width=10,command=self.font_minus)
-        self.font_minus.pack(side = tk.LEFT)
+        self.spacyModel_label = tk.Label(self.model_frame, text="Spacy Model e.g.,en_core_web_lg:", width=25,anchor="w")
+        self.spacyModel_label.pack(side=tk.LEFT)
+        self.spacyModel_entry = tk.Entry(self.model_frame, width=20)
+        self.spacyModel_entry.pack(side=tk.LEFT)
 
 
     def font_plus(self):
@@ -321,18 +334,18 @@ class CropNerGUI:
 
     def get_nermodel_dir(self):
         """ Add documentation"""
-        model = self.spacyModel.get()
+        model = self.spacyModel_entry.get()
         model_name = "en_core_web_lg"
         if len(model) == 0:
-            self.spacyModel.delete(0, tk.END)
-            self.spacyModel.insert(0, model_name)
+            self.spacyModel_entry.delete(0, tk.END)
+            self.spacyModel_entry.insert(0, model_name)
         else:
             if(model.lower() == "en_core_web_sm"):
                 model_name = "en_core_web_sm"
             elif(model.lower() == "en_core_web_md"):
                 model_name = "en_core_web_md"
-            self.spacyModel.delete(0, tk.END)
-            self.spacyModel.insert(0, model_name)
+            self.spacyModel_entry.delete(0, tk.END)
+            self.spacyModel_entry.insert(0, model_name)
         self.model_dir = fd.askdirectory()
         self.nlp_agdata = spacy.load(self.model_dir)
 
@@ -364,11 +377,11 @@ class CropNerGUI:
         Load spacy model
         """
         if self.nlp_agdata is None:
-            model = self.spacyModel.get()
+            model = self.spacyModel_entry.get()
             model_name = "en_core_web_lg"
             if len(model) == 0:
-                self.spacyModel.delete(0, tk.END)
-                self.spacyModel.insert(0, model_name)
+                self.spacyModel_entry.delete(0, tk.END)
+                self.spacyModel_entry.insert(0, model_name)
             else:
                 if (model.lower() == "en_core_web_sm"):
                     model_name = "en_core_web_sm"
@@ -388,11 +401,10 @@ class CropNerGUI:
         """ Get data from PDF file"""
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
+
+        self.file_prefix = self.raw_file.name.split(".")[0]
+        self.pdf_name = self.raw_file.name.split("/")[-1]
         self.pdf_document = Document(self.raw_file.name)
-
-
-
-
 
     def LoadPage(self):
         """
@@ -689,10 +701,6 @@ class CropNerGUI:
                 else:
                     entValue = self.cust_ents_dict[selection_line][0][start:end]
                     entValue = entValue.strip().lower()
-                    if (label == 'CROP'):
-                        self.crop_cnt[entValue] = self.crop_cnt[entValue] - 1
-                    if (label == 'CVAR'):
-                        self.cvar_cnt[entValue] = self.cvar_cnt[entValue] - 1
 
             self.cust_ents_dict[selection_line][1] = new_ents
 
@@ -864,46 +872,24 @@ class CropNerGUI:
         # Clear warning message
         self.msg.config(text="")
 
-        # Clear cvar and crop entries
-        self.cropEntry.delete(0, tk.END)
-        self.cvarEntry.delete(0, tk.END)
-        self.crop_cnt = {}
-        self.cvar_cnt = {}
-
     def tag_ner_with_spacy(self, text):
         """ Use SpaCy to identify NER in text"""
         #print("Pipeline=",self.nlp_agdata.pipe_names)
         doc = self.nlp_agdata(text)
         return doc
 
-    def continue_func(self):
+    def continue_func(self, save_choice):
         """" Add comment """
+        if save_choice == 'copy':
+            file_prefix = self.raw_file.name.split(".")[0]
+            now = datetime.now()  # current date and time
+            date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
+            self.annotation_file = file_prefix + "_" + date_time + ".json"
 
-        # Hide continue button after it was pressed
-        self.continue_btn.pack_forget()
-
-        chunk = str(self.page_number)
-        url = self.urlEntry.get()
-        crop = self.cropEntry.get()
-        cvar = self.cvarEntry.get()
-
+        url = self.source_entry.get()
         train_data = []
-        file_prefix = self.raw_file.name.split(".")[0]
-        pdf_name = self.raw_file.name.split("/")[-1]
 
-        file_prefix = file_prefix+"_p"+chunk
-
-        if(len(crop) > 0):
-            file_prefix = file_prefix+"_crop_"+crop
-        if(len(cvar) > 0):
-            file_prefix = file_prefix+"_cvar_"+cvar
-        output_filename = file_prefix + "_td.json"
-
-        if(os.path.isfile(output_filename) and len(self.cust_ents_dict) != 0):
-            now = datetime.now()
-            date_time = now.strftime("%Y_%m_%d_%H_%M_%S")
-            output_filename = file_prefix+"_"+date_time+"_td.json"
-            self.msg.config(text="Warning!! Annotation file with the same name already exists. A copy created.", foreground="red")
+        # if(os.path.isfile(output_filename) # If you want to check if a file exists
 
         if (len(self.cust_ents_dict) == 0):
             self.msg.config(text="Warning!! No annotations to save.", foreground="red")
@@ -915,37 +901,36 @@ class CropNerGUI:
                 ents_value.sort()
                 ents = {'entities': ents_value}
                 train_data.append((text_value, ents))
-            train_dict = mixed_type_2_dict(train_data, chunk, pdf_name, url, crop, cvar)
-            dict_2_json(train_dict, output_filename)
+            train_dict = mixed_type_2_dict(train_data, self.page_number, self.pdf_name)
+            dict_2_json(train_dict, self.annotation_file)
+
+        # Hide buttons
+        self.continue_btn.pack_forget()
+        self.copy_btn.pack_forget()
+        self.ann_file_label.pack_forget()
+        self.ann_file_entry.pack_forget()
+        self.source_label.pack_forget()
+        self.source_entry.pack_forget()
 
         # Clear data after saving
         self.remove_all_tags()
 
     def file_save(self):
         """ Save current annotation"""
-        cropOrcvarUpdated = 0
-
-        crop=self.cropEntry.get()
-        cvar=self.cvarEntry.get()
-
-        if len(crop) == 0:
-            if(self.get_max_dict_value(self.crop_cnt) is not None):
-                cropValue = self.get_max_dict_value(self.crop_cnt)
-                self.cropEntry.delete(0, tk.END)
-                self.cropEntry.insert(0, str(cropValue))
-                cropOrcvarUpdated = 1
-        if len(cvar) == 0:
-            if(self.get_max_dict_value(self.cvar_cnt) is not None):
-                cvarValue = self.get_max_dict_value(self.cvar_cnt)
-                self.cvarEntry.delete(0, tk.END)
-                self.cvarEntry.insert(0, str(cvarValue))
-                cropOrcvarUpdated = 1
-
-        if(cropOrcvarUpdated == 1):
-            self.continue_btn.pack(side=tk.LEFT)
-            self.msg.config(text="Warning!! 'Crop Label' or 'Crop Variety Label' automatically detected. \nMake corrections if necessary then press 'Continue' to Save file", foreground="red",anchor="w")
+        if self.annotation_file is None:
+            self.annotation_file = self.file_prefix + "_page_"+self.page_number+".json"
+            self.msg.config(text="The file name shown in the text box will be used. Edit the name and optionally enter meta-data in the fields provided and press 'Continue' to Save.", foreground="red",anchor="w")
         else:
-            self.continue_func()
+            self.msg.config(text="WARNING!! You are about to overwrite your annotation file. Select 'Continue' to overwite or 'Create Copy' \n and optionally enter meta-data in the fields provided.",foreground="red", anchor="w")
+
+        self.continue_btn.pack(side=tk.LEFT)
+        self.ann_file_entry.delete(0, tk.END)
+        self.ann_file_entry.insert(0, self.annotation_file.name)
+        self.ann_file_label.pack(side=tk.LEFT)
+        self.ann_file_entry.pack(side=tk.LEFT)
+
+        self.source_label.pack(side=tk.LEFT)
+        self.source_entry.pack(side=tk.LEFT)
 
 
 
