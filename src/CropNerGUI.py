@@ -534,6 +534,9 @@ class CropNerGUI:
                 self.cust_ents_dict[self.page_number] = [input_text, tags]
             # HERE: UPDATED BUT DID NOT TEST THIS FUNCTION
 
+        #for key, value in self.cust_ents_dict.items():
+        #    print(key,":",value)
+
 
     def pre_tag_old(self, selection):
         """ Pre-tag selected content or all the text in text box with NER tags. """
