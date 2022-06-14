@@ -924,6 +924,7 @@ class CropNerGUI:
             self.msg.config(text="WARNING!! You are about to overwrite your annotation file. Select 'Continue' to overwite or 'Create Copy' \n and optionally enter meta-data in the fields provided.",foreground="red", anchor="w")
 
         self.continue_btn.pack(side=tk.LEFT)
+        self.copy_btn.pack(side=tk.LEFT)
         self.ann_file_entry.delete(0, tk.END)
         self.ann_file_entry.insert(0, self.annotation_file.name)
         self.ann_file_label.pack(side=tk.LEFT)
