@@ -50,6 +50,7 @@ class CropNerGUI:
 
         self.raw_file = None
         self.annotation_file = None
+        self.chunk = None
         self.pdf_document = None
         self.file_prefix = None
         self.pdf_name = None
@@ -426,6 +427,7 @@ class CropNerGUI:
             else:
                 self.page_number = int(page_num)
 
+            self.chunk=self.page_number
             # Delete contents
             self.text.delete(1.0, tk.END)
 
@@ -501,6 +503,7 @@ class CropNerGUI:
                 self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
                 page_num = 1
             self.page_number = int(page_num)
+            self.chunk = self.page_number
 
             # Extract text from pdf while maintaining layout
             control = TextControl(mode="physical")
@@ -678,28 +681,31 @@ class CropNerGUI:
         """ Delete selection from annotations. """
         # Clear warning message, if one exists
         self.msg.config(text="")
-        # if no text is selected then tk.TclError exception occurs
-        try:
-            selection_line = int(self.text.index("sel.first").split(".")[0])
-            selection_start = int(self.text.index("sel.first").split(".")[1])
-            selection_end= int(self.text.index("sel.last").split(".")[1])
 
-            # Update annotation to delete tag that was removed
-            new_ents = []
-            for (start, end, label) in self.cust_ents_dict[selection_line][1]:
-                if(not self.overlap([selection_start,selection_end],[start, end])):
-                    new_ents.append((start, end, label))
-                else:
-                    entValue = self.cust_ents_dict[selection_line][0][start:end]
-                    entValue = entValue.strip().lower()
+        selection_line = int(self.text.index("sel.first").split(".")[0])
+        tmp_selection_start = int(self.text.index("sel.first").split(".")[1])
+        tmp_selection_end = int(self.text.index("sel.last").split(".")[1])
+        selection_start =  self.scrollText_line_content_index[selection_line-1][0] + tmp_selection_start
+        selection_end = self.scrollText_line_content_index[selection_line-1][0] + tmp_selection_end
 
-            self.cust_ents_dict[selection_line][1] = new_ents
+        new_cust_ents_dict = {}
+        new_ents = []
+        tag = None
+        input_text = self.cust_ents_dict[self.chunk][0]
+        entities = self.cust_ents_dict[self.chunk][1]
 
-            for tag in self.tags:
-                self.text.tag_remove(tag, "sel.first", "sel.last")
-        except tk.TclError:
-            self.msg.config(text="Warning!! No text was selected.", foreground="red")
-        self.cust_ents_dict[selection_line][1].sort()
+        # Loop through tags and find ones that overlap with selected region and remove them.
+        for (start, end, label) in entities:
+            if not self.overlap([selection_start,selection_end],[start, end]):
+                new_ents.append((start, end, label))
+            else:
+                tag = label
+
+        self.text.tag_remove(tag, "sel.first", "sel.last")
+
+        new_ents.sort()
+        self.cust_ents_dict[self.chunk] = [input_text, new_ents]
+
 
     def show_ents(doc):
         if doc.ents:
@@ -721,25 +727,22 @@ class CropNerGUI:
             # Load annotation data
             data = json_2_dict(self.annotation_file.name)
             train_data = dict_2_mixed_type(data)
-
+            """
             doc = data['doc']
             url = data['url']
-            chunk = data['chunk']
-
-            # Put annotations in a dictionary. It make it easier to determine if a sentence has been annotated
-            annotation = train_data[0]
-            sentence = annotation[0]
-            entities = annotation[1]['entities']
-            self.annotation_dict[sentence]= entities
+            """
+            self.chunk = int(data['chunk'])
+            self.page_number = self.chunk
 
             # Empty text box so we can load annotations
             self.text.delete(1.0, tk.END)
 
             # Load  annotation
-
             annotation = train_data[0]
+            self.cust_ents_dict[self.chunk] = [annotation[0],annotation[1]['entities']]
             sentence = annotation[0]
             entities = annotation[1]['entities']
+
 
             self.text.insert("1.0", sentence + '\n')
 
@@ -749,10 +752,6 @@ class CropNerGUI:
 
             for ent_val in entities:
                 self.highlight_ent(ent_val[0],ent_val[1], ent_val[2])
-
-            print("self.annotation_dict=",self.annotation_dict)
-
-
 
     def highlight_text(self):
         """ Highlight selected text """
@@ -809,24 +808,18 @@ class CropNerGUI:
             else:
                 filename = self.annotation_file.name
 
-
-
         url = self.source_entry.get()
-        ann_train_data = []
+
 
         # if(os.path.isfile(output_filename) # If you want to check if a file exists
 
         if len(self.cust_ents_dict) == 0:
             self.msg.config(text="Warning!! No annotations to save.", foreground="red")
         else:
-            for lineNo in self.cust_ents_dict:
-                text_ents = self.cust_ents_dict[lineNo]
-                text_value = text_ents[0].strip()
-                ents_value = text_ents[1]
-                ents_value.sort()
-                ents = {'entities': ents_value}
-                ann_train_data.append((text_value, ents))
-            ann_train_dict = mixed_type_2_dict(ann_train_data, self.page_number, self.pdf_name)
+            input_text = self.cust_ents_dict[self.chunk][0]
+            entities = self.cust_ents_dict[self.chunk][1]
+
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.pdf_name, url)
             dict_2_json(ann_train_dict, filename)
 
         # Hide buttons
@@ -842,7 +835,6 @@ class CropNerGUI:
 
     def file_save(self):
         """ Save current annotation"""
-        filename = None
         if self.annotation_file is None:
             self.annotation_file = self.file_prefix + "_pg"+str(self.page_number)+".json"
             self.msg.config(text="The file name shown in the text box will be used. Edit the name and optionally enter meta-data in the fields provided and press 'Continue' to Save.", foreground="red",anchor="w")
