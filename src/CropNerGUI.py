@@ -438,17 +438,9 @@ class CropNerGUI:
 
             page = self.pdf_document[self.page_number - 1]
             txt = page.text(control=control)
-            # print(txt)
             self.text.insert("1.0",txt)
 
-            '''
-            self.sentences = self.LoadPDF()
-            lineNo = 1
-            for sent in self.sentences:
-                if len(sent) > 0:
-                    self.text.insert(str(lineNo) + ".0", sent + '\n')
-                    lineNo = lineNo + 1
-            '''
+
 
     def update_scrollText_line_content_index(self):
         """ Add documentation"""
@@ -468,7 +460,7 @@ class CropNerGUI:
             num_char = num_char + line_len + 1  # The 1 we are adding is for newline character
             line_no = line_no + 1
 
-    def highlight_ent(self, ent):
+    def highlight_ent(self, start_char, end_char, label):
         """ Add documentation """
         line_start = -1
         char_start = -1
@@ -477,19 +469,19 @@ class CropNerGUI:
         # Loop through lines in the text field and find where this tag is.
         for key, value in self.scrollText_line_content_index.items():
             (start, end) = value
-            if (ent.start_char >= start):
+            if start_char >= start:
                 line_start = key + 1
-                char_start = ent.start_char - start
-            if (ent.end_char <= end and line_start > 0):
+                char_start = start_char - start
+            if end_char <= end and line_start > 0:
                 line_end = key + 1
-                ent_num_char = ent.end_char - ent.start_char
-                if (line_start == line_end):
+                ent_num_char = end_char - start_char
+                if line_start == line_end:
                     char_end = char_start + ent_num_char
                 else:
-                    char_end = ent.end_char - start
+                    char_end = end_char - start
                 break
 
-        self.text.tag_add(ent.label_, str(line_start) + "." + str(char_start), str(line_end) + "." + str(char_end))
+        self.text.tag_add(label, str(line_start) + "." + str(char_start), str(line_end) + "." + str(char_end))
 
     def pre_tag(self):
         """ Pre-tag selected content or all the text in text box with NER tags. """
@@ -522,7 +514,8 @@ class CropNerGUI:
             # Reset annotation dictionary
             self.cust_ents_dict = {}
 
-            # Update variable that holds number of lines in textbox
+            # Update variable that holds number of lines in textbox. You need this for
+            # the function highlight_ent to work
             self.update_scrollText_line_content_index()
             #for key, value in self.scrollText_line_content_index.items():
             #    print(key,":",value)
@@ -532,7 +525,7 @@ class CropNerGUI:
             for ent in doc.ents:
                 if (ent.label_ in self.tags): # NER is in our list of custom tags
                     # index = self.tags.index(ent.label_) # Find index for an element in a list
-                    self.highlight_ent(ent)
+                    self.highlight_ent(ent.start_char, ent.end_char, ent.label_)
                     if self.cust_ents_dict.get(self.page_number, False):
                         self.cust_ents_dict[self.page_number].append((ent.start_char, ent.end_char, ent.label_))
                     else:
@@ -729,115 +722,36 @@ class CropNerGUI:
             data = json_2_dict(self.annotation_file.name)
             train_data = dict_2_mixed_type(data)
 
-            # Put annotations in a dictionary. It make it easier to determine if a sentence has been annotated
-            for annotation in train_data:
-                sentence = annotation[0]
-                entities = annotation[1]['entities']
-                self.annotation_dict[sentence]= entities
+            doc = data['doc']
+            url = data['url']
+            chunk = data['chunk']
 
-            # Reset dictionary containing current annotations
-            new_cust_ents_dict = {}
+            # Put annotations in a dictionary. It make it easier to determine if a sentence has been annotated
+            annotation = train_data[0]
+            sentence = annotation[0]
+            entities = annotation[1]['entities']
+            self.annotation_dict[sentence]= entities
 
             # Empty text box so we can load annotations
             self.text.delete(1.0, tk.END)
-            lineNo = 1
 
             # Load  annotation
-            for annotation in train_data:
-                sentence = annotation[0]
-                entities = annotation[1]['entities']
-                self.text.insert(str(lineNo) + ".0", sentence + '\n')
 
-                for ent_val in entities:
-                    start = ent_val[0]
-                    end = ent_val[1]
-                    label = ent_val[2]
-                    if label in self.tags:
-                        self.text.tag_add(label, str(lineNo) + "." + str(start), str(lineNo) + "." + str(end))
-                    else:
-                        self.text.tag_add("highlight", str(lineNo) + "." + str(start), str(lineNo) + "." + str(end))
+            annotation = train_data[0]
+            sentence = annotation[0]
+            entities = annotation[1]['entities']
 
-                lineNo = lineNo + 1
+            self.text.insert("1.0", sentence + '\n')
 
-                '''
-                
-                
-            
-            
-            else:
-                # Get page number
-                page_num = self.pageEntry.get()
-                if not page_num.isdigit():
-                    self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
-                    page_num = 1
-                self.page_number = int(page_num)
+            # Update variable that holds number of lines in textbox. You need this update
+            # for highlight_ent to work
+            self.update_scrollText_line_content_index()
 
-                # Extract text from pdf while maintaining layout
-                control = TextControl(mode="physical")
+            for ent_val in entities:
+                self.highlight_ent(ent_val[0],ent_val[1], ent_val[2])
 
-                page = self.pdf_document[self.page_number - 1]
-                txt = page.text(control=control)
-                self.text.insert("1.0",txt)
-                print("type(txt):",type(txt))
+            print("self.annotation_dict=",self.annotation_dict)
 
-                sent_list = list(self.annotation_dict.keys())
-                sent_temp = sent_list[0]
-                print("sent_list [0]:", sent_temp)
-                print("page.find_text(sent_temp):",page.find_text(sent_temp))
-                line20 = self.text.get("20.0", "20.end").split(".")
-                print("line20[0]:", line20[0])
-
-                doc = self.tag_ner_with_spacy(txt)
-                '
-                for ent in doc.ents:
-                    print(ent.text, ent.start_char, ent.end_char, ent.label_)
-                
-                print("---------")
-                #print(doc.text)
-                lines = txt.splitlines()
-                print(lines[19])
-                print("---------")
-
-                print("\n--------- START")
-                x = 0
-                for sent in doc.sents:
-                    if x > 2 and x < 10:
-                        print(sent.text,"|")
-                    x = x + 1
-                print("--------- END")
-
-
-
-            
-             # Delete contents and reset line number 
-            self.text.delete(1.0, tk.END)
-            lineNo = 1
-            
-            lineNo = 1
-            for sent in self.sentences:
-                annotation_exists = self.annotation_dict.get(sent,False)
-                if annotation_exists:
-                    # Add sentence to text box
-                    self.text.insert(str(lineNo)+".0", sent+'\n')
-
-                    # Update dictionary containing current annotations
-                    annot_entry = [sent,annotation_exists]
-                    new_cust_ents_dict[lineNo] = annot_entry
-                    #self.cust_ents_dict[lineNo][1] = annotation_exists
-
-                    for ent in annotation_exists:
-                        start = ent[0]
-                        end = ent[1]
-                        label = ent[2]
-                        if (label in self.tags):
-                            self.text.tag_add(label, str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
-                        else:
-                            self.text.tag_add("highlight", str(lineNo)+"." + str(start),str(lineNo)+"."+ str(end))
-                else:
-                    self.text.insert(str(lineNo)+".0", sent+'\n')
-                lineNo = lineNo + 1
-        self.cust_ents_dict = new_cust_ents_dict
-        '''
 
 
     def highlight_text(self):
@@ -890,7 +804,12 @@ class CropNerGUI:
             date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
             filename = file_prefix + "_" + date_time + ".json"
         else:
-            filename = self.annotation_file.name
+            if isinstance(self.annotation_file, str):
+                filename = self.annotation_file
+            else:
+                filename = self.annotation_file.name
+
+
 
         url = self.source_entry.get()
         ann_train_data = []
