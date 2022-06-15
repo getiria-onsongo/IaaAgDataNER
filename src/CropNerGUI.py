@@ -101,9 +101,7 @@ class CropNerGUI:
         self.spaceLabel.pack(side=tk.LEFT)
         self.clearTag_btn = tk.Button(self.topframe, text="Remove-Tag", command=partial(self.remove_tag))
         self.clearTag_btn.pack(side=tk.LEFT)
-        self.pretagSelection_btn = tk.Button(self.topframe, text="Pre-Tag Selection", command=partial(self.pre_tag, "Selection"))
-        self.pretagSelection_btn.pack(side=tk.LEFT)
-        self.pretagPage_btn = tk.Button(self.topframe, text="Pre-Tag Page", command=partial(self.pre_tag, "Page"))
+        self.pretagPage_btn = tk.Button(self.topframe, text="Pre-Tag Page", command=self.pre_tag)
         self.pretagPage_btn.pack(side=tk.LEFT)
 
         self.cust_ent_frame = tk.Frame(self.rootWin)
@@ -452,19 +450,58 @@ class CropNerGUI:
                     lineNo = lineNo + 1
             '''
 
-    def pre_tag(self, selection):
-        """ Pre-tag selected content or all the text in text box with NER tags. """
+    def update_scrollText_line_content_index(self):
+        """ Add documentation"""
+        # Trying to figure out where entities are on scrollTextbox is a little tricky because tKinter uses newline
+        # characters to split text. Here we are keeping track of how many characters appear before a line in the
+        # GUI. This should make it easier to figure out where a token is given its
+        # start and end indices. Given (Steveland/Luther//Wintermalt 1001 1029 PED)  named entity, it is 1001, 1029
+        input_text = self.text.get(1.0, "end")
+        lines = input_text.splitlines()
+        self.num_page_lines = len(lines)
+        line_no = 0
+        num_char = 0
+        for line in lines:
+            line_len = len(line)
+            interval = (num_char, num_char + line_len)
+            self.scrollText_line_content_index[line_no] = interval
+            num_char = num_char + line_len + 1  # The 1 we are adding is for newline character
+            line_no = line_no + 1
 
+    def highlight_ent(self, ent):
+        """ Add documentation """
+        line_start = -1
+        char_start = -1
+        line_end = -1
+        char_end = -1
+        # Loop through lines in the text field and find where this tag is.
+        for key, value in self.scrollText_line_content_index.items():
+            (start, end) = value
+            if (ent.start_char >= start):
+                line_start = key + 1
+                char_start = ent.start_char - start
+            if (ent.end_char <= end and line_start > 0):
+                line_end = key + 1
+                ent_num_char = ent.end_char - ent.start_char
+                if (line_start == line_end):
+                    char_end = char_start + ent_num_char
+                else:
+                    char_end = ent.end_char - start
+                break
+
+        self.text.tag_add(ent.label_, str(line_start) + "." + str(char_start), str(line_end) + "." + str(char_end))
+
+    def pre_tag(self):
+        """ Pre-tag selected content or all the text in text box with NER tags. """
+        input_text = None
         # Clear warning message, if one exists
         self.msg.config(text="")
         if self.model_dir is None:
             self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
-        elif self.pdf_document is None:
-            self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
-            self.LoadPDF()
         else:
-            # Reset annotation dictionary
-            self.cust_ents_dict = {}
+            if self.pdf_document is None:
+                self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
+                self.LoadPDF()
 
             # Get page number
             page_num = self.pageEntry.get()
@@ -482,21 +519,11 @@ class CropNerGUI:
             input_text = page.text(control=control)
             self.text.insert("1.0", input_text)
 
-            # Trying to figure out where entities are on scrollTextbox is a little tricky because tKinter uses newline
-            # characters to split text. Here we are keeping track of how many characters appear before a line in the 
-            # GUI. This should make it easier to figure out where a token is given its
-            # start and end indices. Given (Steveland/Luther//Wintermalt 1001 1029 PED)  named entity, it is 1001, 1029
-            lines = input_text.splitlines()
-            self.num_page_lines = len(lines)
-            line_no = 0
-            num_char = 0
-            for line in lines:
-                line_len = len(line)
-                interval = (num_char, num_char+line_len)
-                self.scrollText_line_content_index[line_no] = interval
-                num_char = num_char + line_len + 1  # The 1 we are adding is for newline character
-                line_no = line_no + 1
+            # Reset annotation dictionary
+            self.cust_ents_dict = {}
 
+            # Update variable that holds number of lines in textbox
+            self.update_scrollText_line_content_index()
             #for key, value in self.scrollText_line_content_index.items():
             #    print(key,":",value)
 
@@ -504,38 +531,9 @@ class CropNerGUI:
 
             for ent in doc.ents:
                 if (ent.label_ in self.tags): # NER is in our list of custom tags
-                    # print("\n\n----------------- START IF")
-                    # Find where it is in the text boox and highlight it.
-                    # print("ENT:",ent.text, ent.start_char, ent.end_char,ent.label_)
-                    index = self.tags.index(ent.label_)
-                    ner_tag=self.tags[index]
-                    color = self.colors[index]
-                    line_start = -1
-                    char_start = -1
-                    line_end = -1
-                    char_end = -1
-                    # Loop through lines in the text field and find where this tag is.
-                    for key, value in self.scrollText_line_content_index.items():
-                        (start,end) = value
-                        if(ent.start_char >= start):
-                            line_start = key + 1
-                            char_start = ent.start_char - start
-                        if(ent.end_char <= end and line_start > 0):
-                            line_end = key + 1
-                            ent_num_char = ent.end_char - ent.start_char
-                            if(line_start == line_end):
-                                char_end = char_start + ent_num_char
-                            else:
-                                char_end = ent.end_char - start
-                            #print(self.text.get(str(line_start) + ".0", str(line_end) + ".end"))
-                            #print("tag=",self.text.get(str(line_start) + "."+str(char_start), str(line_end) + "."+str(char_end)))
-                            break
-
-                    #print("----------------- END IF")
-
-                    self.text.tag_add(ent.label_, str(line_start) + "."+str(char_start),str(line_end) + "."+str(char_end))
-
-                    if (self.cust_ents_dict.get(self.page_number, False)):
+                    # index = self.tags.index(ent.label_) # Find index for an element in a list
+                    self.highlight_ent(ent)
+                    if self.cust_ents_dict.get(self.page_number, False):
                         self.cust_ents_dict[self.page_number].append((ent.start_char, ent.end_char, ent.label_))
                     else:
                         self.cust_ents_dict[self.page_number] = [(ent.start_char, ent.end_char, ent.label_)]
@@ -544,7 +542,7 @@ class CropNerGUI:
             if (self.cust_ents_dict.get(self.page_number, False)):
                 tags = self.cust_ents_dict[self.page_number]
                 self.cust_ents_dict[self.page_number] = [input_text, tags]
-            # HERE: UPDATED BUT DID NOT TEST THIS FUNCTION
+
 
         #for key, value in self.cust_ents_dict.items():
         #    print(key,":",value)
@@ -740,27 +738,32 @@ class CropNerGUI:
             # Reset dictionary containing current annotations
             new_cust_ents_dict = {}
 
-            if self.pdf_document is None:
-                # If user is trying to annotate and a PDF file has not been annotated, we will make the
-                # assumption they are just reviewing annotations in the json file.
-                # Delete contents and reset line number
-                self.text.delete(1.0, tk.END)
-                lineNo = 1
+            # Empty text box so we can load annotations
+            self.text.delete(1.0, tk.END)
+            lineNo = 1
 
-                # Review annotation
-                for annotation in train_data:
-                    sentence = annotation[0]
-                    entities = annotation[1]['entities']
-                    self.text.insert(str(lineNo) + ".0", sentence + '\n')
-                    for ent in entities:
-                        start = ent[0]
-                        end = ent[1]
-                        label = ent[2]
-                        if (label in self.tags):
-                            self.text.tag_add(label, str(lineNo) + "." + str(start), str(lineNo) + "." + str(end))
-                        else:
-                            self.text.tag_add("highlight", str(lineNo) + "." + str(start), str(lineNo) + "." + str(end))
-                    lineNo = lineNo + 1
+            # Load  annotation
+            for annotation in train_data:
+                sentence = annotation[0]
+                entities = annotation[1]['entities']
+                self.text.insert(str(lineNo) + ".0", sentence + '\n')
+
+                for ent_val in entities:
+                    start = ent_val[0]
+                    end = ent_val[1]
+                    label = ent_val[2]
+                    if label in self.tags:
+                        self.text.tag_add(label, str(lineNo) + "." + str(start), str(lineNo) + "." + str(end))
+                    else:
+                        self.text.tag_add("highlight", str(lineNo) + "." + str(start), str(lineNo) + "." + str(end))
+
+                lineNo = lineNo + 1
+
+                '''
+                
+                
+            
+            
             else:
                 # Get page number
                 page_num = self.pageEntry.get()
@@ -785,10 +788,10 @@ class CropNerGUI:
                 print("line20[0]:", line20[0])
 
                 doc = self.tag_ner_with_spacy(txt)
-                ''''
+                '
                 for ent in doc.ents:
                     print(ent.text, ent.start_char, ent.end_char, ent.label_)
-                '''
+                
                 print("---------")
                 #print(doc.text)
                 lines = txt.splitlines()
@@ -805,7 +808,7 @@ class CropNerGUI:
 
 
 
-            '''
+            
              # Delete contents and reset line number 
             self.text.delete(1.0, tk.END)
             lineNo = 1
@@ -880,18 +883,21 @@ class CropNerGUI:
 
     def continue_func(self, save_choice):
         """" Add comment """
+        filename = None
         if save_choice == 'copy':
             file_prefix = self.raw_file.name.split(".")[0]
             now = datetime.now()  # current date and time
             date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-            self.annotation_file = file_prefix + "_" + date_time + ".json"
+            filename = file_prefix + "_" + date_time + ".json"
+        else:
+            filename = self.annotation_file.name
 
         url = self.source_entry.get()
-        train_data = []
+        ann_train_data = []
 
         # if(os.path.isfile(output_filename) # If you want to check if a file exists
 
-        if (len(self.cust_ents_dict) == 0):
+        if len(self.cust_ents_dict) == 0:
             self.msg.config(text="Warning!! No annotations to save.", foreground="red")
         else:
             for lineNo in self.cust_ents_dict:
@@ -900,9 +906,9 @@ class CropNerGUI:
                 ents_value = text_ents[1]
                 ents_value.sort()
                 ents = {'entities': ents_value}
-                train_data.append((text_value, ents))
-            train_dict = mixed_type_2_dict(train_data, self.page_number, self.pdf_name)
-            dict_2_json(train_dict, self.annotation_file)
+                ann_train_data.append((text_value, ents))
+            ann_train_dict = mixed_type_2_dict(ann_train_data, self.page_number, self.pdf_name)
+            dict_2_json(ann_train_dict, filename)
 
         # Hide buttons
         self.continue_btn.pack_forget()
@@ -917,19 +923,24 @@ class CropNerGUI:
 
     def file_save(self):
         """ Save current annotation"""
+        filename = None
         if self.annotation_file is None:
-            self.annotation_file = self.file_prefix + "_page_"+self.page_number+".json"
+            self.annotation_file = self.file_prefix + "_pg"+str(self.page_number)+".json"
             self.msg.config(text="The file name shown in the text box will be used. Edit the name and optionally enter meta-data in the fields provided and press 'Continue' to Save.", foreground="red",anchor="w")
+            self.continue_btn.pack(side=tk.LEFT)
         else:
             self.msg.config(text="WARNING!! You are about to overwrite your annotation file. Select 'Continue' to overwite or 'Create Copy' \n and optionally enter meta-data in the fields provided.",foreground="red", anchor="w")
+            self.continue_btn.pack(side=tk.LEFT)
+            self.copy_btn.pack(side=tk.LEFT)
 
-        self.continue_btn.pack(side=tk.LEFT)
-        self.copy_btn.pack(side=tk.LEFT)
         self.ann_file_entry.delete(0, tk.END)
-        self.ann_file_entry.insert(0, self.annotation_file.name)
+        if isinstance(self.annotation_file, str):
+            self.ann_file_entry.insert(0, self.annotation_file)
+        else:
+            self.ann_file_entry.insert(0, self.annotation_file.name)
+
         self.ann_file_label.pack(side=tk.LEFT)
         self.ann_file_entry.pack(side=tk.LEFT)
-
         self.source_label.pack(side=tk.LEFT)
         self.source_entry.pack(side=tk.LEFT)
 
