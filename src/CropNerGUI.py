@@ -194,6 +194,11 @@ class CropNerGUI:
         self.continue_btn.pack(side=tk.LEFT)
         self.continue_btn.pack_forget()
 
+        # Continue button
+        self.overwrite_btn = tk.Button(self.msg_frame, text="Overwrite", width=10,command=partial(self.continue_func, "save"))
+        self.overwrite_btn.pack(side=tk.LEFT)
+        self.overwrite_btn.pack_forget()
+
         self.copy_btn = tk.Button(self.msg_frame, text="Create Copy", width=10, command=partial(self.continue_func, "copy"))
         self.copy_btn.pack(side=tk.LEFT)
         self.copy_btn.pack_forget()
@@ -236,9 +241,6 @@ class CropNerGUI:
 
         self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=20,command=partial(self.open_file,"json"))
         self.annotation_btn.pack(side=tk.LEFT)
-
-        self.review_btn = tk.Button(self.open_frame, text="Review Annotations", command=self.ReviewAnnotations)
-        self.review_btn.pack(side=tk.LEFT)
 
         # Font +
         self.font_plus = tk.Button(self.open_frame, text="Font +", width=10, command=self.font_plus)
@@ -366,6 +368,7 @@ class CropNerGUI:
 
         if file_type == "json":
             self.annotation_file = f
+            self.ReviewAnnotations()
         elif file_type == "pdf":
             self.raw_file=f
         else:
@@ -688,9 +691,8 @@ class CropNerGUI:
         selection_start =  self.scrollText_line_content_index[selection_line-1][0] + tmp_selection_start
         selection_end = self.scrollText_line_content_index[selection_line-1][0] + tmp_selection_end
 
-        new_cust_ents_dict = {}
         new_ents = []
-        tag = None
+        overlapping_tags = []
         input_text = self.cust_ents_dict[self.chunk][0]
         entities = self.cust_ents_dict[self.chunk][1]
 
@@ -699,9 +701,12 @@ class CropNerGUI:
             if not self.overlap([selection_start,selection_end],[start, end]):
                 new_ents.append((start, end, label))
             else:
-                tag = label
-
-        self.text.tag_remove(tag, "sel.first", "sel.last")
+                overlapping_tags.append(label)
+        if len(overlapping_tags) == 0:
+            self.msg.config(text="Warning!! It appears the region you selected ("+str(selection_start)+"-"+str(selection_end)+" did not overlap with a tag.", foreground="red")
+        else:
+            for tag in overlapping_tags:
+                self.text.tag_remove(tag, "sel.first", "sel.last")
 
         new_ents.sort()
         self.cust_ents_dict[self.chunk] = [input_text, new_ents]
@@ -742,7 +747,6 @@ class CropNerGUI:
             self.cust_ents_dict[self.chunk] = [annotation[0],annotation[1]['entities']]
             sentence = annotation[0]
             entities = annotation[1]['entities']
-
 
             self.text.insert("1.0", sentence + '\n')
 
@@ -810,9 +814,6 @@ class CropNerGUI:
 
         url = self.source_entry.get()
 
-
-        # if(os.path.isfile(output_filename) # If you want to check if a file exists
-
         if len(self.cust_ents_dict) == 0:
             self.msg.config(text="Warning!! No annotations to save.", foreground="red")
         else:
@@ -823,6 +824,7 @@ class CropNerGUI:
             dict_2_json(ann_train_dict, filename)
 
         # Hide buttons
+        self.overwrite_btn.pack_forget()
         self.continue_btn.pack_forget()
         self.copy_btn.pack_forget()
         self.ann_file_label.pack_forget()
@@ -835,13 +837,23 @@ class CropNerGUI:
 
     def file_save(self):
         """ Save current annotation"""
+        # Check to see if user is trying to overwrite a file
         if self.annotation_file is None:
-            self.annotation_file = self.file_prefix + "_pg"+str(self.page_number)+".json"
-            self.msg.config(text="The file name shown in the text box will be used. Edit the name and optionally enter meta-data in the fields provided and press 'Continue' to Save.", foreground="red",anchor="w")
-            self.continue_btn.pack(side=tk.LEFT)
+            # Check to make sure value has been initialized
+            if self.file_prefix is None:
+                self.file_prefix = "annotation_file"
+            self.annotation_file = self.file_prefix + "_pg" + str(self.page_number) + ".json"
+            if os.path.isfile(self.annotation_file):
+                self.msg.config( text="WARNING!! You are about to overwrite your annotation file. Click 'Overwrite' to overwite or 'Create Copy' \n and optionally enter meta-data in the fields provided.",foreground="red", anchor="w")
+                self.overwrite_btn.pack(side=tk.LEFT)
+                self.copy_btn.pack(side=tk.LEFT)
+            else:
+                self.msg.config(text="The file name shown in the text box will be used. Edit the name and optionally enter meta-data in the fields provided and click 'Continue' to Save.", foreground="red",anchor="w")
+                self.continue_btn.pack(side=tk.LEFT)
+
         else:
-            self.msg.config(text="WARNING!! You are about to overwrite your annotation file. Select 'Continue' to overwite or 'Create Copy' \n and optionally enter meta-data in the fields provided.",foreground="red", anchor="w")
-            self.continue_btn.pack(side=tk.LEFT)
+            self.msg.config(text="WARNING!! You are about to overwrite your annotation file. Click 'Overwrite' to overwite or 'Create Copy' \n and optionally enter meta-data in the fields provided.",foreground="red", anchor="w")
+            self.overwrite_btn.pack(side=tk.LEFT)
             self.copy_btn.pack(side=tk.LEFT)
 
         self.ann_file_entry.delete(0, tk.END)
@@ -854,9 +866,6 @@ class CropNerGUI:
         self.ann_file_entry.pack(side=tk.LEFT)
         self.source_label.pack(side=tk.LEFT)
         self.source_entry.pack(side=tk.LEFT)
-
-
-
 
     def nextPage(self):
         """ Load the next page"""
