@@ -27,3 +27,16 @@ ExperimentalCode/*
 .idea/*
 src/.idea/*
 .ipynb_checkpoints/*
+<<<<<<< HEAD
+=======
+src/code_snippets.py
+ner_2021*
+ner_2021_08_training_data.jsonl
+ner_2021_08_validate_data.jsonl
+senter_ner_2021*
+env_ner/*
+env_medacy/*
+Pipfile
+Pipfile.lock
+.python-version
+>>>>>>> 3a4905c (fixed gitignore issues with cache)
