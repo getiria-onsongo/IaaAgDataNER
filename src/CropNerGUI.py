@@ -371,6 +371,8 @@ class CropNerGUI:
             self.ReviewAnnotations()
         elif file_type == "pdf":
             self.raw_file=f
+            self.LoadPage()
+
         else:
             self.msg.config(text="Warning!! Please select a valid (pdf or json) file.", foreground="red")
 
@@ -456,7 +458,7 @@ class CropNerGUI:
         input_text = self.text.get(1.0, "end")
         lines = input_text.splitlines()
         self.num_page_lines = len(lines)
-        line_no = 0
+        line_no = 1
         num_char = 0
         for line in lines:
             line_len = len(line)
@@ -475,10 +477,10 @@ class CropNerGUI:
         for key, value in self.scrollText_line_content_index.items():
             (start, end) = value
             if start_char >= start:
-                line_start = key + 1
+                line_start = key
                 char_start = start_char - start
             if end_char <= end and line_start > 0:
-                line_end = key + 1
+                line_end = key
                 ent_num_char = end_char - start_char
                 if line_start == line_end:
                     char_end = char_start + ent_num_char
@@ -575,11 +577,16 @@ class CropNerGUI:
             h_end = int(self.text.index("sel.last").split(".")[1])
 
             line_no = int(self.text.index("sel.first").split(".")[0])
-            print("lineNumber=", line_no)
-            print("line_interval=", self.scrollText_line_content_index[line_no])
+            ent_char_start = self.scrollText_line_content_index[line_no][0] + h_start
+            ent_char_end = self.scrollText_line_content_index[line_no][0] + h_end
+
+            print("self.scrollText_line_content_index[line_no]=", self.scrollText_line_content_index[line_no])
+            print("h_start,h_end=",h_start,h_end)
+            print("ent_char_start,ent_char_end",ent_char_start,ent_char_end)
+
 
             if self.cust_ents_dict.get(self.chunk,False):
-                # Check to see if the current line of text matches the one we have in the annotation dictionary.
+                # Check to see if the current text matches the one we have in the annotation dictionary.
                 # If not, warn the user about the conflict and make the update
                 if input_text != self.cust_ents_dict[self.chunk][0]:
                     self.msg.config(text="Warning!! Text in annotation dictionary was different. It has been updated",
@@ -590,20 +597,21 @@ class CropNerGUI:
                 # delete the existing tag. SpaCy does not allow NER tags to overlap.
                 new_ents = []
                 for (start, end, label) in self.cust_ents_dict[self.chunk][1]:
-                    if not self.overlap([h_start, h_end], [start, end]):
+                    if not self.overlap([ent_char_start, ent_char_end], [start, end]):
                         new_ents.append((start, end, label))
                 self.cust_ents_dict[self.chunk][1] = new_ents
 
                 # Add the new NER tag into the dictionary
-                self.cust_ents_dict[self.chunk][1].append((h_start, h_end, tagLabel))
+                self.cust_ents_dict[self.chunk][1].append((ent_char_start,ent_char_end, tagLabel))
             else:
-                self.cust_ents_dict[self.chunk] = [input_text, [(h_start, h_end, tagLabel)]]
+                self.cust_ents_dict[self.chunk] = [input_text, [(ent_char_start,ent_char_end, tagLabel)]]
 
             # Highlight the new NER  tag
             self.text.tag_add(tagLabel, "sel.first", "sel.last")
 
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
+        print("ENTs=",self.cust_ents_dict[self.chunk][1])
 
     def remove_tag(self):
         """ Delete selection from annotations. """
@@ -613,8 +621,8 @@ class CropNerGUI:
         selection_line = int(self.text.index("sel.first").split(".")[0])
         tmp_selection_start = int(self.text.index("sel.first").split(".")[1])
         tmp_selection_end = int(self.text.index("sel.last").split(".")[1])
-        selection_start =  self.scrollText_line_content_index[selection_line-1][0] + tmp_selection_start
-        selection_end = self.scrollText_line_content_index[selection_line-1][0] + tmp_selection_end
+        selection_start =  self.scrollText_line_content_index[selection_line][0] + tmp_selection_start
+        selection_end = self.scrollText_line_content_index[selection_line][0] + tmp_selection_end
 
         new_ents = []
         overlapping_tags = []
