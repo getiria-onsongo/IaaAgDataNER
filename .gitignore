@@ -27,11 +27,10 @@ ExperimentalCode/*
 .idea/*
 src/.idea/*
 .ipynb_checkpoints/*
-.env
-env/*
-.ner_2021_08_mode
+env_ner/*
+env_medacy/*
+Pipfile
+Pipfile.lock
 ner_2021_08_model/*
-.senter_ner_2021_08_model
 senter_ner_2021_08_model/*
-.ner_2021_08_model
 ner_2021_08/*
