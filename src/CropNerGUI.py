@@ -542,72 +542,6 @@ class CropNerGUI:
                 tags = self.cust_ents_dict[self.page_number]
                 self.cust_ents_dict[self.page_number] = [input_text, tags]
 
-
-        #for key, value in self.cust_ents_dict.items():
-        #    print(key,":",value)
-
-
-    def pre_tag_old(self, selection):
-        """ Pre-tag selected content or all the text in text box with NER tags. """
-
-        # Clear warning message, if one exists
-        self.msg.config(text="")
-        if self.model_dir is None:
-            self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
-        elif len(self.text.tag_ranges("sel")) == 0:
-            self.msg.config(text="Warning!! No text was selected.", foreground="red")
-        else:
-            # Reset annotation dictionary
-            self.cust_ents_dict = {}
-
-            # By default, start annotating the first line.
-            firstLineNo = 1
-
-            # Get the line number for the beginning and end of the text.
-            if (selection == "Selection"):
-                firstLineNo = int(self.text.index("sel.first").split(".")[0])
-                lastLineIndex = int(self.text.index('sel.last').split(".")[0])
-            else:
-                # firstLineNo will remain the default value set above.
-                lastLineIndex = int(self.text.index('end').split(".")[0])
-
-            #print("firstLineNo,lastLineIndex",firstLineNo,lastLineIndex)
-            # Check to see if we have any text. We do not expect a sentence to
-            # be less than 5 characters. We will use 5 as the threshold.
-            text = self.text.get(str(firstLineNo)+".0", self.text.index('end'))
-            if(len(text) < 5):
-                self.msg.config(text="Text field appears to be empty. Please load or enter text to Pre-Tag", foreground="red")
-            else:
-                # Start annotating the line before the selection.
-                if(firstLineNo > 1):
-                    firstLineNo = firstLineNo - 1
-                # Loop through each of these line
-                for lineIndex in range(firstLineNo, lastLineIndex, 1):
-                    lineNo = lineIndex + 1
-                    lineNo_str = str(lineNo)
-                    input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
-                    doc = self.tag_ner_with_spacy(input_text)
-
-                    for ent in doc.ents:
-                        if (ent.label_ in self.tags):
-                            # Add tag to crop or cvar if it is one of the two.
-                            ent_value = input_text[ent.start_char:ent.end_char].strip().lower()
-                            if(ent.label_ == 'CROP'):
-                                self.add_to_dict(self.crop_cnt,ent_value)
-
-                            if (ent.label_ == 'CVAR'):
-                                self.add_to_dict(self.cvar_cnt, ent_value)
-
-                            self.text.tag_add(ent.label_, lineNo_str+"." + str(ent.start_char), lineNo_str+"." + str(ent.end_char))
-                            if (self.cust_ents_dict.get(lineNo, False)):
-                                self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
-                            else:
-                                self.cust_ents_dict[lineNo] = [(ent.start_char, ent.end_char, ent.label_)]
-
-                    if (self.cust_ents_dict.get(lineNo, False)):
-                        tags = self.cust_ents_dict[lineNo]
-                        self.cust_ents_dict[lineNo] = [input_text,tags]
-
     def overlap(self, interva1, interval2):
         """ Check to see if two intervals overlap. """
         overlap = False
@@ -617,7 +551,7 @@ class CropNerGUI:
         interval2start = interval2[0]
         interval2end = interval2[1]
 
-        if(interval2start >= interva1start and interval2start <= interva1end):
+        if (interval2start >= interva1start and interval2start <= interva1end):
             overlap = True
         elif (interval2end >= interva1start and interval2end <= interva1end):
             overlap = True
@@ -630,52 +564,43 @@ class CropNerGUI:
         # Clear warning message, if one exists
         self.msg.config(text="")
         try:
-            # Get start and end char positions
-            lineNo = int(self.text.index("sel.first").split(".")[0])
-            lineNo_str = str(lineNo)
-            input_text = self.text.get(lineNo_str + ".0", lineNo_str + ".end")
+            # Get text
+            input_text = input_text = self.text.get(1.0, "end")
 
+            # Update variable that holds number of lines in textbox.
+            self.update_scrollText_line_content_index()
+
+            # Get start and end char positions
             h_start = int(self.text.index("sel.first").split(".")[1])
             h_end = int(self.text.index("sel.last").split(".")[1])
 
-            if (self.cust_ents_dict.get(lineNo,False)):
+            line_no = int(self.text.index("sel.first").split(".")[0])
+            print("lineNumber=", line_no)
+            print("line_interval=", self.scrollText_line_content_index[line_no])
+
+            if self.cust_ents_dict.get(self.chunk,False):
                 # Check to see if the current line of text matches the one we have in the annotation dictionary.
                 # If not, warn the user about the conflict and make the update
-                if(input_text != self.cust_ents_dict[lineNo][0]):
-                    self.msg.config(text="Warning!! Text in annotation dictionary was different. It has been updated", foreground="red")
-                    self.cust_ents_dict[lineNo][0] = input_text
+                if input_text != self.cust_ents_dict[self.chunk][0]:
+                    self.msg.config(text="Warning!! Text in annotation dictionary was different. It has been updated",
+                                    foreground="red")
+                    self.cust_ents_dict[self.chunk][0] = input_text
 
                 # Check if selected area overlaps with another NER tag. If it does,
                 # delete the existing tag. SpaCy does not allow NER tags to overlap.
                 new_ents = []
-                for (start, end, label) in self.cust_ents_dict[lineNo][1]:
-                    if (not self.overlap([h_start, h_end], [start, end])):
+                for (start, end, label) in self.cust_ents_dict[self.chunk][1]:
+                    if not self.overlap([h_start, h_end], [start, end]):
                         new_ents.append((start, end, label))
-                self.cust_ents_dict[lineNo][1] = new_ents
+                self.cust_ents_dict[self.chunk][1] = new_ents
 
                 # Add the new NER tag into the dictionary
-                self.cust_ents_dict[lineNo][1].append((h_start, h_end, tagLabel))
+                self.cust_ents_dict[self.chunk][1].append((h_start, h_end, tagLabel))
             else:
-                self.cust_ents_dict[lineNo] = [input_text,[(h_start,h_end,tagLabel)]]
+                self.cust_ents_dict[self.chunk] = [input_text, [(h_start, h_end, tagLabel)]]
 
             # Highlight the new NER  tag
             self.text.tag_add(tagLabel, "sel.first", "sel.last")
-            #self.cust_ents.append((h_start,h_end,tagLabel))
-
-            # Currently, this tool is designed to do crop and variety based annotation.
-            # Named entities will be linked to a crop and a variety. If multiple entries
-            # exist, the most common term will be used. If there are ties, the first one
-            # encountered will be used.
-
-            # Add tag to crop or cvar if it is one of the two.
-            ent_value = input_text[h_start:h_end].lower()
-            # Remove leading and trailing spaces if the user selected spaces
-            ent_value = ent_value.strip()
-            if (tagLabel == 'CROP'):
-                self.add_to_dict(self.crop_cnt, ent_value)
-
-            if (tagLabel == 'CVAR'):
-                self.add_to_dict(self.cvar_cnt, ent_value)
 
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
@@ -703,7 +628,8 @@ class CropNerGUI:
             else:
                 overlapping_tags.append(label)
         if len(overlapping_tags) == 0:
-            self.msg.config(text="Warning!! It appears the region you selected ("+str(selection_start)+"-"+str(selection_end)+" did not overlap with a tag.", foreground="red")
+            self.msg.config(text="Warning!! It appears the region you selected ("+str(selection_start)+
+                                 "-"+str(selection_end)+" did not overlap with a tag.", foreground="red")
         else:
             for tag in overlapping_tags:
                 self.text.tag_remove(tag, "sel.first", "sel.last")
@@ -715,7 +641,8 @@ class CropNerGUI:
     def show_ents(doc):
         if doc.ents:
             for ent in doc.ents:
-                print(ent.text + ' - ' + str(ent.start_char) + ' - ' + str(ent.end_char) + ' - ' + ent.label_ + ' - ' + str(spacy.explain(ent.label_)))
+                print(ent.text + ' - ' + str(ent.start_char) + ' - ' + str(ent.end_char) + ' - ' + ent.label_ + ' - ' +
+                      str(spacy.explain(ent.label_)))
             else:
                  print('No named entities found.')
 
