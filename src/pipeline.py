@@ -1,7 +1,5 @@
 
 from agParse import *
-from tkinterColorList import  *
-from datetime import datetime
 from functools import partial
 from json2py import *
 import os.path
@@ -9,33 +7,94 @@ from py2json import *
 import PyPDF2
 import re
 import random
-import tkinter as tk
-from tkinter import filedialog as fd
 from collections import defaultdict
-from tkinter.scrolledtext import ScrolledText
 import os
 import sys
+import glob
+from conversions import conversion
 
 # only works with a single line of text
 # need to multiline tagging & inputing whole files & dirs
 
 class Pipeline:
 
-    def __init__(self, model_dir, text):
+    def __init__(self, file_dir, model_dir, spacy_model_name="en_core_web_lg", tags=["ALAS","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]):
+        self.file_dir = file_dir
         self.model_dir = model_dir
+        self.spacy_model_name = spacy_model_name # spacy model to use for pos
+        self.tags = tags
+        self.nlp_pos = spacy.load(self.spacy_model_name)
         self.nlp = None
         self.cust_ents_dict = {}
-        self.text = text
-        self.tags=["highlight","default_color_tag","ALAS","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
-        self.nlp_pos = spacy.load("en_core_web_lg") # spacy model to use for pos
         self.crop_cnt = {}
         self.cvar_cnt = {}
-
+        self.page_num = 0
 
     def load_model(self):
         self.nlp = spacy.load(self.model_dir)
         self.nlp.add_pipe("compound_trait_entities", after='ner')
 
+    def load_files(self):
+        files = glob.glob("Data/CSU/*.pdf")
+        print(files)
+        for f in files:
+            pdf_file = open(f, mode="rb")
+            pdfReader = PyPDF2.PdfFileReader(pdf_file)
+            page_count = len(pdfReader.pages)
+            page_num = 0
+            while page_num <= page_count:
+                page = pdfReader.getPage(page_num - 1)
+                page_text = page.extractText()
+                page_text = re.sub('\n', '', page_text)
+                page_text = re.sub('\.\s', '.\n', page_text)
+                page_text = re.sub('\s\s', '\n', page_text)
+                self.tag(page_text)
+                json_name = self.file_save(f, "", page_num)
+                bratt_name = f[0:len(f)-4] + "_p" + str(page_num) + "_td_out.ann"
+                conversion(json_name, bratt_name)
+                page_num = page_num + 1
+            pdf_file.close()
+
+
+    def tag(self, text):
+        """ Pre-tag selected content or all the text in text box with NER tags. """
+        # Reset dictionaries
+        self.cust_ents_dict = {}
+        self.crop_cnt = {}
+        self.cvar_cnt = {}
+        lineNo = 0
+        sents = self.get_sents(text, self.nlp_pos)
+        for sent in sents:
+            lineNo = lineNo + 1
+            doc = self.tag_ner_with_spacy(sent.text)
+            for ent in doc.ents:
+                if (ent.label_ in self.tags):
+                    # does pos tagging and expaning the ent span if needed
+                    ent = self.get_pos(ent, self.nlp_pos)
+                    # Add tag to crop or cvar if it is one of the two.
+                    ent_value = text[ent.start_char:ent.end_char].strip().lower()
+                    if(ent.label_ == 'CROP'):
+                        self.add_to_dict(self.crop_cnt,ent_value)
+                    if (ent.label_ == 'CVAR'):
+                        self.add_to_dict(self.cvar_cnt, ent_value)
+                    if (self.cust_ents_dict.get(lineNo, False)):
+                        self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
+                    else:
+                        self.cust_ents_dict[lineNo] = [(ent.start_char, ent.end_char, ent.label_)]
+
+            if (self.cust_ents_dict.get(lineNo, False)):
+                tags = self.cust_ents_dict[lineNo]
+                self.cust_ents_dict[lineNo] = [text,tags]
+
+
+    def get_sents(self, text, nlp):
+        doc = self.nlp_pos(text)
+        return doc.sents
+
+    def tag_ner_with_spacy(self, text):
+        """ Use SpaCy to identify NER in text"""
+        doc = self.nlp(text)
+        return doc
 
     def get_pos(self, ent, nlp):
         '''
@@ -122,39 +181,6 @@ class Pipeline:
                         print()
         return ent
 
-    def tag(self):
-        """ Pre-tag selected content or all the text in text box with NER tags. """
-        # Reset annotation dictionary
-        self.cust_ents_dict = {}
-        input_text = self.text
-        doc = self.tag_ner_with_spacy(input_text)
-        for ent in doc.ents:
-            if (ent.label_ in self.tags):
-                # does pos tagging and expaning the ent span if needed
-                ent = self.get_pos(ent, self.nlp_pos)
-                # Add tag to crop or cvar if it is one of the two.
-                ent_value = input_text[ent.start_char:ent.end_char].strip().lower()
-                if(ent.label_ == 'CROP'):
-                    self.add_to_dict(self.crop_cnt,ent_value)
-                if (ent.label_ == 'CVAR'):
-                    self.add_to_dict(self.cvar_cnt, ent_value)
-                lineNo = 1 # hot fix
-                if (self.cust_ents_dict.get(lineNo, False)):
-                    self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
-                else:
-                    self.cust_ents_dict[lineNo] = [(ent.start_char, ent.end_char, ent.label_)]
-
-        if (self.cust_ents_dict.get(lineNo, False)):
-                tags = self.cust_ents_dict[lineNo]
-                self.cust_ents_dict[lineNo] = [input_text,tags]
-
-
-
-    def tag_ner_with_spacy(self, text):
-        """ Use SpaCy to identify NER in text"""
-        doc = self.nlp(text)
-        return doc
-
 
     def add_to_dict(self, dictionary, ent_value):
         """ Add documentation"""
@@ -164,8 +190,38 @@ class Pipeline:
             dictionary[ent_value] = 1
 
 
+    def file_save(self, name, url, chunk):
+        """ Save annotation as json"""
+        crop = str(self.get_max_dict_value(self.crop_cnt))
+        cvar = str(self.get_max_dict_value(self.cvar_cnt))
+        name_prefix = name[0:len(name)-4]
+        output_filename = name_prefix + "_p" + str(chunk) + "_td_out.json"
+        train_data = []
+        for lineNo in self.cust_ents_dict:
+            text_ents = self.cust_ents_dict[lineNo]
+            text_value = text_ents[0].strip()
+            ents_value = text_ents[1]
+            ents_value.sort()
+            ents = {'entities': ents_value}
+            train_data.append((text_value, ents))
+        train_dict = mixed_type_2_dict(train_data, chunk, name, url, crop, cvar)
+        dict_2_json(train_dict, output_filename)
+        print("saved file")
+        return output_filename
+
+
+    def get_max_dict_value(self, dictionary):
+        """ Add documentation"""
+        maxKey = None
+        maxValue = 0
+        for key, value in dictionary.items():
+            if value > maxValue:
+                maxKey = key
+                maxValue = value
+        return maxKey
+
+
 if __name__ == '__main__':
-    pipeline = Pipeline("senter_ner_2021_08_model/model-best", 'CV-133, PI 653260) hard red winter wheat (Triticum aestivum L.) was')
+    pipeline = Pipeline("Data/UIdaho2019", "senter_ner_2021_08_model/model-best")
     pipeline.load_model()
-    pipeline.tag()
-    print(pipeline.cust_ents_dict)
+    pipeline.load_files()
