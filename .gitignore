@@ -30,6 +30,7 @@ src/.idea/*
 <<<<<<< HEAD
 =======
 src/code_snippets.py
+Data/*
 ner_2021*
 ner_2021_08_training_data.jsonl
 ner_2021_08_validate_data.jsonl
