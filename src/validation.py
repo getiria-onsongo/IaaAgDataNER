@@ -1,22 +1,16 @@
-
-from agParse import *
-from functools import partial
-from json2py import *
 import os.path
-from py2json import *
-import PyPDF2
+from datetime import datetime
 import re
-import random
-from collections import defaultdict
-import os
-import sys
 import glob
+from pyxpdf import Document, Page, Config
+from pyxpdf.xpdf import TextControl
 from conversions import conversion
+from agParse import *
+from json2py import *
+from py2json import *
 
-# only works with a single line of text
-# need to multiline tagging & inputing whole files & dirs
 
-class Pipeline:
+class Validation:
 
     def __init__(self, file_dir, model_dir, spacy_model_name="en_core_web_lg", tags=["ALAS","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]):
         self.file_dir = file_dir
@@ -30,9 +24,11 @@ class Pipeline:
         self.cvar_cnt = {}
         self.page_num = 0
 
+
     def load_model(self):
         self.nlp = spacy.load(self.model_dir)
         self.nlp.add_pipe("compound_trait_entities", after='ner')
+
 
     def process_files(self):
         """
@@ -41,69 +37,44 @@ class Pipeline:
         feature to make sure train/test split is maintained. Need to switch to working
         at page level (issue with pdf reader).
         """
-        files = glob.glob("Data/CSU/*.pdf")
+        files = glob.glob(self.file_dir+"/*.pdf")
         print(files)
         for f in files:
-            pdf_file = open(f, mode="rb")
-            pdfReader = PyPDF2.PdfFileReader(pdf_file)
-            page_count = len(pdfReader.pages)
-            page_num = 0
-            while page_num <= page_count:
-                page = pdfReader.getPage(page_num - 1)
-                page_text = page.extractText()
-                page_text = re.sub('\n', '', page_text)
-                page_text = re.sub('\.\s', '.\n', page_text)
-                page_text = re.sub('\s\s', '\n', page_text)
-                self.tag(page_text)
-                json_name = self.file_save(f, "", page_num)
-                bratt_name = f[0:len(f)-4] + "_p" + str(page_num) + "_td_out.ann"
+            self.cust_ents_dict = {}
+            pdf_document = Document(f)
+            page_number = 1
+            while page_number <= len(pdf_document):
+                self.tag(pdf_document, page_number)
+                json_name = self.file_save(f, "", page_number)
+                bratt_name = f[0:len(f)-4] + "_p" + str(page_number) + "_td_out.ann"
                 conversion(json_name, bratt_name)
-                page_num = page_num + 1
-            pdf_file.close()
+                page_number = page_number + 1
 
 
-    def tag(self, text):
+    def tag(self, pdf_document, page_number):
         """ Pre-tag selected content or all the text in text box with NER tags. """
-        # Reset dictionaries
         self.cust_ents_dict = {}
-        self.crop_cnt = {}
-        self.cvar_cnt = {}
-        lineNo = 0
-        sents = self.get_sents(text, self.nlp_pos)
-        for sent in sents:
-            lineNo = lineNo + 1
-            doc = self.tag_ner_with_spacy(sent.text)
-            for ent in doc.ents:
-                if (ent.label_ in self.tags):
-                    # does pos tagging and expaning the ent span if needed
-                    ent = self.get_pos(ent, self.nlp_pos)
-                    # Add tag to crop or cvar if it is one of the two.
-                    ent_value = text[ent.start_char:ent.end_char].strip().lower()
-                    if(ent.label_ == 'CROP'):
-                        self.add_to_dict(self.crop_cnt,ent_value)
-                    if (ent.label_ == 'CVAR'):
-                        self.add_to_dict(self.cvar_cnt, ent_value)
-                    if (self.cust_ents_dict.get(lineNo, False)):
-                        self.cust_ents_dict[lineNo].append((ent.start_char, ent.end_char, ent.label_))
-                    else:
-                        self.cust_ents_dict[lineNo] = [(ent.start_char, ent.end_char, ent.label_)]
+        control = TextControl(mode="physical")
+        page = pdf_document[page_number - 1]
+        input_text = page.text(control=control)
+        doc = self.tag_ner_with_spacy(input_text)
+        for ent in doc.ents:
+            if (ent.label_ in self.tags):
+                ent = self.get_pos(ent, self.nlp_pos)
+                if self.cust_ents_dict.get(page_number, False):
+                    self.cust_ents_dict[page_number].append((ent.start_char, ent.end_char, ent.label_))
+                else:
+                    self.cust_ents_dict[page_number] = [(ent.start_char, ent.end_char, ent.label_)]
+        if (self.cust_ents_dict.get(page_number, False)):
+            tags = self.cust_ents_dict[page_number]
+            self.cust_ents_dict[page_number] = [input_text, tags]
 
-            if (self.cust_ents_dict.get(lineNo, False)):
-                tags = self.cust_ents_dict[lineNo]
-                self.cust_ents_dict[lineNo] = [text,tags]
-
-
-    def get_sents(self, text, nlp):
-        """
-        likley can remove this soon, just to get line counts / numbers.
-        """
-        doc = self.nlp_pos(text)
-        return doc.sents
 
     def tag_ner_with_spacy(self, text):
         """ Use SpaCy to identify NER in text"""
         doc = self.nlp(text)
         return doc
+
 
     def get_pos(self, ent, nlp):
         """
@@ -119,7 +90,7 @@ class Pipeline:
             label = ent.label_
             # functions that contain rules to expand the entity's span
             ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
-            ent = self.num_combine_ent(doc, current_index, ent, label)
+            # ent = self.num_combine_ent(doc, current_index, ent, label)
         return ent
 
 
@@ -199,38 +170,30 @@ class Pipeline:
             dictionary[ent_value] = 1
 
 
-    def file_save(self, name, url, chunk):
-        """ Simplifed version of GUI save file. """"
-        crop = str(self.get_max_dict_value(self.crop_cnt))
-        cvar = str(self.get_max_dict_value(self.cvar_cnt))
-        name_prefix = name[0:len(name)-4]
-        output_filename = name_prefix + "_p" + str(chunk) + "_td_out.json"
-        train_data = []
-        for lineNo in self.cust_ents_dict:
-            text_ents = self.cust_ents_dict[lineNo]
-            text_value = text_ents[0].strip()
-            ents_value = text_ents[1]
-            ents_value.sort()
-            ents = {'entities': ents_value}
-            train_data.append((text_value, ents))
-        train_dict = mixed_type_2_dict(train_data, chunk, name, url, crop, cvar)
-        dict_2_json(train_dict, output_filename)
-        print("saved file")
+    def file_save(self, pdf_name, url, chunk, copy=False):
+        """ Simplifed version of GUI save file & continue_func. """
+        name_prefix = pdf_name.split(".")[0]
+        output_filename = name_prefix + "_pg" + str(chunk) + "out.json"
+        if os.path.isfile(output_filename):
+            if copy:
+                print("making file copy")
+                now = datetime.now()  # current date and time
+                date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
+                output_filename = name_prefix + "_" + datatime + "out.json"
+            else:
+                print("file will be overwritten")
+
+        if len(self.cust_ents_dict) == 0:
+            print("no annotations to save.")
+        else:
+            input_text = self.cust_ents_dict[chunk][0]
+            entities = self.cust_ents_dict[chunk][1]
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], chunk, pdf_name, url)
+            dict_2_json(ann_train_dict, output_filename)
         return output_filename
 
 
-    def get_max_dict_value(self, dictionary):
-        """ Add documentation"""
-        maxKey = None
-        maxValue = 0
-        for key, value in dictionary.items():
-            if value > maxValue:
-                maxKey = key
-                maxValue = value
-        return maxKey
-
-
 if __name__ == '__main__':
-    pipeline = Pipeline("Data/UIdaho2019", "senter_ner_2021_08_model/model-best")
-    pipeline.load_model()
-    pipeline.load_files()
+    validate = Validation("Data/CSU", "senter_ner_2021_08_model/model-best")
+    validate.load_model()
+    validate.process_files()
