@@ -62,7 +62,7 @@ if __name__ == "__main__":
     #
     # Parse out the arguments and assign them to variables
     #
-    # Usage example: python3 py2json.py temp.txt temp.out  --doc 'BarCvDescLJ11.pdf' --url 'http://smalgrains.ucdavis.edu' --chunk 2 --crop 'barley' --cvar 'eight-twelve'
+    # Usage example: python3 src/py2json.py src/agData.py Data/DavisLJ11/barley_manual_ner.json  --doc 'BarCvDescLJ11.pdf' --url 'http://smalgrains.ucdavis.edu' 
     parser = argparse.ArgumentParser(
         description = "convert python nested lists to JSON",
         epilog = "Example: python3 py2json.py pyInput jsonOutput (optional --doc 'BarCvDescLJ11.pdf' ; --url 'http://smalgrains.ucdavis.edu' ; --chunk 2 ; --crop 'barley' ; --cvar 'eight-twelve'"
