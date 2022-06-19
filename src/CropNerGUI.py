@@ -102,8 +102,10 @@ class CropNerGUI:
         self.spaceLabel.pack(side=tk.LEFT)
         self.clearTag_btn = tk.Button(self.topframe, text="Remove-Tag", command=partial(self.remove_tag))
         self.clearTag_btn.pack(side=tk.LEFT)
-        self.pretagPage_btn = tk.Button(self.topframe, text="Pre-Tag Page", command=self.pre_tag)
+        self.pretagPage_btn = tk.Button(self.topframe, text="Pre-Tag Page", command=partial(self.pre_tag, "page"))
         self.pretagPage_btn.pack(side=tk.LEFT)
+        self.pretagSelection_btn = tk.Button(self.topframe, text="Pre-Tag Selection", command=partial(self.pre_tag, "selection"))
+        self.pretagSelection_btn.pack(side=tk.LEFT)
 
         self.cust_ent_frame = tk.Frame(self.rootWin)
         self.cust_ent_frame.pack(side=tk.TOP,fill="x")
@@ -490,7 +492,7 @@ class CropNerGUI:
 
         self.text.tag_add(label, str(line_start) + "." + str(char_start), str(line_end) + "." + str(char_end))
 
-    def pre_tag(self):
+    def pre_tag(self,selection):
         """ Pre-tag selected content or all the text in text box with NER tags. """
         input_text = None
         # Clear warning message, if one exists
@@ -498,10 +500,7 @@ class CropNerGUI:
         if self.model_dir is None:
             self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
         else:
-            if self.pdf_document is None:
-                self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
-                self.LoadPDF()
-
+            input_text = None
             # Get page number
             page_num = self.pageEntry.get()
             if not page_num.isdigit():
@@ -510,13 +509,20 @@ class CropNerGUI:
             self.page_number = int(page_num)
             self.chunk = self.page_number
 
-            # Extract text from pdf while maintaining layout
-            control = TextControl(mode="physical")
+            if (selection == "selection"):
+                input_text =  self.text.get("sel.first", "sel.last")
+            else:
+                if self.pdf_document is None:
+                    self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
+                    self.LoadPDF()
+
+                # Extract text from pdf while maintaining layout
+                control = TextControl(mode="physical")
+
+                page = self.pdf_document[self.page_number - 1]
+                input_text = page.text(control=control)
 
             self.text.delete(1.0, tk.END)
-
-            page = self.pdf_document[self.page_number - 1]
-            input_text = page.text(control=control)
             self.text.insert("1.0", input_text)
 
             # Reset annotation dictionary
@@ -678,6 +684,7 @@ class CropNerGUI:
             self.text.delete(1.0, tk.END)
 
             # Load  annotation
+            print("size=",len(train_data))
             annotation = train_data[0]
             self.cust_ents_dict[self.chunk] = [annotation[0],annotation[1]['entities']]
             sentence = annotation[0]
