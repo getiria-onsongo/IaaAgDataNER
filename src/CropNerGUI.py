@@ -683,14 +683,28 @@ class CropNerGUI:
             # Empty text box so we can load annotations
             self.text.delete(1.0, tk.END)
 
+            annotated_text = None
+            entities = None
             # Load  annotation
-            print("size=",len(train_data))
-            annotation = train_data[0]
-            self.cust_ents_dict[self.chunk] = [annotation[0],annotation[1]['entities']]
-            sentence = annotation[0]
-            entities = annotation[1]['entities']
+            if len(train_data) > 1:
+                total_num_char = 0
+                annotated_text = ""
+                entities = []
+                for text_annotation in train_data:
+                    annotated_text_tmp = text_annotation[0]
+                    entities_tmp = text_annotation[1]['entities']
+                    for ent_tmp in entities_tmp:
+                        entities.append((total_num_char + ent_tmp[0],total_num_char + ent_tmp[1], ent_tmp[2]))
+                    total_num_char = total_num_char + len(annotated_text_tmp) + 1
+                    annotated_text = annotated_text + annotated_text_tmp + "\n"
+                self.cust_ents_dict[self.chunk] = [annotated_text, entities]
+            else:
+                text_annotation = train_data[0]
+                annotated_text = text_annotation[0]
+                entities = text_annotation[1]['entities']
+                self.cust_ents_dict[self.chunk] = [annotated_text,entities]
 
-            self.text.insert("1.0", sentence + '\n')
+            self.text.insert("1.0", annotated_text + '\n')
 
             # Update variable that holds number of lines in textbox. You need this update
             # for highlight_ent to work
