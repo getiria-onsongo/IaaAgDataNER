@@ -1,7 +1,8 @@
 #!/bin/env python3
+import spacy.tokens
 
 from agParse import *
-from tkinterColorList import  *
+from tkinterColorList import *
 from datetime import datetime
 from functools import partial
 from json2py import *
@@ -31,10 +32,31 @@ from tkinter.scrolledtext import ScrolledText
 
 # 4) Need to start thinking about an ontology
 
-# create a NER GUI class
+# create a NER GUI clas
 class CropNerGUI:
+    """ A class used to represent NER tagging GUI window.
+
+    ...
+    Attributes
+    ----------
+    self.rootWin : tk.Tk()
+        tKinter class that represents the main window
+    self.rootWin.title : self.rootWin.title()
+        Title for the GUI
+    self.rootWin.geometry : self.rootWin.geometry()
+        Size for the main window
+    self.model_dir : str
+        Path to language model directory
+
+    Methods
+    -------
+
+
+    """
+
     def __init__(self):
-        # Create a GUI window.
+        """ Initialize  CropNerGU object"""
+
         self.rootWin = tk.Tk()
         # self.rootWin.option_add('*Font', 'Times 24')
         self.rootWin.title("GEMS NER Annotation Tool")
@@ -45,8 +67,6 @@ class CropNerGUI:
         self.tags=["highlight","default_color_tag","ALAS","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
         self.colors=["gray","black","violet","lawn green","deep sky blue","yellow","red","orange","pink","brown","MediumPurple1"]
         self.tag_colors_buttonID = {}
-
-        self.cvar_cnt = {}
 
         self.raw_file = None
         self.annotation_file = None
@@ -72,7 +92,7 @@ class CropNerGUI:
         self.topframe = tk.Frame(self.rootWin)
         self.topframe.pack(side=tk.TOP,fill="x")
 
-        # NOTE: A partial function is created from another function, where some of the parameters are fixed.
+        # NOTE: A partial function is created from another function, where some parameters are fixed.
         # In the instance below, we want to call the function self.get_ner (which takes a single input) several
         # times but each time we pass it a different value depending on the button that was clicked. If the ALAS
         # button is clicked, we want to pass the text "ALAS" but if the "CROP" button was clicked we want to pass the
@@ -93,7 +113,6 @@ class CropNerGUI:
                 self.tag_colors_buttonID[tagValue] = [colorValue, None]
             else:
                 # Create button
-                # self.alas_btn = tk.Button(self.topframe, highlightbackground="violet",text="ALAS", command=partial(self.get_ner, "ALAS"))
                 btn = tk.Button(self.topframe, highlightbackground=colorValue,text=tagValue, command=partial(self.get_ner, tagValue))
                 btn.pack(side=tk.LEFT)
                 self.tag_colors_buttonID[tagValue] = [colorValue, btn]
@@ -102,9 +121,10 @@ class CropNerGUI:
         self.spaceLabel.pack(side=tk.LEFT)
         self.clearTag_btn = tk.Button(self.topframe, text="Remove-Tag", command=partial(self.remove_tag))
         self.clearTag_btn.pack(side=tk.LEFT)
-        self.pretagPage_btn = tk.Button(self.topframe, text="Pre-Tag Page", command=partial(self.pre_tag, "page"))
+        self.pretagPage_btn = tk.Button(self.topframe, text="Pre-Tag Page(s)", command=partial(self.pre_tag, "page"))
         self.pretagPage_btn.pack(side=tk.LEFT)
-        self.pretagSelection_btn = tk.Button(self.topframe, text="Pre-Tag Selection", command=partial(self.pre_tag, "selection"))
+        self.pretagSelection_btn = tk.Button(self.topframe, text="Pre-Tag Selection",
+                                             command=partial(self.pre_tag, "selection"))
         self.pretagSelection_btn.pack(side=tk.LEFT)
 
         self.cust_ent_frame = tk.Frame(self.rootWin)
@@ -142,7 +162,7 @@ class CropNerGUI:
         # in one iteration but instead of 10 statements we will use a loop
         for tag, color_buttonID in self.tag_colors_buttonID.items():
             color = color_buttonID[0]
-            if(tag != "highlight"):
+            if tag != "highlight":
                 # One iteration does the equivalent of:
                 # self.text.tag_configure("ALAS", background="violet")
                 self.text.tag_configure(tag, background=color)
@@ -192,16 +212,19 @@ class CropNerGUI:
         self.msg.pack(side=tk.LEFT)
 
         # Continue button
-        self.continue_btn = tk.Button(self.msg_frame, text="Continue", width=10, command=partial(self.continue_func, "save"))
+        self.continue_btn = tk.Button(self.msg_frame, text="Continue", width=10,
+                                      command=partial(self.continue_func, "save"))
         self.continue_btn.pack(side=tk.LEFT)
         self.continue_btn.pack_forget()
 
         # Continue button
-        self.overwrite_btn = tk.Button(self.msg_frame, text="Overwrite", width=10,command=partial(self.continue_func, "save"))
+        self.overwrite_btn = tk.Button(self.msg_frame, text="Overwrite", width=10,
+                                       command=partial(self.continue_func, "save"))
         self.overwrite_btn.pack(side=tk.LEFT)
         self.overwrite_btn.pack_forget()
 
-        self.copy_btn = tk.Button(self.msg_frame, text="Create Copy", width=10, command=partial(self.continue_func, "copy"))
+        self.copy_btn = tk.Button(self.msg_frame, text="Create Copy", width=10,
+                                  command=partial(self.continue_func, "copy"))
         self.copy_btn.pack(side=tk.LEFT)
         self.copy_btn.pack_forget()
 
@@ -264,12 +287,16 @@ class CropNerGUI:
         self.spacyModel_entry = tk.Entry(self.model_frame, width=20)
         self.spacyModel_entry.pack(side=tk.LEFT)
 
-
     def font_plus(self):
-        """ Add documentation"""
+        """ Increase font size for text in ScrolledText (text box)
+
+        Expects the global variable self.font_size which is of type
+        string to be set. The default value is "16". This function
+        increments  self.font_size by 1 and then updates font size
+        in self.text.
+        """
         self.font_size = str(int(self.font_size) + 1)
         self.text['font'] = "Times "+self.font_size
-        
 
     def font_minus(self):
         """ Add documentation"""
@@ -353,7 +380,8 @@ class CropNerGUI:
         self.nlp_agdata = spacy.load(self.model_dir)
 
 
-    def open_file(self, file_type):
+
+    def open_file(self, file_type: str):
         """ Get file from user. """
 
         # Clear warning message, if one exists
@@ -416,6 +444,7 @@ class CropNerGUI:
         """
         Load content into text box
         """
+        # TODO: Currently only loads 1 page. Update to load arbitrary number of pages (max=size of document).
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
@@ -469,7 +498,7 @@ class CropNerGUI:
             num_char = num_char + line_len + 1  # The 1 we are adding is for newline character
             line_no = line_no + 1
 
-    def highlight_ent(self, start_char, end_char, label):
+    def highlight_ent(self, start_char: int, end_char: int, label: str):
         """ Add documentation """
         line_start = -1
         char_start = -1
@@ -492,7 +521,7 @@ class CropNerGUI:
 
         self.text.tag_add(label, str(line_start) + "." + str(char_start), str(line_end) + "." + str(char_end))
 
-    def pre_tag(self,selection):
+    def pre_tag(self, selection: str):
         """ Pre-tag selected content or all the text in text box with NER tags. """
         input_text = None
         # Clear warning message, if one exists
@@ -544,13 +573,13 @@ class CropNerGUI:
                         self.cust_ents_dict[self.page_number].append((ent.start_char, ent.end_char, ent.label_))
                     else:
                         self.cust_ents_dict[self.page_number] = [(ent.start_char, ent.end_char, ent.label_)]
-                
+
 
             if (self.cust_ents_dict.get(self.page_number, False)):
                 tags = self.cust_ents_dict[self.page_number]
                 self.cust_ents_dict[self.page_number] = [input_text, tags]
 
-    def overlap(self, interva1, interval2):
+    def overlap(self, interva1: int, interval2: int) -> bool:
         """ Check to see if two intervals overlap. """
         overlap = False
         interva1start = interva1[0]
@@ -567,7 +596,7 @@ class CropNerGUI:
             overlap = True
         return overlap
 
-    def get_ner(self,tagLabel):
+    def get_ner(self, tag_label: str):
         """ Extract NER tag"""
         # Clear warning message, if one exists
         self.msg.config(text="")
@@ -590,7 +619,6 @@ class CropNerGUI:
             print("h_start,h_end=",h_start,h_end)
             print("ent_char_start,ent_char_end",ent_char_start,ent_char_end)
 
-
             if self.cust_ents_dict.get(self.chunk,False):
                 # Check to see if the current text matches the one we have in the annotation dictionary.
                 # If not, warn the user about the conflict and make the update
@@ -608,12 +636,12 @@ class CropNerGUI:
                 self.cust_ents_dict[self.chunk][1] = new_ents
 
                 # Add the new NER tag into the dictionary
-                self.cust_ents_dict[self.chunk][1].append((ent_char_start,ent_char_end, tagLabel))
+                self.cust_ents_dict[self.chunk][1].append((ent_char_start,ent_char_end, tag_label))
             else:
-                self.cust_ents_dict[self.chunk] = [input_text, [(ent_char_start,ent_char_end, tagLabel)]]
+                self.cust_ents_dict[self.chunk] = [input_text, [(ent_char_start,ent_char_end, tag_label)]]
 
             # Highlight the new NER  tag
-            self.text.tag_add(tagLabel, "sel.first", "sel.last")
+            self.text.tag_add(tag_label, "sel.first", "sel.last")
 
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
@@ -621,6 +649,9 @@ class CropNerGUI:
 
     def remove_tag(self):
         """ Delete selection from annotations. """
+        # TODO: If you select multiple lines, it will remove tags from just the first line. Update
+        # to remove tags in all the lines if multiple lines are selected.
+
         # Clear warning message, if one exists
         self.msg.config(text="")
 
@@ -748,13 +779,13 @@ class CropNerGUI:
         # Clear warning message
         self.msg.config(text="")
 
-    def tag_ner_with_spacy(self, text):
+    def tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
         """ Use SpaCy to identify NER in text"""
         #print("Pipeline=",self.nlp_agdata.pipe_names)
         doc = self.nlp_agdata(text)
         return doc
 
-    def continue_func(self, save_choice):
+    def continue_func(self, save_choice: str):
         """" Add comment """
         filename = None
         if save_choice == 'copy':
