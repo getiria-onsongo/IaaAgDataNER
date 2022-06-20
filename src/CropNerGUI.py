@@ -47,10 +47,28 @@ class CropNerGUI:
         Size for the main window
     self.model_dir : str
         Path to language model directory
+    self.tags : list
+        Agricultural data NER tags.
+    self.colors : list
+        Colors used to highlight tags in self.tags. Should have
+        the same number of entries as self.tags. NER tag in
+        self.tags[i] will be highlighted using color self.colors[i]
+    self.self.tag_colors_buttonID : dict
+        Dictionary with a tag as key and [color, buttonID] as value
+    self.raw_file : _io.TextIOWrapper
+        PDF or text file selected by user using the GUI
+    self.annotation_file : _io.TextIOWrapper
+        Annotation file selected by user using the GUI
+    self.chunk : int
+        Current logical partition of the document being annotated. By default
+        this is the page number because it is natural to annotate a document in
+        page increments.
+    self.pdf_document : pyxpdf.Document
+        PDF to be annotated that was selected using GUI
+    self.file_prefix : str
 
     Methods
     -------
-
 
     """
 
@@ -58,37 +76,32 @@ class CropNerGUI:
         """ Initialize  CropNerGU object"""
 
         self.rootWin = tk.Tk()
-        # self.rootWin.option_add('*Font', 'Times 24')
         self.rootWin.title("GEMS NER Annotation Tool")
         self.rootWin.geometry('1500x900')
-
         self.model_dir = None
-        self.content=[""]
-        self.tags=["highlight","default_color_tag","ALAS","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]
-        self.colors=["gray","black","violet","lawn green","deep sky blue","yellow","red","orange","pink","brown","MediumPurple1"]
+        self.tags=["highlight", "default_color_tag", "ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD",
+                   "TRAT"]
+        self.colors=["gray", "black", "violet", "lawn green", "deep sky blue", "yellow", "red", "orange",
+                     "pink", "brown", "MediumPurple1"]
         self.tag_colors_buttonID = {}
-
         self.raw_file = None
         self.annotation_file = None
         self.chunk = None
         self.pdf_document = None
         self.file_prefix = None
-        self.pdf_name = None
 
+        self.pdf_name = None
         self.sentences = None
         self.annotation_dict = {}
         self.scrollText_line_content_index = {} # Store index of characters in this line
         self.file_extension = None
         self.nlp_agdata = None
-
         self.cust_ents_dict = {}
-
         self.output_file_name = "sample_p0_td.py"
         self.page_number=0
         self.line_num = 0
         self.font_size = "16"
-        self.num_page_lines = len(self.content)
-
+        self.num_page_lines = 0
         self.topframe = tk.Frame(self.rootWin)
         self.topframe.pack(side=tk.TOP,fill="x")
 
@@ -106,16 +119,17 @@ class CropNerGUI:
         # self.tag_colors["highlight"] = ["gray", buttonID]
         # in an iteration
         for i in range(len(self.tags)):
-            tagValue = self.tags[i]
-            colorValue = self.colors[i]
+            tag_value = self.tags[i]
+            color_value = self.colors[i]
             # We don't need to create a button for the first two tags
             if i < 2:
-                self.tag_colors_buttonID[tagValue] = [colorValue, None]
+                self.tag_colors_buttonID[tag_value] = [color_value, None]
             else:
                 # Create button
-                btn = tk.Button(self.topframe, highlightbackground=colorValue,text=tagValue, command=partial(self.get_ner, tagValue))
+                btn = tk.Button(self.topframe, highlightbackground=color_value,text=tag_value,
+                                command=partial(self.get_ner, tag_value))
                 btn.pack(side=tk.LEFT)
-                self.tag_colors_buttonID[tagValue] = [colorValue, btn]
+                self.tag_colors_buttonID[tag_value] = [color_value, btn]
 
         self.spaceLabel = tk.Label(self.topframe, text="    ", width=17)
         self.spaceLabel.pack(side=tk.LEFT)
@@ -126,33 +140,26 @@ class CropNerGUI:
         self.pretagSelection_btn = tk.Button(self.topframe, text="Pre-Tag Selection",
                                              command=partial(self.pre_tag, "selection"))
         self.pretagSelection_btn.pack(side=tk.LEFT)
-
         self.cust_ent_frame = tk.Frame(self.rootWin)
         self.cust_ent_frame.pack(side=tk.TOP,fill="x")
         self.blankLabel_two = tk.Label(self.cust_ent_frame, text="   ")
         self.blankLabel_two.pack(side=tk.LEFT)
-
         self.edit_ent_frame = tk.Frame(self.rootWin)
         self.edit_ent_frame.pack(side=tk.TOP,fill="x")
         self.traitLabel = tk.Label(self.edit_ent_frame, text="Enter Entity Label:", width=20)
         self.traitLabel.pack(side=tk.LEFT)
         self.traitEntry = tk.Entry(self.edit_ent_frame, width=10)
         self.traitEntry.pack(side=tk.LEFT)
-
         # Add entity button
         self.add_ent_btn = tk.Button(self.edit_ent_frame, text="Add Entity", width=10, command=self.add_ent)
         self.add_ent_btn.pack(side=tk.LEFT)
-
         # Remove entity button
         self.remove_ent_btn = tk.Button(self.edit_ent_frame, text="Remove Entity", width=10, command=self.remove_ent)
         self.remove_ent_btn.pack(side=tk.LEFT)
-
         # adding the text: Note, height defines height if widget in lines based in font size
         self.text = ScrolledText(self.rootWin, height=25, width=140, font = "Times "+self.font_size, wrap='word')
-        self.text.insert(tk.END, self.content[self.line_num])
         self.text.focus_force()
         self.text.pack(side=tk.TOP)
-
         self.text.tag_configure("highlight", foreground="black", background="gray")
         # We need to repeat the configuration on the line above for all the tags. Except we will
         # not change the foreground. It is the equivalent of
@@ -168,55 +175,43 @@ class CropNerGUI:
                 self.text.tag_configure(tag, background=color)
 
         self.bottom_frame = tk.Frame(self.rootWin)
-        self.bottom_frame.pack(side=tk.TOP,fill="x")
-
+        self.bottom_frame.pack(side=tk.TOP, fill="x")
         self.blankLabel_three = tk.Label(self.bottom_frame, text="   ")
         self.blankLabel_three.pack(side=tk.LEFT)
         # Exit button
         self.exit_btn = tk.Button(self.bottom_frame, text="Exit",width=10,command=self.quit)
         self.exit_btn.pack(side = tk.LEFT)
-
         # Load button
         self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.LoadPage)
         self.load_btn.pack(side=tk.LEFT)
-
         # Highlight button
         self.bold_btn = tk.Button(self.bottom_frame, text="Highlight Text",width=10, command=self.highlight_text)
         self.bold_btn.pack(side = tk.LEFT)
-
         # Clear button
         self.clear_btn = tk.Button(self.bottom_frame, text="Remove All Tags",width=20, command=self.remove_all_tags)
         self.clear_btn.pack(side = tk.LEFT)
-
         # Clear data button
         self.clear_data_btn = tk.Button(self.bottom_frame, text="Clear Data", width=10, command=self.clear_data)
         self.clear_data_btn.pack(side=tk.LEFT)
-
         # Clear message button
         self.msg_btn = tk.Button(self.bottom_frame, text="Clear Warning Message", width=20, command=self.clear_message)
         self.msg_btn.pack(side=tk.LEFT)
-
         # Next page button
         self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=self.nextPage)
         self.next_btn.pack(side = tk.LEFT)
-
         # Save button
         self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save)
         self.save_btn.pack(side=tk.LEFT)
-
         self.msg_frame = tk.Frame(self.rootWin)
         self.msg_frame.pack(side=tk.TOP)
-
         # Label to display messages
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
         self.msg.pack(side=tk.LEFT)
-
         # Continue button
         self.continue_btn = tk.Button(self.msg_frame, text="Continue", width=10,
                                       command=partial(self.continue_func, "save"))
         self.continue_btn.pack(side=tk.LEFT)
         self.continue_btn.pack_forget()
-
         # Continue button
         self.overwrite_btn = tk.Button(self.msg_frame, text="Overwrite", width=10,
                                        command=partial(self.continue_func, "save"))
@@ -227,61 +222,51 @@ class CropNerGUI:
                                   command=partial(self.continue_func, "copy"))
         self.copy_btn.pack(side=tk.LEFT)
         self.copy_btn.pack_forget()
-
         # Meta Data Frame
         self.metadata_frame = tk.Frame(self.rootWin)
         self.metadata_frame.pack(side=tk.TOP)
-
         self.ann_file_label = tk.Label(self.metadata_frame, text="Annotation File Name (json):", width=20, anchor="w")
         self.ann_file_label.pack(side=tk.LEFT)
         self.ann_file_label.pack_forget()
         self.ann_file_entry = tk.Entry(self.metadata_frame, width=30)
         self.ann_file_entry.pack(side=tk.LEFT)
         self.ann_file_entry.pack_forget()
-
         self.source_label = tk.Label(self.metadata_frame, text="PDF/Text URL (source):", width=15, anchor="w")
         self.source_label.pack(side=tk.LEFT)
         self.source_label.pack_forget()
         self.source_entry = tk.Entry(self.metadata_frame, width=30)
         self.source_entry.pack(side=tk.LEFT)
         self.source_entry.pack_forget()
-
         # Frame for selecting
         self.open_frame = tk.Frame(self.rootWin)
         self.open_frame.pack(side=tk.TOP,fill="x")
-
         self.blankLabel_five = tk.Label(self.open_frame, text="   ")
         self.blankLabel_five.pack(side=tk.LEFT)
         # open file button
-        self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF)',width=18,command=partial(self.open_file,"pdf"))
+        self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF/txt)', width=18,
+                                     command=partial(self.open_file, "pdf"))
         self.open_button.pack(side=tk.LEFT)
-
-        self.nermodel_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,command=self.get_nermodel_dir)
+        self.nermodel_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,
+                                         command=self.get_nermodel_dir)
         self.nermodel_button.pack(side=tk.LEFT)
-
-        self.pageLabel = tk.Label(self.open_frame, text="Raw Data File Page Num:",width=18)
+        self.pageLabel = tk.Label(self.open_frame, text="Raw Data File Page Num:", width=18)
         self.pageLabel.pack(side=tk.LEFT)
         self.pageEntry = tk.Entry(self.open_frame, width=5)
         self.pageEntry.pack(side=tk.LEFT)
-
-        self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=20,command=partial(self.open_file,"json"))
+        self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=20,
+                                        command=partial(self.open_file, "json"))
         self.annotation_btn.pack(side=tk.LEFT)
-
         # Font +
         self.font_plus = tk.Button(self.open_frame, text="Font +", width=10, command=self.font_plus)
         self.font_plus.pack(side=tk.LEFT)
-
         # Font -
         self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
         self.font_minus.pack(side=tk.LEFT)
-
         # Model frame
         self.model_frame = tk.Frame(self.rootWin)
         self.model_frame.pack(side=tk.TOP,fill="x")
-
         self.blankLabel_six = tk.Label(self.model_frame, text="     ")
         self.blankLabel_six.pack(side=tk.LEFT)
-
         self.spacyModel_label = tk.Label(self.model_frame, text="Spacy Model e.g.,en_core_web_lg:", width=25,anchor="w")
         self.spacyModel_label.pack(side=tk.LEFT)
         self.spacyModel_entry = tk.Entry(self.model_frame, width=20)
@@ -370,19 +355,18 @@ class CropNerGUI:
             self.spacyModel_entry.delete(0, tk.END)
             self.spacyModel_entry.insert(0, model_name)
         else:
-            if(model.lower() == "en_core_web_sm"):
+            if model.lower() == "en_core_web_sm":
                 model_name = "en_core_web_sm"
-            elif(model.lower() == "en_core_web_md"):
+            elif model.lower() == "en_core_web_md":
                 model_name = "en_core_web_md"
             self.spacyModel_entry.delete(0, tk.END)
             self.spacyModel_entry.insert(0, model_name)
         self.model_dir = fd.askdirectory()
         self.nlp_agdata = spacy.load(self.model_dir)
 
-
-
     def open_file(self, file_type: str):
         """ Get file from user. """
+        # TODO: Make it possible for users to select text files
 
         # Clear warning message, if one exists
         self.msg.config(text="")
@@ -394,7 +378,6 @@ class CropNerGUI:
         )
         # show the open file dialog
         f = fd.askopenfile(filetypes=filetypes)
-        #self.file_extension = pathlib.Path(f.name).suffix
 
         if file_type == "json":
             self.annotation_file = f
@@ -402,7 +385,6 @@ class CropNerGUI:
         elif file_type == "pdf":
             self.raw_file=f
             self.LoadPage()
-
         else:
             self.msg.config(text="Warning!! Please select a valid (pdf or json) file.", foreground="red")
 
@@ -417,22 +399,20 @@ class CropNerGUI:
                 self.spacyModel_entry.delete(0, tk.END)
                 self.spacyModel_entry.insert(0, model_name)
             else:
-                if (model.lower() == "en_core_web_sm"):
+                if model.lower() == "en_core_web_sm":
                     model_name = "en_core_web_sm"
-                elif (model.lower() == "en_core_web_md"):
+                elif model.lower() == "en_core_web_md":
                     model_name = "en_core_web_md"
-
             if self.model_dir is not None:
                 self.nlp_agdata = spacy.load(self.model_dir)
             else:
                 self.nlp_agdata = spacy.load(model_name)
 
-
             self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
-
 
     def LoadPDF(self):
         """ Get data from PDF file"""
+
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
 
@@ -445,6 +425,7 @@ class CropNerGUI:
         Load content into text box
         """
         # TODO: Currently only loads 1 page. Update to load arbitrary number of pages (max=size of document).
+        # TODO: Give users the option to load text files in addition to pdf files.
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
@@ -697,7 +678,7 @@ class CropNerGUI:
         """
         # Clear warning message, if one exists
         self.msg.config(text="")
-        # self.raw_file is None or self.annotation_file is None:
+
         if self.annotation_file is None:
             self.msg.config(text="Please select an annotations file (json)", foreground="red")
         else:
