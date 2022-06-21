@@ -18,13 +18,13 @@ from tkinter.scrolledtext import ScrolledText
 
 # 1) WRITE A DOCUMENT AND PUT IT INTO GITHUB AND DOCUMENT SCHEMA
 # DECISIONS AND VIEWS AND HOW WE WILL LIKELY IMPLEMENT APIs.
-
+#
 # 2) WE NEED TO RESOLVE IS STANDARDIZING THINGS SUCH AS
 # ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
 # do not make sense because we need to be able to know
 # relationships. See item 3 below. We should look at co-reference resolution.
-# It might help. (https://medium.com/huggingface/state-of-the-art-neural-coreference-resolution-for-chatbots-3302365dcf30)
-
+# See: https://medium.com/huggingface/state-of-the-art-neural-coreference-resolution-for-chatbots-3302365dcf30
+#
 # 3) WE NEED TO GROUP ANNOTATIONS SUCH AS TRAITS INTO CATEGORIES THAT
 # MAKE SENSE TO THE USER. RIGHT NOW WE HAVE "early maturity" AND "winter"
 # AS TRAITS WHILE ACCORDING TO THE SPECS WE SHOULD BE RETURNING
@@ -32,7 +32,7 @@ from tkinter.scrolledtext import ScrolledText
 
 # 4) Need to start thinking about an ontology
 
-# create a NER GUI clas
+# Create NER GUI class
 class CropNerGUI:
     """ A class used to represent NER tagging GUI window.
 
@@ -65,7 +65,34 @@ class CropNerGUI:
         page increments.
     self.pdf_document : pyxpdf.Document
         PDF to be annotated that was selected using GUI
+    self.pdf_name : str
+        Name of the pdf/text file being annotated. e.g., BarCvDescLJ11.pdf
     self.file_prefix : str
+        File path prefix (minus file type) e.g., for BarCvDescLJ11.pdf
+        path prefix is Data/DavisLJ11/BarCvDescLJ11
+    self.scrolled_text_line_content_index : dict
+        Contains index position of characters in a given line. Key = line number
+        tuple is index of first and last characters respectively.
+        {2: (114, 228)} = line 2 has characters from index 114 to index 228
+    self.nlp_agdata : class (spacy.lang)
+        spaCy language model. Defaults to en_core_web_lg if not specified
+    self.cust_ents_dict : dict
+        Contains NER tag annotations. key = chunk number, values = entities
+    self.page_number : int
+        Current page number
+    self.font_size : str
+        Default font size for text in ScrolledText. Should be a string format
+        for a number e.g., '16'
+    self.top_frame: class (tkinter.Frame)
+        Top level frame for GUI
+    self.blank_label_one : class (tkinter.Label)
+        Blank label with 3 empty spaces used for formatting. Ensures there is some
+        space between the edge and first widget e.g., button
+
+
+
+
+
 
     Methods
     -------
@@ -88,31 +115,26 @@ class CropNerGUI:
         self.annotation_file = None
         self.chunk = None
         self.pdf_document = None
-        self.file_prefix = None
-
         self.pdf_name = None
-        self.sentences = None
-        self.annotation_dict = {}
-        self.scrollText_line_content_index = {} # Store index of characters in this line
-        self.file_extension = None
+        self.file_prefix = None
+        self.scrolled_text_line_content_index = {}
         self.nlp_agdata = None
         self.cust_ents_dict = {}
-        self.output_file_name = "sample_p0_td.py"
-        self.page_number=0
-        self.line_num = 0
+        self.page_number = 0
         self.font_size = "16"
-        self.num_page_lines = 0
-        self.topframe = tk.Frame(self.rootWin)
-        self.topframe.pack(side=tk.TOP,fill="x")
+        self.top_frame = tk.Frame(self.rootWin)
+        print("self.top_frame type = ", type(self.top_frame))
+        self.top_frame.pack(side=tk.TOP, fill="x")
+        self.blank_label_one = tk.Label(self.top_frame, text="   ")
+        self.blank_label_one.pack(side=tk.LEFT)
+        print("self.blank_label_one type = ", type(self.blank_label_one))
 
         # NOTE: A partial function is created from another function, where some parameters are fixed.
         # In the instance below, we want to call the function self.get_ner (which takes a single input) several
         # times but each time we pass it a different value depending on the button that was clicked. If the ALAS
         # button is clicked, we want to pass the text "ALAS" but if the "CROP" button was clicked we want to pass the
         # text CROP. So, partial(self.get_ner, "ALAS") is the same as self.get_ner("ALAS")
-        self.blankLabel_one = tk.Label(self.topframe, text="   ")
-        self.blankLabel_one.pack(side=tk.LEFT)
-
+        #
         # Create a dictionary with a tag as key and [color, buttonID] as value.
         # This will make it easy to retrieve the color for a tag. The loop does the equivalent
         # of
@@ -126,18 +148,18 @@ class CropNerGUI:
                 self.tag_colors_buttonID[tag_value] = [color_value, None]
             else:
                 # Create button
-                btn = tk.Button(self.topframe, highlightbackground=color_value,text=tag_value,
+                btn = tk.Button(self.top_frame, highlightbackground=color_value,text=tag_value,
                                 command=partial(self.get_ner, tag_value))
                 btn.pack(side=tk.LEFT)
                 self.tag_colors_buttonID[tag_value] = [color_value, btn]
 
-        self.spaceLabel = tk.Label(self.topframe, text="    ", width=17)
+        self.spaceLabel = tk.Label(self.top_frame, text="    ", width=17)
         self.spaceLabel.pack(side=tk.LEFT)
-        self.clearTag_btn = tk.Button(self.topframe, text="Remove-Tag", command=partial(self.remove_tag))
+        self.clearTag_btn = tk.Button(self.top_frame, text="Remove-Tag(s)", command=partial(self.remove_tag))
         self.clearTag_btn.pack(side=tk.LEFT)
-        self.pretagPage_btn = tk.Button(self.topframe, text="Pre-Tag Page(s)", command=partial(self.pre_tag, "page"))
+        self.pretagPage_btn = tk.Button(self.top_frame, text="Pre-Tag Page(s)", command=partial(self.pre_tag, "page"))
         self.pretagPage_btn.pack(side=tk.LEFT)
-        self.pretagSelection_btn = tk.Button(self.topframe, text="Pre-Tag Selection",
+        self.pretagSelection_btn = tk.Button(self.top_frame, text="Pre-Tag Selection",
                                              command=partial(self.pre_tag, "selection"))
         self.pretagSelection_btn.pack(side=tk.LEFT)
         self.cust_ent_frame = tk.Frame(self.rootWin)
@@ -346,7 +368,6 @@ class CropNerGUI:
             self.text.tag_configure(ent_label, background=color)
             self.tag_colors_buttonID[ent_label] = [color, btn]
 
-
     def get_nermodel_dir(self):
         """ Add documentation"""
         model = self.spacyModel_entry.get()
@@ -459,25 +480,25 @@ class CropNerGUI:
             txt = page.text(control=control)
             self.text.insert("1.0",txt)
 
-
-
-    def update_scrollText_line_content_index(self):
+    def update_scrolled_text_line_content_index(self):
         """ Add documentation"""
         # Trying to figure out where entities are on scrollTextbox is a little tricky because tKinter uses newline
         # characters to split text. Here we are keeping track of how many characters appear before a line in the
         # GUI. This should make it easier to figure out where a token is given its
         # start and end indices. Given (Steveland/Luther//Wintermalt 1001 1029 PED)  named entity, it is 1001, 1029
+        
+        # values= {1: (0, 113), 2: (114, 228)
         input_text = self.text.get(1.0, "end")
         lines = input_text.splitlines()
-        self.num_page_lines = len(lines)
         line_no = 1
         num_char = 0
         for line in lines:
             line_len = len(line)
             interval = (num_char, num_char + line_len)
-            self.scrollText_line_content_index[line_no] = interval
+            self.scrolled_text_line_content_index[line_no] = interval
             num_char = num_char + line_len + 1  # The 1 we are adding is for newline character
             line_no = line_no + 1
+
 
     def highlight_ent(self, start_char: int, end_char: int, label: str):
         """ Add documentation """
@@ -486,7 +507,7 @@ class CropNerGUI:
         line_end = -1
         char_end = -1
         # Loop through lines in the text field and find where this tag is.
-        for key, value in self.scrollText_line_content_index.items():
+        for key, value in self.scrolled_text_line_content_index.items():
             (start, end) = value
             if start_char >= start:
                 line_start = key
@@ -540,8 +561,8 @@ class CropNerGUI:
 
             # Update variable that holds number of lines in textbox. You need this for
             # the function highlight_ent to work
-            self.update_scrollText_line_content_index()
-            #for key, value in self.scrollText_line_content_index.items():
+            self.update_scrolled_text_line_content_index()
+            #for key, value in self.scrolled_text_line_content_index.items():
             #    print(key,":",value)
 
             doc = self.tag_ner_with_spacy(input_text)
@@ -556,7 +577,7 @@ class CropNerGUI:
                         self.cust_ents_dict[self.page_number] = [(ent.start_char, ent.end_char, ent.label_)]
 
 
-            if (self.cust_ents_dict.get(self.page_number, False)):
+            if self.cust_ents_dict.get(self.page_number, False):
                 tags = self.cust_ents_dict[self.page_number]
                 self.cust_ents_dict[self.page_number] = [input_text, tags]
 
@@ -569,11 +590,11 @@ class CropNerGUI:
         interval2start = interval2[0]
         interval2end = interval2[1]
 
-        if (interval2start >= interva1start and interval2start <= interva1end):
+        if (interval2start >= interva1start) and (interval2start <= interva1end):
             overlap = True
-        elif (interval2end >= interva1start and interval2end <= interva1end):
+        elif (interval2end >= interva1start) and (interval2end <= interva1end):
             overlap = True
-        elif (interval2start <= interva1start and interval2end >= interva1end):
+        elif (interval2start <= interva1start) and (interval2end >= interva1end):
             overlap = True
         return overlap
 
@@ -586,17 +607,17 @@ class CropNerGUI:
             input_text = input_text = self.text.get(1.0, "end")
 
             # Update variable that holds number of lines in textbox.
-            self.update_scrollText_line_content_index()
+            self.update_scrolled_text_line_content_index()
 
             # Get start and end char positions
             h_start = int(self.text.index("sel.first").split(".")[1])
             h_end = int(self.text.index("sel.last").split(".")[1])
 
             line_no = int(self.text.index("sel.first").split(".")[0])
-            ent_char_start = self.scrollText_line_content_index[line_no][0] + h_start
-            ent_char_end = self.scrollText_line_content_index[line_no][0] + h_end
+            ent_char_start = self.scrolled_text_line_content_index[line_no][0] + h_start
+            ent_char_end = self.scrolled_text_line_content_index[line_no][0] + h_end
 
-            print("self.scrollText_line_content_index[line_no]=", self.scrollText_line_content_index[line_no])
+            print("self.scrolled_text_line_content_index[line_no]=", self.scrolled_text_line_content_index[line_no])
             print("h_start,h_end=",h_start,h_end)
             print("ent_char_start,ent_char_end",ent_char_start,ent_char_end)
 
@@ -630,17 +651,17 @@ class CropNerGUI:
 
     def remove_tag(self):
         """ Delete selection from annotations. """
-        # TODO: If you select multiple lines, it will remove tags from just the first line. Update
-        # to remove tags in all the lines if multiple lines are selected.
 
         # Clear warning message, if one exists
         self.msg.config(text="")
 
-        selection_line = int(self.text.index("sel.first").split(".")[0])
+        selection_start_line = int(self.text.index("sel.first").split(".")[0])
         tmp_selection_start = int(self.text.index("sel.first").split(".")[1])
+        selection_start = self.scrolled_text_line_content_index[selection_start_line][0] + tmp_selection_start
+
+        selection_end_line = int(self.text.index("sel.last").split(".")[0])
         tmp_selection_end = int(self.text.index("sel.last").split(".")[1])
-        selection_start =  self.scrollText_line_content_index[selection_line][0] + tmp_selection_start
-        selection_end = self.scrollText_line_content_index[selection_line][0] + tmp_selection_end
+        selection_end = self.scrolled_text_line_content_index[selection_end_line][0] + tmp_selection_end
 
         new_ents = []
         overlapping_tags = []
@@ -720,7 +741,7 @@ class CropNerGUI:
 
             # Update variable that holds number of lines in textbox. You need this update
             # for highlight_ent to work
-            self.update_scrollText_line_content_index()
+            self.update_scrolled_text_line_content_index()
 
             for ent_val in entities:
                 self.highlight_ent(ent_val[0],ent_val[1], ent_val[2])
