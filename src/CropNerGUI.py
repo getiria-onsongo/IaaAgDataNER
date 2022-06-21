@@ -358,10 +358,8 @@ class CropNerGUI:
         self.msg.config(text="")
 
         # file type
-        filetypes = (
-            ('json files', '*.json'),
-            ('PDF files', '*.pdf')
-        )
+        filetypes = [(f'{file_type} files', f'*.{file_type}')]
+
         # show the open file dialog
         f = fd.askopenfile(filetypes=filetypes)
         #self.file_extension = pathlib.Path(f.name).suffix
@@ -371,6 +369,7 @@ class CropNerGUI:
             self.ReviewAnnotations()
         elif file_type == "pdf":
             self.raw_file=f
+            self.pdf_document = None
             self.LoadPage()
 
         else:
@@ -444,7 +443,7 @@ class CropNerGUI:
             control = TextControl(mode="physical")
 
             page = self.pdf_document[self.page_number - 1]
-            txt = page.text(control=control)
+            txt = page.text()
             self.text.insert("1.0",txt)
 
 
@@ -516,7 +515,7 @@ class CropNerGUI:
             self.text.delete(1.0, tk.END)
 
             page = self.pdf_document[self.page_number - 1]
-            input_text = page.text(control=control)
+            input_text = page.text()
             self.text.insert("1.0", input_text)
 
             # Reset annotation dictionary
@@ -637,7 +636,7 @@ class CropNerGUI:
                 overlapping_tags.append(label)
         if len(overlapping_tags) == 0:
             self.msg.config(text="Warning!! It appears the region you selected ("+str(selection_start)+
-                                 "-"+str(selection_end)+" did not overlap with a tag.", foreground="red")
+                                 "-"+str(selection_end)+") did not overlap with a tag.", foreground="red")
         else:
             for tag in overlapping_tags:
                 self.text.tag_remove(tag, "sel.first", "sel.last")
