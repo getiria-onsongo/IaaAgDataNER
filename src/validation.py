@@ -18,16 +18,12 @@ class Validation:
         self.spacy_model_name = spacy_model_name # spacy model to use for pos
         self.tags = tags
         self.nlp_pos = spacy.load(self.spacy_model_name)
-        self.nlp = None
+        self.nlp =  spacy.load(self.model_dir)
+        self.nlp.add_pipe("compound_trait_entities", after='ner')
         self.cust_ents_dict = {}
         self.crop_cnt = {}
         self.cvar_cnt = {}
         self.page_num = 0
-
-
-    def load_model(self):
-        self.nlp = spacy.load(self.model_dir)
-        self.nlp.add_pipe("compound_trait_entities", after='ner')
 
 
     def process_files(self):
@@ -57,7 +53,8 @@ class Validation:
         control = TextControl(mode="physical")
         page = pdf_document[page_number - 1]
         input_text = page.text(control=control)
-        doc = self.tag_ner_with_spacy(input_text)
+        doc = self.nlp(input_text)
+
         for ent in doc.ents:
             if (ent.label_ in self.tags):
                 ent = self.get_pos(ent, self.nlp_pos)
@@ -70,13 +67,7 @@ class Validation:
             self.cust_ents_dict[page_number] = [input_text, tags]
 
 
-    def tag_ner_with_spacy(self, text):
-        """ Use SpaCy to identify NER in text"""
-        doc = self.nlp(text)
-        return doc
-
-
-    def get_pos(self, ent, nlp):
+    def get_pos(self, ent, nlp_pos):
         """
         Proceses a given entity with rules that use pos tag data to expand the entity span if needed.
 
@@ -84,7 +75,7 @@ class Validation:
         :param nlp: spacy model for pos tagging
         :returns: entity, with an expanded span if needed
         """
-        doc = nlp(ent.sent.text)
+        doc = nlp_pos(ent.sent.text)
         if(len(doc[ent.start:ent.end]) > 0):
             current_index = doc[ent.start:ent.end][0].i
             label = ent.label_
@@ -190,10 +181,10 @@ class Validation:
             entities = self.cust_ents_dict[chunk][1]
             ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], chunk, pdf_name, url)
             dict_2_json(ann_train_dict, output_filename)
+
         return output_filename
 
 
 if __name__ == '__main__':
     validate = Validation("Data/CSU", "senter_ner_2021_08_model/model-best")
-    validate.load_model()
     validate.process_files()
