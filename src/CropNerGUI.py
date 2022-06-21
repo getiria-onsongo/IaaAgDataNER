@@ -126,7 +126,7 @@ class CropNerGUI:
         self.remove_ent_btn.pack(side=tk.LEFT)
 
         # adding the text: Note, height defines height if widget in lines based in font size
-        self.text = ScrolledText(self.rootWin, height=25, width=140, font = "Times "+self.font_size, wrap='word')
+        self.text = ScrolledText(self.rootWin, height=20, width=140, font = "Times "+self.font_size, wrap='word')
         self.text.insert(tk.END, self.content[self.line_num])
         self.text.focus_force()
         self.text.pack(side=tk.TOP)
@@ -441,10 +441,11 @@ class CropNerGUI:
                 self.LoadPDF()
 
             # Extract text from pdf while maintaining layout
-            control = TextControl(mode="physical")
+            # control = TextControl(mode="physical")
+            # We don't want to maintain layout, as this breaks any PDF with multiple columns.
 
             page = self.pdf_document[self.page_number - 1]
-            txt = page.text(control=control)
+            txt = page.text()
             self.text.insert("1.0",txt)
 
 
@@ -511,12 +512,12 @@ class CropNerGUI:
             self.chunk = self.page_number
 
             # Extract text from pdf while maintaining layout
-            control = TextControl(mode="physical")
+            # control = TextControl(mode="physical")
 
             self.text.delete(1.0, tk.END)
 
             page = self.pdf_document[self.page_number - 1]
-            input_text = page.text(control=control)
+            input_text = page.text()
             self.text.insert("1.0", input_text)
 
             # Reset annotation dictionary
