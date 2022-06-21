@@ -4,7 +4,7 @@ import re
 import glob
 from pyxpdf import Document, Page, Config
 from pyxpdf.xpdf import TextControl
-from conversions import conversion
+from jsontobratt import conversion
 from agParse import *
 from json2py import *
 from py2json import *
