@@ -60,11 +60,8 @@ class CropNerGUI:
 
         if len(sys.argv) >= 3:
             self.raw_file = sys.argv[2]
-            # flag to take care of loading pdfs from a default path which is a tiny bit different from loading a user selected path
-            self.default_file = True
         else:
             self.raw_file = None
-            self.default_file = False
 
 
         self.annotation_file = None
@@ -78,7 +75,7 @@ class CropNerGUI:
         self.scrollText_line_content_index = {} # Store index of characters in this line
         self.file_extension = None
         self.nlp_agdata = None
-        self.nlp_pos = spacy.load("en_core_web_lg") # spacy model to use for pos
+        self.nlp_pos = spacy.load("en_core_web_lg") # default spacy model to use for pos
 
         self.cust_ents_dict = {}
 
@@ -400,6 +397,7 @@ class CropNerGUI:
         """
         Load spacy model
         """
+
         if self.nlp_agdata is None:
             model = self.spacyModel_entry.get()
             model_name = "en_core_web_lg"
@@ -425,9 +423,15 @@ class CropNerGUI:
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
 
-        self.file_prefix = self.raw_file.name.split(".")[0]
-        self.pdf_name = self.raw_file.name.split("/")[-1]
-        self.pdf_document = Document(self.raw_file.name)
+        if type(self.raw_file) is str:
+            self.file_prefix = self.raw_file.split(".")[0]
+            self.pdf_name = self.raw_file.split("/")[-1]
+            self.pdf_document = Document(self.raw_file)
+        else:
+            self.file_prefix = self.raw_file.name.split(".")[0]
+            self.pdf_name = self.raw_file.name.split("/")[-1]
+            self.pdf_document = Document(self.raw_file.name)
+
 
     def LoadPage(self):
         """
@@ -458,6 +462,15 @@ class CropNerGUI:
             # Load PDF file
             if self.pdf_document is None:
                 self.LoadPDF()
+
+            # Extract text from pdf while maintaining layout
+            control = TextControl(mode="physical")
+
+            page = self.pdf_document[self.page_number - 1]
+            txt = page.text(control=control)
+            self.text.insert("1.0",txt)
+
+
 
     def get_pos(self, ent, nlp):
         '''
@@ -543,12 +556,6 @@ class CropNerGUI:
                         print()
         return ent
 
-
-    def pre_tag(self, selection):
-        """ Pre-tag selected content or all the text in text box with NER tags. """
-        print("\n\nTagging new pdf...\n")
-
-
     def update_scrollText_line_content_index(self):
         """ Add documentation"""
         # Trying to figure out where entities are on scrollTextbox is a little tricky because tKinter uses newline
@@ -592,6 +599,11 @@ class CropNerGUI:
 
     def pre_tag(self):
         """ Pre-tag selected content or all the text in text box with NER tags. """
+        # load non-default model for pos tagging
+        pos_model = self.spacyModel_entry.get().lower()
+        if pos_model == "en_core_web_sm" or pos_model == "en_core_web_md":
+            self.nlp_pos = spacy.load(pos_model)
+            
         input_text = None
         # Clear warning message, if one exists
         self.msg.config(text="")
@@ -632,6 +644,7 @@ class CropNerGUI:
 
             for ent in doc.ents:
                 if (ent.label_ in self.tags): # NER is in our list of custom tags
+                    ent = self.get_pos(ent, self.nlp_pos)
                     # index = self.tags.index(ent.label_) # Find index for an element in a list
                     self.highlight_ent(ent.start_char, ent.end_char, ent.label_)
                     if self.cust_ents_dict.get(self.page_number, False):
