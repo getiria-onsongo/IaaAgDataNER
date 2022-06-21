@@ -27,3 +27,14 @@ ExperimentalCode/*
 .idea/*
 src/.idea/*
 .ipynb_checkpoints/*
+Pipfile
+Pipfile.lock
+.python-version
+env_medacy/*
+env_ner/*
+ner_2021_08/*
+ner_2021_08_model/*
+ner_2021_08_training_data.jsonl
+ner_2021_08_validate_data.jsonl
+senter_ner_2021_08_model/*
+Data/*
