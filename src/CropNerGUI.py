@@ -57,11 +57,8 @@ class CropNerGUI:
 
         if len(sys.argv) >= 3:
             self.raw_file = sys.argv[2]
-            # flag to take care of loading pdfs from a default path which is a tiny bit different from loading a user selected path
-            self.default_file = True
         else:
             self.raw_file = None
-            self.default_file = False
 
 
         self.annotation_file = None
@@ -69,7 +66,7 @@ class CropNerGUI:
         self.annotation_dict = {}
         self.file_extension = None
         self.nlp_agdata = None
-        self.nlp_pos = spacy.load("en_core_web_lg") # spacy model to use for pos
+        self.nlp_pos = spacy.load("en_core_web_lg") # default spacy model to use for pos
 
         self.cust_ents_dict = {}
 
@@ -383,6 +380,7 @@ class CropNerGUI:
         """
         Load spacy model
         """
+
         if self.nlp_agdata is None:
             model = self.spacyModel.get()
             model_name = "en_core_web_lg"
@@ -465,6 +463,15 @@ class CropNerGUI:
                 if len(sent) > 0:
                     self.text.insert(str(lineNo) + ".0", sent + '\n')
                     lineNo = lineNo + 1
+
+            # Extract text from pdf while maintaining layout
+            control = TextControl(mode="physical")
+
+            page = self.pdf_document[self.page_number - 1]
+            txt = page.text(control=control)
+            self.text.insert("1.0",txt)
+
+
 
     def get_pos(self, ent, nlp):
         '''
