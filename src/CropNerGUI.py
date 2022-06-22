@@ -15,18 +15,19 @@ import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
 
-# TODO: WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
+# 1) WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
 # ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
 # do not make sense because we need to be able to know
 # relationships. We should look at co-reference resolution.
 # See: https://medium.com/huggingface/state-of-the-art-neural-coreference-resolution-for-chatbots-3302365dcf30
 #
-# TODO: WE NEED TO GROUP ANNOTATIONS SUCH AS TRAITS INTO CATEGORIES THAT
+# 2) WE NEED TO GROUP ANNOTATIONS SUCH AS TRAITS INTO CATEGORIES THAT
 # MAKE SENSE TO THE USER. RIGHT NOW WE HAVE "early maturity" AND "winter"
 # AS TRAITS WHILE ACCORDING TO THE SPECS WE SHOULD BE RETURNING
 # “Maturity” : “early maturity”, “Season”: “winter”
 
-# TODO: Need to start thinking about an ontology
+# 3) Need to start thinking about an ontology
+
 
 # Create NER GUI class
 class CropNerGUI:
@@ -79,8 +80,54 @@ class CropNerGUI:
     Methods
     -------
     font_plus(self)
-        Increase font size for text in ScrolledText (text box)
-
+        Increase font size for text in ScrolledText (text box).
+    font_minus(self)
+        Decrease font size for text in ScrolledText (text box).
+    add_ent(self)
+        Add a user defined named entity to the application.
+    remove_ent(self)
+        Remove a user defined named entity from the application.
+    get_ner_model_dir(self)
+        Select a folder containing spaCy nlp pipeline.
+    open_file(self, file_type: str)
+        Open a file (pdf/text) to be annotated or an annotation file (json) to be reviewed. selected using the GUI.
+    load_pdf(self)
+        Load  PDF file.
+    load_page(self)
+        Load contents of a PDF or text file into text box.
+    update_scrolled_text_line_content_index(self)
+        Populate the dictionary self.scrolled_text_line_content_index with position indices for the first and
+        last characters in each line in the text box.
+    highlight_ent(self, start_char: int, end_char: int, label: str)
+        Given the start index and end index of a named entity, highlight it in the text box.
+    pre_tag(self, selection: str)
+         Pre-tag selected content or all the text in text box with NER tags.
+    overlap(self, interval_one: list, interval_two: list) -> bool
+        Check to see if two intervals overlap.
+    get_ner(self, tag_label: str)
+        Tag a piece of text that has been selected as a named entity.
+    remove_tag(self)
+        Untag a piece of text that was classified as a named entity.
+    review_annotations(self)
+        Load a json file containing annotations and review it.
+    clear_message(self)
+        Clear warning message
+    clear_data(self)
+        Clear data in text box and dictionary containing annotations.
+    remove_all_tags(self)
+        Remove all the NER tags on text loaded in the text box.
+    tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc
+        Use NLP pipeline to identify named entities in the text.
+    continue_func(self, save_choice: str)
+        Continue the process of either saving annotation in a new file or overwriting an existing file.
+    file_save(self)
+        Save current annotation.
+    next_page(self)
+        Load the next page.
+    go(self)
+        Start running the GUI running.
+    quit(self)
+        Callback method attached to the quit button.
     """
 
     def __init__(self):
@@ -88,7 +135,7 @@ class CropNerGUI:
 
         self.rootWin = tk.Tk()
         self.rootWin.title("GEMS NER Annotation Tool")
-        self.rootWin.geometry('1250x650')
+        self.rootWin.geometry('1250x700')
         self.model_dir = None
         self.tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]
         self.colors=["violet", "lawn green", "deep sky blue", "yellow", "red", "orange","pink", "brown",
@@ -146,8 +193,13 @@ class CropNerGUI:
             self.tag_colors_buttonID[tag_value] = [color_value, btn]
 
         # Blank label with empty spaces used for formatting.
-        self.space_label = tk.Label(self.top_frame, text="    ", width=17)
+        self.space_label = tk.Label(self.top_frame, text=" ", width=3)
         self.space_label.pack(side=tk.LEFT)
+
+        # Button user will click to tag selected text
+        self.pre_tag_selection_btn = tk.Button(self.top_frame, text="Pre-Tag Selection",
+                                               command=partial(self.pre_tag, "selection"))
+        self.pre_tag_selection_btn.pack(side=tk.LEFT)
 
         # Button user will click to remove tags
         self.clear_tag_btn = tk.Button(self.top_frame, text="Remove-Tag(s)", command=self.remove_tag)
@@ -157,15 +209,14 @@ class CropNerGUI:
         self.pre_tag_page_btn = tk.Button(self.top_frame, text="Pre-Tag Page(s)", command=partial(self.pre_tag, "page"))
         self.pre_tag_page_btn.pack(side=tk.LEFT)
 
-        # Button user will click to tag selected text
-        self.pre_tag_selection_btn = tk.Button(self.top_frame, text="Pre-Tag Selection",
-                                               command=partial(self.pre_tag, "selection"))
-        self.pre_tag_selection_btn.pack(side=tk.LEFT)
+        # Remove all tags button
+        self.clear_btn = tk.Button(self.top_frame, text="Remove All Tags", width=15, command=self.remove_all_tags)
+        self.clear_btn.pack(side = tk.LEFT)
 
         # Frame with buttons that will contain user defined NER tags. Button with NER tags added by users will
         # be added to this frame. This is done in the function add_ent
         self.cust_ent_frame = tk.Frame(self.rootWin)
-        self.cust_ent_frame.pack(side=tk.TOP,fill="x")
+        self.cust_ent_frame.pack(side=tk.TOP, fill="x")
 
         # Blank label for formatting
         self.blank_label_two = tk.Label(self.cust_ent_frame, text="   ")
@@ -173,7 +224,7 @@ class CropNerGUI:
 
         # Frame containing options for users to add their own NER tags
         self.edit_ent_frame = tk.Frame(self.rootWin)
-        self.edit_ent_frame.pack(side=tk.TOP,fill="x")
+        self.edit_ent_frame.pack(side=tk.TOP, fill="x")
 
         # Label for text entry for a new NER tag defined by the user
         self.trait_label = tk.Label(self.edit_ent_frame, text="Enter Entity Label:", width=20)
@@ -217,12 +268,6 @@ class CropNerGUI:
         # Load button
         self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.load_page)
         self.load_btn.pack(side=tk.LEFT)
-        # Highlight button
-        self.bold_btn = tk.Button(self.bottom_frame, text="Highlight Text", width=10, command=self.highlight_text)
-        self.bold_btn.pack(side = tk.LEFT)
-        # Remove all tags button
-        self.clear_btn = tk.Button(self.bottom_frame, text="Remove All Tags", width=20, command=self.remove_all_tags)
-        self.clear_btn.pack(side = tk.LEFT)
         # Clear data button
         self.clear_data_btn = tk.Button(self.bottom_frame, text="Clear Data", width=10, command=self.clear_data)
         self.clear_data_btn.pack(side=tk.LEFT)
@@ -308,7 +353,8 @@ class CropNerGUI:
         self.font_minus.pack(side=tk.LEFT)
 
     def font_plus(self):
-        """ Increase font size for text in ScrolledText (text box)
+        """
+        Increase font size for text in ScrolledText (text box).
 
         Expects the global variable self.font_size which is of type string to be set. The default value is "16".
         This function increments self.font_size by 1 and then updates font size in self.text.
@@ -317,7 +363,8 @@ class CropNerGUI:
         self.text['font'] = "Times "+self.font_size
 
     def font_minus(self):
-        """ Decrease font size for text in ScrolledText (text box)
+        """
+        Decrease font size for text in ScrolledText (text box).
 
         Expects the global variable self.font_size which is of type string to be set. The default value is "16".
         This function decreases self.font_size by 1 and then updates font size in self.text.
@@ -326,7 +373,8 @@ class CropNerGUI:
         self.text['font'] = "Times "+self.font_size
 
     def add_ent(self):
-        """ Add a user defined named entity to the application.
+        """
+        Add a user defined named entity to the application.
 
         Expects the text entry for specifying a user defined entity tag to have the name of a user defined named
         entity. It then adds this new named entity to the application.
@@ -362,7 +410,8 @@ class CropNerGUI:
             self.tag_colors_buttonID[ent_label] = [color, btn]
 
     def remove_ent(self):
-        """ Remove a user defined named entity from the application.
+        """
+        Remove a user defined named entity from the application.
 
         Expects the text entry for specifying a user defined entity tag to have the name of a user defined named
         entity. It then removes this named entity from the application.
@@ -377,7 +426,8 @@ class CropNerGUI:
         self.tags.remove(ent_label)
 
     def get_ner_model_dir(self):
-        """ Select a folder containing spaCy nlp pipeline.
+        """
+        Select a folder containing spaCy nlp pipeline.
 
         Loads the nlp pipeline that will be used for tagging.
 
@@ -401,7 +451,8 @@ class CropNerGUI:
         # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
 
     def open_file(self, file_type: str):
-        """ Open a file (pdf/text) to be annotated or an annotation file (json) to be reviewed. selected using the GUI.
+        """
+        Open a file (pdf/text) to be annotated or an annotation file (json) to be reviewed. selected using the GUI.
 
         Parameters
         ----------
@@ -434,7 +485,8 @@ class CropNerGUI:
             self.msg.config(text="Warning!! Please select a valid (pdf or json) file.", foreground="red")
 
     def load_pdf(self):
-        """ Load  PDF file.
+        """
+        Load  PDF file.
 
         Expects the self.raw_file global variable to be set. If not, a warning message is displayed.
         """
@@ -501,7 +553,6 @@ class CropNerGUI:
         dictionary tells you the first line has the first 113 characters and the second line has characters starting
         with index 114 up to index 228.
         """
-
         input_text = self.text.get(1.0, "end")
         lines = input_text.splitlines()
         line_no = 1
@@ -543,7 +594,8 @@ class CropNerGUI:
         self.text.tag_add(label, str(line_start) + "." + str(char_start), str(line_end) + "." + str(char_end))
 
     def pre_tag(self, selection: str):
-        """ Pre-tag selected content or all the text in text box with NER tags.
+        """
+        Pre-tag selected content or all the text in text box with NER tags.
 
         Parameters
         ----------
@@ -613,7 +665,8 @@ class CropNerGUI:
                 self.cust_ents_dict[self.page_number] = [input_text, tags]
 
     def overlap(self, interval_one: list, interval_two: list) -> bool:
-        """ Check to see if two intervals overlap.
+        """
+        Check to see if two intervals overlap.
 
         Parameters
         ----------
@@ -644,7 +697,14 @@ class CropNerGUI:
         return overlap
 
     def get_ner(self, tag_label: str):
-        """ Extract NER tag"""
+        """
+        Tag a piece of text that has been selected as a named entity.
+
+        Parameters
+        ----------
+        tag_label : str
+            Label to assign to the named entity that was selected.
+        """
         # Clear warning message, if one exists
         self.msg.config(text="")
         try:
@@ -690,7 +750,11 @@ class CropNerGUI:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
 
     def remove_tag(self):
-        """ Delete selection from annotations. """
+        """
+        Untag a piece of text that was classified as a named entity.
+
+        Extract the piece of text that was selected and remove it from the list of named entities.
+        """
 
         # Clear warning message, if one exists
         self.msg.config(text="")
@@ -726,8 +790,12 @@ class CropNerGUI:
 
     def review_annotations(self):
         """
-        Review annotations
+        Load a json file containing annotations and review it.
+
+        It does not take as input any parameters, but it expects the variable that hold annotation
+        file name (self.annotation_file)  to have a valid json file value.
         """
+
         # Clear warning message, if one exists
         self.msg.config(text="")
 
@@ -749,7 +817,8 @@ class CropNerGUI:
 
             annotated_text = None
             entities = None
-            # Load  annotation
+
+            # Annotation file that contains more than one text block
             if len(train_data) > 1:
                 total_num_char = 0
                 annotated_text = ""
@@ -777,20 +846,16 @@ class CropNerGUI:
             for ent_val in entities:
                 self.highlight_ent(ent_val[0],ent_val[1], ent_val[2])
 
-    def highlight_text(self):
-        """ Highlight selected text """
-        try:
-            self.text.tag_add("highlight", "sel.first", "sel.last")
-        except tk.TclError:
-            # if no text is selected then tk.TclError exception occurs
-            self.msg.config(text="Warning!! No text was selected.",foreground="red")
-
     def clear_message(self):
-        """ Clear warning message"""
+        """
+        Clear warning message
+        """
         self.msg.config(text="")
 
     def clear_data(self):
-        """ Clear data in text box"""
+        """
+        Clear data in text box and dictionary containing annotations.
+        """
         # Clear annotations
         self.cust_ents_dict = {}
 
@@ -801,7 +866,9 @@ class CropNerGUI:
         self.text.delete(1.0, tk.END)
 
     def remove_all_tags(self):
-        """ Highlight text"""
+        """
+        Remove all the NER tags on text loaded in the text box.
+        """
         for tag in self.tags:
             self.text.tag_remove(tag, "1.0", "end")
 
@@ -812,12 +879,16 @@ class CropNerGUI:
         self.msg.config(text="")
 
     def tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
-        """ Use SpaCy to identify NER in text"""
+        """
+        Use NLP pipeline to identify named entities in the text.
+        """
         doc = self.nlp_agdata(text)
         return doc
 
     def continue_func(self, save_choice: str):
-        """" Add comment """
+        """
+        Continue the process of either saving annotation in a new file or overwriting an existing file.
+        """
         filename = None
         if save_choice == 'copy':
             file_prefix = self.raw_file.name.split(".")[0]
@@ -831,7 +902,6 @@ class CropNerGUI:
                 filename = self.annotation_file.name
 
         url = self.source_entry.get()
-
         if len(self.cust_ents_dict) == 0:
             self.msg.config(text="Warning!! No annotations to save.", foreground="red")
         else:
@@ -840,7 +910,6 @@ class CropNerGUI:
 
             ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.pdf_name, url)
             dict_2_json(ann_train_dict, filename)
-
         # Hide buttons
         self.overwrite_btn.pack_forget()
         self.continue_btn.pack_forget()
@@ -849,12 +918,13 @@ class CropNerGUI:
         self.ann_file_entry.pack_forget()
         self.source_label.pack_forget()
         self.source_entry.pack_forget()
-
         # Clear data after saving
         self.remove_all_tags()
 
     def file_save(self):
-        """ Save current annotation"""
+        """
+        Save current annotation.
+        """
         # Check to see if user is trying to overwrite a file
         if self.annotation_file is None:
             # Check to make sure value has been initialized
@@ -886,7 +956,9 @@ class CropNerGUI:
         self.source_entry.pack(side=tk.LEFT)
 
     def next_page(self):
-        """ Load the next page"""
+        """
+        Load the next page.
+        """
         if len(self.cust_ents_dict) == 0:
             self.msg.config(text="Warning!! No annotations to save.", foreground="red")
         else:
@@ -908,28 +980,25 @@ class CropNerGUI:
         self.load_page()
 
     def go(self):
-        """This takes no inputs, and sets the GUI running"""
+        """
+        Start running the GUI running.
+        """
         self.rootWin.mainloop()
 
     def quit(self):
-        """This is a callback method attached to the quit button.
-        It destroys the main window, which ends the program"""
+        """
+        Callback method attached to the quit button.
 
-        '''
-        # This seemed like a good idea to save the annotation file everytime 
-        # the application quit, just in case the user forgot to save. However, 
-        # when testing a ton of unnecessary files were being generated. We will comment
-        # this out for now and if this features becomes necessary in the future, we can 
-        # just uncomment.  
-        if(self.raw_file is not None):
-            # Save current annotation
-            self.file_save()
-        '''
+        It destroys the main window, which ends the program
+        """
+        # TODO: If a user accidentally clicks the Exit button, the program quits without saving any of the current
+        # annotation. Add functionality to first ask the user if they want to save or discard their current annotation,
+        # if they have any. NOTE: Annotations are saved on self.cust_ents_dict. Checking to see if this dictionary
+        # is empty should be a reasonable check on if a user has annotations that need to be saved.
         self.rootWin.destroy()
 
+
 # Driver code
-
-
 if __name__ == "__main__":
-    myGui = CropNerGUI()
-    myGui.go()
+    ner_gui = CropNerGUI()
+    ner_gui.go()
