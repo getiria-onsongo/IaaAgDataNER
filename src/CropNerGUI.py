@@ -46,8 +46,7 @@ class CropNerGUI:
     self.tags : list
         Agricultural data NER tags.
     self.colors : list
-        Colors used to highlight tags in self.tags. Should have
-        the same number of entries as self.tags. NER tag in
+        Colors used to highlight tags in self.tags. Should have the same number of entries as self.tags. NER tag in
         self.tags[i] will be highlighted using color self.colors[i]
     self.self.tag_colors_buttonID : dict
         Dictionary with a tag as key and [color, buttonID] as value
@@ -56,20 +55,17 @@ class CropNerGUI:
     self.annotation_file : _io.TextIOWrapper
         Annotation file selected by user using the GUI
     self.chunk : int
-        Current logical partition of the document being annotated. By default
-        this is the page number because it is natural to annotate a document in
-        page increments.
+        Current logical partition of the document being annotated. By default, this is the page number because it is
+        natural to annotate a document in page increments.
     self.pdf_document : pyxpdf.Document
         PDF to be annotated that was selected using GUI
     self.pdf_name : str
         Name of the pdf/text file being annotated. e.g., BarCvDescLJ11.pdf
     self.file_prefix : str
-        File path prefix (minus file type) e.g., for BarCvDescLJ11.pdf
-        path prefix is Data/DavisLJ11/BarCvDescLJ11
+        File path prefix (minus file type) e.g., for BarCvDescLJ11.pdf path prefix is Data/DavisLJ11/BarCvDescLJ11
     self.scrolled_text_line_content_index : dict
-        Contains index position of characters in a given line. Key = line number
-        tuple is index of first and last characters respectively.
-        {2: (114, 228)} = line 2 has characters from index 114 to index 228
+        Contains index position of characters in a given line. Key = line number tuple is index of first and last
+        characters respectively. {2: (114, 228)} = line 2 has characters from index 114 to index 228
     self.nlp_agdata : class (spacy.lang)
         spaCy language model. Defaults to en_core_web_lg if not specified
     self.cust_ents_dict : dict
@@ -77,8 +73,8 @@ class CropNerGUI:
     self.page_number : int
         Current page number
 
-    NOTE: Though the widgets are global variables, we will not document them here. Most
-    are self-evident. We have added inline comments in the code itself.
+    NOTE: Though the widgets are global variables, we will not document them here. Most are self-evident. We have
+    added inline comments in the code itself.
 
     Methods
     -------
@@ -183,7 +179,7 @@ class CropNerGUI:
         self.trait_label = tk.Label(self.edit_ent_frame, text="Enter Entity Label:", width=20)
         self.trait_label.pack(side=tk.LEFT)
 
-        # Text entry widget for user to type the name of a new NER tag they want to add
+        # Text entry widget for user to type the name of a user defined NER tag they want to add
         self.trait_entry = tk.Entry(self.edit_ent_frame, width=10)
         self.trait_entry.pack(side=tk.LEFT)
 
@@ -191,7 +187,7 @@ class CropNerGUI:
         self.add_ent_btn = tk.Button(self.edit_ent_frame, text="Add Entity", width=10, command=self.add_ent)
         self.add_ent_btn.pack(side=tk.LEFT)
 
-        # Button to remove the last NER tag added by the user
+        # Button to remove NER tag added by the user
         self.remove_ent_btn = tk.Button(self.edit_ent_frame, text="Remove Entity", width=10, command=self.remove_ent)
         self.remove_ent_btn.pack(side=tk.LEFT)
 
@@ -327,21 +323,31 @@ class CropNerGUI:
     def font_plus(self):
         """ Increase font size for text in ScrolledText (text box)
 
-        Expects the global variable self.font_size which is of type
-        string to be set. The default value is "16". This function
-        increments  self.font_size by 1 and then updates font size
-        in self.text.
+        Expects the global variable self.font_size which is of type string to be set. The default value is "16".
+        This function increments self.font_size by 1 and then updates font size in self.text.
         """
         self.font_size = str(int(self.font_size) + 1)
         self.text['font'] = "Times "+self.font_size
 
     def font_minus(self):
-        """ Add documentation"""
+        """ Decrease font size for text in ScrolledText (text box)
+
+        HERE
+
+        Expects the global variable self.font_size which is of type
+        string to be set. The default value is "16". This function
+        decreases self.font_size by 1 and then updates font size
+        in self.text.
+        """
         self.font_size = str(int(self.font_size) - 1)
         self.text['font'] = "Times "+self.font_size
 
     def remove_ent(self):
-        """ Add documentation"""
+        """ Remove a button for a user defined NER tag.
+
+        Expects the text entry next to "Enter Entity Label" to
+        have the name of one of the user defined entity labels. It wii
+        """
         ent_label = self.trait_entry.get().upper()
         color = self.tag_colors_buttonID[ent_label][0]
         ent_btn = self.tag_colors_buttonID[ent_label][1]
