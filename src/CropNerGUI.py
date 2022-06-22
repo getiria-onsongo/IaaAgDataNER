@@ -486,7 +486,7 @@ class CropNerGUI:
             label = ent.label_
             # functions that contain rules to expand the entity's span
             ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
-            ent = self.num_combine_ent(doc, current_index, ent, label)
+            # ent = self.num_combine_ent(doc, current_index, ent, label)
         return ent
 
 
@@ -603,7 +603,7 @@ class CropNerGUI:
         pos_model = self.spacyModel_entry.get().lower()
         if pos_model == "en_core_web_sm" or pos_model == "en_core_web_md":
             self.nlp_pos = spacy.load(pos_model)
-            
+
         input_text = None
         # Clear warning message, if one exists
         self.msg.config(text="")
