@@ -678,13 +678,14 @@ class CropNerGUI:
             if not self.overlap([selection_start,selection_end],[start, end]):
                 new_ents.append((start, end, label))
             else:
-                overlapping_tags.append(label)
+                overlapping_tags.append((start, end, label))
         if len(overlapping_tags) == 0:
             self.msg.config(text="Warning!! It appears the region you selected ("+str(selection_start)+
                                  "-"+str(selection_end)+") did not overlap with a tag.", foreground="red")
         else:
-            for tag in overlapping_tags:
-                self.text.tag_remove(tag, "sel.first", "sel.last")
+            for (start, end, label) in overlapping_tags:
+                # Removes tag using the tag's actual indices instead of the selection's indices
+                self.text.tag_remove(label, f"1.0+{start}c", f"1.0+{end}c")
 
         new_ents.sort()
         self.cust_ents_dict[self.chunk] = [input_text, new_ents]
