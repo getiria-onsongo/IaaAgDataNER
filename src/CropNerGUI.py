@@ -330,7 +330,7 @@ class CropNerGUI:
         self.blank_label_five.pack(side=tk.LEFT)
         # Select file to be annotated button
         self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF/txt)', width=18,
-                                     command=partial(self.open_file, "pdf_or_text"))
+                                     command=partial(self.open_file, "pdf"))
         self.open_button.pack(side=tk.LEFT)
         # Select folder with language model
         self.ner_model_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,
@@ -479,8 +479,9 @@ class CropNerGUI:
         if file_type == "json":
             self.annotation_file = f
             self.review_annotations()
-        elif file_type == "pdf_or_text":
+        elif file_type == "pdf":
             self.raw_file=f
+            self.pdf_document = None
             self.load_page()
         else:
             self.msg.config(text="Warning!! Please select a valid (pdf or json) file.", foreground="red")
@@ -633,11 +634,13 @@ class CropNerGUI:
                     self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
                     self.load_pdf()
 
+
                 # Extract text from pdf while maintaining layout
                 control = TextControl(mode="physical")
 
                 page = self.pdf_document[self.page_number - 1]
-                input_text = page.text(control=control)
+                input_text = page.text()
+
 
             self.text.delete(1.0, tk.END)
             self.text.insert("1.0", input_text)
