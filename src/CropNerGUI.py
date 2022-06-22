@@ -88,7 +88,7 @@ class CropNerGUI:
 
         self.rootWin = tk.Tk()
         self.rootWin.title("GEMS NER Annotation Tool")
-        self.rootWin.geometry('1500x900')
+        self.rootWin.geometry('1250x650')
         self.model_dir = None
         self.tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]
         self.colors=["violet", "lawn green", "deep sky blue", "yellow", "red", "orange","pink", "brown",
@@ -215,7 +215,7 @@ class CropNerGUI:
         self.exit_btn = tk.Button(self.bottom_frame, text="Exit",width=10,command=self.quit)
         self.exit_btn.pack(side = tk.LEFT)
         # Load button
-        self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.LoadPage)
+        self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.load_page)
         self.load_btn.pack(side=tk.LEFT)
         # Highlight button
         self.bold_btn = tk.Button(self.bottom_frame, text="Highlight Text", width=10, command=self.highlight_text)
@@ -285,11 +285,11 @@ class CropNerGUI:
         self.blank_label_five.pack(side=tk.LEFT)
         # Select file to be annotated button
         self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF/txt)', width=18,
-                                     command=partial(self.open_file, "pdf"))
+                                     command=partial(self.open_file, "pdf_or_text"))
         self.open_button.pack(side=tk.LEFT)
         # Select folder with language model
         self.ner_model_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,
-                                          command=self.get_nermodel_dir)
+                                          command=self.get_ner_model_dir)
         self.ner_model_button.pack(side=tk.LEFT)
         # Enter page you would like to load. Start with 1 as opposed to the conventional 0 numbering in CS
         self.page_label = tk.Label(self.open_frame, text="Raw Data File Page Num:", width=18)
@@ -307,19 +307,6 @@ class CropNerGUI:
         self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
         self.font_minus.pack(side=tk.LEFT)
 
-        # Frame to display default language model
-        self.model_frame = tk.Frame(self.rootWin)
-        self.model_frame.pack(side=tk.TOP,fill="x")
-        # Blank label for formatting
-        self.blank_label_six = tk.Label(self.model_frame, text="     ")
-        self.blank_label_six.pack(side=tk.LEFT)
-        # Display default language model
-        self.spacy_model_label = tk.Label(self.model_frame,
-                                          text="Spacy Model e.g.,en_core_web_lg:", width=25, anchor="w")
-        self.spacy_model_label.pack(side=tk.LEFT)
-        self.spacy_model_entry = tk.Entry(self.model_frame, width=20)
-        self.spacy_model_entry.pack(side=tk.LEFT)
-
     def font_plus(self):
         """ Increase font size for text in ScrolledText (text box)
 
@@ -332,40 +319,25 @@ class CropNerGUI:
     def font_minus(self):
         """ Decrease font size for text in ScrolledText (text box)
 
-        HERE
-
-        Expects the global variable self.font_size which is of type
-        string to be set. The default value is "16". This function
-        decreases self.font_size by 1 and then updates font size
-        in self.text.
+        Expects the global variable self.font_size which is of type string to be set. The default value is "16".
+        This function decreases self.font_size by 1 and then updates font size in self.text.
         """
         self.font_size = str(int(self.font_size) - 1)
         self.text['font'] = "Times "+self.font_size
 
-    def remove_ent(self):
-        """ Remove a button for a user defined NER tag.
-
-        Expects the text entry next to "Enter Entity Label" to
-        have the name of one of the user defined entity labels. It wii
-        """
-        ent_label = self.trait_entry.get().upper()
-        color = self.tag_colors_buttonID[ent_label][0]
-        ent_btn = self.tag_colors_buttonID[ent_label][1]
-        ent_btn.pack_forget()
-        # Remove elements from dictionary and arrays
-        self.tag_colors_buttonID.pop(ent_label)
-        self.colors.remove(color)
-        self.tags.remove(ent_label)
-
     def add_ent(self):
-        """ Add documentation"""
+        """ Add a user defined named entity to the application.
+
+        Expects the text entry for specifying a user defined entity tag to have the name of a user defined named
+        entity. It then adds this new named entity to the application.
+        """
         ent_label = self.trait_entry.get().upper()
         if ent_label in self.tags:
             self.msg.config(text="Warning!! Cannot add entity. Another entity with the same label already exists!",
                             foreground="red")
         else:
             # The code below select a color from color_list which is defined in tkinterColorList.py
-            # If it loops through the lenth of the colors in color_list and does not find a color
+            # If it loops through the length of the colors in color_list and does not find a color
             # that has not already been used, it generates a random color.
             color = None
             n = len(color_list)
@@ -377,9 +349,9 @@ class CropNerGUI:
                     color = i_color
                     break
             # Note, because we are selecting colors randomly from color_list, there is a chance we will not
-            # find a color that has not already been used. This can happen if by chance we keep randomnly
+            # find a color that has not already been used. This can happen if by chance we keep
             # selecting colors that have been used. If this happens, just create a random color.
-            if(color is None):
+            if color is None:
                 color = "#" + ("%06x" % random.randint(0, 16777215))
             self.colors.append(color)
             self.tags.append(ent_label)
@@ -389,25 +361,56 @@ class CropNerGUI:
             self.text.tag_configure(ent_label, background=color)
             self.tag_colors_buttonID[ent_label] = [color, btn]
 
-    def get_nermodel_dir(self):
-        """ Add documentation"""
-        model = self.spacy_model_entry.get()
-        model_name = "en_core_web_lg"
-        if len(model) == 0:
-            self.spacy_model_entry.delete(0, tk.END)
-            self.spacy_model_entry.insert(0, model_name)
-        else:
-            if model.lower() == "en_core_web_sm":
-                model_name = "en_core_web_sm"
-            elif model.lower() == "en_core_web_md":
-                model_name = "en_core_web_md"
-            self.spacy_model_entry.delete(0, tk.END)
-            self.spacy_model_entry.insert(0, model_name)
+    def remove_ent(self):
+        """ Remove a user defined named entity from the application.
+
+        Expects the text entry for specifying a user defined entity tag to have the name of a user defined named
+        entity. It then removes this named entity from the application.
+        """
+        ent_label = self.trait_entry.get().upper()
+        color = self.tag_colors_buttonID[ent_label][0]
+        ent_btn = self.tag_colors_buttonID[ent_label][1]
+        ent_btn.pack_forget()
+        # Remove elements from dictionary and arrays
+        self.tag_colors_buttonID.pop(ent_label)
+        self.colors.remove(color)
+        self.tags.remove(ent_label)
+
+    def get_ner_model_dir(self):
+        """ Select a folder containing spaCy nlp pipeline.
+
+        Loads the nlp pipeline that will be used for tagging.
+
+        Raises
+        ------
+        OSError
+            If the selected folder does not contain a valid spaCy pipeline, an OSError will be thrown and
+        a default language model is used instead.
+        """
         self.model_dir = fd.askdirectory()
-        self.nlp_agdata = spacy.load(self.model_dir)
+        try:
+            self.nlp_agdata = spacy.load(self.model_dir)
+            lang = self.nlp_agdata.lang # Attribute error thrown if valid language model is not selected
+            self.msg.config(text="NOTE: Model for "+lang+" language identified", foreground="red")
+        except OSError:
+            self.msg.config(text="WARNING!!: Selected folder does not contain valid language model \n"
+                                 "Default model 'en_core_web_lg' will be used.", foreground="red")
+            self.nlp_agdata = spacy.load("en_core_web_lg")
+        # NOTE: Commenting the line below for now. We will try using spaCy noun phrases instead
+        # to capture tags such as 'rough owns'
+        # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
 
     def open_file(self, file_type: str):
-        """ Get file from user. """
+        """ Open a file (pdf/text) to be annotated or an annotation file (json) to be reviewed. selected using the GUI.
+
+        Parameters
+        ----------
+        file_type : str
+            Type of file that was selected. This is either 'json' or 'pdf_or_text'
+
+        If a user selects a pdf ot text file, it will be loaded into the text box for annotation. If a json file
+        containing annotation is selected, it will bo loaded with the annotations highlighted.
+        """
         # TODO: Make it possible for users to select text files
 
         # Clear warning message, if one exists
@@ -424,36 +427,17 @@ class CropNerGUI:
         if file_type == "json":
             self.annotation_file = f
             self.review_annotations()
-        elif file_type == "pdf":
+        elif file_type == "pdf_or_text":
             self.raw_file=f
-            self.LoadPage()
+            self.load_page()
         else:
             self.msg.config(text="Warning!! Please select a valid (pdf or json) file.", foreground="red")
 
-    def LoadModel(self):
-        """
-        Load spacy model
-        """
-        if self.nlp_agdata is None:
-            model = self.spacy_model_entry.get()
-            model_name = "en_core_web_lg"
-            if len(model) == 0:
-                self.spacy_model_entry.delete(0, tk.END)
-                self.spacy_model_entry.insert(0, model_name)
-            else:
-                if model.lower() == "en_core_web_sm":
-                    model_name = "en_core_web_sm"
-                elif model.lower() == "en_core_web_md":
-                    model_name = "en_core_web_md"
-            if self.model_dir is not None:
-                self.nlp_agdata = spacy.load(self.model_dir)
-            else:
-                self.nlp_agdata = spacy.load(model_name)
+    def load_pdf(self):
+        """ Load  PDF file.
 
-            self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
-
-    def LoadPDF(self):
-        """ Get data from PDF file"""
+        Expects the self.raw_file global variable to be set. If not, a warning message is displayed.
+        """
 
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
@@ -462,17 +446,18 @@ class CropNerGUI:
         self.pdf_name = self.raw_file.name.split("/")[-1]
         self.pdf_document = Document(self.raw_file.name)
 
-    def LoadPage(self):
+    def load_page(self):
         """
-        Load content into text box
+        Load contents of a PDF or text file into text box.
+
+        If the entry box for page number has a value, it will load the page specified. If not, by default it will
+        load the first page.
         """
         # TODO: Currently only loads 1 page. Update to load arbitrary number of pages (max=size of document).
         # TODO: Give users the option to load text files in addition to pdf files.
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
-            # Load Spacy Model
-            self.LoadModel()
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
@@ -492,7 +477,7 @@ class CropNerGUI:
 
             # Load PDF file
             if self.pdf_document is None:
-                self.LoadPDF()
+                self.load_pdf()
 
             # Extract text from pdf while maintaining layout
             control = TextControl(mode="physical")
@@ -502,13 +487,21 @@ class CropNerGUI:
             self.text.insert("1.0",txt)
 
     def update_scrolled_text_line_content_index(self):
-        """ Add documentation"""
-        # Trying to figure out where entities are on scrollTextbox is a little tricky because tKinter uses newline
-        # characters to split text. Here we are keeping track of how many characters appear before a line in the
-        # GUI. This should make it easier to figure out where a token is given its
-        # start and end indices. Given (Steveland/Luther//Wintermalt 1001 1029 PED)  named entity, it is 1001, 1029
-        
-        # values= {1: (0, 113), 2: (114, 228)
+        """
+        Populate the dictionary self.scrolled_text_line_content_index with position indices for the first and
+        last characters in each line in the text box.
+
+        Trying to figure out where entities are on scrollTextbox is a little tricky because tKinter uses newline
+        characters to split text. Here we are keeping track of how many characters appear before a line in the
+        GUI. This should make it easier to figure out where a token is given its
+        start and end indices. Given (Steveland/Luther//Wintermalt 1001 1029 PED)  named entity, we know the first
+        character is at position 1001 and the last character is at position 1029. Question is, where is it in the
+        textbox? This dictionary will have line number as the key and a tuple
+        (index of first char in line, index of last char in line) as values e.g.,  {1: (0, 113), 2: (114, 228). This
+        dictionary tells you the first line has the first 113 characters and the second line has characters starting
+        with index 114 up to index 228.
+        """
+
         input_text = self.text.get(1.0, "end")
         lines = input_text.splitlines()
         line_no = 1
@@ -521,7 +514,13 @@ class CropNerGUI:
             line_no = line_no + 1
 
     def highlight_ent(self, start_char: int, end_char: int, label: str):
-        """ Add documentation """
+        """
+        Given the start index and end index of a named entity, highlight it in the text box.
+
+        Expects the dictionary (self.scrolled_text_line_content_index) with indices for characters in each line in
+        the text box to be specified. The label for the named entity needs to have been added to
+        self.text.tag_configure.
+        """
         line_start = -1
         char_start = -1
         line_end = -1
@@ -544,7 +543,18 @@ class CropNerGUI:
         self.text.tag_add(label, str(line_start) + "." + str(char_start), str(line_end) + "." + str(char_end))
 
     def pre_tag(self, selection: str):
-        """ Pre-tag selected content or all the text in text box with NER tags. """
+        """ Pre-tag selected content or all the text in text box with NER tags.
+
+        Parameters
+        ----------
+        selection : str
+            String specifying the type tagging to be done.
+
+        If a user has selected a block of text and clicked the "Pre-Tag Selection" button, the selected text will be
+        tagged and annotation displayed in the text box.
+
+        If they clicked the "Pre-Tage Pages(s)" button, all the text loaded in the text box will be annotated.
+        """
         input_text = None
         # Clear warning message, if one exists
         self.msg.config(text="")
@@ -561,11 +571,14 @@ class CropNerGUI:
             self.chunk = self.page_number
 
             if selection == "selection":
+                # TODO: If a user clicks the "Pre-Tag Selection" button but they have not selected any text, an
+                # error is through without displaying a warning message. Check to make sure "sel.first" and
+                # "sel.last" are defined before calling self.text.get()
                 input_text =  self.text.get("sel.first", "sel.last")
             else:
                 if self.pdf_document is None:
                     self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
-                    self.LoadPDF()
+                    self.load_pdf()
 
                 # Extract text from pdf while maintaining layout
                 control = TextControl(mode="physical")
@@ -584,6 +597,7 @@ class CropNerGUI:
             self.update_scrolled_text_line_content_index()
             doc = self.tag_ner_with_spacy(input_text)
 
+            # TODO: Add a warning message if ent is empty so users know none of the custom tags were found
             for ent in doc.ents:
                 # NER is in our list of custom tags
                 if ent.label_ in self.tags:
@@ -598,20 +612,34 @@ class CropNerGUI:
                 tags = self.cust_ents_dict[self.page_number]
                 self.cust_ents_dict[self.page_number] = [input_text, tags]
 
-    def overlap(self, interva1: int, interval2: int) -> bool:
-        """ Check to see if two intervals overlap. """
+    def overlap(self, interval_one: list, interval_two: list) -> bool:
+        """ Check to see if two intervals overlap.
+
+        Parameters
+        ----------
+        interval_one : list[start1, end1]
+            List containing two int values [start1, end1].
+
+        interval_two : list[start2, end2]
+            List containing two int values [start2, end2].
+
+        Returns
+        -------
+        bool
+            True if the intervals overlap and False otherwise.
+        """
         overlap = False
-        interva1start = interva1[0]
-        interva1end = interva1[1]
+        interval_one_start = interval_one[0]
+        interval_one_end = interval_one[1]
 
-        interval2start = interval2[0]
-        interval2end = interval2[1]
+        interval_two_start = interval_two[0]
+        interval_two_end = interval_two[1]
 
-        if (interval2start >= interva1start) and (interval2start <= interva1end):
+        if (interval_two_start >= interval_one_start) and (interval_two_start <= interval_one_end):
             overlap = True
-        elif (interval2end >= interva1start) and (interval2end <= interva1end):
+        elif (interval_two_end >= interval_one_start) and (interval_two_end <= interval_one_end):
             overlap = True
-        elif (interval2start <= interva1start) and (interval2end >= interva1end):
+        elif (interval_two_start <= interval_one_start) and (interval_two_end >= interval_one_end):
             overlap = True
         return overlap
 
@@ -877,7 +905,7 @@ class CropNerGUI:
         self.annotation_file = None
 
         # Load data
-        self.LoadPage()
+        self.load_page()
 
     def go(self):
         """This takes no inputs, and sets the GUI running"""
