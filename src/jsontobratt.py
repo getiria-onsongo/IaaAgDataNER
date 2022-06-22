@@ -45,14 +45,14 @@ def conversion(infile, outfile):
 
     # Key terms for all the labels in the json file
     keyterm_dict = {
-        "ALAS": "varietal alias",
+        "ALAS": "varietal_alias",
         "CROP": "crop",
         "CVAR": "crop_variety",
-        "JRNL": "journal reference",
+        "JRNL": "journal_reference",
         "PATH": "pathogen",
         "PED": "pedigree",
-        "PLAN": "plant anatomy",
-        "PPTD": "plant predisposition to disease",
+        "PLAN": "plant_anatomy",
+        "PPTD": "plant_predisposition_to_disease",
         "TRAT": "trait",
         # not complete for given CSV!
     }
@@ -68,8 +68,8 @@ def conversion(infile, outfile):
                 entitydata = str(entity).split(" ")
 
                 # startnum and endnum add the length of the sentences the come before them
-                startnum = int(entitydata[1].replace(",", "")) + counter
-                endnum = int(entitydata[3].replace(",", "")) + counter
+                startnum = int(entitydata[1].replace(",", ""))
+                endnum = int(entitydata[3].replace(",", ""))
                 keyterm = entitydata[5].replace("'", "").replace("}", "")
 
                 # Replace the label using the keyterm dictionary above
@@ -79,7 +79,7 @@ def conversion(infile, outfile):
                     substring = x[int(entitydata[1].replace(",", "")): int(entitydata[3].replace(",", ""))]
 
                     # File is outputted in this formatted seen below
-                    t_entry = f"t{tindx}\t{keyterm_long} {startnum} {endnum}\t{substring}"
+                    t_entry = f"T{tindx}\t{keyterm_long} {startnum} {endnum}\t{substring}"
 
                     # Finally it's written here into the ann file
                     with open(annfile, "a") as f:
