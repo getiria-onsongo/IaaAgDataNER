@@ -179,7 +179,7 @@ class CropNerGUI:
         self.remove_ent_btn = tk.Button(self.edit_ent_frame, text="Remove Entity", width=10, command=self.remove_ent)
         self.remove_ent_btn.pack(side=tk.LEFT)
         # adding the text: Note, height defines height if widget in lines based in font size
-        self.text = ScrolledText(self.rootWin, height=25, width=140, font = "Times "+self.font_size, wrap='word')
+        self.text = ScrolledText(self.rootWin, height=20, width=140, font = "Times "+self.font_size, wrap='word')
         self.text.focus_force()
         self.text.pack(side=tk.TOP)
         self.text.tag_configure("highlight", foreground="black", background="gray")
@@ -470,8 +470,8 @@ class CropNerGUI:
             self.text.delete(1.0, tk.END)
 
             # Load PDF file
-            if self.pdf_document is None:
-                self.LoadPDF()
+            # if self.pdf_document is None:
+            self.LoadPDF()
 
             # Extract text from pdf while maintaining layout
             # control = TextControl(mode="physical")
@@ -678,9 +678,9 @@ class CropNerGUI:
         if len(overlapping_tags) == 0:
             self.msg.config(text="Warning!! It appears the region you selected ("+str(selection_start)+
                                  "-"+str(selection_end)+" did not overlap with a tag.", foreground="red")
-        else:
-            for tag in overlapping_tags:
-                self.text.tag_remove(tag, "sel.first", "sel.last")
+        
+        for tag in self.tags:
+            self.text.tag_remove(tag, "sel.first", "sel.last")
 
         new_ents.sort()
         self.cust_ents_dict[self.chunk] = [input_text, new_ents]
