@@ -383,8 +383,15 @@ class CropNerGUI:
             self.spacyModel_entry.delete(0, tk.END)
             self.spacyModel_entry.insert(0, model_name)
         self.model_dir = fd.askdirectory()
-        self.nlp_agdata = spacy.load(self.model_dir)
+        try:
+            self.nlp_agdata = spacy.load(self.model_dir)
+            self.msg.config(text="Model loaded: " + self.nlp_agdata.meta['name'], foreground="red")
+        except OSError as e:
+            self.msg.config(text="Your model selection was invalid; please try again before loading raw data.", foreground="red")
 
+
+
+                
     def open_file(self, file_type: str):
         """ Get file from user. """
         # TODO: Make it possible for users to select text files
@@ -545,12 +552,11 @@ class CropNerGUI:
                 if self.pdf_document is None:
                     self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
                     self.LoadPDF()
-
-                # Extract text from pdf while maintaining layout
-                control = TextControl(mode="physical")
-
                 page = self.pdf_document[self.page_number - 1]
-                input_text = page.text(control=control)
+                input_text = page.text()
+
+            # Extract text from pdf while maintaining layout
+            control = TextControl(mode="physical")
 
             self.text.delete(1.0, tk.END)
             self.text.insert("1.0", input_text)
