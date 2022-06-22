@@ -5,18 +5,18 @@ import glob
 from pyxpdf import Document, Page, Config
 from pyxpdf.xpdf import TextControl
 from jsontobratt import conversion
+from datasettobratt import dataset_to_bratt
 from agParse import *
 from json2py import *
 from py2json import *
 
 
-class Validation:
+class ValidationPreprocess:
 
     def __init__(self, file_dir, model_dir, spacy_model_name="en_core_web_lg", tags=["ALAS","CROP","CVAR","JRNL","PATH","PED","PLAN","PPTD","TRAT"]):
         self.file_dir = file_dir
         self.model_dir = model_dir
         self.spacy_model_name = spacy_model_name # spacy model to use for pos
-        self.tags = tags
         self.nlp_pos = spacy.load(self.spacy_model_name)
         self.nlp =  spacy.load(self.model_dir)
         self.nlp.add_pipe("compound_trait_entities", after='ner')
@@ -24,25 +24,26 @@ class Validation:
         self.crop_cnt = {}
         self.cvar_cnt = {}
         self.page_num = 0
+        self.tags = tags
 
 
-    def process_files(self):
+    def process_files(self, file_ending="/*.pdf"):
         """
         Gets the directory of pdfs, reads them in and then does ner tagging on them,
         saves as json, and then converts and saves them as bratt files. May need a
         feature to make sure train/test split is maintained. Need to switch to working
         at page level (issue with pdf reader).
         """
-        files = glob.glob(self.file_dir+"/*.pdf")
-        print(files)
+        files = glob.glob(self.file_dir+file_ending)
+        print("%s files to process." %str(len(files)))
         for f in files:
             self.cust_ents_dict = {}
             pdf_document = Document(f)
             page_number = 1
             while page_number <= len(pdf_document):
                 self.tag(pdf_document, page_number)
-                json_name = self.file_save(f, "", page_number)
-                bratt_name = f[0:len(f)-4] + "_p" + str(page_number) + "_td_out.ann"
+                json_name = self.file_save(f, "", page_number, name_prefix="barley")
+                bratt_name = json_name[0:len(json_name)-5]
                 conversion(json_name, bratt_name)
                 page_number = page_number + 1
 
@@ -161,30 +162,36 @@ class Validation:
             dictionary[ent_value] = 1
 
 
-    def file_save(self, pdf_name, url, chunk, copy=False):
+    def file_save(self, pdf_name, url, chunk, name_prefix=None, name_suffix="_td.json", output_dir="Data/Output/", copy=False):
         """ Simplifed version of GUI save file & continue_func. """
-        name_prefix = pdf_name.split(".")[0]
-        output_filename = name_prefix + "_pg" + str(chunk) + "out.json"
+        if name_prefix == None:
+            name_prefix = pdf_name.split(".")[0].split("/")[2]
+        output_filename = output_dir + name_prefix + "_p" + str(chunk) + name_suffix
+
         if os.path.isfile(output_filename):
             if copy:
-                print("making file copy")
+                print("Making file copy...")
                 now = datetime.now()  # current date and time
                 date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-                output_filename = name_prefix + "_" + datatime + "out.json"
+                output_filename = output_dir + name_prefix  + "_" + datatime + "_" + name_suffix
             else:
-                print("file will be overwritten")
+                print("File will be overwritten.")
 
         if len(self.cust_ents_dict) == 0:
-            print("no annotations to save.")
+            print("No annotations to save.")
         else:
             input_text = self.cust_ents_dict[chunk][0]
             entities = self.cust_ents_dict[chunk][1]
             ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], chunk, pdf_name, url)
             dict_2_json(ann_train_dict, output_filename)
+            print("Created %s." %output_filename)
 
         return output_filename
 
 
 if __name__ == '__main__':
-    validate = Validation("Data/CSU", "senter_ner_2021_08_model/model-best")
-    validate.process_files()
+    dataset = "Data/DavisLJ11"
+    model = "senter_ner_2021_08_model/model-best"
+    dataset_to_bratt(dataset)
+    preprocess = ValidationPreprocess(dataset, model)
+    preprocess.process_files()
