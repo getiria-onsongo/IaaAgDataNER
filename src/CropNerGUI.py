@@ -330,7 +330,7 @@ class CropNerGUI:
         self.blank_label_five.pack(side=tk.LEFT)
         # Select file to be annotated button
         self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF/txt)', width=18,
-                                     command=partial(self.open_file, "pdf"))
+                                     command=partial(self.open_file, "pdf/txt"))
         self.open_button.pack(side=tk.LEFT)
         # Select folder with language model
         self.ner_model_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,
@@ -471,7 +471,10 @@ class CropNerGUI:
         self.msg.config(text="")
 
         # file type
-        filetypes = [(f'{file_type} files', f'*.{file_type}')]
+        if file_type == "json":
+            filetypes = [("json files", "*.json")]
+        elif file_type == "pdf/txt":
+            filetypes = [("data files", "*.pdf *.txt")]
 
         # show the open file dialog
         f = fd.askopenfile(filetypes=filetypes)
@@ -479,12 +482,12 @@ class CropNerGUI:
         if file_type == "json":
             self.annotation_file = f
             self.review_annotations()
-        elif file_type == "pdf":
+        elif file_type == "pdf/txt":
             self.raw_file=f
             self.pdf_document = None
             self.load_page()
         else:
-            self.msg.config(text="Warning!! Please select a valid (pdf or json) file.", foreground="red")
+            self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
 
     def load_pdf(self):
         """
@@ -516,6 +519,7 @@ class CropNerGUI:
             # Reset annotation dictionary
             self.cust_ents_dict = {}
 
+            # Read valid page number, otherwise reset to 1
             page_num = self.page_entry.get()
             if not page_num.isdigit():
                 self.msg.config(text="Page number not entered. Value initialized to 1", foreground="red")
@@ -526,18 +530,24 @@ class CropNerGUI:
                 self.page_number = int(page_num)
 
             self.chunk=self.page_number
+
             # Delete contents
             self.text.delete(1.0, tk.END)
 
-            # Load PDF file
-            if self.pdf_document is None:
-                self.load_pdf()
+            # Calls pyxpdf in case the file is a PDF
+            if self.raw_file.name[-3:] == "pdf":
+                # Load PDF file
+                if self.pdf_document is None:
+                    self.load_pdf()
 
-            # Extract text from pdf while maintaining layout
-            control = TextControl(mode="physical")
+                # Extract text from pdf while maintaining layout
+                control = TextControl(mode="physical")
 
-            page = self.pdf_document[self.page_number - 1]
-            txt = page.text()
+                page = self.pdf_document[self.page_number - 1]
+                txt = page.text()
+            else:
+                txt = self.raw_file.read()
+
             self.text.insert("1.0",txt)
 
     def update_scrolled_text_line_content_index(self):
@@ -607,7 +617,7 @@ class CropNerGUI:
         If a user has selected a block of text and clicked the "Pre-Tag Selection" button, the selected text will be
         tagged and annotation displayed in the text box.
 
-        If they clicked the "Pre-Tage Pages(s)" button, all the text loaded in the text box will be annotated.
+        If they clicked the "Pre-Tag Pages(s)" button, all the text loaded in the text box will be annotated.
         """
         input_text = None
         # Clear warning message, if one exists
@@ -630,16 +640,19 @@ class CropNerGUI:
                 # "sel.last" are defined before calling self.text.get()
                 input_text =  self.text.get("sel.first", "sel.last")
             else:
-                if self.pdf_document is None:
-                    self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
-                    self.load_pdf()
+                # Commenting temporarily for .txt support
+                #if self.pdf_document is None:
+                #    self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
+                #    self.load_pdf()
 
+                if self.raw_file.name[-3:] == "pdf":
+                    # Extract text from pdf while maintaining layout
+                    control = TextControl(mode="physical")
 
-                # Extract text from pdf while maintaining layout
-                control = TextControl(mode="physical")
-
-                page = self.pdf_document[self.page_number - 1]
-                input_text = page.text()
+                    page = self.pdf_document[self.page_number - 1]
+                    input_text = page.text()
+                else:
+                    input_text = self.text.get(1.0, "end")
 
 
             self.text.delete(1.0, tk.END)
