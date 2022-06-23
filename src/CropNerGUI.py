@@ -70,9 +70,21 @@ class CropNerGUI:
 
         self.cust_ents_dict = {}
 
-        self.output_file_name = "sample_p0_td.py"
-        self.pageNumber=0
-        self.line_num = 0
+        if len(sys.argv) >= 2:
+            self.model_dir = sys.argv[1]
+            # Assumes a model passed in as an arg is correctly formatted, no error handling here
+            self.nlp_agdata = spacy.load(self.model_dir)
+        else:
+            self.model_dir = None
+
+        if len(sys.argv) >= 3:
+            self.raw_file = sys.argv[2]
+        else:
+            self.raw_file = None
+
+        # ----------------------- Widgets for GUI start here.
+        # Default font size for text in ScrolledText. Should be a string format
+        # for a number e.g., '16'
         self.font_size = "16"
         self.page_lines = len(self.content)
 
@@ -543,8 +555,124 @@ class CropNerGUI:
             # Reset annotation dictionary
             self.cust_ents_dict = {}
 
-            # By default, start annotating the first line.
-            firstLineNo = 1
+            # Update variable that holds number of lines in textbox. You need this for
+            # the function highlight_ent to work
+            self.update_scrolled_text_line_content_index()
+            doc = self.tag_ner_with_spacy(input_text)
+
+            # TODO: Add a warning message if ent is empty so users know none of the custom tags were found
+            for ent in doc.ents:
+                # NER is in our list of custom tags
+                if ent.label_ in self.tags:
+                    ent = self.get_pos(ent)
+                    # index = self.tags.index(ent.label_) # Find index for an element in a list
+                    self.highlight_ent(ent.start_char, ent.end_char, ent.label_)
+                    if self.cust_ents_dict.get(self.page_number, False):
+                        self.cust_ents_dict[self.page_number].append((ent.start_char, ent.end_char, ent.label_))
+                    else:
+                        self.cust_ents_dict[self.page_number] = [(ent.start_char, ent.end_char, ent.label_)]
+
+            if self.cust_ents_dict.get(self.page_number, False):
+                tags = self.cust_ents_dict[self.page_number]
+                self.cust_ents_dict[self.page_number] = [input_text, tags]
+
+
+    def get_pos(self, ent):
+        '''
+        Proceses a given entity with rules that use pos tag data to expand the entity span if needed.
+
+        :param ent: entity to possibly expand span of
+        :param nlp: spacy model for pos tagging
+        :returns: entity, with an expanded span if needed
+        '''
+        doc = self.pos_model(ent.sent.text)
+        if(len(doc[ent.start:ent.end]) > 0):
+            current_index = doc[ent.start:ent.end][0].i
+            label = ent.label_
+            # functions that contain rules to expand the entity's span
+            ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
+            # ent = self.num_combine_ent(doc, current_index, ent, label)
+        return ent
+
+
+    def adj_combine_noun_ent(self, doc, current_index, ent, label):
+        '''
+        If the first token in an entity is a noun or proper noun, finds all adjectives proceeding the entity and expands the span to contain all of them.
+
+        :param doc: sentence entity belongs to passed through spacy model
+        :param current_index: index of first token in the doc
+        :param ent: entity to possibly expand span of
+        :param label: label of ent
+        :returns: entity, which has been expanded if needed
+        '''
+        if current_index >= 1:
+            current = doc[current_index]
+            left = doc[current_index-1]
+            pos_current = current.pos_
+            pos_left = left.pos_
+
+            if pos_current == "NOUN" or pos_current == "PROPN":
+                if pos_left == "ADJ":
+                        print("Adj expanding...")
+                        print("entity: "+ str(ent))
+                        i = current_index
+                        start_index = ent.start
+                        # keeps searching until all adjectives are found, for nouns described by mutiple entities
+                        while i >= 1:
+                            i = i - 1
+                            if doc[i].pos_ == "ADJ":
+                                start_index = i
+                            else:
+                                break
+                        first_tok = doc[start_index]
+                        ent = doc[first_tok.i:ent.end]
+                        ent.label_ = label
+                        print("new: " + str(ent))
+                        print("label: " + str(ent.label_))
+                        print()
+        return ent
+
+    def num_combine_ent(self, doc, current_index, ent, label):
+        '''
+        If the first token in an entity is a noun, proper noun, or adjective, finds expands the span to include a numerical measurment that comes before the entity. The measurment is found by seeing if it conforms to the format num-noun-entity. So, "30 mg wheat" would be fulfill the rule but "12 wheat" would not.
+
+        :param doc: sentence entity belongs to passed through spacy model
+        :param current_index: index of first token in the doc
+        :param ent: entity to possibly expand span of
+        :param label: label of ent
+        :returns: entity, which has been expanded if needed
+        '''
+        if current_index >= 2:
+            current = doc[current_index]
+            left = doc[current_index-1]
+            left_left = doc[current_index-2]
+            pos_current = current.pos_
+            pos_left = left.pos_
+            pos_left_left = left_left.pos_
+            if pos_current == "ADJ" or pos_current == "NOUN" or pos_current == "PROPN" :
+                if pos_left == "PROPN" or pos_left == "NOUN":
+                    if pos_left_left == "NUM":
+                        print("Num expanding...")
+                        print("entity: " + str(ent))
+                        ent = doc[left_left.i:ent.end]
+                        ent.label_ = label
+                        print("new: " + str(ent))
+                        print("label: " + str(ent.label_))
+                        print()
+        return ent
+
+
+    def overlap(self, interval_one: list, interval_two: list) -> bool:
+        """
+        Check to see if two intervals overlap.
+
+        Parameters
+        ----------
+        interval_one : list[start1, end1]
+            List containing two int values [start1, end1].
+
+        interval_two : list[start2, end2]
+            List containing two int values [start2, end2].
 
             # Get the line number for the beginning and end of the text.
             if (selection == "Selection"):
