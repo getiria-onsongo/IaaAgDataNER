@@ -15,6 +15,8 @@ import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
 
+import hashlib #TODO: Remove this, it's for debugging and was simply forgotten if still here
+
 # 1) WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
 # ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
 # do not make sense because we need to be able to know
@@ -529,14 +531,14 @@ class CropNerGUI:
 
             # Load PDF file
             # if self.pdf_document is None:
-            self.LoadPDF()
+            self.load_pdf()
 
             # Extract text from pdf while maintaining layout
             # control = TextControl(mode="physical")
             # We don't want to maintain layout, as this breaks any PDF with multiple columns.
 
             page = self.pdf_document[self.page_number - 1]
-            txt = page.text()
+            txt = page.text().replace("\r", "")
             self.text.insert("1.0",txt)
 
     def update_scrolled_text_line_content_index(self):
@@ -633,11 +635,8 @@ class CropNerGUI:
                     self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
                     self.load_pdf()
 
-                # Extract text from pdf while maintaining layout
-                control = TextControl(mode="physical")
-
                 page = self.pdf_document[self.page_number - 1]
-                input_text = page.text()
+                input_text = page.text().replace("\r", "")
 
             self.text.delete(1.0, tk.END)
             self.text.insert("1.0", input_text)
