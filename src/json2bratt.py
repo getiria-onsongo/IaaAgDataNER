@@ -15,10 +15,10 @@ import tkinter.filedialog
 if __name__ == "__main__":
     # Use tkinter for selecting files using a gui file selector
     root = tkinter.Tk()
-    infile = tkinter.filedialog.askopenfilename(
-        initialdir=["../Data"], filetypes=[("json files", "*.json *.jsonl")])
+    infile = tkinter.filedialog.askopenfilename(initialdir=["../Data"], filetypes=[("json files", "*.json *.jsonl")])
     root.destroy()
     outfile = input("\nName your output file: ")
+
 
 
 def conversion(infile, outfile):
@@ -68,20 +68,18 @@ def conversion(infile, outfile):
                 entitydata = str(entity).split(" ")
 
                 # startnum and endnum add the length of the sentences the come before them
-
-                startnum = int(entitydata[1].replace(",", "")) + counter
-                endnum = int(entitydata[3].replace(",", "")) + counter
+                startnum = int(entitydata[1].replace(",", ""))
+                endnum = int(entitydata[3].replace(",", ""))
                 keyterm = entitydata[5].replace("'", "").replace("}", "")
 
                 # Replace the label using the keyterm dictionary above
                 keyterm_long = keyterm_dict.get(keyterm, None)
                 # If keyterm exists then print it out or print "unknown keyterm"
                 if keyterm_long:
-                    substring = x[int(entitydata[1].replace(",", "")): int(
-                        entitydata[3].replace(",", ""))]
+                    substring = x[int(entitydata[1].replace(",", "")): int(entitydata[3].replace(",", ""))]
 
                     # File is outputted in this formatted seen below
-                    t_entry = f"T{tindx}\t{keyterm} {startnum} {endnum}\t{substring}"
+                    t_entry = f"T{tindx}\t{keyterm_long} {startnum} {endnum}\t{substring}"
 
                     # Finally it's written here into the ann file
                     with open(annfile, "a") as f:
@@ -89,22 +87,21 @@ def conversion(infile, outfile):
                         f.write("\n")
 
                 else:
-                    print(
-                        f"\n{x} sentence has been skipped because, \033[91m\033[1m{keyterm}\033[0m is not defined in the dictionary")
+                    print(f"\n{x} sentence has been skipped because, \033[91m\033[1m{keyterm}\033[0m \033[91mis not defined in the dictionary\033[0m")
+                    with open(annfile, "a") as f:
+                        f.write(f"Unknown key term {keyterm}")
+                        f.write("\n")
 
             # Exception if the sentence has not been formatted properly
             except:
-                raise ValueError(
-                    f"\033[91m{x}\033[0m is not formatted correctly so it has been skipped")
+                raise ValueError(f"\033[91m{x}\033[0m is not formatted correctly so it has been skipped")
 
             tindx += 1
+            counter += len(x)
             i += 1
-
         # Text file is written here and joined without any space
         with open(txtfile, "a") as f:
             f.write(x)
-        # This is the part which decides if you wanna do document or sentence level
-        counter += len(x)  # Do 0 if you want sentence level
     print(f"\nFile converted to bratt as {annfile} and {txtfile}")
 
 
