@@ -5,6 +5,7 @@ src/temp.txt
 temp.txt
 train.cfg
 ner_2022*
+ner_2022_05_model/*/*
 YEDDA/
 ner-annotator/
 prodigy/
@@ -14,6 +15,7 @@ src/logo.png
 src/temp.json
 src/temp.py
 src/temp1.py
+src/CropNerGUI_experimental.py
 test.jsonl
 test1.txt
 test2.jsonl
