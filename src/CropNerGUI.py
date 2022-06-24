@@ -468,8 +468,6 @@ class CropNerGUI:
         If a user selects a pdf ot text file, it will be loaded into the text box for annotation. If a json file
         containing annotation is selected, it will bo loaded with the annotations highlighted.
         """
-        # TODO: Make it possible for users to select text files
-
         # Clear warning message, if one exists
         self.msg.config(text="")
 
@@ -514,7 +512,7 @@ class CropNerGUI:
         load the first page.
         """
         # TODO: Currently only loads 1 page. Update to load arbitrary number of pages (max=size of document).
-        # TODO: Give users the option to load text files in addition to pdf files.
+        # *Done by Ruben
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
