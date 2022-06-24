@@ -441,7 +441,7 @@ class CropNerGUI:
         try:
             self.nlp_agdata = spacy.load(self.model_dir)
             lang = self.nlp_agdata.lang # Attribute error thrown if valid language model is not selected
-            self.msg.config(text="NOTE: Model for "+lang+" language identified", foreground="red")
+            self.msg.config(text="NOTE: Model for "+lang+" language identified", foreground="orange")
         except OSError:
             self.msg.config(text="WARNING!!: Selected folder does not contain valid language model \n"
                                  "Default model 'en_core_web_lg' will be used.", foreground="red")
@@ -711,7 +711,8 @@ class CropNerGUI:
             self.update_scrolled_text_line_content_index()
             doc = self.tag_ner_with_spacy(input_text)
 
-            # TODO: Add a warning message if ent is empty so users know none of the custom tags were found
+            if(len(doc.ents) == 0):
+                self.msg.config(text="Warning!! No entities were found in this selection.", foreground="red")
             for ent in doc.ents:
                 # NER is in our list of custom tags
                 if ent.label_ in self.tags:
