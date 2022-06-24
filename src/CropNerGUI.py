@@ -619,13 +619,12 @@ class CropNerGUI:
 
         If they clicked the "Pre-Tag Pages(s)" button, all the text loaded in the text box will be annotated.
         """
-        input_text = None
         # Clear warning message, if one exists
         self.msg.config(text="")
         if self.model_dir is None:
             self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
+        # Pre-tag with NER model
         else:
-            input_text = None
             # Get page number
             page_num = self.page_entry.get()
             if not page_num.isdigit():
@@ -633,12 +632,13 @@ class CropNerGUI:
                 page_num = 1
             self.page_number = int(page_num)
             self.chunk = self.page_number
-
+            # Grabs selected text if in selection mode, otherwise ends the operation.
             if selection == "selection":
-                # TODO: If a user clicks the "Pre-Tag Selection" button but they have not selected any text, an
-                # error is through without displaying a warning message. Check to make sure "sel.first" and
-                # "sel.last" are defined before calling self.text.get()
-                input_text =  self.text.get("sel.first", "sel.last")
+                if (len(self.text.tag_ranges("sel")) > 0):
+                    input_text =  self.text.get("sel.first", "sel.last")
+                else:
+                    self.msg.config(text="No selection detected; no text was tagged.", foreground="red")
+                    return
             else:
                 # Commenting temporarily for .txt support
                 #if self.pdf_document is None:
@@ -653,7 +653,6 @@ class CropNerGUI:
                     input_text = page.text()
                 else:
                     input_text = self.text.get(1.0, "end")
-
 
             self.text.delete(1.0, tk.END)
             self.text.insert("1.0", input_text)
