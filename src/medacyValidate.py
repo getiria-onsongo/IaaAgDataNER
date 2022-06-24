@@ -8,8 +8,8 @@ from medacy.data.annotations import Annotations
 from medacy.data.data_file import DataFile
 
 
-gold_dataset = Dataset("Data/InputDavis")
-system_dataset = Dataset("Data/OutputDavis")
+gold_dataset = Dataset("Data/DavisLJ11Test")
+system_dataset = Dataset("Data/DavisLJ11Train")
 
 
 # for file in system_dataset:
@@ -19,7 +19,6 @@ system_dataset = Dataset("Data/OutputDavis")
 # counts = gold_dataset.compute_counts()
 # print(f"Entities: {entities}")
 # pprint.pprint(counts)
-
 
 
 result = measure_dataset(gold_dataset, system_dataset, 'lenient')
