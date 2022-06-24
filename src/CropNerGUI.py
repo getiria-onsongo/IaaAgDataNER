@@ -33,6 +33,7 @@ from tkinter.scrolledtext import ScrolledText
 class CropNerGUI:
     """ A class used to represent NER tagging GUI window.
 
+
     ...
     Attributes
     ----------
