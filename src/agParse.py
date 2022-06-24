@@ -29,13 +29,12 @@ def trat_adj_entities(doc):
     # CAVEAT: we still need to do deal with TRAT (be) ADJ (e.g., 'its protein levels are low')
     new_ents = []
     for ent in doc.ents:
-        # this line has been changed to make sure the index is within bounds to not throw an error on the pdfs where that use to happen
-        if ent.label_ in ('TRAT') and len(doc) - 1 >= ent.start + 1:
+        if ent.label_ in ('TRAT'):
             next_token = doc[ent.start + 1]
-                # print('DEBUG: ', ent.text, ent.start, ent.label_, next_token.text, next_token.pos_, next_token.dep_)
+            # print('DEBUG: ', ent.text, ent.start, ent.label_, next_token.text, next_token.pos_, next_token.dep_)
             if next_token.pos_ == 'ADV' and next_token.dep_ == 'advmod':
                 new_ent = Span(doc, ent.start, ent.end + 1, label='TRAT')
-                new_ents.append(new_ent)
+                new_ents.append(new_ent)    
             else:
                 new_ents.append(ent)
         else:
@@ -79,11 +78,11 @@ def plan_adj_entities(doc):
 def get_matched_spans(doc, substring):
     nlp = spacy.load("en_core_web_lg")
     matcher = Matcher(nlp.vocab)
-
+    
     sdoc = nlp(substring)
     pattern = [{"ORTH": token.text} for token in sdoc] #allows matching multi-word pattern
     matcher.add(substring,[pattern])
-
+    
     result = []
     matches = matcher(doc)
     #print(matches)
@@ -102,7 +101,7 @@ def add_non_ovlp_ent(new_ent, master_ents):
 
     if new_ent is None:
         return master_ents
-
+    
     result = []
     for estab_ent in master_ents:
         if not ((new_ent.end_char >= estab_ent.start_char) and
@@ -119,7 +118,7 @@ def add_non_ovlp_ent(new_ent, master_ents):
 def add_ped_jrnl_entities(doc):
     '''add PED and JRNL entities derived from regex code'''
 
-    # add in regex-derived PED & JRNL entries, being sure to remove other
+    # add in regex-derived PED & JRNL entries, being sure to remove other 
     # entities that overlap with them
 
     all_ents = list(doc.ents)
@@ -174,11 +173,11 @@ if __name__ == "__main__":
     if len(sys.argv)<0:
         parser.print_usage()
         sys.exit()
-
+        
     args = parser.parse_args()
     text = args.text
     model_dir = args.model_dir
-
+    
     if model_dir is not None:
         nlp = spacy.load(model_dir)
 
@@ -189,3 +188,4 @@ if __name__ == "__main__":
     print("\nEntities:")
     for ent in doc.ents:
         print(ent.text, ent.start_char, ent.end_char, ent.label_)
+
