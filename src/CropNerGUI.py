@@ -64,6 +64,8 @@ class CropNerGUI:
         Name of the pdf/text file being annotated. e.g., BarCvDescLJ11.pdf
     self.file_prefix : str
         File path prefix (minus file type) e.g., for BarCvDescLJ11.pdf path prefix is Data/DavisLJ11/BarCvDescLJ11
+    self.file_mode : str
+        Specifies whether the program is working on a pdf or text file
     self.scrolled_text_line_content_index : dict
         Contains index position of characters in a given line. Key = line number tuple is index of first and last
         characters respectively. {2: (114, 228)} = line 2 has characters from index 114 to index 228
@@ -147,6 +149,7 @@ class CropNerGUI:
         self.pdf_document = None
         self.pdf_name = None
         self.file_prefix = None
+        self.file_mode = None
         self.scrolled_text_line_content_index = {}
         self.nlp_agdata = None
         self.cust_ents_dict = {}
@@ -519,23 +522,26 @@ class CropNerGUI:
             # Reset annotation dictionary
             self.cust_ents_dict = {}
 
-            # Read valid page number, otherwise reset to 1
-            page_num = self.page_entry.get()
-            if not page_num.isdigit():
-                self.msg.config(text="Page number not entered. Value initialized to 1", foreground="red")
-                self.page_number = 1
-                self.page_entry.delete(0,tk.END)
-                self.page_entry.insert(0, str(self.page_number))
-            else:
-                self.page_number = int(page_num)
-
-            self.chunk=self.page_number
+            # Detects file type
+            self.file_mode = self.raw_file.name[-3:]
 
             # Delete contents
             self.text.delete(1.0, tk.END)
 
-            # Calls pyxpdf in case the file is a PDF
-            if self.raw_file.name[-3:] == "pdf":
+            # Calls pyxpdf in case the file is a PDF, otherwise reads as txt
+            if self.file_mode == "pdf":
+                # Read valid page number, otherwise reset to 1
+                page_num = self.page_entry.get()
+                if not page_num.isdigit():
+                    self.msg.config(text="Page number not entered. Value initialized to 1", foreground="red")
+                    self.page_number = 1
+                    self.page_entry.delete(0,tk.END)
+                    self.page_entry.insert(0, str(self.page_number))
+                else:
+                    self.page_number = int(page_num)
+
+                self.chunk=self.page_number
+
                 # Load PDF file
                 if self.pdf_document is None:
                     self.load_pdf()
@@ -546,6 +552,7 @@ class CropNerGUI:
                 page = self.pdf_document[self.page_number - 1]
                 txt = page.text()
             else:
+                page_number = 0
                 txt = self.raw_file.read()
 
             self.text.insert("1.0",txt)
@@ -625,13 +632,6 @@ class CropNerGUI:
             self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
         # Pre-tag with NER model
         else:
-            # Get page number
-            page_num = self.page_entry.get()
-            if not page_num.isdigit():
-                self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
-                page_num = 1
-            self.page_number = int(page_num)
-            self.chunk = self.page_number
             # Grabs selected text if in selection mode, otherwise ends the operation.
             if selection == "selection":
                 if (len(self.text.tag_ranges("sel")) > 0):
@@ -640,18 +640,23 @@ class CropNerGUI:
                     self.msg.config(text="No selection detected; no text was tagged.", foreground="red")
                     return
             else:
-                # Commenting temporarily for .txt support
-                #if self.pdf_document is None:
-                #    self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
-                #    self.load_pdf()
-
-                if self.raw_file.name[-3:] == "pdf":
+                # The code reserved for PDFs is currently a little unnecessary and the code will work without it, but if we eventually want the user to be able to type a page range and pre-tag them without reloading the text box first then this is where that will happen.
+                if self.file_mode == "pdf":
+                    # Get page number
+                    page_num = self.page_entry.get()
+                    if not page_num.isdigit():
+                        self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
+                        page_num = 1
+                    self.page_number = int(page_num)
+                    self.chunk = self.page_number
                     # Extract text from pdf while maintaining layout
                     control = TextControl(mode="physical")
 
                     page = self.pdf_document[self.page_number - 1]
                     input_text = page.text()
                 else:
+                    # To not interferse with how the dictionary is structured the program will use page 0 for non-PDF files for now.
+                    page_number = 0
                     input_text = self.text.get(1.0, "end")
 
             self.text.delete(1.0, tk.END)
@@ -976,25 +981,26 @@ class CropNerGUI:
         """
         Load the next page.
         """
-        if len(self.cust_ents_dict) == 0:
-            self.msg.config(text="Warning!! No annotations to save.", foreground="red")
-        else:
-            self.msg.config(text="")
-            # Save current annotation
-            # Uncomment this for now. Initially it seemed like a good idea but there are a lot of
-            # Instances where a user might not want to save annotations when they click next page
-            # self.file_save()
+        if self.file_mode == "pdf":
+            if len(self.cust_ents_dict) == 0:
+                self.msg.config(text="Warning!! No annotations to save.", foreground="red")
+            else:
+                self.msg.config(text="")
+                # Save current annotation
+                # Uncomment this for now. Initially it seemed like a good idea but there are a lot of
+                # Instances where a user might not want to save annotations when they click next page
+                # self.file_save()
 
-        # Increment page number
-        self.page_number = self.page_number + 1
-        self.page_entry.delete(0, tk.END)
-        self.page_entry.insert(0, str(self.page_number))
+            # Increment page number
+            self.page_number = self.page_number + 1
+            self.page_entry.delete(0, tk.END)
+            self.page_entry.insert(0, str(self.page_number))
 
-        # Reset annotation data
-        self.annotation_file = None
+            # Reset annotation data
+            self.annotation_file = None
 
-        # Load data
-        self.load_page()
+            # Load data
+            self.load_page()
 
     def go(self):
         """
