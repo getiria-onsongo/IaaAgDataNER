@@ -529,8 +529,7 @@ class CropNerGUI:
             self.text.delete(1.0, tk.END)
 
             # Load PDF file
-            if self.pdf_document is None:
-                self.load_pdf()
+            self.load_pdf()
 
             # Extract text from pdf while maintaining layout
             control = TextControl(mode="physical")
