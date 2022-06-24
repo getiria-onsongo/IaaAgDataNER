@@ -442,7 +442,7 @@ class CropNerGUI:
         try:
             self.nlp_agdata = spacy.load(self.model_dir)
             lang = self.nlp_agdata.lang # Attribute error thrown if valid language model is not selected
-            self.msg.config(text="NOTE: Model for "+lang+" language identified", foreground="red")
+            self.msg.config(text="NOTE: Model for "+lang+" language identified", foreground="orange")
         except OSError:
             self.msg.config(text="WARNING!!: Selected folder does not contain valid language model \n"
                                  "Default model 'en_core_web_lg' will be used.", foreground="red")
@@ -499,6 +499,55 @@ class CropNerGUI:
         self.pdf_name = self.raw_file.name.split("/")[-1]
         self.pdf_document = Document(self.raw_file.name)
 
+    def page_num_is_valid(self, page_num):
+        """
+        Returns True if page_num is a number, False if page_num is completely invalid, and -1 if it's a range.
+        """
+        if page_num.isdigit():
+            return True
+        dash_index = page_num.find("-")
+        if(dash_index == -1):
+            return False
+        pg1 = page_num[0 : dash_index]
+        if not pg1.isdigit():
+            return False
+        pg2 = page_num[dash_index + 1:]
+        if not pg2.isdigit():
+            return False
+        return -1
+
+    def handle_bad_page_requests(self, page_num_valid):
+        """
+        If a page not in the doc is requested, this will set the page number to a valid
+        one and print a warning.
+
+        page_num_valid is passed in so that this method already knows whether it should
+        be checking a list or single number.
+        """
+        doc_length = len(self.pdf_document)
+        if page_num_valid == -1: # ie, page number is a range
+            if self.page_number[0] < 1: # This will only take effect if the starting page is set to 0. Beginning hyphens are already invalid.
+                self.page_number[0] = 1
+                self.msg.config(text="First page entered is less than 1; setting first page to 1", foreground="red")
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, "1-" + str(self.page_number[1]))
+            if self.page_number[1] > doc_length:
+                self.page_number[1] = doc_length
+                self.msg.config(text="Last page entered is greater than the length of the PDF; setting last page to the end of the PDF")
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, str(self.page_number[0]) + "-" + str(self.page_number[1]))
+        else: # ie. there is a single page
+            if self.page_number < 1: # This may as well be self.page_number == 0. A beginning hyphen is already invalid (not a digit or a range).
+                self.page_number = 1
+                self.msg.config(text="Page entered is too small; setting to 1", foreground="red")
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, "1")
+            if self.page_number > doc_length:
+                self.page_number = doc_length
+                self.msg.config(text="Page entered is too large; setting it to the last page (" + str(doc_length) + ")", foreground="red")
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, str(doc_length))
+
     def load_page(self):
         """
         Load contents of a PDF or text file into text box.
@@ -506,7 +555,6 @@ class CropNerGUI:
         If the entry box for page number has a value, it will load the page specified. If not, by default it will
         load the first page.
         """
-        # TODO: Currently only loads 1 page. Update to load arbitrary number of pages (max=size of document).
         # TODO: Give users the option to load text files in addition to pdf files.
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
@@ -515,27 +563,45 @@ class CropNerGUI:
             # Reset annotation dictionary
             self.cust_ents_dict = {}
 
-            page_num = self.page_entry.get()
-            if not page_num.isdigit():
-                self.msg.config(text="Page number not entered. Value initialized to 1", foreground="red")
+            page_num = self.page_entry.get().replace(" ", "")
+            page_num_valid = self.page_num_is_valid(page_num)
+            if page_num_valid == False:
+                self.msg.config(text="Valid page number not entered. Value initialized to 1", foreground="red")
                 self.page_number = 1
                 self.page_entry.delete(0,tk.END)
                 self.page_entry.insert(0, str(self.page_number))
-            else:
+                self.chunk=self.page_number
+            elif page_num_valid == True:
                 self.page_number = int(page_num)
+                self.chunk=self.page_number
+            else: # Range of numbers
+                dash_index = page_num.find("-")
+                pg1 = int(page_num[0 : dash_index])
+                pg2 = int(page_num[dash_index + 1:])
+                self.page_number = [pg1, pg2]
+                # Switch first and last page if the user's first number was the smaller one.
+                if(self.page_number[1] < self.page_number[0]):
+                    self.msg.config(text="A larger page was entered first. The pages will be displayed in order from smallest to largest anyway.", foreground="red")
+                    placeholder = self.page_number[0]
+                    self.page_number[0] = self.page_number[1]
+                    self.page_number[1] = placeholder
+                self.chunk=self.page_number[0]
 
-            self.chunk=self.page_number
             # Delete contents
             self.text.delete(1.0, tk.END)
 
             # Load PDF file
             self.load_pdf()
 
-            # Extract text from pdf while maintaining layout
-            control = TextControl(mode="physical")
+            self.handle_bad_page_requests(page_num_valid)
 
-            page = self.pdf_document[self.page_number - 1]
-            txt = page.text(control=control)
+            if not (page_num_valid == -1): # Single page, whether page_num_valid is true or false
+                page = self.pdf_document[self.page_number - 1]
+                txt = page.text().replace("\r", "")
+            else: # Page range
+                txt = ""
+                for page in self.pdf_document[self.page_number[0] - 1 : self.page_number[1]]:
+                    txt = txt + page.text().replace("\r", "")
             self.text.insert("1.0",txt)
 
     def update_scrolled_text_line_content_index(self):
@@ -632,11 +698,8 @@ class CropNerGUI:
                     self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
                     self.load_pdf()
 
-                # Extract text from pdf while maintaining layout
-                control = TextControl(mode="physical")
-
                 page = self.pdf_document[self.page_number - 1]
-                input_text = page.text(control=control)
+                input_text = page.text().replace("\r", "")
 
             self.text.delete(1.0, tk.END)
             self.text.insert("1.0", input_text)
@@ -649,7 +712,8 @@ class CropNerGUI:
             self.update_scrolled_text_line_content_index()
             doc = self.tag_ner_with_spacy(input_text)
 
-            # TODO: Add a warning message if ent is empty so users know none of the custom tags were found
+            if(len(doc.ents) == 0):
+                self.msg.config(text="Warning!! No entities were found in this selection.", foreground="red")
             for ent in doc.ents:
                 # NER is in our list of custom tags
                 if ent.label_ in self.tags:
@@ -784,9 +848,9 @@ class CropNerGUI:
         if len(overlapping_tags) == 0:
             self.msg.config(text="Warning!! It appears the region you selected ("+str(selection_start)+
                                  "-"+str(selection_end)+" did not overlap with a tag.", foreground="red")
-        else:
-            for tag in overlapping_tags:
-                self.text.tag_remove(tag, "sel.first", "sel.last")
+        
+        for tag in self.tags:
+            self.text.tag_remove(tag, "sel.first", "sel.last")
 
         new_ents.sort()
         self.cust_ents_dict[self.chunk] = [input_text, new_ents]
