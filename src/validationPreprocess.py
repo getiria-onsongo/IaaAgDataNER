@@ -2,7 +2,7 @@ import os.path
 from datetime import datetime
 import re
 import glob
-from pyxpdf import Document, Page, Config
+from pyxpdf import Document
 from pyxpdf.xpdf import TextControl
 from json2bratt import conversion
 from dataset2bratt import dataset_to_bratt
@@ -49,14 +49,17 @@ class ValidationPreprocess:
     Methods
     -------
     process_files(self)
-        process files by running through model then converting and saving json, bratt & txt of files
+        process files by running through model then converting and saving
+        json, bratt & txt of files
     tag(self, pdf_document : pyxpdf.Document, page_number : int)
         finds entities for a given page in a pdf
     get_pos(self, ent : str )
         finds the part of speech for an entity and expands if needed
-    adj_combine_noun_ent(self, doc : spacy.Doc, current_index : int, ent : str, label : str)
+    adj_combine_noun_ent(self, doc : spacy.Doc, current_index : int, ent :
+    str, label : str)
         expands an entity to contain adjectives
-    num_combine_ent(self, doc : spacy.Doc, current_index : int, ent : str, label : str)
+    num_combine_ent(self, doc : spacy.Doc, current_index : int, ent : str,
+    label : str)
         expands an entity to contain numerical measurments
     file_save(self, pdf_name : str, url : str, chunk : int)
         saves json for a file
@@ -133,7 +136,8 @@ class ValidationPreprocess:
 
     def get_pos(self, ent):
         '''
-        Proceses a given entity with rules that use pos tag data to expand the entity span if needed.
+        Proceses a given entity with rules that use pos tag data to expand
+        the entity span if needed.
 
         Parameters
         ----------
@@ -153,7 +157,9 @@ class ValidationPreprocess:
 
     def adj_combine_noun_ent(self, doc, current_index, ent, label):
         '''
-        If the first token in an entity is a noun or proper noun, finds all adjectives proceeding the entity and expands the span to contain all of them.
+        If the first token in an entity is a noun or proper noun, finds all
+        adjectives proceeding the entity and expands the span to contain
+        all of them.
 
         Parameters
         ----------
@@ -178,26 +184,30 @@ class ValidationPreprocess:
                 if pos_left == "ADJ":
                     print("Adj expanding...")
                     print("entity: " + str(ent))
-                     i = current_index
-                      start_index = ent.start
-                       # keeps searching until all adjectives are found, for nouns described by mutiple entities
-                       while i >= 1:
-                            i = i - 1
-                            if doc[i].pos_ == "ADJ":
-                                start_index = i
-                            else:
-                                break
-                        first_tok = doc[start_index]
-                        ent = doc[first_tok.i:ent.end]
-                        ent.label_ = label
-                        print("new: " + str(ent))
-                        print("label: " + str(ent.label_))
-                        print()
+                    i = current_index
+                    start_index = ent.start
+                    # keeps searching until all adjectives are found
+                    while i >= 1:
+                        i = i - 1
+                        if doc[i].pos_ == "ADJ":
+                            start_index = i
+                        else:
+                            break
+                    first_tok = doc[start_index]
+                    ent = doc[first_tok.i:ent.end]
+                    ent.label_ = label
+                    print("new: " + str(ent))
+                    print("label: " + str(ent.label_))
+                    print()
         return ent
 
     def num_combine_ent(self, doc, current_index, ent, label):
         '''
-        If the first token in an entity is a noun, proper noun, or adjective,  expands the span to include a numerical measurment that comes before the entity. The measurment is found by seeing if it conforms to the format num-noun-entity. So, "30 mg wheat" would be fulfill the rule but "12 wheat" would not.
+        If the first token in an entity is a noun, proper noun, or
+        adjective,  expands the span to include a numerical measurment that
+        comes before the entity. The measurment is found by seeing if it
+        conforms to the format num-noun-entity. So, "30 mg wheat" would be
+        fulfill the rule but "12 wheat" would not.
 
         Parameters
         ----------
@@ -233,7 +243,8 @@ class ValidationPreprocess:
 
     def file_save(self, pdf_name, url, chunk):
         '''
-         Simplifed version of GUI save file & continue_func which saves created json files.
+         Simplifed version of GUI save file & continue_func which saves
+         created json files.
 
         Parameters
         ----------
