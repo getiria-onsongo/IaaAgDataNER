@@ -5,7 +5,7 @@ src/temp.txt
 temp.txt
 train.cfg
 ner_2022*
-ner_2022_05_model/
+ner_2022_05_model/*/*
 YEDDA/
 ner-annotator/
 prodigy/
