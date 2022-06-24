@@ -154,6 +154,7 @@ class CropNerGUI:
         self.pos_model = spacy.load("en_core_web_lg")
         self.cust_ents_dict = {}
         self.page_number = 0
+        self.pos_model = spacy.load("en_core_web_lg")
 
         # ----------------------- Widgets for GUI start here.
         # Default font size for text in ScrolledText. Should be a string format
@@ -676,6 +677,60 @@ class CropNerGUI:
                     print()
         return ent
 
+    def get_pos(self, ent):
+        '''
+        Proceses a given entity with rules that use pos tag data to expand
+        the entity span if needed.
+        :param ent: entity to possibly expand span of
+        :param nlp: spacy model for pos tagging
+        :returns: entity, with an expanded span if needed
+        '''
+        doc = self.pos_model(ent.sent.text)
+        if(len(doc[ent.start:ent.end]) > 0):
+            current_index = doc[ent.start:ent.end][0].i
+            label = ent.label_
+            # functions that expands ents to contain proceeding adjectives
+            ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
+        return ent
+
+    def adj_combine_noun_ent(self, doc, current_index, ent, label):
+        '''
+        If the first token in an entity is a noun or proper noun, finds
+        all adjectives proceeding the entity and expands the span to
+        contain all of them.
+        :param doc: sentence entity belongs to passed through spacy model
+        :param current_index: index of first token in the doc
+        :param ent: entity to possibly expand span of
+        :param label: label of ent
+        :returns: entity, which has been expanded if needed
+        '''
+        if current_index >= 1:
+            current = doc[current_index]
+            left = doc[current_index-1]
+            pos_current = current.pos_
+            pos_left = left.pos_
+
+            if pos_current == "NOUN" or pos_current == "PROPN":
+                if pos_left == "ADJ":
+                    print("Adj expanding...")
+                    print("entity: " + str(ent))
+                    i = current_index
+                    start_index = ent.start
+                    # keeps searching until all adjectives are found
+                    while i >= 1:
+                        i = i - 1
+                        if doc[i].pos_ == "ADJ":
+                            start_index = i
+                        else:
+                            break
+                    first_tok = doc[start_index]
+                    ent = doc[first_tok.i:ent.end]
+                    ent.label_ = label
+                    print("new: " + str(ent))
+                    print("label: " + str(ent.label_))
+                    print()
+        return ent
+
     def pre_tag(self, selection: str):
         """
         Pre-tag selected content or all the text in text box with NER tags.
@@ -739,6 +794,7 @@ class CropNerGUI:
             for ent in doc.ents:
                 # NER is in our list of custom tags
                 if ent.label_ in self.tags:
+                    ent = self.get_pos(ent)
                     # index = self.tags.index(ent.label_) # Find index for an element in a list
                     ent = self.get_pos(ent)
                     self.highlight_ent(
