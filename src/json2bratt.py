@@ -45,14 +45,14 @@ def conversion(infile, outfile):
 
     # Key terms for all the labels in the json file
     keyterm_dict = {
-        "ALAS": "varietal alias",
+        "ALAS": "varietal_alias",
         "CROP": "crop",
         "CVAR": "crop_variety",
-        "JRNL": "journal reference",
+        "JRNL": "journal_reference",
         "PATH": "pathogen",
         "PED": "pedigree",
-        "PLAN": "plant anatomy",
-        "PPTD": "plant predisposition to disease",
+        "PLAN": "plant_anatomy",
+        "PPTD": "plant_predisposition_to_disease",
         "TRAT": "trait",
         # not complete for given CSV!
     }
@@ -68,6 +68,7 @@ def conversion(infile, outfile):
                 entitydata = str(entity).split(" ")
 
                 # startnum and endnum add the length of the sentences the come before them
+
                 startnum = int(entitydata[1].replace(",", "")) + counter
                 endnum = int(entitydata[3].replace(",", "")) + counter
                 keyterm = entitydata[5].replace("'", "").replace("}", "")
@@ -80,7 +81,7 @@ def conversion(infile, outfile):
                         entitydata[3].replace(",", ""))]
 
                     # File is outputted in this formatted seen below
-                    t_entry = f"t{tindx}\t{keyterm_long} {startnum} {endnum}\t{substring}"
+                    t_entry = f"T{tindx}\t{keyterm} {startnum} {endnum}\t{substring}"
 
                     # Finally it's written here into the ann file
                     with open(annfile, "a") as f:
@@ -89,10 +90,7 @@ def conversion(infile, outfile):
 
                 else:
                     print(
-                        f"\n{x} sentence has been skipped because, \033[91m\033[1m{keyterm}\033[0m \033[91mis not defined in the dictionary\033[0m")
-                    with open(annfile, "a") as f:
-                        f.write(f"Unknown key term {keyterm}")
-                        f.write("\n")
+                        f"\n{x} sentence has been skipped because, \033[91m\033[1m{keyterm}\033[0m is not defined in the dictionary")
 
             # Exception if the sentence has not been formatted properly
             except:
@@ -100,11 +98,13 @@ def conversion(infile, outfile):
                     f"\033[91m{x}\033[0m is not formatted correctly so it has been skipped")
 
             tindx += 1
-            counter += len(x)
             i += 1
+
         # Text file is written here and joined without any space
         with open(txtfile, "a") as f:
             f.write(x)
+        # This is the part which decides if you wanna do document or sentence level
+        counter += len(x)  # Do 0 if you want sentence level
     print(f"\nFile converted to bratt as {annfile} and {txtfile}")
 
 
