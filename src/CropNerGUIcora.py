@@ -38,6 +38,10 @@ class CropNerGUI:
     ...
     Attributes
     ----------
+    self.model_default : str
+        default model from argparse if given
+    self.file_default : str
+        default file from argparse if given
     self.rootWin : tk.Tk()
         tKinter class that represents the main window
     self.rootWin.title : self.rootWin.title()
@@ -132,7 +136,7 @@ class CropNerGUI:
         Callback method attached to the quit button.
     """
 
-    def __init__(self):
+    def __init__(self, model_default=None, file_default=None):
         # Create a GUI window.
         self.rootWin = tk.Tk()
         self.rootWin.title("GEMS NER Annotation Tool")
@@ -154,16 +158,17 @@ class CropNerGUI:
         self.nlp_agdata = None
         self.cust_ents_dict = {}
         self.page_number = 0
+        self.pos_model = spacy.load("en_core_web_lg")
 
-        if len(sys.argv) >= 2:
-            self.model_dir = sys.argv[1]
-            # Assumes a model passed in as an arg is correctly formatted, no error handling here
+        self.model_default = model_default
+        self.file_default = file_default
+        if self.model_default is not None:
+            self.model_dir = self.model_default
             self.nlp_agdata = spacy.load(self.model_dir)
         else:
             self.model_dir = None
-
-        if len(sys.argv) >= 3:
-            self.raw_file = sys.argv[2]
+        if self.file_default is not None:
+            self.raw_file = self.file_default
         else:
             self.raw_file = None
 
@@ -684,19 +689,16 @@ class CropNerGUI:
                         text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
                     self.load_pdf()
 
-                # Extract text from pdf while maintaining layout
+        # Extract text from pdf while maintaining layout
                 control = TextControl(mode="physical")
 
                 page = self.pdf_document[self.page_number - 1]
                 input_text = page.text(control=control)
 
             self.text.delete(1.0, tk.END)
-
-            page = self.pdf_document[self.page_number - 1]
-            input_text = page.text(control=control)
             self.text.insert("1.0", input_text)
 
-            # Reset annotation dictionary
+    # Reset annotation dictionary
             self.cust_ents_dict = {}
 
             # Update variable that holds number of lines in textbox. You need this for
@@ -1164,5 +1166,21 @@ class CropNerGUI:
 
 # Driver code
 if __name__ == "__main__":
-    ner_gui = CropNerGUI()
+
+    parser = argparse.ArgumentParser(
+        description='runs GUI with option for default model and file',
+        epilog='python src/CropNerGUI --model senter_ner_model/model-best --file Data/CSU/Bill-Brown-Reprint.pdf'
+    )
+    parser.add_argument(
+        '--model', help='path to trained model',
+        action='store', default=None
+    )
+    parser.add_argument(
+        '--file', help='path to directory of dataset',
+        action='store', default=None
+    )
+    args = parser.parse_args()
+    model, file = args.model, args.file
+
+    ner_gui = CropNerGUI(model_default=model, file_default=file)
     ner_gui.go()
