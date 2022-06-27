@@ -1,0 +1,165 @@
+T1	crop_variety 0 6	UC 937
+T2	crop_variety 7 13	UC 937
+T3	trait 19 28	six-rowed
+T4	trait 29 35	spring
+T5	trait 36 40	feed
+T6	crop 41 47	barley
+T7	crop_variety 96 102	UC 937
+T8	crop_variety 183 187	Sma1
+T9	pedigree 206 259	Steptoe/2*Diamant /3/Minn
+Dwarf 64.98-8/Briggs/4/Asse
+T10	crop_variety 321 336	Robert Matchett
+T11	trait 421 425	seed
+T12	crop_variety 530 545	Robert Matchett
+T13	trait 557 561	head
+T14	varietal_alias 645 658	UCD 92-10,615
+T15	trait 675 680	yield
+T16	crop_variety 715 721	UC 937
+T17	trait 748 753	yield
+T18	crop_variety 787 793	UC 937
+T19	plant_predisposition_to_disease 821 831	resistance
+T20	pathogen 835 846	stripe rust
+T21	trait 886 892	winter
+T22	trait 913 919	sowing
+T23	crop_variety 957 963	UC 937
+T24	trait 976 980	tall
+T25	trait 981 991	semi-dwarf
+T26	trait 1004 1018	short-statured
+T27	trait 1072 1078	taller
+T28	crop_variety 1084 1090	UC 828
+T29	trait 1102 1116	straw strength
+T30	trait 1136 1144	maturing
+T31	trait 1146 1158	heading time
+T32	crop_variety 1185 1191	UC 828
+T33	trait 1226 1235	emergence
+T34	plant_anatomy 1274 1280	Spikes
+T35	plant_anatomy 1291 1296	awned
+T36	plant_anatomy 1330 1336	Glumes
+T37	plant_anatomy 1376 1381	lemma
+T38	plant_anatomy 1416 1421	hairs
+T39	plant_anatomy 1423 1433	Glume awns
+T40	plant_anatomy 1486 1492	glumes
+T41	plant_anatomy 1494 1504	Lemma
+awns
+T42	plant_anatomy 1535 1542	kernels
+T43	plant_anatomy 1558 1566	aleurone
+T44	crop_variety 1648 1654	UC 937
+T45	plant_predisposition_to_disease 1659 1668	resistant
+T46	pathogen 1672 1683	stripe rust
+T47	pathogen 1688 1693	scald
+T48	plant_predisposition_to_disease 1699 1719	moderately resistant
+T49	pathogen 1723 1726	BYD
+T50	pathogen 1728 1737	leaf rust
+T51	pathogen 1739 1753	powdery mildew
+T52	pathogen 1759 1769	net blotch
+T53	plant_predisposition_to_disease 1794 1805	susceptible
+T54	pathogen 1809 1818	leaf rust
+T55	pathogen 1823 1845	moderately susceptible
+T56	pathogen 1860 1897	dew. It was evaluated as Entry 937 in
+T57	crop_variety 1885 1894	Entry 937
+T58	trait 2057 2072	spring planting
+T59	journal_reference 2125 2152	Crop Science 42:1374 (2002)
+T60	trait 2154 2156	UC
+T61	crop_variety 2164 2173	UC Signal
+T62	trait 2201 2231	ley. It was released by the Ca
+T63	trait 2186 2192	spring
+T64	trait 2193 2197	feed
+T65	crop 2198 2204	barley
+T66	pathogen 2383 2386	XIV
+T67	pathogen 2394 2396	XV
+T68	pathogen 2438 2441	XII
+T69	varietal_alias 2496 2502	IV 363
+T70	varietal_alias 2507 2514	UC Holt
+T71	trait 2519 2526	yielded
+T72	crop 2705 2711	Valley
+T73	plant_anatomy 2731 2736	awned
+T74	trait 2747 2755	maturing
+T75	plant_anatomy 2813 2819	spikes
+T76	plant_anatomy 2821 2828	Kernels
+T77	plant_anatomy 2856 2864	aleurone
+T78	plant_anatomy 2883 2891	rachilla
+T79	plant_predisposition_to_disease 2923 2945	moderately susceptible
+T80	pathogen 2949 2954	scald
+T81	plant_predisposition_to_disease 2959 2970	susceptible
+T82	pathogen 2974 2977	BYD
+T83	pathogen 2982 2996	powdery
+mildew
+T84	journal_reference 3138 3164	Crop Science 15:603 (1975)
+T85	crop_variety 3173 3179	Walker
+T86	trait 3185 3194	six-rowed
+T87	trait 3195 3201	spring
+T88	trait 3202 3206	feed
+T89	crop 3207 3213	barley
+T90	varietal_alias 3333 3340	UT 1731
+T91	trait 3383 3393	irrigation
+T92	trait 3408 3416	maturity
+T93	crop_variety 3427 3434	Steptoe
+T94	trait 3438 3450	heading date
+T95	trait 3456 3464	mid-tall
+T96	trait 3477 3483	taller
+T97	crop_variety 3489 3496	Steptoe
+T98	trait 3512 3519	lodging
+T99	plant_anatomy 3532 3538	Spikes
+T100	plant_anatomy 3589 3604	lateral kernels
+T101	plant_anatomy 3618 3623	hairs
+T102	plant_anatomy 3631 3643	rachis edges
+T103	plant_anatomy 3645 3651	Glumes
+T104	plant_anatomy 3681 3686	hairs
+T105	plant_anatomy 3719 3723	awns
+T106	plant_anatomy 3725 3735	Lemma awns
+T107	plant_anatomy 3760 3764	hair
+T108	plant_anatomy 3786 3791	teeth
+T109	plant_anatomy 3797 3801	seed
+T110	plant_anatomy 3846 3860	rachilla hairs
+T111	plant_anatomy 3875 3881	crease
+T112	plant_anatomy 3889 3893	base
+T113	plant_anatomy 3895 3903	Aleurone
+T114	plant_anatomy 3924 3928	base
+T115	plant_anatomy 3936 3941	spike
+T116	plant_anatomy 3968 3974	collar
+T117	trait 3976 3987	Grain yield
+T118	crop_variety 4000 4007	Steptoe
+T119	trait 4013 4024	test weight
+T120	trait 4029 4036	protein
+T121	crop_variety 4044 4051	Steptoe
+T122	plant_predisposition_to_disease 4086 4095	resistant
+T123	pathogen 4099 4109	loose smut
+T124	pathogen 4114 4126	covered smut
+T125	plant_predisposition_to_disease 4128 4148	moderately resistant
+T126	pathogen 4152 4166	powdery mildew
+T127	plant_predisposition_to_disease 4172 4183	susceptible
+T128	pathogen 4187 4198	stripe rust
+T129	trait 4291 4306	spring planting
+T130	crop_variety 4402 4414	Westbred 501
+T131	trait 4420 4429	six-rowed
+T132	trait 4430 4436	spring
+T133	trait 4437 4441	feed
+T134	crop 4442 4448	barley
+T135	crop_variety 4592 4596	Bulk
+T136	varietal_alias 4632 4641	WPB78-
+20
+T137	trait 4663 4671	maturity
+T138	trait 4679 4686	stature
+T139	trait 4688 4700	plant height
+T140	trait 4734 4748	straw strength
+T141	plant_anatomy 4782 4788	Spikes
+T142	plant_anatomy 4836 4843	kernels
+T143	plant_anatomy 4857 4869	Rachis edges
+T144	plant_anatomy 4879 4884	hairs
+T145	plant_anatomy 4886 4890	Awns
+T146	plant_anatomy 4917 4923	Glumes
+T147	plant_anatomy 4955 4960	lemma
+T148	plant_anatomy 4970 4981	glume hairs
+T149	plant_anatomy 4989 4993	awns
+T150	plant_anatomy 5051 5057	glumes
+T151	plant_anatomy 5059 5064	Hulls
+T152	plant_anatomy 5097 5105	Aleurone
+T153	plant_anatomy 5120 5134	Rachilla hairs
+T154	plant_anatomy 5145 5150	Veins
+T155	plant_anatomy 5191 5196	barbs
+T156	plant_anatomy 5200 5213	lateral veins
+T157	plant_anatomy 5219 5225	crease
+T158	plant_anatomy 5287 5290	awn
+T159	plant_anatomy 5296 5303	Kernels
+T160	plant_anatomy 5365 5380	lateral kernels
+T161	plant_anatomy 5440 5455	central kernels

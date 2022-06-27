@@ -1,0 +1,88 @@
+T1	crop_variety 8 17	September
+T2	varietal_alias 19 23	2011
+T3	plant_anatomy 87 92	Grain
+T4	crop_variety 169 174	Davis
+T5	trait 425 442	Yield performance
+T6	trait 490 522	University of California, Davis,
+T7	varietal_alias 586 648	201,209, 217, 223, 229, 233, 236, 244, 249, 254, 259, 262, 265
+T8	trait 713 722	1980-2011
+T9	plant_anatomy 784 814	http://smallgrains.ucdavis.edu
+T10	trait 835 841	WINTER
+T11	crop 842 848	BARLEY
+T12	crop_variety 863 875	Eight-Twelve
+T13	trait 881 890	six-rowed
+T14	trait 891 897	winter
+T15	trait 898 902	feed
+T16	crop 903 909	barley
+T17	pedigree 1001 1029	Steveland/Luther//Wintermalt
+T18	varietal_alias 1064 1071	79Ab812
+T19	plant_anatomy 1086 1090	awns
+T20	trait 1102 1110	maturity
+T21	trait 1117 1133	winter hardiness
+T22	trait 1149 1155	height
+T23	trait 1259 1273	 rachilla hair
+T24	plant_anatomy 1194 1200	Spikes
+T25	plant_anatomy 1222 1229	Kernels
+T26	plant_anatomy 1310 1324	scald, and sno
+T27	plant_anatomy 1260 1274	rachilla hairs
+T28	plant_predisposition_to_disease 1282 1293	susceptible
+T29	pathogen 1297 1308	stripe rust
+T30	pathogen 1310 1315	scald
+T31	pathogen 1321 1330	snow mold
+T32	plant_predisposition_to_disease 1336 1358	moderately susceptible
+T33	pathogen 1362 1365	BYD
+T34	crop_variety 1387 1396	Entry 697
+T35	journal_reference 1525 1554	Crop Science 32(3):828 (1992)
+T36	crop_variety 1561 1565	Maja
+T37	trait 1571 1580	six-rowed
+T38	trait 1581 1587	winter
+T39	trait 1588 1592	feed
+T40	trait 1593 1597	malt
+T41	crop 1598 1604	barley
+T42	crop_variety 1664 1675	AgriSource
+
+T43	trait 1700 1715	doubled haploid
+T44	pedigree 1754 1769	Strider/88Ab536
+T45	varietal_alias 1804 1812	STAB 113
+T46	crop_variety 1814 1818	Maja
+T47	crop_variety 1829 1836	88Ab536
+T48	trait 1850 1861	facultative
+T49	trait 2054 2062	maturity
+T50	trait 2166 2179	planting date
+T51	trait 2181 2199	irrigation savings
+T52	trait 2205 2222	drought avoidance
+T53	trait 2241 2247	height
+T54	trait 2293 2299	height
+T55	trait 2311 2325	straw strength
+T56	plant_anatomy 2338 2342	awns
+T57	plant_anatomy 2362 2367	spike
+T58	plant_anatomy 2373 2378	grain
+T59	plant_anatomy 2389 2397	aleurone
+T60	crop_variety 2399 2403	Maja
+T61	trait 2413 2424	test weight
+T62	crop 2455 2461	barley
+T63	trait 2597 2610	grain protein
+T64	trait 2615 2627	enzyme level
+T65	plant_predisposition_to_disease 2710 2719	resistant
+T66	pathogen 2723 2734	stripe rust
+T67	plant_predisposition_to_disease 2739 2750	susceptible
+T68	pathogen 2754 2759	scald
+T69	crop 2787 2791	1129
+T70	trait 2853 2866	fall planting
+T71	crop 2981 2987	barley
+T72	trait 3040 3055	doubled-haploid
+T73	pedigree 3085 3117	I1162-19/J-126//WA1245///Steptoe
+T74	varietal_alias 3152 3157	ORW-6
+T75	trait 3172 3178	height
+T76	crop_variety 3227 3231	Kold
+T77	trait 3250 3258	maturing
+T78	trait 3269 3283	straw strength
+T79	plant_anatomy 3298 3302	awns
+T80	plant_anatomy 3322 3327	spike
+T81	plant_predisposition_to_disease 3362 3371	resistant
+T82	pathogen 3375 3386	stripe rust
+T83	pathogen 3417 3422	scald
+T84	pathogen 3424 3434	net blotch
+T85	pathogen 3440 3443	BYD
+T86	trait 3618 3631	fall planting
+T87	trait 3706 3712	SPRING
