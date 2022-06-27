@@ -15,6 +15,13 @@ import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
 
+# TODO: Even though users can add their own named entities, the tool does not recognize these user
+# defined named entities once they've quit the application. Basically, when a user customizes the GUI
+# the changes do not persist across sessions. Make customized additions to the GUI persistent across sessions.
+# One approach to implementing this would be to add a starting prompt that asks a user if they want to
+# 1) Annotate crop data 2) Annotate user data or 3) Review annotations. If they choose 2 or 3, build the GUI by
+# first scanning their annotations to determine what Named Entity tags (e.g., ALAS) to include in the GUI
+
 # 1) WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
 # ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
 # do not make sense because we need to be able to know
@@ -32,6 +39,7 @@ from tkinter.scrolledtext import ScrolledText
 # Create NER GUI class
 class CropNerGUI:
     """ A class used to represent NER tagging GUI window.
+
 
     ...
     Attributes
@@ -106,6 +114,8 @@ class CropNerGUI:
          Pre-tag selected content or all the text in text box with NER tags.
     overlap(self, interval_one: list, interval_two: list) -> bool
         Check to see if two intervals overlap.
+    get_selected_interval(self) -> tuple
+        Determines the index of the first and last characters (char_start, char_end) selected by the user.
     get_ner(self, tag_label: str)
         Tag a piece of text that has been selected as a named entity.
     remove_tag(self)
@@ -715,6 +725,26 @@ class CropNerGUI:
             overlap = True
         return overlap
 
+    def get_selected_interval(self) -> tuple:
+        """
+        Determines the index of the first and last characters (char_start, char_end) selected by the user.
+
+        Returns
+        -------
+        tuple
+            Indices of first and last characters selected (char_start, char_end) .
+        """
+
+        selection_start_line = int(self.text.index("sel.first").split(".")[0])
+        tmp_selection_start = int(self.text.index("sel.first").split(".")[1])
+        selection_start = self.scrolled_text_line_content_index[selection_start_line][0] + tmp_selection_start
+
+        selection_end_line = int(self.text.index("sel.last").split(".")[0])
+        tmp_selection_end = int(self.text.index("sel.last").split(".")[1])
+        selection_end = self.scrolled_text_line_content_index[selection_end_line][0] + tmp_selection_end
+        result = (selection_start, selection_end)
+        return result
+
     def get_ner(self, tag_label: str):
         """
         Tag a piece of text that has been selected as a named entity.
@@ -724,6 +754,9 @@ class CropNerGUI:
         tag_label : str
             Label to assign to the named entity that was selected.
         """
+        # TODO: This function has a major bug. If you try to tag text that spans multiple pages, it will not only
+        # fail, but it will also remove some annotations.
+
         # Clear warning message, if one exists
         self.msg.config(text="")
         try:
@@ -733,13 +766,8 @@ class CropNerGUI:
             # Update variable that holds number of lines in textbox.
             self.update_scrolled_text_line_content_index()
 
-            # Get start and end char positions
-            h_start = int(self.text.index("sel.first").split(".")[1])
-            h_end = int(self.text.index("sel.last").split(".")[1])
-
-            line_no = int(self.text.index("sel.first").split(".")[0])
-            ent_char_start = self.scrolled_text_line_content_index[line_no][0] + h_start
-            ent_char_end = self.scrolled_text_line_content_index[line_no][0] + h_end
+            # Get indices for the first and last characters selected
+            (ent_char_start, ent_char_end) = self.get_selected_interval()
 
             if self.cust_ents_dict.get(self.chunk,False):
                 # Check to see if the current text matches the one we have in the annotation dictionary.
@@ -778,13 +806,8 @@ class CropNerGUI:
         # Clear warning message, if one exists
         self.msg.config(text="")
 
-        selection_start_line = int(self.text.index("sel.first").split(".")[0])
-        tmp_selection_start = int(self.text.index("sel.first").split(".")[1])
-        selection_start = self.scrolled_text_line_content_index[selection_start_line][0] + tmp_selection_start
-
-        selection_end_line = int(self.text.index("sel.last").split(".")[0])
-        tmp_selection_end = int(self.text.index("sel.last").split(".")[1])
-        selection_end = self.scrolled_text_line_content_index[selection_end_line][0] + tmp_selection_end
+        # Get indices for the first and last characters selected
+        (selection_start, selection_end) = self.get_selected_interval()
 
         new_ents = []
         overlapping_tags = []
