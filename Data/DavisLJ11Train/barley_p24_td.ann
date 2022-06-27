@@ -1,0 +1,177 @@
+T1	trait 9 27	midseason maturity
+T2	plant_anatomy 29 35	Spikes
+T3	plant_anatomy 102 106	awns
+T4	plant_anatomy 108 114	Glumes
+T5	plant_anatomy 135 140	hairs
+T6	plant_anatomy 149 158	glume awn
+T7	plant_anatomy 192 197	glume
+T8	plant_anatomy 199 204	Hulls
+T9	plant_anatomy 261 275	rachilla hairs
+T10	plant_anatomy 290 298	aleurone
+T11	plant_anatomy 300 313	Lateral veins
+T12	plant_anatomy 347 359	central
+vein
+T13	plant_anatomy 389 393	germ
+T14	plant_anatomy 436 442	kernel
+T15	plant_anatomy 462 467	barbs
+T16	plant_anatomy 479 484	veins
+T17	plant_anatomy 490 496	crease
+T18	plant_anatomy 518 522	base
+T19	plant_anatomy 546 553	Kernels
+T20	plant_anatomy 618 633	Lateral kernels
+T21	plant_predisposition_to_disease 688 697	resistant
+T22	pathogen 701 710	stem rust
+T23	plant_predisposition_to_disease 712 720	tolerant
+T24	pathogen 724 727	BYD
+T25	plant_predisposition_to_disease 729 751	moderately susceptible
+T26	pathogen 755 766	spot blotch
+T27	pathogen 768 778	net blotch
+T28	pathogen 783 793	loose smut
+T29	plant_predisposition_to_disease 799 810	susceptible
+T30	pathogen 814 835	Septoria leaf blotch
+
+T31	pathogen 839 853	powdery mildew
+T32	crop_variety 875 884	Entry 234
+T33	trait 931 946	spring planting
+T34	journal_reference 999 1024	Crop Science 4:239 (1964)
+T35	crop_variety 1033 1039	Legacy
+T36	trait 1045 1054	six-rowed
+T37	trait 1055 1061	spring
+T38	trait 1062 1069	malting
+T39	crop 1089 1101	ased by Busc
+T40	pedigree 1166 1181	6B86-3517/Excel
+T41	crop_variety 1232 1238	Bumper
+T42	crop_variety 1240 1244	Karl
+T43	crop_variety 1246 1252	Manker
+T44	crop_variety 1258 1263	Excel
+T45	varietal_alias 1298 1307	6B93-2978
+T46	trait 1320 1324	tall
+T47	trait 1343 1361	lodging resistance
+T48	trait 1372 1380	maturity
+T49	plant_anatomy 1401 1405	awns
+T50	plant_anatomy 1412 1426	rachilla hairs
+T51	plant_anatomy 1442 1450	aleurone
+T52	plant_predisposition_to_disease 1458 1467	resistant
+T53	pathogen 1471 1482	spot blotch
+T54	pathogen 1507 1517	net
+blotch
+T55	plant_predisposition_to_disease 1518 1528	resistance
+T56	crop_variety 1534 1540	Robust
+T57	plant_predisposition_to_disease 1575 1586	susceptible
+T58	pathogen 1590 1595	scald
+T59	pathogen 1597 1600	BYD
+T60	pathogen 1606 1617	stripe rust
+T61	trait 1697 1706	2001-2011
+T62	trait 1711 1726	spring planting
+T63	crop_variety 1786 1791	Lewis
+T64	trait 1797 1806	two-rowed
+T65	trait 1807 1813	spring
+T66	trait 1814 1818	feed
+T67	trait 1823 1830	malting
+T68	crop 1831 1837	barley
+T69	pedigree 1931 1944	Hector/Klages
+T70	varietal_alias 1979 1988	MT 547123
+T71	crop 2018 2024	barley
+T72	trait 2068 2074	yields
+T73	crop_variety 2080 2086	Klages
+T74	trait 2136 2151	malting quality
+T75	trait 2170 2178	maturity
+T76	trait 2183 2188	heads
+T77	crop_variety 2209 2215	Klages
+T78	plant_anatomy 2239 2246	kernels
+T79	trait 2256 2262	height
+T80	trait 2274 2292	lodging resistance
+T81	crop_variety 2298 2304	Klages
+T82	plant_anatomy 2310 2316	spikes
+T83	plant_anatomy 2362 2366	awns
+T84	plant_anatomy 2374 2378	awns
+T85	plant_anatomy 2406 2411	glume
+T86	plant_anatomy 2417 2423	glumes
+T87	plant_anatomy 2446 2451	hairs
+T88	plant_anatomy 2453 2465	Rachis edges
+T89	plant_anatomy 2476 2481	hairs
+T90	plant_anatomy 2506 2511	hulls
+T91	plant_anatomy 2520 2525	barbs
+T92	plant_anatomy 2533 2546	lateral veins
+T93	plant_anatomy 2562 2570	rachilla
+T94	plant_anatomy 2581 2589	aleurone
+T95	plant_anatomy 2595 2601	crease
+T96	plant_anatomy 2619 2623	base
+T97	plant_anatomy 2649 2652	awn
+T98	plant_predisposition_to_disease 2670 2679	tolerance
+T99	pathogen 2683 2687	spot
+T100	pathogen 2692 2702	net blotch
+T101	pathogen 2707 2722	common root rot
+T102	crop_variety 2728 2734	Klages
+T103	crop_variety 2756 2765	Entry 686
+T104	trait 2827 2842	spring planting
+T105	journal_reference 2895 2925	Crop Science 25:570-571 (1985)
+T106	crop_variety 2933 2938	Lindy
+T107	trait 2944 2953	six-rowed
+T108	trait 2954 2960	spring
+T109	trait 2961 2965	feed
+T110	crop 2966 2972	barley
+T111	trait 3020 3028	maturing
+T112	trait 3042 3054	plant
+height
+T113	trait 3064 3078	straw strength
+T114	plant_predisposition_to_disease 3113 3122	resistant
+T115	pathogen 3126 3131	scald
+T116	pathogen 3136 3145	leaf rust
+T117	plant_predisposition_to_disease 3150 3161	susceptible
+T118	pathogen 3165 3168	BYD
+T119	trait 3261 3276	spring planting
+T120	crop_variety 3433 3436	Lud
+T121	trait 3442 3451	two-rowed
+T122	trait 3452 3458	spring
+T123	trait 3459 3463	feed
+T124	crop 3464 3470	barley
+T125	pedigree 3561 3584	Vada/Zephyr//RMGH 59114
+T126	trait 3603 3611	maturity
+T127	crop_variety 3624 3630	Klages
+T128	trait 3646 3658	plant height
+T129	trait 3671 3678	shorter
+T130	crop_variety 3684 3690	Klages
+T131	plant_anatomy 3703 3708	straw
+T132	plant_anatomy 3729 3733	awns
+T133	plant_anatomy 3735 3741	Glumes
+T134	plant_anatomy 3753 3758	hairs
+T135	plant_anatomy 3784 3789	Hulls
+T136	plant_anatomy 3830 3838	aleurone
+T137	plant_anatomy 3853 3867	Rachilla hairs
+T138	plant_anatomy 3879 3884	Veins
+T139	plant_anatomy 3916 3921	barbs
+T140	plant_anatomy 3925 3938	lateral veins
+T141	plant_anatomy 3944 3950	crease
+T142	plant_anatomy 3991 3997	kernel
+T143	plant_anatomy 4014 4017	awn
+T144	plant_predisposition_to_disease 4053 4062	resistant
+T145	pathogen 4066 4080	powdery mildew
+T146	pathogen 4082 4092	loose smut
+T147	pathogen 4098 4110	covered smut
+T148	plant_predisposition_to_disease 4115 4126	susceptible
+T149	pathogen 4130 4135	scald
+T150	pathogen 4137 4146	stem rust
+T151	pathogen 4148 4158	net
+blotch
+T152	pathogen 4163 4174	spot blotch
+T153	trait 4267 4282	spring planting
+T154	crop_variety 4343 4349	Madera
+T155	trait 4352 4361	six-rowed
+T156	trait 4362 4368	spring
+T157	trait 4369 4373	feed
+T158	crop 4374 4380	barley
+T159	varietal_alias 4514 4521	UZU-POP
+T160	varietal_alias 4557 4567	DA 587- 71
+T161	trait 4580 4588	maturing
+T162	trait 4604 4616	plant height
+T163	trait 4634 4648	straw strength
+T164	plant_predisposition_to_disease 4694 4703	resistant
+T165	pathogen 4707 4712	scald
+T166	pathogen 4714 4724	net blotch
+T167	pathogen 4726 4729	BYD
+T168	pathogen 4731 4742	stripe rust
+T169	pathogen 4747 4761	powdery mildew
+T170	plant_predisposition_to_disease 4767 4789	moderately susceptible
+T171	pathogen 4793 4802	leaf rust
+T172	crop_variety 4824 4833	Entry 814
