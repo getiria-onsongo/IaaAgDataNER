@@ -679,15 +679,22 @@ class CropNerGUI:
             doc = self.tag_ner_with_spacy(input_text)
 
             # TODO: Add a warning message if ent is empty so users know none of the custom tags were found
+            custom_tags_present = False
             for ent in doc.ents:
                 # NER is in our list of custom tags
                 if ent.label_ in self.tags:
+                    custom_tags_present = True
                     # index = self.tags.index(ent.label_) # Find index for an element in a list
                     self.highlight_ent(ent.start_char, ent.end_char, ent.label_)
                     if self.cust_ents_dict.get(self.page_number, False):
                         self.cust_ents_dict[self.page_number].append((ent.start_char, ent.end_char, ent.label_))
                     else:
                         self.cust_ents_dict[self.page_number] = [(ent.start_char, ent.end_char, ent.label_)]
+
+            if custom_tags_present:
+                self.msg.config(text="No custom agriculture tags detected in the text!", foreground="red")
+            if len(doc.ents) == 0:
+                self.msg.config(text="No entities detected in the text!", foreground="red")
 
             if self.cust_ents_dict.get(self.page_number, False):
                 tags = self.cust_ents_dict[self.page_number]
