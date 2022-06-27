@@ -1,0 +1,175 @@
+T1	crop_variety 80 86	Conrad
+T2	trait 92 101	two-rowed
+T3	trait 102 108	spring
+T4	trait 109 116	malting
+T5	crop 117 123	barley
+T6	pedigree 213 227	B1215/B88-5336
+T7	varietal_alias 262 271	2B96-5057
+T8	plant_anatomy 299 304	grain
+T9	trait 325 333	maturity
+T10	trait 335 340	heads
+T11	trait 370 377	matures
+T12	crop_variety 406 411	B1202
+T13	trait 417 428	medium-tall
+T14	trait 429 441	plant height
+T15	crop_variety 476 481	B1202
+T16	crop_variety 510 520	Harrington
+T17	trait 523 537	Straw strength
+T18	crop_variety 552 557	B1202
+T19	crop_variety 604 609	Merit
+T20	crop_variety 614 624	Harrington
+T21	trait 626 648	high levels of enzymes
+T22	crop_variety 654 659	Merit
+T23	trait 672 689	levels of extract
+T24	trait 694 718	better malt modification
+T25	crop_variety 724 729	B1202
+T26	plant_predisposition_to_disease 759 769	resistance
+T27	pathogen 773 778	scald
+T28	crop_variety 794 799	B1202
+T29	crop_variety 825 835	Harrington
+T30	plant_predisposition_to_disease 837 859	moderately susceptible
+T31	plant_predisposition_to_disease 870 880	resistance
+T32	pathogen 884 894	net blotch
+T33	crop_variety 931 936	B1202
+T34	crop_variety 941 951	Harrington
+T35	plant_predisposition_to_disease 953 973	moderately resistant
+T36	plant_predisposition_to_disease 1009 1018	resistant
+T37	pathogen 1022 1033	stripe rust
+T38	trait 1113 1120	2001-02
+T39	trait 1147 1162	spring planting
+T40	crop_variety 1221 1225	Ishi
+T41	trait 1231 1240	six-rowed
+T42	trait 1241 1247	spring
+T43	trait 1248 1252	feed
+T44	crop 1253 1259	barley
+T45	pedigree 1339 1352	UC
+828/UC 960
+T46	varietal_alias 1389 1396	UC 1047
+T47	varietal_alias 1401 1415	UCD PYT99 A-13
+T48	crop_variety 1417 1421	Ishi
+T49	trait 1422 1439	has the sdw1 gene
+T50	trait 1447 1461	short
+statured
+T51	crop_variety 1500 1506	UC 937
+T52	crop_variety 1530 1536	UC 933
+T53	trait 1624 1642	lodging resistance
+T54	crop_variety 1669 1675	UC 937
+T55	crop_variety 1691 1694	UC
+
+T56	trait 1747 1762	days to heading
+T57	crop_variety 1795 1801	UC 937
+T58	crop_variety 1824 1830	UC 933
+T59	trait 1881 1889	maturity
+T60	plant_anatomy 1946 1955	awns, hav
+T61	plant_anatomy 2006 2011	spike
+T62	plant_anatomy 2040 2047	kernels
+T63	plant_anatomy 2068 2076	aleurone
+T64	plant_anatomy 2090 2096	Grains
+T65	plant_anatomy 2133 2138	hairs
+T66	plant_anatomy 2162 2176	Rachilla hairs
+T67	crop_variety 2210 2214	Ishi
+T68	plant_predisposition_to_disease 2219 2228	resistant
+T69	pathogen 2232 2237	scald
+T70	pathogen 2242 2256	powdery mildew
+T71	plant_predisposition_to_disease 2258 2269	moderately
+
+T72	plant_predisposition_to_disease 2269 2278	resistant
+T73	pathogen 2339 2358	le to leaf rust. It
+T74	pathogen 2295 2298	BYD
+T75	pathogen 2303 2313	net blotch
+T76	plant_predisposition_to_disease 2319 2341	moderately susceptible
+T77	pathogen 2345 2354	leaf rust
+T78	plant_predisposition_to_disease 2379 2401	moderately
+susceptible
+T79	pathogen 2405 2415	net blotch
+T80	trait 2612 2627	spring planting
+T81	journal_reference 2678 2705	Crop Science 46:1396 (2006)
+T82	crop_variety 2714 2720	Meltan
+T83	trait 2726 2735	two-rowed
+T84	trait 2736 2742	spring
+T85	trait 2743 2747	feed
+T86	crop 2748 2754	barley
+T87	trait 2859 2886	eraging about 32 inches in 
+T88	trait 2839 2855	moderately short
+T89	trait 2910 2924	straw strength
+T90	plant_predisposition_to_disease 2959 2968	resistant
+T91	pathogen 2972 2981	leaf rust
+T92	pathogen 2986 3000	powdery mildew
+T93	plant_predisposition_to_disease 3002 3022	moderately resistant
+T94	pathogen 3026 3037	stripe rust
+T95	plant_predisposition_to_disease 3043 3054	susceptible
+T96	pathogen 3058 3063	scald
+T97	pathogen 3065 3075	net blotch
+T98	pathogen 3080 3083	BYD
+T99	crop_variety 3105 3114	Entry 951
+T100	crop_variety 3296 3304	Merit 57
+T101	trait 3310 3319	two-rowed
+T102	trait 3320 3326	spring
+T103	trait 3327 3334	malting
+T104	crop 3335 3341	barley
+T105	pedigree 3435 3457	Merit//Merit/2B94-5744
+T106	trait 3510 3527	levels of enzymes
+T107	trait 3529 3539	α-
+amylase
+T108	trait 3544 3559	diastatic power
+T109	crop_variety 3585 3590	Merit
+T110	crop_variety 3648 3653	Merit
+T111	trait 3708 3730	levels of malt extract
+T112	crop_variety 3732 3740	Merit 57
+T113	trait 3744 3755	rough awned
+T114	trait 3765 3773	maturing
+T115	trait 3785 3800	yield potential
+T116	trait 3822 3834	plant height
+T117	trait 3839 3853	straw strength
+T118	trait 3875 3893	lodging resistance
+T119	crop_variety 3899 3910	AC Metcalfe
+T120	trait 3924 3948	resistance to shattering
+T121	trait 3966 3993	tolerance of straw breakage
+T122	trait 3998 4005	drought
+T123	crop_variety 4007 4015	Merit 57
+T124	trait 4020 4037	denser pubescence
+T125	plant_anatomy 4058 4067	flag leaf
+T126	crop_variety 4073 4078	Merit
+T127	trait 4084 4106	anthocyanin coloration
+T128	plant_anatomy 4114 4132	flag leaf auricles
+T129	crop_variety 4148 4153	Merit
+T130	trait 4159 4174	spike emergence
+T131	crop_variety 4191 4196	Merit
+T132	plant_anatomy 4214 4224	lemma awns
+T133	crop_variety 4228 4236	Merit 57
+T134	trait 4249 4271	anthocyanin
+coloration
+T135	crop_variety 4277 4287	Harrington
+T136	crop_variety 4289 4297	Merit 57
+T137	plant_anatomy 4310 4315	spike
+T138	crop_variety 4321 4326	Merit
+T139	plant_anatomy 4332 4337	spike
+T140	crop_variety 4354 4359	Merit
+T141	crop_variety 4364 4374	Harrington
+T142	plant_anatomy 4380 4393	basal marking
+T143	plant_anatomy 4401 4407	kernel
+T144	crop_variety 4411 4419	Merit 57
+T145	crop_variety 4474 4484	Harrington
+T146	crop_variety 4486 4494	Merit 57
+T147	plant_anatomy 4508 4514	kernel
+T148	crop_variety 4532 4540	Merit 57
+T149	pathogen 4552 4557	scald
+T150	plant_predisposition_to_disease 4558 4568	resistance
+T151	crop_variety 4574 4579	Merit
+T152	crop_variety 4604 4612	Merit 57
+T153	plant_predisposition_to_disease 4617 4639	moderately susceptible
+T154	pathogen 4643 4648	scald
+T155	pathogen 4650 4660	net blotch
+T156	pathogen 4662 4683	race MCC of stem rust
+T157	pathogen 4689 4700	spot blotch
+T158	plant_predisposition_to_disease 4706 4717	susceptible
+T159	pathogen 4721 4724	BYD
+T160	trait 4821 4836	spring planting
+T161	crop_variety 4901 4911	Millennium
+T162	trait 4917 4926	six-rowed
+T163	trait 4927 4933	spring
+T164	trait 4934 4938	feed
+T165	crop 4939 4945	barley
+T166	varietal_alias 5087 5101	UT94B1058-4603
+T167	varietal_alias 5106 5113	UT 4603
+T168	crop_variety 5115 5125	Millennium

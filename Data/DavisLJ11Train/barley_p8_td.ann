@@ -1,0 +1,143 @@
+T1	pedigree 24 35	Böre/Hudson
+T2	varietal_alias 70 80	WA 2084-63
+T3	crop_variety 105 111	Hudson
+T4	crop 126 132	barley
+T5	trait 173 190	lodging resistant
+T6	trait 197 204	shorter
+T7	trait 220 235	winterhardiness
+T8	crop_variety 248 254	Hudson
+T9	trait 262 273	rough-awned
+T10	trait 275 283	mid-tall
+T11	trait 294 302	maturing
+T12	plant_anatomy 308 313	spike
+T13	plant_anatomy 332 339	kernels
+T14	plant_anatomy 371 379	aleurone
+T15	plant_anatomy 398 407	rachillas
+T16	plant_predisposition_to_disease 470 479	resistant
+T17	pathogen 483 488	scald
+T18	plant_predisposition_to_disease 493 504	susceptible
+T19	pathogen 508 519	stripe rust
+T20	trait 631 644	fall planting
+T21	journal_reference 697 719	Crop Science
+13(5):579
+T22	crop_variety 733 737	Kold
+T23	trait 743 752	six-rowed
+T24	trait 753 759	winter
+T25	trait 760 764	feed
+T26	crop 765 771	barley
+T27	pedigree 852 871	cross B-1285/Astrix
+T28	varietal_alias 906 914	ORWM8407
+T29	trait 933 941	maturity
+T30	trait 956 962	height
+T31	trait 980 1001	resistance to lodging
+T32	trait 1011 1026	winterhardiness
+T33	plant_anatomy 1032 1038	spikes
+T34	plant_anatomy 1058 1062	awns
+T35	plant_anatomy 1064 1072	Aleurone
+T36	plant_predisposition_to_disease 1113 1122	resistant
+T37	pathogen 1126 1137	stripe rust
+T38	plant_predisposition_to_disease 1139 1159	moderately resistant
+T39	pathogen 1163 1168	scald
+T40	pathogen 1173 1183	net blotch
+T41	plant_predisposition_to_disease 1189 1212	moderately susceptible
+
+T42	pathogen 1215 1218	BYD
+T43	trait 1311 1324	fall planting
+T44	journal_reference 1377 1408	Crop Science 35(5): 1503 (1995)
+T45	crop_variety 1414 1417	Mal
+T46	trait 1423 1432	six-rowed
+T47	trait 1433 1439	winter
+T48	trait 1440 1444	feed
+T49	crop 1445 1451	barley
+T50	trait 1519 1527	maturity
+T51	trait 1536 1542	height
+T52	trait 1553 1574	resistance to lodging
+T53	trait 1585 1601	winter hardiness
+T54	plant_predisposition_to_disease 1647 1656	resistant
+T55	pathogen 1660 1665	scald
+T56	plant_predisposition_to_disease 1670 1681	susceptible
+T57	pathogen 1685 1696	stripe rust
+T58	pathogen 1701 1704	BYD
+T59	crop_variety 1899 1904	Robur
+T60	trait 1910 1919	six-rowed
+T61	trait 1920 1926	winter
+T62	trait 1927 1931	feed
+T63	crop 1932 1938	barley
+T64	trait 1992 2000	maturity
+T65	trait 2010 2024	straw
+strength
+T66	crop_variety 2046 2055	Entry 650
+T67	trait 2117 2130	fall planting
+T68	crop_variety 2193 2201	Schuyler
+T69	trait 2207 2216	six-rowed
+T70	trait 2217 2223	winter
+T71	trait 2224 2228	feed
+T72	crop 2229 2235	barley
+T73	pedigree 2313 2326	Hudson/Alpine
+T74	varietal_alias 2361 2374	NY 5619B-3B-1
+T75	plant_anatomy 2393 2398	spike
+T76	plant_anatomy 2406 2410	awns
+T77	trait 2424 2432	maturity
+T78	trait 2447 2453	height
+T79	trait 2460 2478	lodging resistance
+T80	trait 2489 2504	winterhardiness
+T81	trait 2520 2526	yields
+T82	crop_variety 2532 2538	Hudson
+T83	trait 2549 2560	test weight
+T84	plant_anatomy 2562 2569	Kernels
+T85	plant_anatomy 2608 2616	aleurone
+T86	plant_predisposition_to_disease 2659 2668	resistant
+T87	pathogen 2672 2677	scald
+T88	pathogen 2679 2690	stripe rust
+T89	pathogen 2695 2709	powdery mildew
+T90	plant_predisposition_to_disease 2715 2726	susceptible
+T91	pathogen 2730 2733	BYD
+T92	plant_predisposition_to_disease 2758 2769	susceptible
+T93	pathogen 2773 2784	stripe
+rust
+T94	journal_reference 2943 2969	Crop Science 12:124 (1972)
+T95	crop_variety 2976 2980	Scio
+T96	trait 2986 2995	six-rowed
+T97	trait 2996 3002	winter
+T98	trait 3003 3007	feed
+T99	crop 3008 3014	barley
+T100	trait 3119 3127	maturity
+T101	trait 3142 3148	height
+T102	trait 3155 3173	lodging resistance
+T103	trait 3184 3199	winterhardiness
+T104	plant_predisposition_to_disease 3234 3256	moderately susceptible
+T105	pathogen 3260 3265	scald
+T106	pathogen 3270 3273	BYD
+T107	plant_predisposition_to_disease 3279 3290	susceptible
+T108	pathogen 3294 3305	stripe rust
+T109	trait 3417 3430	fall planting
+T110	crop_variety 3491 3497	Showin
+T111	trait 3503 3512	six-rowed
+T112	trait 3513 3519	winter
+T113	trait 3520 3524	feed
+T114	crop 3525 3531	barley
+T115	pedigree 3638 3653	68-1448/2116-67
+T116	varietal_alias 3688 3698	WA 2905-75
+T117	trait 3741 3756	winterhardiness
+T118	trait 3766 3776	semi-dwarf
+T119	trait 3792 3797	straw
+T120	trait 3802 3823	resistance to lodging
+T121	trait 3844 3856	growth habit
+T122	plant_anatomy 3877 3882	spike
+T123	plant_anatomy 3926 3930	awns
+T124	plant_anatomy 3951 3955	Seed
+T125	plant_anatomy 4027 4032	hulls
+T126	plant_anatomy 4040 4048	aleurone
+T127	plant_anatomy 4056 4070	rachilla hairs
+T128	plant_anatomy 4092 4097	veins
+T129	plant_anatomy 4103 4109	crease
+T130	plant_anatomy 4155 4158	awn
+T131	plant_predisposition_to_disease 4193 4213	moderately resistant
+T132	pathogen 4217 4238	Cephalosporium stripe
+T133	plant_predisposition_to_disease 4240 4262	moderately susceptible
+T134	pathogen 4266 4271	scald
+T135	plant_predisposition_to_disease 4277 4288	susceptible
+T136	pathogen 4292 4303	stripe rust
+T137	pathogen 4308 4311	BYD
+T138	trait 4440 4453	fall planting
+T139	journal_reference 4506 4533	Crop Science 26:1079 (1986)

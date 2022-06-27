@@ -1,5 +1,4 @@
 #!/bin/env python3
-import spacy.tokens
 
 from agParse import *
 from tkinterColorList import *
@@ -13,7 +12,10 @@ from pyxpdf.xpdf import TextControl
 import random
 import tkinter as tk
 from tkinter import filedialog as fd
+from collections import defaultdict
 from tkinter.scrolledtext import ScrolledText
+import os
+import sys
 
 # 1) WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
 # ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
@@ -36,10 +38,6 @@ class CropNerGUI:
     ...
     Attributes
     ----------
-    self.model_default : str
-        default model from argparse if given
-    self.file_default : str
-            default file from argparse if given
     self.rootWin : tk.Tk()
         tKinter class that represents the main window
     self.rootWin.title : self.rootWin.title()
@@ -134,13 +132,13 @@ class CropNerGUI:
         Callback method attached to the quit button.
     """
 
-    def __init__(self, model_default=None, file_default=None):
-        """ Initialize  CropNerGU object"""
-
+    def __init__(self):
+        # Create a GUI window.
         self.rootWin = tk.Tk()
         self.rootWin.title("GEMS NER Annotation Tool")
         self.rootWin.geometry('1250x700')
         self.model_dir = None
+        self.pos_model = spacy.load("en_core_web_lg")
         self.tags = ["ALAS", "CROP", "CVAR", "JRNL",
                      "PATH", "PED", "PLAN", "PPTD", "TRAT"]
         self.colors = ["violet", "lawn green", "deep sky blue", "yellow", "red", "orange", "pink", "brown",
@@ -156,17 +154,16 @@ class CropNerGUI:
         self.nlp_agdata = None
         self.cust_ents_dict = {}
         self.page_number = 0
-        self.pos_model = spacy.load("en_core_web_lg")
 
-        self.model_default = model_default
-        self.file_default = file_default
-        if self.model_default is not None:
-            self.model_dir = self.model_default
+        if len(sys.argv) >= 2:
+            self.model_dir = sys.argv[1]
+            # Assumes a model passed in as an arg is correctly formatted, no error handling here
             self.nlp_agdata = spacy.load(self.model_dir)
         else:
             self.model_dir = None
-        if self.file_default is not None:
-            self.raw_file = self.file_default
+
+        if len(sys.argv) >= 3:
+            self.raw_file = sys.argv[2]
         else:
             self.raw_file = None
 
@@ -319,8 +316,8 @@ class CropNerGUI:
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
         self.msg.pack(side=tk.LEFT)
         # Continue button
-        self.continue_btn = tk.Button(self.msg_frame, text="Continue", width=10,
-                                      command=partial(self.continue_func, "save"))
+        self.continue_btn = tk.Button(
+            self.msg_frame, text="Continue", width=10, command=partial(self.continue_func, "save"))
         self.continue_btn.pack(side=tk.LEFT)
         self.continue_btn.pack_forget()
         # Button to overwrite a file when saving
@@ -535,6 +532,8 @@ class CropNerGUI:
                 text="No raw data file has been selected. Please select a file to load.", foreground="red")
 
         if type(self.raw_file) is str:
+            self.file_prefix = self.raw_file.split(".")[0]
+            self.pdf_name = self.raw_file.split("/")[-1]
             self.pdf_document = Document(self.raw_file)
         else:
             self.file_prefix = self.raw_file.name.split(".")[0]
@@ -573,7 +572,8 @@ class CropNerGUI:
             self.text.delete(1.0, tk.END)
 
             # Load PDF file
-            self.load_pdf()
+            if self.pdf_document is None:
+                self.load_pdf()
 
             # Extract text from pdf while maintaining layout
             control = TextControl(mode="physical")
@@ -638,10 +638,96 @@ class CropNerGUI:
         self.text.tag_add(label, str(line_start) + "."
                           + str(char_start), str(line_end) + "." + str(char_end))
 
+    def pre_tag(self, selection: str):
+        """
+        Pre-tag selected content or all the text in text box with NER tags.
+
+        Parameters
+        ----------
+        selection : str
+            String specifying the type tagging to be done.
+
+        If a user has selected a block of text and clicked the "Pre-Tag Selection" button, the selected text will be
+        tagged and annotation displayed in the text box.
+
+        If they clicked the "Pre-Tage Pages(s)" button, all the text loaded in the text box will be annotated.
+        """
+        input_text = None
+        # Clear warning message, if one exists
+        self.msg.config(text="")
+        if self.model_dir is None:
+            self.msg.config(
+                text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
+        else:
+            if self.pdf_document is None:
+                self.msg.config(
+                    text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
+                self.LoadPDF()
+
+            # Get page number
+            page_num = self.page_entry.get()
+            if not page_num.isdigit():
+                self.msg.config(
+                    text="Page number not entered. Page 1 in PDF loaded", foreground="red")
+                page_num = 1
+            self.page_number = int(page_num)
+            self.chunk = self.page_number
+
+            if selection == "selection":
+                # TODO: If a user clicks the "Pre-Tag Selection" button but they have not selected any text, an
+                # error is through without displaying a warning message. Check to make sure "sel.first" and
+                # "sel.last" are defined before calling self.text.get()
+                input_text = self.text.get("sel.first", "sel.last")
+            else:
+                if self.pdf_document is None:
+                    self.msg.config(
+                        text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
+                    self.load_pdf()
+
+                # Extract text from pdf while maintaining layout
+                control = TextControl(mode="physical")
+
+                page = self.pdf_document[self.page_number - 1]
+                input_text = page.text(control=control)
+
+            self.text.delete(1.0, tk.END)
+
+            page = self.pdf_document[self.page_number - 1]
+            input_text = page.text(control=control)
+            self.text.insert("1.0", input_text)
+
+            # Reset annotation dictionary
+            self.cust_ents_dict = {}
+
+            # Update variable that holds number of lines in textbox. You need this for
+            # the function highlight_ent to work
+            self.update_scrolled_text_line_content_index()
+            doc = self.tag_ner_with_spacy(input_text)
+
+            # TODO: Add a warning message if ent is empty so users know none of the custom tags were found
+            for ent in doc.ents:
+                # NER is in our list of custom tags
+                if ent.label_ in self.tags:
+                    ent = self.get_pos(ent)
+                    # index = self.tags.index(ent.label_) # Find index for an element in a list
+                    self.highlight_ent(
+                        ent.start_char, ent.end_char, ent.label_)
+                    if self.cust_ents_dict.get(self.page_number, False):
+                        self.cust_ents_dict[self.page_number].append(
+                            (ent.start_char, ent.end_char, ent.label_))
+                    else:
+                        self.cust_ents_dict[self.page_number] = [
+                            (ent.start_char, ent.end_char, ent.label_)]
+
+            if self.cust_ents_dict.get(self.page_number, False):
+                tags = self.cust_ents_dict[self.page_number]
+                self.cust_ents_dict[self.page_number] = [input_text, tags]
+
     def get_pos(self, ent):
         '''
         Proceses a given entity with rules that use pos tag data to expand
         the entity span if needed.
+
         :param ent: entity to possibly expand span of
         :param nlp: spacy model for pos tagging
         :returns: entity, with an expanded span if needed
@@ -650,8 +736,9 @@ class CropNerGUI:
         if(len(doc[ent.start:ent.end]) > 0):
             current_index = doc[ent.start:ent.end][0].i
             label = ent.label_
-            # functions that expands ents to contain proceeding adjectives
+            # functions that contain rules to expand the entity's span
             ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
+            # ent = self.num_combine_ent(doc, current_index, ent, label)
         return ent
 
     def adj_combine_noun_ent(self, doc, current_index, ent, label):
@@ -659,6 +746,7 @@ class CropNerGUI:
         If the first token in an entity is a noun or proper noun, finds
         all adjectives proceeding the entity and expands the span to
         contain all of them.
+
         :param doc: sentence entity belongs to passed through spacy model
         :param current_index: index of first token in the doc
         :param ent: entity to possibly expand span of
@@ -677,7 +765,7 @@ class CropNerGUI:
                     print("entity: " + str(ent))
                     i = current_index
                     start_index = ent.start
-                    # keeps searching until all adjectives are found
+                    # keeps searching until all adjectives are foundS
                     while i >= 1:
                         i = i - 1
                         if doc[i].pos_ == "ADJ":
@@ -727,84 +815,6 @@ class CropNerGUI:
                         print()
         return ent
 
-    def pre_tag(self, selection: str):
-        """
-        Pre-tag selected content or all the text in text box with NER tags.
-
-        Parameters
-        ----------
-        selection : str
-            String specifying the type tagging to be done.
-
-        If a user has selected a block of text and clicked the "Pre-Tag Selection" button, the selected text will be
-        tagged and annotation displayed in the text box.
-
-        If they clicked the "Pre-Tage Pages(s)" button, all the text loaded in the text box will be annotated.
-        """
-        input_text = None
-        # Clear warning message, if one exists
-        self.msg.config(text="")
-        if self.model_dir is None:
-            self.msg.config(
-                text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
-        else:
-            input_text = None
-            # Get page number
-            page_num = self.page_entry.get()
-            if not page_num.isdigit():
-                self.msg.config(
-                    text="Page number not entered. Page 1 in PDF loaded", foreground="red")
-                page_num = 1
-            self.page_number = int(page_num)
-            self.chunk = self.page_number
-
-            if selection == "selection":
-                # TODO: If a user clicks the "Pre-Tag Selection" button but they have not selected any text, an
-                # error is through without displaying a warning message. Check to make sure "sel.first" and
-                # "sel.last" are defined before calling self.text.get()
-                input_text = self.text.get("sel.first", "sel.last")
-            else:
-                if self.pdf_document is None:
-                    self.msg.config(
-                        text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
-                    self.load_pdf()
-
-                # Extract text from pdf while maintaining layout
-                control = TextControl(mode="physical")
-
-                page = self.pdf_document[self.page_number - 1]
-                input_text = page.text(control=control)
-
-            self.text.delete(1.0, tk.END)
-            self.text.insert("1.0", input_text)
-
-            # Reset annotation dictionary
-            self.cust_ents_dict = {}
-
-            # Update variable that holds number of lines in textbox. You need this for
-            # the function highlight_ent to work
-            self.update_scrolled_text_line_content_index()
-            doc = self.tag_ner_with_spacy(input_text)
-
-            # TODO: Add a warning message if ent is empty so users know none of the custom tags were found
-            for ent in doc.ents:
-                # NER is in our list of custom tags
-                if ent.label_ in self.tags:
-                    ent = self.get_pos(ent)
-                    # index = self.tags.index(ent.label_) # Find index for an element in a list
-                    self.highlight_ent(
-                        ent.start_char, ent.end_char, ent.label_)
-                    if self.cust_ents_dict.get(self.page_number, False):
-                        self.cust_ents_dict[self.page_number].append(
-                            (ent.start_char, ent.end_char, ent.label_))
-                    else:
-                        self.cust_ents_dict[self.page_number] = [
-                            (ent.start_char, ent.end_char, ent.label_)]
-
-            if self.cust_ents_dict.get(self.page_number, False):
-                tags = self.cust_ents_dict[self.page_number]
-                self.cust_ents_dict[self.page_number] = [input_text, tags]
-
     def overlap(self, interval_one: list, interval_two: list) -> bool:
         """
         Check to see if two intervals overlap.
@@ -846,9 +856,6 @@ class CropNerGUI:
         tag_label : str
             Label to assign to the named entity that was selected.
         """
-        # TODO: This function has a major bug. If you try to tag text that spans multiple pages, it will not only
-        # fail, but it will also remove some annotations.
-
         # Clear warning message, if one exists
         self.msg.config(text="")
         try:
@@ -884,13 +891,13 @@ class CropNerGUI:
 
                 # Add the new NER tag into the dictionary
                 self.cust_ents_dict[self.chunk][1].append(
-                    (ent_char_start, ent_char_end, tag_label))
+                    (ent_char_start, ent_char_end, tagLabel))
             else:
                 self.cust_ents_dict[self.chunk] = [input_text, [
-                    (ent_char_start, ent_char_end, tag_label)]]
+                    (ent_char_start, ent_char_end, tagLabel)]]
 
             # Highlight the new NER  tag
-            self.text.tag_add(tag_label, "sel.first", "sel.last")
+            self.text.tag_add(tagLabel, "sel.first", "sel.last")
 
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
@@ -988,7 +995,7 @@ class CropNerGUI:
                 entities = text_annotation[1]['entities']
                 self.cust_ents_dict[self.chunk] = [annotated_text, entities]
 
-            self.text.insert("1.0", annotated_text + '\n')
+            self.text.insert("1.0", sentence + '\n')
 
             # Update variable that holds number of lines in textbox. You need this update
             # for highlight_ent to work
@@ -1157,19 +1164,5 @@ class CropNerGUI:
 
 # Driver code
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='runs GUI with option for default model and file',
-        epilog='python src/CropNerGUI --model senter_ner_model/model-best --file Data/CSU/Bill-Brown-Reprint.pdf'
-        )
-    parser.add_argument(
-        '--model', help='path to trained model',
-        action='store', default=None
-        )
-    parser.add_argument(
-        '--file', help='path to directory of dataset',
-        action='store', default=None
-        )
-    args = parser.parse_args()
-    model, file = args.model, args.file
-    ner_gui = CropNerGUI(model_default=model, file_default=file)
+    ner_gui = CropNerGUI()
     ner_gui.go()

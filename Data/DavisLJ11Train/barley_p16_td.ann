@@ -1,0 +1,138 @@
+T1	plant_predisposition_to_disease 0 22	moderately susceptible
+T2	pathogen 26 29	BYD
+T3	trait 123 138	spring planting
+T4	journal_reference 191 220	Crop Science 26:1079 (1986)
+
+
+T5	crop_variety 226 231	Craft
+T6	trait 237 246	two-rowed
+T7	trait 247 253	spring
+T8	trait 254 261	malting
+T9	crop 262 268	barley
+T10	varietal_alias 396 405	MT 970116
+T11	trait 438 463	excellent flavor profile
+
+T12	trait 467 474	malting
+T13	crop_variety 506 512	Klages
+T14	trait 625 633	maturity
+T15	trait 640 652	plant height
+T16	trait 671 685	straw strength
+T17	trait 779 794	spring planting
+T18	crop_variety 854 859	Creel
+T19	trait 865 874	six-rowed
+T20	trait 875 881	spring
+T21	trait 882 886	feed
+T22	crop 887 893	barley
+T23	pedigree 1013 1036	M44/80Ab4952//79Ab10719
+T24	crop_variety 1220 1225	Creel
+T25	trait 1250 1258	maturity
+T26	trait 1271 1278	heading
+T27	crop_variety 1282 1288	Colter
+T28	trait 1297 1305	mid-tall
+T29	crop_variety 1325 1331	Colter
+T30	trait 1337 1343	lodges
+T31	crop_variety 1354 1360	Colter
+T32	plant_anatomy 1380 1386	spikes
+T33	plant_anatomy 1395 1399	awns
+T34	plant_anatomy 1410 1424	rachilla hairs
+T35	plant_anatomy 1426 1433	Kernels
+T36	plant_anatomy 1461 1469	aleurone
+T37	crop_variety 1471 1476	Creel
+T38	trait 1479 1495	kernel plumpness
+T39	crop_variety 1508 1514	Colter
+T40	crop_variety 1532 1537	Morex
+T41	crop_variety 1592 1597	Creel
+T42	plant_predisposition_to_disease 1602 1624	moderately susceptible
+T43	pathogen 1628 1631	BYD
+T44	pathogen 1633 1643	net blotch
+T45	pathogen 1649 1654	scald
+T46	plant_predisposition_to_disease 1660 1671	susceptible
+T47	pathogen 1675 1686	stripe rust
+T48	trait 1780 1795	spring planting
+T49	journal_reference 1848 1875	Crop Science 46:1812 (2006)
+T50	crop_variety 1883 1888	Crest
+T51	trait 1894 1903	two-rowed
+T52	trait 1904 1910	spring
+T53	trait 1911 1918	malting
+T54	trait 1923 1927	feed
+T55	crop 1928 1934	barley
+T56	pedigree 2049 2067	Klages/2 WA8537-68
+T57	varietal_alias 2102 2113	WA 8771-
+78
+T58	trait 2159 2164	yield
+T59	trait 2227 2235	maturity
+T60	crop_variety 2259 2265	Klages
+T61	trait 2275 2281	height
+T62	crop_variety 2294 2300	Klages
+T63	trait 2325 2332	lodging
+T64	plant_anatomy 2334 2340	Spikes
+T65	plant_anatomy 2362 2366	awns
+T66	plant_anatomy 2387 2394	Kernels
+T67	plant_anatomy 2419 2424	Hulls
+T68	plant_anatomy 2461 2466	Veins
+T69	plant_anatomy 2489 2495	crease
+T70	plant_anatomy 2516 2530	Rachilla hairs
+T71	plant_anatomy 2545 2553	aleurone
+T72	trait 2576 2583	malting
+T73	trait 2588 2607	nutritional quality
+T74	plant_predisposition_to_disease 2639 2657	partial resistance
+T75	pathogen 2661 2675	powdery mildew
+T76	pathogen 2680 2691	stripe rust
+T77	plant_predisposition_to_disease 2700 2711	susceptible
+T78	pathogen 2715 2734	Russian wheat aphid
+T79	crop_variety 2756 2765	Entry 902
+T80	trait 2827 2842	spring planting
+T81	journal_reference 2895 2927	Crop Science 32:1506-1507 (1992)
+T82	crop_variety 2936 2942	Criton
+T83	trait 2948 2957	two-rowed
+T84	trait 2958 2964	spring
+T85	trait 2965 2969	feed
+T86	crop 2970 2976	barley
+T87	varietal_alias 3110 3118	91Ab3148
+T88	trait 3132 3140	maturing
+T89	trait 3151 3163	plant height
+T90	trait 3187 3194	lodging
+T91	plant_predisposition_to_disease 3226 3248	moderately susceptible
+T92	pathogen 3252 3263	stripe rust
+T93	trait 3357 3372	spring planting
+T94	crop_variety 3434 3441	Crystal
+T95	trait 3447 3456	two-rowed
+T96	trait 3457 3463	spring
+T97	trait 3464 3471	malting
+T98	crop 3472 3478	barley
+T99	pedigree 3644 3658	Columba/Klages
+T100	varietal_alias 3693 3701	78Ab6871
+T101	trait 3720 3728	maturity
+T102	trait 3736 3744	mid-tall
+T103	crop_variety 3757 3763	Klages
+T104	trait 3775 3780	straw
+T105	plant_anatomy 3791 3797	Spikes
+T106	plant_anatomy 3836 3840	awns
+T107	plant_anatomy 3842 3856	Rachilla hairs
+T108	plant_anatomy 3867 3873	Glumes
+T109	plant_anatomy 3896 3901	hairs
+T110	plant_anatomy 3907 3911	hull
+T111	plant_anatomy 3938 3946	Aleurone
+T112	plant_anatomy 3985 3998	lateral veins
+T113	plant_anatomy 4004 4016	central vein
+T114	plant_anatomy 4051 4056	barbs
+T115	plant_anatomy 4060 4073	lateral veins
+T116	plant_anatomy 4079 4085	crease
+T117	plant_anatomy 4103 4107	base
+T118	plant_anatomy 4130 4135	beard
+T119	trait 4141 4156	Malting quality
+T120	crop_variety 4183 4189	Klages
+T121	trait 4191 4213	Kernel color retention
+T122	pathogen 4268 4279	stripe rust
+T123	plant_predisposition_to_disease 4288 4308	good field tolerance
+T124	pathogen 4312 4325	kernel blight
+T125	crop_variety 4347 4356	Entry 657
+T126	journal_reference 4515 4541	Crop Science 31:481 (1991)
+T127	crop_variety 4552 4560	Drummond
+T128	trait 4566 4575	six-rowed
+T129	trait 4576 4582	spring
+T130	trait 4583 4590	malting
+T131	crop 4591 4597	barley
+T132	pedigree 4679 4725	Hazen*2/WPG821/4/Stander/3/Bumper/Hazen//Azure
+T133	varietal_alias 4760 4767	ND15477
+T134	crop_variety 4769 4777	Drummond
