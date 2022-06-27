@@ -36,3 +36,4 @@ ExperimentalCode/*
 .idea/*
 src/.idea/*
 .ipynb_checkpoints/*
+.gitignore
