@@ -33,10 +33,13 @@ from tkinter.scrolledtext import ScrolledText
 class CropNerGUI:
     """ A class used to represent NER tagging GUI window.
 
-
     ...
     Attributes
     ----------
+    self.model_default : str
+        default model from argparse if given
+    self.file_default : str
+            default file from argparse if given
     self.rootWin : tk.Tk()
         tKinter class that represents the main window
     self.rootWin.title : self.rootWin.title()
@@ -131,7 +134,7 @@ class CropNerGUI:
         Callback method attached to the quit button.
     """
 
-    def __init__(self):
+    def __init__(self, model_default=None, file_default=None):
         """ Initialize  CropNerGU object"""
 
         self.rootWin = tk.Tk()
@@ -154,6 +157,18 @@ class CropNerGUI:
         self.cust_ents_dict = {}
         self.page_number = 0
         self.pos_model = spacy.load("en_core_web_lg")
+
+        self.model_default = model_default
+        self.file_default = file_default
+        if self.model_default is not None:
+            self.model_dir = self.model_default
+            self.nlp_agdata = spacy.load(self.model_dir)
+        else:
+            self.model_dir = None
+        if self.file_default is not None:
+            self.raw_file = self.file_default
+        else:
+            self.raw_file = None
 
         # ----------------------- Widgets for GUI start here.
         # Default font size for text in ScrolledText. Should be a string format
@@ -518,10 +533,12 @@ class CropNerGUI:
         if self.raw_file is None:
             self.msg.config(
                 text="No raw data file has been selected. Please select a file to load.", foreground="red")
-
-        self.file_prefix = self.raw_file.name.split(".")[0]
-        self.pdf_name = self.raw_file.name.split("/")[-1]
-        self.pdf_document = Document(self.raw_file.name)
+        if type(self.raw_file) is str:
+            self.pdf_document = Document(self.raw_file)
+        else:
+            self.file_prefix = self.raw_file.name.split(".")[0]
+            self.pdf_name = self.raw_file.name.split("/")[-1]
+            self.pdf_document = Document(self.raw_file.name)
 
     def load_page(self):
         """
@@ -555,8 +572,7 @@ class CropNerGUI:
             self.text.delete(1.0, tk.END)
 
             # Load PDF file
-            if self.pdf_document is None:
-                self.load_pdf()
+            self.load_pdf()
 
             # Extract text from pdf while maintaining layout
             control = TextControl(mode="physical")
@@ -1105,5 +1121,19 @@ class CropNerGUI:
 
 # Driver code
 if __name__ == "__main__":
-    ner_gui = CropNerGUI()
+    parser = argparse.ArgumentParser(
+        description='runs GUI with option for default model and file',
+        epilog='python src/CropNerGUI --model senter_ner_model/model-best --file Data/CSU/Bill-Brown-Reprint.pdf'
+        )
+    parser.add_argument(
+        '--model', help='path to trained model',
+        action='store', default=None
+        )
+    parser.add_argument(
+        '--file', help='path to directory of dataset',
+        action='store', default=None
+        )
+    args = parser.parse_args()
+    model, file = args.model, args.file
+    ner_gui = CropNerGUI(model_default=model, file_default=file)
     ner_gui.go()
