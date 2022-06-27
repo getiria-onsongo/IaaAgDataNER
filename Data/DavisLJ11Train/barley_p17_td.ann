@@ -1,0 +1,154 @@
+T1	trait 3 7	tall
+T2	trait 20 26	height
+T3	crop_variety 30 37	Stander
+T4	crop_variety 66 72	Robust
+T5	trait 82 101	fair straw strength
+T6	trait 103 117	straw strength
+T7	crop_variety 130 136	Robust
+T8	crop_variety 138 145	Stander
+T9	crop_variety 150 156	Foster
+T10	trait 177 185	maturing
+T11	trait 193 205	heading date
+T12	crop_variety 217 223	Robust
+T13	crop_variety 226 235	Drummond
+
+T14	plant_anatomy 239 255	semi-smooth awns
+T15	plant_anatomy 264 279	covered kernels
+T16	plant_anatomy 290 304	rachilla hairs
+T17	plant_anatomy 311 325	white aleurone
+T18	plant_anatomy 327 333	Spikes
+T19	plant_anatomy 397 404	kernels
+T20	trait 416 428	malt extract
+T21	crop_variety 464 469	Morex
+T22	trait 471 484	Grain protein
+T23	trait 486 498	wort protein
+T24	trait 508 546	ratio of wort protein to total protein
+T25	crop_variety 550 558	Drummond
+T26	crop_variety 591 596	Morex
+T27	trait 598 616	Enzymatic activity
+T28	crop_variety 620 628	Drummond
+T29	crop_variety 633 638	Morex
+T30	crop_variety 675 683	Drummond
+T31	plant_predisposition_to_disease 688 697	resistant
+T32	pathogen 701 712	spot blotch
+T33	plant_predisposition_to_disease 714 736	moderately susceptible
+T34	pathogen 740 749	stem rust
+T35	pathogen 762 772	net blotch
+T36	pathogen 778 781	BYD
+T37	plant_predisposition_to_disease 787 798	susceptible
+T38	pathogen 802 812	loose smut
+T39	pathogen 814 819	scald
+T40	pathogen 829 840	Septoria sp
+T41	pathogen 845 857	Fusarium spp
+T42	trait 985 1000	spring planting
+T43	journal_reference 1053 1084	Crop Science 42: 664-665 (2002)
+T44	crop_variety 1095 1103	Early 28
+T45	trait 1109 1118	six-rowed
+T46	trait 1119 1125	spring
+T47	trait 1126 1130	feed
+T48	crop 1131 1137	barley
+T49	varietal_alias 1308 1321	80-MA-666-172
+T50	trait 1340 1348	maturing
+T51	trait 1434 1449	spring planting
+T52	crop_variety 1512 1520	Early 32
+T53	trait 1526 1535	six-rowed
+T54	trait 1536 1542	spring
+T55	trait 1543 1547	feed
+T56	crop 1548 1554	barley
+T57	varietal_alias 1725 1738	80-MA-666-173
+T58	trait 1757 1765	maturing
+T59	trait 1787 1799	plant height
+T60	trait 1809 1823	straw strength
+T61	plant_predisposition_to_disease 1869 1878	resistant
+T62	pathogen 1882 1892	net blotch
+T63	plant_predisposition_to_disease 1894 1916	moderately susceptible
+T64	pathogen 1920 1929	leaf rust
+T65	plant_predisposition_to_disease 1935 1946	susceptible
+T66	pathogen 1965 1975	 powdery m
+T67	pathogen 1957 1960	BYD
+T68	pathogen 1966 1980	powdery mildew
+T69	crop_variety 2002 2011	Entry 624
+T70	crop_variety 2169 2176	Ellinor
+T71	trait 2182 2191	two-rowed
+T72	trait 2192 2198	spring
+T73	trait 2199 2206	malting
+T74	trait 2211 2215	feed
+T75	crop 2216 2222	barley
+T76	trait 2303 2311	maturing
+T77	trait 2327 2339	plant height
+T78	trait 2349 2363	straw strength
+T79	pathogen 2424 2427	BYD
+T80	trait 2514 2529	spring
+planting
+T81	crop_variety 2589 2594	Excel
+T82	trait 2600 2609	six-rowed
+T83	trait 2610 2616	spring
+T84	trait 2617 2624	malting
+T85	crop 2625 2631	barley
+T86	varietal_alias 2776 2781	MN 52
+T87	trait 2801 2809	maturing
+T88	crop_variety 2822 2828	Robust
+T89	trait 2837 2845	mid-tall
+T90	crop_variety 2860 2865	Morex
+T91	crop_variety 2869 2875	Robust
+T92	trait 2887 2901	straw strength
+T93	crop_variety 2914 2920	Robust
+T94	trait 2922 2937	n lodging react
+T95	plant_anatomy 2943 2949	Spikes
+T96	crop_variety 2995 3000	Excel
+T97	plant_anatomy 3005 3016	smooth-awns
+T98	plant_anatomy 3039 3046	kernels
+T99	plant_anatomy 3062 3067	hairs
+T100	plant_anatomy 3075 3083	rachilla
+T101	plant_anatomy 3096 3104	aleurone
+T102	plant_anatomy 3106 3111	Hulls
+T103	plant_anatomy 3181 3192	rominent. T
+T104	plant_anatomy 3211 3216	barbs
+T105	plant_anatomy 3220 3233	lateral veins
+T106	plant_anatomy 3239 3245	crease
+T107	plant_anatomy 3263 3267	base
+T108	plant_anatomy 3290 3295	beard
+T109	plant_anatomy 3343 3363	cel’s malting qualit
+T110	crop_variety 3341 3346	Excel
+T111	trait 3349 3364	malting quality
+T112	crop_variety 3391 3396	Morex
+T113	plant_predisposition_to_disease 3428 3437	resistant
+T114	pathogen 3441 3450	stem rust
+T115	pathogen 3492 3503	spot blotch
+T116	plant_predisposition_to_disease 3505 3525	moderately resistant
+T117	pathogen 3529 3539	net blotch
+T118	plant_predisposition_to_disease 3545 3556	susceptible
+T119	pathogen 3560 3570	loose smut
+T120	trait 3675 3690	spring planting
+T121	journal_reference 3757 3806	1:227 (1991)
+
+FARMINGTON
+Farmington is a two-rowe
+T122	crop 3820 3826	barley
+T123	pedigree 3981 4045	Klages/WA8189-69//Piroline
+SD Mutant/Valticky SD Mutant/3/Maresi
+T124	varietal_alias 4080 4089	WA9504-94
+T125	trait 4099 4109	semi-dwarf
+T126	trait 4258 4270	plant height
+T127	crop_variety 4309 4318	Baronesse
+T128	trait 4329 4343	straw strength
+T129	trait 4363 4371	maturity
+T130	crop_variety 4384 4393	Baronesse
+T131	plant_anatomy 4395 4401	Spikes
+T132	plant_anatomy 4432 4436	Awns
+T133	plant_anatomy 4457 4464	Kernels
+T134	plant_anatomy 4489 4497	aleurone
+T135	plant_anatomy 4504 4518	rachilla hairs
+T136	plant_anatomy 4529 4535	crease
+T137	plant_anatomy 4547 4552	veins
+T138	plant_anatomy 4567 4572	lemma
+T139	plant_anatomy 4577 4582	palea
+T140	plant_anatomy 4603 4610	Kernels
+T141	plant_predisposition_to_disease 4678 4687	resistant
+T142	pathogen 4691 4700	leaf rust
+T143	plant_predisposition_to_disease 4709 4727	partial resistance
+T144	plant_predisposition_to_disease 4731 4740	tolerance
+T145	pathogen 4744 4755	stripe rust
+T146	trait 4849 4864	spring planting
+T147	journal_reference 4917 4949	Crop Science 42:2209-2210
+(2002)
