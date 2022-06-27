@@ -502,6 +502,8 @@ class CropNerGUI:
     def page_num_is_valid(self, page_num):
         """
         Returns True if page_num is a number, False if page_num is completely invalid, and -1 if it's a range.
+        Note that the function expects spacing to have already been cleaned out of it prior to being called.
+        In other words, it won't necessarily recognize something like "1 - 5" as a range.
         """
         if page_num.isdigit():
             return True
@@ -752,9 +754,9 @@ class CropNerGUI:
         interval_two_start = interval_two[0]
         interval_two_end = interval_two[1]
 
-        if (interval_two_start >= interval_one_start) and (interval_two_start <= interval_one_end):
+        if (interval_two_start >= interval_one_start) and (interval_two_start < interval_one_end):
             overlap = True
-        elif (interval_two_end >= interval_one_start) and (interval_two_end <= interval_one_end):
+        elif (interval_two_end > interval_one_start) and (interval_two_end <= interval_one_end):
             overlap = True
         elif (interval_two_start <= interval_one_start) and (interval_two_end >= interval_one_end):
             overlap = True
