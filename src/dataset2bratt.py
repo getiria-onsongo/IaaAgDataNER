@@ -5,7 +5,8 @@ import argparse
 
 def dataset_to_bratt(input_dir, output_dir, file_pattern="/*td.json", name_prefix=None):
     '''
-    Converts a whole dataset into bratt and txt files
+    Converts a whole dataset into bratt and txt files.
+    Must run from main directory, prefix feature not working yet.
 
     Parameters
     ----------
