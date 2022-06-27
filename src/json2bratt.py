@@ -15,10 +15,10 @@ import tkinter.filedialog
 if __name__ == "__main__":
     # Use tkinter for selecting files using a gui file selector
     root = tkinter.Tk()
-    infile = tkinter.filedialog.askopenfilename(initialdir=["../Data"], filetypes=[("json files", "*.json *.jsonl")])
+    infile = tkinter.filedialog.askopenfilename(
+        initialdir=["../Data"], filetypes=[("json files", "*.json *.jsonl")])
     root.destroy()
     outfile = input("\nName your output file: ")
-
 
 
 def conversion(infile, outfile):
@@ -76,7 +76,8 @@ def conversion(infile, outfile):
                 keyterm_long = keyterm_dict.get(keyterm, None)
                 # If keyterm exists then print it out or print "unknown keyterm"
                 if keyterm_long:
-                    substring = x[int(entitydata[1].replace(",", "")): int(entitydata[3].replace(",", ""))]
+                    substring = x[int(entitydata[1].replace(",", "")): int(
+                        entitydata[3].replace(",", ""))]
 
                     # File is outputted in this formatted seen below
                     t_entry = f"t{tindx}\t{keyterm_long} {startnum} {endnum}\t{substring}"
@@ -87,14 +88,16 @@ def conversion(infile, outfile):
                         f.write("\n")
 
                 else:
-                    print(f"\n{x} sentence has been skipped because, \033[91m\033[1m{keyterm}\033[0m \033[91mis not defined in the dictionary\033[0m")
+                    print(
+                        f"\n{x} sentence has been skipped because, \033[91m\033[1m{keyterm}\033[0m \033[91mis not defined in the dictionary\033[0m")
                     with open(annfile, "a") as f:
                         f.write(f"Unknown key term {keyterm}")
                         f.write("\n")
 
             # Exception if the sentence has not been formatted properly
             except:
-                raise ValueError(f"\033[91m{x}\033[0m is not formatted correctly so it has been skipped")
+                raise ValueError(
+                    f"\033[91m{x}\033[0m is not formatted correctly so it has been skipped")
 
             tindx += 1
             counter += len(x)
