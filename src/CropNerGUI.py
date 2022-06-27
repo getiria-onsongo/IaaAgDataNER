@@ -560,7 +560,8 @@ class CropNerGUI:
                 page = self.pdf_document[self.page_number - 1]
                 txt = page.text()
             else:
-                page_number = 0
+                self.page_number = 0
+                self.chunk = self.page_number
                 txt = self.raw_file.read()
 
             self.text.insert("1.0",txt)
