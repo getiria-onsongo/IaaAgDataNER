@@ -68,8 +68,9 @@ def conversion(infile, outfile):
                 entitydata = str(entity).split(" ")
 
                 # startnum and endnum add the length of the sentences the come before them
-                startnum = int(entitydata[1].replace(",", ""))
-                endnum = int(entitydata[3].replace(",", ""))
+
+                startnum = int(entitydata[1].replace(",", "")) + counter
+                endnum = int(entitydata[3].replace(",", "")) + counter
                 keyterm = entitydata[5].replace("'", "").replace("}", "")
 
                 # Replace the label using the keyterm dictionary above
@@ -80,7 +81,7 @@ def conversion(infile, outfile):
                         entitydata[3].replace(",", ""))]
 
                     # File is outputted in this formatted seen below
-                    t_entry = f"T{tindx}\t{keyterm_long} {startnum} {endnum}\t{substring}"
+                    t_entry = f"T{tindx}\t{keyterm} {startnum} {endnum}\t{substring}"
 
                     # Finally it's written here into the ann file
                     with open(annfile, "a") as f:
@@ -97,11 +98,13 @@ def conversion(infile, outfile):
                     f"\033[91m{x}\033[0m is not formatted correctly so it has been skipped")
 
             tindx += 1
-            counter += len(x)
+
             i += 1
+
         # Text file is written here and joined without any space
         with open(txtfile, "a") as f:
             f.write(x)
+        counter += len(x)
     print(f"\nFile converted to bratt as {annfile} and {txtfile}")
 
 
