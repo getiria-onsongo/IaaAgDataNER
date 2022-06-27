@@ -1040,13 +1040,24 @@ class CropNerGUI:
         """
         Callback method attached to the quit button.
 
-        It destroys the main window, which ends the program
+        It check for unsaved changes and opens a save dialog window, otherwise it destroys the main window, which ends the program
         """
         # TODO: If a user accidentally clicks the Exit button, the program quits without saving any of the current
         # annotation. Add functionality to first ask the user if they want to save or discard their current annotation,
         # if they have any. NOTE: Annotations are saved on self.cust_ents_dict. Checking to see if this dictionary
         # is empty should be a reasonable check on if a user has annotations that need to be saved.
-        self.rootWin.destroy()
+
+        # Creates a save dialog window if the dictionary for new annotations is not empty.
+        if self.cust_ents_dict:
+            self.save_dialog = tk.Toplevel(self.rootWin)
+            label = tk.Label(self.save_dialog, text="You currently have unsaved changes to your annotation. Would you like to save or discard them?")
+            label.pack(side=tk.TOP)
+            savedialog_discard = tk.Button(self.save_dialog, text="Discard and Quit")
+            savedialog_discard.pack(side=tk.BOTTOM)
+            savedialog_confirm = tk.Button(self.save_dialog, text="Save")
+            savedialog_confirm.pack(side=tk.BOTTOM)
+        else:
+            self.rootWin.destroy()
 
 
 # Driver code
