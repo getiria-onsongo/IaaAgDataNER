@@ -723,17 +723,15 @@ class CropNerGUI:
                 # error is through without displaying a warning message. Check to make sure "sel.first" and
                 # "sel.last" are defined before calling self.text.get()
                 input_text =  self.text.get("sel.first", "sel.last")
-                page_needs_loading = False
+                self.text.delete(1.0, tk.END)
+                self.text.insert("1.0", input_text)
             else:
                 if self.pdf_document is None:
                     self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
                     self.load_pdf()
 
-                page_needs_loading = True
+                input_text = self.load_page()
 
-            page_text = self.load_page()
-            if page_needs_loading:
-                input_text = page_text
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
