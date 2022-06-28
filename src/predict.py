@@ -1,18 +1,18 @@
 import os.path
+from datetime import datetime
 import re
 import glob
-from agParse import *
-from json2py import *
-from py2json import *
-from datetime import datetime
 from pyxpdf import Document
 from pyxpdf.xpdf import TextControl
 from json2bratt import conversion
-from dataset2bratt import extract_page_num
+from dataset2bratt import dataset_to_bratt
+from agParse import *
+from json2py import *
+from py2json import *
+
 
 class Predict:
-    """
-    A class to do predictions on data using the trained model
+    """ A class to prepare data for medacy validation
 
     ...
     Attributes
@@ -20,158 +20,133 @@ class Predict:
     self.model_dir : str
         path to trained model for ner tagging
     self.dataset_dir : str
-        path to dataset to predict on
+        path to dataset
     self.output_dir : str
-        path to output predictions to
-    self.spacy_only : bool
-        flag to only uses spacy model and not the part-of-speech based entity
-        expansion feature
-    self.name_json : str
-        start of file name for a new json file.
-        Ex: for creating predictions with files in the naming scheme
-        barley_p1_td.json ... barley_p37_td.json, the prefix would be barley_p
-        as it is the start of all file names
-    self.json_suffix : str
-        end of file name for a new json file
-        Ex: for creating predictions with files in the naming scheme
-        barley_p1_td.json ... barley_p37_td.json, the suffix would be _td.json
-        as it is the end of all file names
-    self.dataset_suffix
-        endings of files from dataset directory to read in and predict on,
-        for files like barley_p1_td.txt or barley_p12_td.txt, the dataset suffix
-        would be _td.txt as it is the part of the file name all the files share
+        path to output files ran through model
+    self.name_prefix : str
+        start of file name for a new json file
+    self.name_suffix : str
+        end of json files, both from gold standard dataset and ones being created
     self.no_overwrite: bool
-        flag for creating new files instead of overwritting, which is the
-        default. with this flag, files will have the exact time of generation
-        between the file prefix and suffix instead of the page number to make
-        sure the file name is unique
+        flag for overwritting files or creating new ones
     self.spacy_model_name : str
-        name of spacy model to use for part of speech, the default is
-        "en_core_web_lg"
+        name of spacy model to use for pos
     self.pos_model : spacy.Language
-        model for part of speech tagging
+        model to use for pos
     self.nlp : spacy.Language
-        model for ner tagging
+        model to use for training
     self.tags : list[str]
         list of possible ner tags
     self.cust_ents_dict : dict
-        dictionary to keep track of entities found
+        keeps track of entities found
+    self.crop_cnt : dict
+        counts crop entities
+    self.cvar_cnt : dict
+        counts crop varient entities
+    self.page_num : int
+        current page number
 
     Methods
     -------
     process_files(self)
         process files by running through model then converting and saving
-        as json files
-    get_text(self, file : str)
-        reads in file and returns contents as a string
-    tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
-        creates spacy doc from inputed text and the trained ner spacy model
-    pre_tag(self, pdf_document : pyxpdf.Document, page_number : int)
+        json, bratt & txt of files
+    tag(self, pdf_document : pyxpdf.Document, page_number : int)
         finds entities for a given page in a pdf
     get_pos(self, ent : str )
         finds the part of speech for an entity and expands if needed
     adj_combine_noun_ent(self, doc : spacy.Doc, current_index : int, ent :
     str, label : str)
         expands an entity to contain adjectives
+    num_combine_ent(self, doc : spacy.Doc, current_index : int, ent : str,
+    label : str)
+        expands an entity to contain numerical measurments
     file_save(self, pdf_name : str, url : str, chunk : int)
-        saves json for a given page
+        saves json for a file
     """
 
-    def __init__(self, model_dir, dataset_dir, output_dir, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
+    def __init__(self, model_dir, dataset_dir, output_dir, name_prefix=None, name_suffix="td.json", no_overwrite=False, spacy_model_name="en_core_web_lg", tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
         self.model_dir = model_dir
         self.dataset_dir = dataset_dir
         self.output_dir = output_dir
 
-        self.spacy_only = spacy_only
-        self.json_prefix = json_prefix
-        self.dataset_suffix = dataset_suffix
-        self.json_suffix = json_suffix
+        self.name_prefix = name_prefix
+        self.name_suffix = name_suffix
         self.no_overwrite = no_overwrite
-        self.spacy_model_name = spacy_model_name
-
+        self.spacy_model_name = spacy_model_name  # spacy model to use for pos
         self.pos_model = spacy.load(self.spacy_model_name)
         self.nlp = spacy.load(self.model_dir)
-        self.tags = ["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]
+        self.nlp.add_pipe("compound_trait_entities", after='ner')
+        self.tags = tags
+
         self.cust_ents_dict = {}
-        self.nlp.add_pipe("compound_trait_entities", after="ner")
+        self.crop_cnt = {}
+        self.cvar_cnt = {}
+        self.page_num = 0
 
     def process_files(self):
-        """
-        Gets a list of txt files from the dataset directory, then does ner
-        tagging on them before saving as json.
-        """
-        files = glob.glob(self.dataset_dir+"/*"+self.dataset_suffix)
-        print(files)
+        '''
+        Gets the directory of pdfs, reads them in and then does ner tagging on them,
+        saves as json, and then converts and saves them as bratt files. May need a
+        feature to make sure train/test split is maintained.
+        '''
+        files = glob.glob(self.dataset_dir+"/*.pdf")
         print("%s files to process." % str(len(files)))
-
+        print(glob.glob(self.dataset_dir+"/*.json"))
         for f in files:
             self.cust_ents_dict = {}
-            text = self.get_text(f)
-            page_number = extract_page_num(f, self.dataset_suffix)
-            self.pre_tag(text, page_number)
-            json_name = self.file_save(f, "", page_number)
+            pdf_document = Document(f)
+            page_number = 1
+            while page_number <= len(pdf_document):
+                self.tag(pdf_document, page_number)
+                json_name = self.file_save(f, "", page_number)
+                # bratt_name = json_name[0:len(json_name)-5]
+                # conversion(json_name, bratt_name)
+                page_number = page_number + 1
 
-    def get_text(self, file : str):
-        """
-        Loads text from a given file to be able to preict on it
-
-        Parameters
-        ----------
-        file : file name
-
-        Returns text from file as a string.
-        """
-        text = ""
-        with open(file) as f:
-            text = f.read()
-        return text
-
-    def tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
-        """
-        Use NLP pipeline to identify named entities in the text.
-        """
-        doc = self.nlp(text)
-        return doc
-
-    def pre_tag(self, input_text : str, page_number : int):
-        """
-        Tags input text using model for ner taging and saves to
-        the cust_ent_dict dictionary
+    def tag(self, pdf_document, page_number):
+        '''
+        Pre-tag selected content or all the text in text box with NER tags.
 
         Parameters
         ----------
-        input_text : str
-            text to tag
-        page_number : str
-            current page number
-        """
+        pdf_document : pyxpdf.Document
+            pdf being processed
+        page_number : int
+            current page to tag
+        '''
+
         self.cust_ents_dict = {}
-        doc = self.tag_ner_with_spacy(input_text)
+        control = TextControl(mode="physical")
+        page = pdf_document[page_number - 1]
+        input_text = page.text(control=control)
+        doc = self.nlp(input_text)
+
         for ent in doc.ents:
-            if ent.label_ in self.tags:
-                if self.spacy_only is not True:
-                    ent = self.get_pos(ent)
+            if (ent.label_ in self.tags):
+                ent = self.get_pos(ent)
                 if self.cust_ents_dict.get(page_number, False):
-                    self.cust_ents_dict[page_number].append((ent.start_char, ent.end_char, ent.label_))
+                    self.cust_ents_dict[page_number].append(
+                        (ent.start_char, ent.end_char, ent.label_))
                 else:
-                    self.cust_ents_dict[page_number] = [(ent.start_char, ent.end_char, ent.label_)]
-        if self.cust_ents_dict.get(page_number, False):
+                    self.cust_ents_dict[page_number] = [
+                        (ent.start_char, ent.end_char, ent.label_)]
+        if (self.cust_ents_dict.get(page_number, False)):
             tags = self.cust_ents_dict[page_number]
             self.cust_ents_dict[page_number] = [input_text, tags]
 
-
     def get_pos(self, ent):
-        """
-        Proceses a given entity with rules that use part of speech data to
-        expand the entity span if needed.
+        '''
+        Proceses a given entity with rules that use pos tag data to expand
+        the entity span if needed.
 
         Parameters
         ----------
         ent : str
             entity to possibly expand span of
 
-        Returns expanded entity
-        """
+        Returns expanded entity.
+        '''
         doc = self.pos_model(ent.sent.text)
         if(len(doc[ent.start:ent.end]) > 0):
             current_index = doc[ent.start:ent.end][0].i
@@ -182,7 +157,7 @@ class Predict:
         return ent
 
     def adj_combine_noun_ent(self, doc, current_index, ent, label):
-        """
+        '''
         If the first token in an entity is a noun or proper noun, finds all
         adjectives proceeding the entity and expands the span to contain
         all of them.
@@ -199,7 +174,7 @@ class Predict:
             label of ent
 
         Returns expanded entity.
-        """
+        '''
         if current_index >= 1:
             current = doc[current_index]
             left = doc[current_index-1]
@@ -227,10 +202,10 @@ class Predict:
                     print()
         return ent
 
-    def file_save(self, pdf_name : str, url : str, chunk : str):
-        """
-        Simplifed version of GUI save file & continue_func which saves
-        created json files to the output directory
+    def file_save(self, pdf_name, url, chunk):
+        '''
+         Simplifed version of GUI save file & continue_func which saves
+         created json files.
 
         Parameters
         ----------
@@ -240,19 +215,19 @@ class Predict:
             url of pdf file
         chunk : int
             current chunk of file being saved, corresponds to page number
-        """
-        name = self.json_prefix
-        if name == None:
-            path_no_ending = pdf_name.split(".")[0].split("/")
-            name = path_no_ending[len(path_no_ending)-1].split("_")[0] + "_p"
-        output_filename = self.output_dir + "/" + name + chunk + self.json_suffix
+        '''
 
+        if self.name_prefix == None:
+            self.name_prefix = pdf_name.split(".")[0].split("/")[2]
+        output_filename = self.output_dir + "/" + \
+            self.name_prefix + "_p" + str(chunk) + self.name_suffix
         if os.path.isfile(output_filename):
             if self.no_overwrite:
                 print("Making file copy...")
                 now = datetime.now()  # current date and time
                 date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-                output_filename = self.output_dir + "/" + name + date_time + "_p" + chunk + self.json_suffix
+                output_filename = self.output_dir + "/" + \
+                    self.name_prefix + "_" + datatime + "_" + self.name_suffix
             else:
                 print("File will be overwritten.")
 
@@ -262,11 +237,12 @@ class Predict:
             input_text = self.cust_ents_dict[chunk][0]
             entities = self.cust_ents_dict[chunk][1]
             ann_train_dict = mixed_type_2_dict(
-                [(input_text, {"entities": entities})], chunk, pdf_name, url)
+                [(input_text, {'entities': entities})], chunk, pdf_name, url)
             dict_2_json(ann_train_dict, output_filename)
             print("Created %s." % output_filename)
 
         return output_filename
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -283,20 +259,16 @@ if __name__ == '__main__':
         'output_dir', help='path of directory to save the converted files trained on to'
     )
     parser.add_argument(
-        '--spacy_only', help='only uses spacy model',
+        '--convert_gold_standard', help='if goldstandard needs to be converted, path to that new folder',
         action='store_true', default=False
     )
     parser.add_argument(
-        '--json_prefix', help='prefix to use to name json files',
+        '--file_prefix', help='file prefix to use to name new bratt and txt files of data',
         action='store', default=None
     )
     parser.add_argument(
-        '--json_suffix', help='suffix to use to name new json files',
-        action='store', default="_td.json"
-    )
-    parser.add_argument(
-        '--dataset_suffix', help='suffix to use to find files in dataset directory to predict on',
-        action='store', default="_td.txt"
+        '--file_suffix', help='file suffix to find json files and name new ones',
+        action='store', default='_td.json'
     )
     parser.add_argument(
         '--no_overwrite',
@@ -305,16 +277,17 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-    model, dataset_dir, output_dir, spacy_only, json_prefix, json_suffix, dataset_suffix, no_overwrite = args.model, args.dataset_dir, args.output_dir, args.spacy_only, args.json_prefix, args.json_suffix, args.dataset_suffix, args.no_overwrite
+    model, dataset_dir, output_dir, convert_gold_standard, name_prefix, name_suffix, no_overwrite = args.model, args.dataset_dir, args.output_dir, args.convert_gold_standard, args.file_prefix, args.file_suffix, args.no_overwrite
 
-    if not os.path.exists(model):
-        print("Path to model invalid")
-    elif not os.path.exists(dataset_dir):
-        print("Path to dataset invalid")
-    else:
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
-        preprocess = Predict(model, dataset_dir, output_dir, spacy_only=spacy_only,
-                             json_prefix=json_prefix, json_suffix=json_suffix, dataset_suffix=dataset_suffix, no_overwrite=no_overwrite)
-        preprocess.process_files()
+    if convert_gold_standard:
+        if not os.path.exists(convert_gold_standard):
+            os.makedirs(convert_gold_standard)
+        dataset_to_bratt(dataset_dir, convert_gold_standard,
+                         name_prefix=None, file_pattern="/*"+name_suffix)
+
+    preprocess = Predict(
+        model, dataset_dir, output_dir, name_prefix=name_prefix, name_suffix=name_suffix, no_overwrite=no_overwrite)
+    preprocess.process_files()
