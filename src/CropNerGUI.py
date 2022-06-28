@@ -580,6 +580,15 @@ class CropNerGUI:
             self.page_number[1] = placeholder
         self.chunk=self.page_number[0]
 
+    def is_spaced_range(raw_page_entry: str):
+        first_space = raw_page_entry.find(" ")
+        # If there is one space...
+        if(not(first_space == -1)) and (first_space == raw_page_entry.rfind(" ")):
+            # And if this space is surrounded by only two valid, positive digits...
+            if(raw_page_entry[0 : first_space].isdigit() and raw_page_entry[first_space+1 :]):
+                return True
+        return False
+
     def load_page(self):
         """
         Load contents of a PDF or text file into text box.
@@ -595,7 +604,10 @@ class CropNerGUI:
             # Reset annotation dictionary
             self.cust_ents_dict = {}
 
-            page_num = self.page_entry.get().replace(" ", "")
+            if(self.is_spaced_range(self.page_entry.get())):
+                page_num = self.page_entry.get().replace(" ", "-")
+            else:
+                page_num = self.page_entry.get().replace(" ", "")
             page_num_valid = self.page_num_is_valid(page_num)
             if page_num_valid == False:
                 self.msg.config(text="Valid page number not entered. Value initialized to 1", foreground="red")
@@ -707,7 +719,10 @@ class CropNerGUI:
         else:
             input_text = None
             # Get page number
-            page_num = self.page_entry.get().replace(" ", "")
+            if(self.is_spaced_range(self.page_entry.get())):
+                page_num = self.page_entry.get().replace(" ", "-")
+            else:
+                page_num = self.page_entry.get().replace(" ", "")
             if not page_num.isdigit(): # Either invalid or a range.
                 if self.page_num_is_valid(page_num) == False: # Invalid
                     self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
