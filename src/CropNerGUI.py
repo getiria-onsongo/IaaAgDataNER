@@ -692,7 +692,7 @@ class CropNerGUI:
                     else:
                         self.cust_ents_dict[self.page_number] = [(ent.start_char, ent.end_char, ent.label_)]
 
-            if custom_tags_present:
+            if not custom_tags_present:
                 self.msg.config(text="No custom agriculture tags detected in the text!", foreground="red")
             if len(doc.ents) == 0:
                 self.msg.config(text="No entities detected in the text!", foreground="red")
