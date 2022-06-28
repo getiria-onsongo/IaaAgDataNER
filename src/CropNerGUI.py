@@ -559,6 +559,27 @@ class CropNerGUI:
                 self.page_entry.delete(0, tk.END)
                 self.page_entry.insert(0, str(doc_length))
 
+    def handle_page_range(self, page_range: list):
+        """
+        Sets everything related to the page number with the assumption that
+        the user has entered a range of numbers rather than a single page. I.e.,
+        the range is ordered correctly, self.page_number is set to a list of
+        two integer values, and self.chunk is set to the starting page.
+
+        Spacing should be removed from page_range before it's passed into this method.
+        """
+        dash_index = page_range.find("-")
+        pg1 = int(page_range[0 : dash_index])
+        pg2 = int(page_range[dash_index + 1:])
+        self.page_number = [pg1, pg2]
+        # Switch first and last page if the user's first number was the smaller one.
+        if(self.page_number[1] < self.page_number[0]):
+            self.msg.config(text="A larger page was entered first. The pages will be displayed in order from smallest to largest anyway.", foreground="red")
+            placeholder = self.page_number[0]
+            self.page_number[0] = self.page_number[1]
+            self.page_number[1] = placeholder
+        self.chunk=self.page_number[0]
+
     def load_page(self):
         """
         Load contents of a PDF or text file into text box.
@@ -586,17 +607,7 @@ class CropNerGUI:
                 self.page_number = int(page_num)
                 self.chunk=self.page_number
             else: # Range of numbers
-                dash_index = page_num.find("-")
-                pg1 = int(page_num[0 : dash_index])
-                pg2 = int(page_num[dash_index + 1:])
-                self.page_number = [pg1, pg2]
-                # Switch first and last page if the user's first number was the smaller one.
-                if(self.page_number[1] < self.page_number[0]):
-                    self.msg.config(text="A larger page was entered first. The pages will be displayed in order from smallest to largest anyway.", foreground="red")
-                    placeholder = self.page_number[0]
-                    self.page_number[0] = self.page_number[1]
-                    self.page_number[1] = placeholder
-                self.chunk=self.page_number[0]
+                self.handle_page_range(page_num)
 
             # Delete contents
             self.text.delete(1.0, tk.END)
@@ -608,12 +619,16 @@ class CropNerGUI:
 
             if not (page_num_valid == -1): # Single page, whether page_num_valid is true or false
                 page = self.pdf_document[self.page_number - 1]
-                txt = page.text().replace("\r", "")
+                #  doesn't necessarily have to be removed for a single page; It gets removed in
+                # the else because tagging across multiple pages doesn't work correctly if  exists.
+                # However, it's removed here as well for consistency and neatness.
+                txt = page.text().replace("\r", "").replace("", "")
             else: # Page range
                 txt = ""
                 for page in self.pdf_document[self.page_number[0] - 1 : self.page_number[1]]:
-                    txt = txt + page.text().replace("\r", "")
+                    txt = txt + page.text().replace("\r", "").replace("", "")
             self.text.insert("1.0",txt)
+            return txt
 
     def update_scrolled_text_line_content_index(self):
         """
@@ -692,28 +707,33 @@ class CropNerGUI:
         else:
             input_text = None
             # Get page number
-            page_num = self.page_entry.get()
-            if not page_num.isdigit():
-                self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
-                page_num = 1
-            self.page_number = int(page_num)
-            self.chunk = self.page_number
+            page_num = self.page_entry.get().replace(" ", "")
+            if not page_num.isdigit(): # Either invalid or a range.
+                if self.page_num_is_valid(page_num) == False: # Invalid
+                    self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
+                    page_num = 1
+                else: # Range
+                    self.handle_page_range(page_num)
+            else: # Single valid page
+                self.page_number = int(page_num)
+                self.chunk = self.page_number
 
             if selection == "selection":
                 # TODO: If a user clicks the "Pre-Tag Selection" button but they have not selected any text, an
                 # error is through without displaying a warning message. Check to make sure "sel.first" and
                 # "sel.last" are defined before calling self.text.get()
                 input_text =  self.text.get("sel.first", "sel.last")
+                page_needs_loading = False
             else:
                 if self.pdf_document is None:
                     self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
                     self.load_pdf()
 
-                page = self.pdf_document[self.page_number - 1]
-                input_text = page.text().replace("\r", "")
+                page_needs_loading = True
 
-            self.text.delete(1.0, tk.END)
-            self.text.insert("1.0", input_text)
+            page_text = self.load_page()
+            if page_needs_loading:
+                input_text = page_text
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
@@ -725,19 +745,23 @@ class CropNerGUI:
 
             if(len(doc.ents) == 0):
                 self.msg.config(text="Warning!! No entities were found in this selection.", foreground="red")
+            if type(self.page_number) is list:
+                page_start = self.page_number[0]
+            else:
+                page_start = self.page_number
             for ent in doc.ents:
                 # NER is in our list of custom tags
                 if ent.label_ in self.tags:
                     # index = self.tags.index(ent.label_) # Find index for an element in a list
                     self.highlight_ent(ent.start_char, ent.end_char, ent.label_)
-                    if self.cust_ents_dict.get(self.page_number, False):
-                        self.cust_ents_dict[self.page_number].append((ent.start_char, ent.end_char, ent.label_))
+                    if self.cust_ents_dict.get(page_start, False):
+                        self.cust_ents_dict[page_start].append((ent.start_char, ent.end_char, ent.label_))
                     else:
-                        self.cust_ents_dict[self.page_number] = [(ent.start_char, ent.end_char, ent.label_)]
+                        self.cust_ents_dict[page_start] = [(ent.start_char, ent.end_char, ent.label_)]
 
-            if self.cust_ents_dict.get(self.page_number, False):
-                tags = self.cust_ents_dict[self.page_number]
-                self.cust_ents_dict[self.page_number] = [input_text, tags]
+            if self.cust_ents_dict.get(page_start, False):
+                tags = self.cust_ents_dict[page_start]
+                self.cust_ents_dict[page_start] = [input_text, tags]
 
     def overlap(self, interval_one: list, interval_two: list) -> bool:
         """
@@ -1057,15 +1081,20 @@ class CropNerGUI:
             # self.file_save()
 
         # Increment page number
-        self.page_number = self.page_number + 1
-        self.page_entry.delete(0, tk.END)
-        self.page_entry.insert(0, str(self.page_number))
+        try:
+            self.page_number = self.page_number + 1
+            self.page_entry.delete(0, tk.END)
+            self.page_entry.insert(0, str(self.page_number))
 
-        # Reset annotation data
-        self.annotation_file = None
+            # Reset annotation data
+            self.annotation_file = None
 
-        # Load data
-        self.load_page()
+            # Load data
+            self.load_page()
+        except TypeError:
+            # While this would be easy to add, it's not clear what exactly SHOULD be incremented
+            # if the user clicks "next page" on a range, so that's left to the user.
+            self.msg.config(text="WARNING!! Cannot increment a range of pages.", foreground="red")
 
     def go(self):
         """
