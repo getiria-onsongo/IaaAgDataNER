@@ -83,6 +83,8 @@ class CropNerGUI:
         Contains NER tag annotations. key = chunk number, values = entities
     self.page_number : int
         Current page number
+    self.metadata_toggle : bool
+        Boolean determining whether the metadata panel should be visible or not
 
     NOTE: Though the widgets are global variables, we will not document them here. Most are self-evident. We have
     added inline comments in the code itself.
@@ -164,6 +166,7 @@ class CropNerGUI:
         self.nlp_agdata = None
         self.cust_ents_dict = {}
         self.page_number = 0
+        self.metadata_toggle = False
 
         # ----------------------- Widgets for GUI start here.
         # Default font size for text in ScrolledText. Should be a string format
@@ -237,7 +240,7 @@ class CropNerGUI:
 
         # Frame containing options for users to add their own NER tags
         self.edit_ent_frame = tk.Frame(self.rootWin)
-        self.edit_ent_frame.pack(side=tk.TOP, fill="x")
+        self.edit_ent_frame.pack(side=tk.TOP, fill="x", padx="40")
 
         # Label for text entry for a new NER tag defined by the user
         self.trait_label = tk.Label(self.edit_ent_frame, text="Enter Entity Label:", width=20)
@@ -255,11 +258,36 @@ class CropNerGUI:
         self.remove_ent_btn = tk.Button(self.edit_ent_frame, text="Remove Entity", width=10, command=self.remove_ent)
         self.remove_ent_btn.pack(side=tk.LEFT)
 
+        # Middle frame for text box and additional text box elements
+        self.middle_frame = tk.Frame(self.rootWin)
+        self.middle_frame.pack(side=tk.TOP, fill="x")
+
         # Text box. Note, height defines height in widget in lines based on font size. If the font size is bigger,
         # you end up with a bigger textbox because each line will occupy more space.
-        self.text = ScrolledText(self.rootWin, height=25, width=140, font="Times "+self.font_size, wrap='word')
+        self.text = ScrolledText(self.middle_frame, height=25, width=140, font="Times "+self.font_size, wrap='word')
         self.text.focus_force()
         self.text.pack(side=tk.TOP)
+
+        # Metadata button for setting metadata for current raw file
+        self.metadata_btn = tk.Button(self.edit_ent_frame, text="Metadata", width=10, command = self.toggle_metadata)
+        self.metadata_btn.pack(side=tk.RIGHT)
+
+        # Doc label
+        self.doc_label = tk.Label(self.middle_frame, text="Document Name")
+        # Doc entry
+        self.doc_entry = tk.Entry(self.middle_frame, width=30)
+        # URL label
+        self.url_label = tk.Label(self.middle_frame, text="URL")
+        # URL entry
+        self.url_entry = tk.Entry(self.middle_frame, width=30)
+        # Crop label
+        self.crop_label = tk.Label(self.middle_frame, text="Crop")
+        # Crop entry
+        self.crop_entry = tk.Entry(self.middle_frame, width=30)
+        # Crop variety label
+        self.cvar_label = tk.Label(self.middle_frame, text="Crop Variety")
+        # Crop variety entry
+        self.cvar_entry = tk.Entry(self.middle_frame, width=30)
 
         # Specify how text will be highlighted in the textbox when a user selects it and click on a button to
         # tag the text. If we only had one button (ALAS), we would have done this using the command
@@ -289,7 +317,7 @@ class CropNerGUI:
         self.msg_btn.pack(side=tk.LEFT)
         # Next page button
         self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=self.next_page)
-        self.next_btn.pack(side = tk.LEFT)
+        self.next_btn.pack(side=tk.LEFT)
         # Save button
         self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save_2)
         self.save_btn.pack(side=tk.LEFT)
@@ -438,6 +466,33 @@ class CropNerGUI:
         self.tag_colors_buttonID.pop(ent_label)
         self.colors.remove(color)
         self.tags.remove(ent_label)
+
+    def toggle_metadata(self):
+        """
+        A button toggle to introduce/remove entry boxes for setting metadata for the json file.
+        """
+        self.metadata_toggle = not self.metadata_toggle
+
+        if self.metadata_toggle:
+            self.text.pack(side=tk.LEFT, padx=(30,0))
+            self.doc_label.pack(side=tk.TOP)
+            self.doc_entry.pack(side=tk.TOP, pady=(0,10))
+            self.url_label.pack(side=tk.TOP)
+            self.url_entry.pack(side=tk.TOP, pady=(0,10))
+            self.crop_label.pack(side=tk.TOP)
+            self.crop_entry.pack(side=tk.TOP, pady=(0,10))
+            self.cvar_label.pack(side=tk.TOP)
+            self.cvar_entry.pack(side=tk.TOP, pady=(0,10))
+        else:
+            self.text.pack(side=tk.TOP)
+            self.doc_label.pack_forget()
+            self.doc_entry.pack_forget()
+            self.url_label.pack_forget()
+            self.url_entry.pack_forget()
+            self.crop_label.pack_forget()
+            self.crop_entry.pack_forget()
+            self.cvar_label.pack_forget()
+            self.cvar_entry.pack_forget()
 
     def get_ner_model_dir(self):
         """
@@ -1008,6 +1063,11 @@ class CropNerGUI:
         self.source_entry.pack(side=tk.LEFT)
 
     def file_save_2(self):
+        """
+        Brings up a file dialog to choose a file name/location then saves annotations to it in .json format.
+        """
+
+        # Opens a tkinter save as file dialog and stores the file to a var
         json_file = fd.asksaveasfile(mode='w', defaultextension='.json')
         if json_file is None:
             return
@@ -1015,6 +1075,7 @@ class CropNerGUI:
         input_text = self.cust_ents_dict[self.chunk][0]
         entities = self.cust_ents_dict[self.chunk][1]
 
+        # Calls dict_2_json on the newly created json file
         ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk)
         dict_2_json_file(ann_train_dict, json_file)
 
@@ -1071,17 +1132,19 @@ class CropNerGUI:
                 """
                 Callback method attached to the save and quit button in the save dialog window.
                 """
-                file_prefix = self.raw_file.name.split(".")[0]
-                now = datetime.now()  # current date and time
-                date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-                filename = file_prefix + "_" + date_time + ".json"
-                input_text = self.cust_ents_dict[self.chunk][0]
-                entities = self.cust_ents_dict[self.chunk][1]
+                self.file_save_2()
+                #file_prefix = self.raw_file.name.split(".")[0]
+                #now = datetime.now()  # current date and time
+                #date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
+                #filename = file_prefix + "_" + date_time + ".json"
+                #input_text = self.cust_ents_dict[self.chunk][0]
+                #entities = self.cust_ents_dict[self.chunk][1]
 
-                url = self.source_entry.get()
-                ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.pdf_name, url)
-                dict_2_json(ann_train_dict, filename)
-                self.rootWin.destroy()
+                #url = self.source_entry.get()
+                #ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.pdf_name, url)
+                #dict_2_json(ann_train_dict, filename)
+                #self.rootWin.destroy()
+
             def discard_and_quit():
                 """
                 Callback method attached to the discard and quit button in the save dialog window.
