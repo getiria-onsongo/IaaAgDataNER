@@ -57,6 +57,12 @@ def dict_2_json(mydict, fname):
     with open(fname, "w") as fho:
         json.dump(mydict, fho)
 
+def dict_2_json_file(mydict, file):
+    """ Convert a structured nested dict object to an already defined JSON dump"""
+    
+    json.dump(mydict, file)
+
+
 if __name__ == "__main__":
 
     #

@@ -291,7 +291,7 @@ class CropNerGUI:
         self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=self.next_page)
         self.next_btn.pack(side = tk.LEFT)
         # Save button
-        self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save)
+        self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save_2)
         self.save_btn.pack(side=tk.LEFT)
 
         # Frame that will contain messages being displayed to the user
@@ -364,6 +364,7 @@ class CropNerGUI:
         # Button to decrease font in the text box (Font +)
         self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
         self.font_minus.pack(side=tk.LEFT)
+        
 
     def font_plus(self):
         """
@@ -1005,6 +1006,20 @@ class CropNerGUI:
         self.ann_file_entry.pack(side=tk.LEFT)
         self.source_label.pack(side=tk.LEFT)
         self.source_entry.pack(side=tk.LEFT)
+
+    def file_save_2(self):
+        json_file = fd.asksaveasfile(mode='w', defaultextension='.json')
+        if json_file is None:
+            return
+
+        input_text = self.cust_ents_dict[self.chunk][0]
+        entities = self.cust_ents_dict[self.chunk][1]
+
+        ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk)
+        dict_2_json_file(ann_train_dict, json_file)
+
+        json_file.close()
+
 
     def next_page(self):
         """
