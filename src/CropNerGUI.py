@@ -560,7 +560,8 @@ class CropNerGUI:
                 page = self.pdf_document[self.page_number - 1]
                 txt = page.text()
             else:
-                page_number = 0
+                self.page_number = 0
+                self.chunk = self.page_number
                 txt = self.raw_file.read()
 
             self.text.insert("1.0",txt)
@@ -1040,13 +1041,48 @@ class CropNerGUI:
         """
         Callback method attached to the quit button.
 
-        It destroys the main window, which ends the program
+        It check for unsaved changes and opens a save dialog window, otherwise it destroys the main window, which ends the program
         """
         # TODO: If a user accidentally clicks the Exit button, the program quits without saving any of the current
         # annotation. Add functionality to first ask the user if they want to save or discard their current annotation,
         # if they have any. NOTE: Annotations are saved on self.cust_ents_dict. Checking to see if this dictionary
         # is empty should be a reasonable check on if a user has annotations that need to be saved.
-        self.rootWin.destroy()
+
+        # Creates a save dialog window if the dictionary for new annotations is not empty.
+        if self.cust_ents_dict:
+
+            # Function called by save and quit button in save dialog window
+            def save_and_quit():
+                """
+                Callback method attached to the save and quit button in the save dialog window.
+                """
+                file_prefix = self.raw_file.name.split(".")[0]
+                now = datetime.now()  # current date and time
+                date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
+                filename = file_prefix + "_" + date_time + ".json"
+                input_text = self.cust_ents_dict[self.chunk][0]
+                entities = self.cust_ents_dict[self.chunk][1]
+
+                url = self.source_entry.get()
+                ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.pdf_name, url)
+                dict_2_json(ann_train_dict, filename)
+                self.rootWin.destroy()
+            def discard_and_quit():
+                """
+                Callback method attached to the discard and quit button in the save dialog window.
+                """
+                self.rootWin.destroy()
+
+            self.save_dialog = tk.Toplevel(self.rootWin)
+            label = tk.Label(self.save_dialog, text="You currently have unsaved changes to your annotation. Would you like to save or discard them?")
+            label.pack(side=tk.TOP)
+            savedialog_discard = tk.Button(self.save_dialog, text="Discard and Quit", command=discard_and_quit)
+            savedialog_discard.pack(side=tk.BOTTOM)
+            savedialog_confirm = tk.Button(self.save_dialog, text="Save", command=save_and_quit)
+            savedialog_confirm.pack(side=tk.BOTTOM)
+        else:
+            self.rootWin.destroy()
+
 
 
 # Driver code
