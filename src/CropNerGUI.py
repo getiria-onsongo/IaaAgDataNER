@@ -787,9 +787,9 @@ class CropNerGUI:
         interval_two_start = interval_two[0]
         interval_two_end = interval_two[1]
 
-        if (interval_two_start >= interval_one_start) and (interval_two_start <= interval_one_end):
+        if (interval_two_start >= interval_one_start) and (interval_two_start < interval_one_end):
             overlap = True
-        elif (interval_two_end >= interval_one_start) and (interval_two_end <= interval_one_end):
+        elif (interval_two_end > interval_one_start) and (interval_two_end <= interval_one_end):
             overlap = True
         elif (interval_two_start <= interval_one_start) and (interval_two_end >= interval_one_end):
             overlap = True
