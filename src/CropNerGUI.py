@@ -276,7 +276,7 @@ class CropNerGUI:
         self.exit_btn = tk.Button(self.bottom_frame, text="Exit",width=10,command=self.quit)
         self.exit_btn.pack(side = tk.LEFT)
         # Load button
-        self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.load_page)
+        self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.load_page_from_button)
         self.load_btn.pack(side=tk.LEFT)
         # Clear data button
         self.clear_data_btn = tk.Button(self.bottom_frame, text="Clear Data", width=10, command=self.clear_data)
@@ -542,6 +542,10 @@ class CropNerGUI:
                 self.msg.config(text="First page entered is less than 1; setting first page to 1", foreground="red")
                 self.page_entry.delete(0, tk.END)
                 self.page_entry.insert(0, "1-" + str(self.page_number[1]))
+            if self.page_number[1] < 1:
+                self.page_number[1] = 1
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, str(self.page_number[0]) + "-1")
             if self.page_number[1] > doc_length:
                 self.page_number[1] = doc_length
                 self.msg.config(text="Last page entered is greater than the length of the PDF; setting last page to the end of the PDF")
@@ -574,11 +578,63 @@ class CropNerGUI:
         self.page_number = [pg1, pg2]
         # Switch first and last page if the user's first number was the smaller one.
         if(self.page_number[1] < self.page_number[0]):
-            self.msg.config(text="A larger page was entered first. The pages will be displayed in order from smallest to largest anyway.", foreground="red")
+            self.msg.config(text="A larger page number was entered first. The pages will be displayed in order from smallest to largest anyway.", foreground="red")
             placeholder = self.page_number[0]
             self.page_number[0] = self.page_number[1]
             self.page_number[1] = placeholder
         self.chunk=self.page_number[0]
+
+    def is_spaced_range(self, raw_page_entry: str):
+        """
+        Checks to see if a page entry is simply two numbers separated by a space, which
+        the program should handle as a range of pages.
+        
+        Lots of processing of page_entry is done both before and after this method is
+        called. It will never be called on an entry with zany spacing, and it can be
+        wrong when it comes to invalid inputs since they'll get filtered out anyway.
+        """
+        first_space = raw_page_entry.find(" ")
+        # If there is one space...
+        if(not(first_space == -1)) and (first_space == raw_page_entry.rfind(" ")):
+            # And if this space is surrounded by only two valid, positive digits...
+            if(raw_page_entry[0 : first_space].isdigit() and raw_page_entry[first_space+1 :]):
+                return True
+        return False
+
+    def clean_spaces_in_page_entry(self, raw_page_entry: str):
+        """
+        Removes extra spaces. Then it checks to see if a user entered a range separated with
+        spaces and replaces the spaces with a dash if so.
+        """
+        old_entry = raw_page_entry.strip() # Remove loading and trailing spaces so that something like " 2 5" gets loaded as "2-5" instead of "25"
+        # Remove all spaces that are adjacent to a dash or a space
+        # The below line is straight from GeeksForGeeks, they're wonderful
+        all_spaces = [i for i in range(len(old_entry)) if old_entry.startswith(" ", i)]
+        entry = ""
+        for i in range(0, len(old_entry)):
+            if not(i in all_spaces):
+                entry = entry + old_entry[i] 
+            elif not(old_entry[i-1] == "-" or old_entry[i+1] == "-" or old_entry[i+1] == " "):
+                    entry = entry + old_entry[i]
+        # Past this point, only single spaces that are next to a dash should exist. This could be something like -  -,
+        # but page_num_is_valid should catch that later.
+        if(self.is_spaced_range(entry)):
+            self.msg.config(text="You have entered two numbers with spacing in between. Loading those pages and the pages between them.", foreground="orange")
+            entry = entry.replace(" ", "-")
+            # Replace user entry with how the program has read it.
+            self.page_entry.delete(0, tk.END)
+            self.page_entry.insert(0, entry)
+        return entry
+
+    def load_page_from_button(self):
+        """
+        Loading the page can cause warnings to pop on on the bottom, especially with ranges.
+        If you press "load data" and the warning from your last page load is still there, it
+        can look like you just got an error even though you didn't. Thus, pressing the button
+        to load the page first clears any warnings.
+        """
+        self.msg.config(text="")
+        self.load_page()
 
     def load_page(self):
         """
@@ -595,7 +651,7 @@ class CropNerGUI:
             # Reset annotation dictionary
             self.cust_ents_dict = {}
 
-            page_num = self.page_entry.get().replace(" ", "")
+            page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
             page_num_valid = self.page_num_is_valid(page_num)
             if page_num_valid == False:
                 self.msg.config(text="Valid page number not entered. Value initialized to 1", foreground="red")
@@ -707,7 +763,7 @@ class CropNerGUI:
         else:
             input_text = None
             # Get page number
-            page_num = self.page_entry.get().replace(" ", "")
+            page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
             if not page_num.isdigit(): # Either invalid or a range.
                 if self.page_num_is_valid(page_num) == False: # Invalid
                     self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
