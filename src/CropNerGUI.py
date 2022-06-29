@@ -551,6 +551,10 @@ class CropNerGUI:
             self.review_annotations()
         elif file_type == "pdf/txt":
             self.raw_file=f
+
+            self.file_prefix = self.raw_file.name.split(".")[0]
+            self.pdf_name = self.raw_file.name.split("/")[-1]
+
             self.pdf_document = None
             self.load_page()
         else:
@@ -582,6 +586,12 @@ class CropNerGUI:
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
+
+            self.doc_entry.delete(0, tk.END)
+            self.doc_entry.insert(0, self.pdf_name)
+            self.url_entry.delete(0, tk.END)
+            self.crop_entry.delete(0, tk.END)
+            self.cvar_entry.delete(0, tk.END)
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
