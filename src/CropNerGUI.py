@@ -68,7 +68,7 @@ class CropNerGUI:
         natural to annotate a document in page increments.
     self.pdf_document : pyxpdf.Document
         PDF to be annotated that was selected using GUI
-    self.pdf_name : str
+    self.file_name : str
         Name of the pdf/text file being annotated. e.g., BarCvDescLJ11.pdf
     self.file_prefix : str
         File path prefix (minus file type) e.g., for BarCvDescLJ11.pdf path prefix is Data/DavisLJ11/BarCvDescLJ11
@@ -159,7 +159,7 @@ class CropNerGUI:
         self.annotation_file = None
         self.chunk = None
         self.pdf_document = None
-        self.pdf_name = None
+        self.file_name = None
         self.file_prefix = None
         self.file_mode = None
         self.scrolled_text_line_content_index = {}
@@ -258,7 +258,7 @@ class CropNerGUI:
         self.remove_ent_btn = tk.Button(self.edit_ent_frame, text="Remove Entity", width=10, command=self.remove_ent)
         self.remove_ent_btn.pack(side=tk.LEFT)
 
-        # Middle frame for text box and additional text box elements
+        # Middle frame for text box and additional file elements like metadata entries
         self.middle_frame = tk.Frame(self.rootWin)
         self.middle_frame.pack(side=tk.TOP, fill="x")
 
@@ -553,7 +553,7 @@ class CropNerGUI:
             self.raw_file=f
 
             self.file_prefix = self.raw_file.name.split(".")[0]
-            self.pdf_name = self.raw_file.name.split("/")[-1]
+            self.file_name = self.raw_file.name.split("/")[-1]
 
             self.pdf_document = None
             self.load_page()
@@ -571,7 +571,7 @@ class CropNerGUI:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
 
         self.file_prefix = self.raw_file.name.split(".")[0]
-        self.pdf_name = self.raw_file.name.split("/")[-1]
+        self.file_name = self.raw_file.name.split("/")[-1]
         self.pdf_document = Document(self.raw_file.name)
 
     def load_page(self):
@@ -588,7 +588,7 @@ class CropNerGUI:
         else:
 
             self.doc_entry.delete(0, tk.END)
-            self.doc_entry.insert(0, self.pdf_name)
+            self.doc_entry.insert(0, self.file_name)
             self.url_entry.delete(0, tk.END)
             self.crop_entry.delete(0, tk.END)
             self.cvar_entry.delete(0, tk.END)
@@ -1025,7 +1025,7 @@ class CropNerGUI:
             input_text = self.cust_ents_dict[self.chunk][0]
             entities = self.cust_ents_dict[self.chunk][1]
 
-            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.pdf_name, url)
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk)
             dict_2_json(ann_train_dict, filename)
         # Hide buttons
         self.overwrite_btn.pack_forget()
@@ -1077,19 +1077,22 @@ class CropNerGUI:
         Brings up a file dialog to choose a file name/location then saves annotations to it in .json format.
         """
 
-        # Opens a tkinter save as file dialog and stores the file to a var
-        json_file = fd.asksaveasfile(mode='w', defaultextension='.json')
-        if json_file is None:
-            return
+        if self.cust_ents_dict:
+            # Opens a tkinter save as file dialog and stores the file to a var
+            json_file = fd.asksaveasfile(mode='w', defaultextension='.json')
+            if json_file is None:
+                return
 
-        input_text = self.cust_ents_dict[self.chunk][0]
-        entities = self.cust_ents_dict[self.chunk][1]
+            input_text = self.cust_ents_dict[self.chunk][0]
+            entities = self.cust_ents_dict[self.chunk][1]
 
-        # Calls dict_2_json on the newly created json file
-        ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.doc_entry.get(), self.url_entry.get(), self.crop_entry.get(), self.cvar_entry.get())
-        dict_2_json_file(ann_train_dict, json_file)
+            # Calls dict_2_json on the newly created json file
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.doc_entry.get(), self.url_entry.get(), self.crop_entry.get(), self.cvar_entry.get())
+            dict_2_json_file(ann_train_dict, json_file)
 
-        json_file.close()
+            json_file.close()
+        else:
+            self.msg.config(text="No NER data detected to save", foreground="red")
 
 
     def next_page(self):
@@ -1151,7 +1154,7 @@ class CropNerGUI:
                 #entities = self.cust_ents_dict[self.chunk][1]
 
                 #url = self.source_entry.get()
-                #ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.pdf_name, url)
+                #ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.file_name, url)
                 #dict_2_json(ann_train_dict, filename)
                 #self.rootWin.destroy()
 
