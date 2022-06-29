@@ -536,15 +536,41 @@ class CropNerGUI:
         be checking a list or single number.
         """
         doc_length = len(self.pdf_document)
+        err = False
+        double_err_text = " At least one other error was not displayed- see entry box."
         if page_num_valid == -1: # ie, page number is a range
             if self.page_number[0] < 1: # This will only take effect if the starting page is set to 0. Beginning hyphens are already invalid.
                 self.page_number[0] = 1
                 self.msg.config(text="First page entered is less than 1; setting first page to 1", foreground="red")
                 self.page_entry.delete(0, tk.END)
                 self.page_entry.insert(0, "1-" + str(self.page_number[1]))
+                err = True
+            if self.page_number[1] < 1:
+                self.page_number[1] = 1
+                self.page_entry.delete(0, tk.END)
+                if(err): # This will only happen if the user enters some form of "0-0"- trying to do a negative anywhere doesn't count as a range, just invalid
+                    self.msg.config(text="PDFs start with page 1, not 0. Additionally, you can enter just one page instead of a range if you'd like. Going to page 1.", foreground="red")
+                    self.page_entry.insert(0, "1")
+                else:
+                    self.msg.config(text="Second page entered is less than 1; setting second page to 1", foreground="red")
+                    self.page_entry.insert(0, str(self.page_number[0]) + "-1")
+                    err = True
             if self.page_number[1] > doc_length:
                 self.page_number[1] = doc_length
-                self.msg.config(text="Last page entered is greater than the length of the PDF; setting last page to the end of the PDF")
+                if(err):
+                    err_text = "Last page entered is greater than the length of the PDF; setting last page to the end of the PDF." + double_err_text
+                else:
+                    err_text = "Last page entered is greater than the length of the PDF; setting last page to the end of the PDF."
+                    err = True
+                self.msg.config(text=err_text, foreground="red")
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, str(self.page_number[0]) + "-" + str(self.page_number[1]))
+            if self.page_number[0] > doc_length:
+                self.page_number[0] = doc_length
+                err_text = "First page entered is greater than the length of the PDF; setting first page to the end of the PDF."
+                if(err):
+                    err_text = err_text + double_err_text
+                self.msg.config(text=err_text, foreground="red")
                 self.page_entry.delete(0, tk.END)
                 self.page_entry.insert(0, str(self.page_number[0]) + "-" + str(self.page_number[1]))
         else: # ie. there is a single page
@@ -578,6 +604,8 @@ class CropNerGUI:
             placeholder = self.page_number[0]
             self.page_number[0] = self.page_number[1]
             self.page_number[1] = placeholder
+            self.page_entry.delete(0, tk.END)
+            self.page_entry.insert(0, str(self.page_number[0]) + "-" + str(self.page_number[1]))
         self.chunk=self.page_number[0]
 
     def load_page(self):
