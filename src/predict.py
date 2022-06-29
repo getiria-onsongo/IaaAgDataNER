@@ -1,18 +1,18 @@
 import os.path
-from datetime import datetime
 import re
 import glob
-from pyxpdf import Document
-from pyxpdf.xpdf import TextControl
-from json2bratt import conversion
-from dataset2bratt import dataset_to_bratt
 from agParse import *
 from json2py import *
 from py2json import *
-
+from datetime import datetime
+from pyxpdf import Document
+from pyxpdf.xpdf import TextControl
+from json2bratt import conversion
+from dataset2bratt import extract_page_num
 
 class Predict:
-    """ A class to prepare data for medacy validation
+    """
+    A class to do predictions on data using the trained model
 
     ...
     Attributes
@@ -20,41 +20,52 @@ class Predict:
     self.model_dir : str
         path to trained model for ner tagging
     self.dataset_dir : str
-        path to dataset
+        path to dataset to predict on
     self.output_dir : str
-        path to output files ran through model
+        path to output predictions to
     self.spacy_only : bool
-        flag to only uses spacy, not pos data to tag
-    self.name_prefix : str
-        start of file name for a new json file
-    self.name_suffix : str
+        flag to only uses spacy model and not the part-of-speech based entity
+        expansion feature
+    self.name_json : str
+        start of file name for a new json file.
+        Ex: for creating predictions with files in the naming scheme
+        barley_p1_td.json ... barley_p37_td.json, the prefix would be barley_p
+        as it is the start of all file names
+    self.json_suffix : str
         end of file name for a new json file
+        Ex: for creating predictions with files in the naming scheme
+        barley_p1_td.json ... barley_p37_td.json, the suffix would be _td.json
+        as it is the end of all file names
+    self.dataset_suffix
+        endings of files from dataset directory to read in and predict on,
+        for files like barley_p1_td.txt or barley_p12_td.txt, the dataset suffix
+        would be _td.txt as it is the part of the file name all the files share
     self.no_overwrite: bool
-        flag for overwritting files or creating new ones
+        flag for creating new files instead of overwritting, which is the
+        default. with this flag, files will have the exact time of generation
+        between the file prefix and suffix instead of the page number to make
+        sure the file name is unique
     self.spacy_model_name : str
-        name of spacy model to use for pos
+        name of spacy model to use for part of speech, the default is
+        "en_core_web_lg"
     self.pos_model : spacy.Language
-        model to use for pos
+        model for part of speech tagging
     self.nlp : spacy.Language
-        model to use for training
+        model for ner tagging
     self.tags : list[str]
         list of possible ner tags
     self.cust_ents_dict : dict
-        keeps track of entities found
-    self.page_num : int
-        current page number
+        dictionary to keep track of entities found
 
     Methods
     -------
     process_files(self)
         process files by running through model then converting and saving
-        json, bratt & txt of files
-    extract_page_num(self, f : str, suffix : str)
-        takes a file name and extracts its page number
+        as json files
     get_text(self, file : str)
-        reads in a text file and returns as a string
+        reads in file and returns contents as a string
     tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
-        creates spacy doc from inputed text
+        creates spacy doc from inputed text and the trained ner spacy model
     pre_tag(self, pdf_document : pyxpdf.Document, page_number : int)
         finds entities for a given page in a pdf
     get_pos(self, ent : str )
@@ -63,68 +74,45 @@ class Predict:
     str, label : str)
         expands an entity to contain adjectives
     file_save(self, pdf_name : str, url : str, chunk : int)
-        saves json for a file
+        saves json for a given page
     """
 
-    def __init__(self, model_dir, dataset_dir, output_dir, spacy_only=False, name_prefix=None, name_suffix="_td.json", no_overwrite=False, spacy_model_name="en_core_web_lg", tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
+    def __init__(self, model_dir, dataset_dir, output_dir, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
         self.model_dir = model_dir
         self.dataset_dir = dataset_dir
         self.output_dir = output_dir
 
         self.spacy_only = spacy_only
-        self.name_prefix = name_prefix
-        self.name_suffix = name_suffix
+        self.json_prefix = json_prefix
+        self.dataset_suffix = dataset_suffix
+        self.json_suffix = json_suffix
         self.no_overwrite = no_overwrite
-        self.spacy_model_name = spacy_model_name  # spacy model to use for pos
+        self.spacy_model_name = spacy_model_name
+
         self.pos_model = spacy.load(self.spacy_model_name)
         self.nlp = spacy.load(self.model_dir)
-        self.tags = tags
-
+        self.tags = ["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]
         self.cust_ents_dict = {}
-        self.page_num = 0
-
         self.nlp.add_pipe("compound_trait_entities", after="ner")
 
     def process_files(self):
         """
-        Gets the directory of pdfs, reads them in and then does ner tagging on them and
-        saves as json.
+        Gets a list of txt files from the dataset directory, then does ner
+        tagging on them before saving as json.
         """
-        files = glob.glob(self.dataset_dir+"/*_td.txt")
+        files = glob.glob(self.dataset_dir+"/*"+self.dataset_suffix)
         print("%s files to process." % str(len(files)))
 
         for f in files:
             self.cust_ents_dict = {}
             text = self.get_text(f)
-            page_number = self.extract_page_num(f, "_td.txt")
+            page_number = extract_page_num(f, self.dataset_suffix)
             self.pre_tag(text, page_number)
             json_name = self.file_save(f, "", page_number)
 
-    def extract_page_num(self, f, suffix):
+    def get_text(self, file : str):
         """
-        Gets page number for files where the page numbers are the one or two
-        digits before the file suffix
-
-        Parameters
-        ----------
-        f : str
-            file name
-        suffix : str
-            file ending
-
-        Returns page number as a string if found, otherwise an empty string
-        """
-        ints_as_strs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-        num = ""
-        if f[len(f)-(len(suffix)+1)] in ints_as_strs:
-            num = f[len(f)-(len(suffix)+1)]
-            if f[len(f)-(len(suffix)+2)] in ints_as_strs:
-                num = f[len(f)-(len(suffix)+2)] + num
-        return num
-
-    def get_text(self, file):
-        """
-        Gets text from a file
+        Loads text from a given file to be able to preict on it
 
         Parameters
         ----------
@@ -144,10 +132,10 @@ class Predict:
         doc = self.nlp(text)
         return doc
 
-
-    def pre_tag(self, input_text, page_number):
+    def pre_tag(self, input_text : str, page_number : int):
         """
-        Tags input text using model with ner tags
+        Tags input text using model for ner taging and saves to
+        the cust_ent_dict dictionary
 
         Parameters
         ----------
@@ -173,15 +161,15 @@ class Predict:
 
     def get_pos(self, ent):
         """
-        Proceses a given entity with rules that use pos tag data to expand
-        the entity span if needed.
+        Proceses a given entity with rules that use part of speech data to
+        expand the entity span if needed.
 
         Parameters
         ----------
         ent : str
             entity to possibly expand span of
 
-        Returns expanded entity.
+        Returns expanded entity
         """
         doc = self.pos_model(ent.sent.text)
         if(len(doc[ent.start:ent.end]) > 0):
@@ -238,10 +226,10 @@ class Predict:
                     print()
         return ent
 
-    def file_save(self, pdf_name, url, chunk):
+    def file_save(self, pdf_name : str, url : str, chunk : int):
         """
-         Simplifed version of GUI save file & continue_func which saves
-         created json files.
+        Simplifed version of GUI save file & continue_func which saves
+        created json files to the output directory
 
         Parameters
         ----------
@@ -252,19 +240,18 @@ class Predict:
         chunk : int
             current chunk of file being saved, corresponds to page number
         """
+        name = self.json_prefix
+        if name == None:
+            path_no_ending = pdf_name.split(".")[0].split("/")
+            name = path_no_ending[len(path_no_ending)-1].split("_")[0]
+        output_filename = self.output_dir + "/" + name + "_p" + str(chunk) + self.json_suffix
 
-        if self.name_prefix == None:
-            path_no_suffix = pdf_name.split(".")[0].split("/")
-            self.name_prefix = path_no_suffix[len(path_no_suffix)-1]
-        output_filename = self.output_dir + "/" + \
-            self.name_prefix + "_p" + str(chunk) + self.file_suffix
         if os.path.isfile(output_filename):
             if self.no_overwrite:
                 print("Making file copy...")
                 now = datetime.now()  # current date and time
                 date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-                output_filename = self.output_dir + "/" + \
-                    self.name_prefix + "_" + datatime + "_" + self.file_suffix
+                output_filename = self.output_dir + "/" + name + "_" + date_time + "_p" + str(chunk) + self.json_suffix
             else:
                 print("File will be overwritten.")
 
@@ -279,7 +266,6 @@ class Predict:
             print("Created %s." % output_filename)
 
         return output_filename
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -300,16 +286,16 @@ if __name__ == '__main__':
         action='store_true', default=False
     )
     parser.add_argument(
-        '--convert_gold_standard', help='if goldstandard needs to be converted, path to that new folder',
+        '--json_prefix', help='prefix to use to name json files',
         action='store', default=None
     )
     parser.add_argument(
-        '--file_prefix', help='file prefix to use to name json files',
-        action='store', default=None
-    )
-    parser.add_argument(
-        '--file_suffix', help='file suffix to use to name new json files',
+        '--json_suffix', help='suffix to use to name new json files',
         action='store', default="_td.json"
+    )
+    parser.add_argument(
+        '--dataset_suffix', help='suffix to use to find files in dataset directory to predict on',
+        action='store', default="_td.txt"
     )
     parser.add_argument(
         '--no_overwrite',
@@ -318,7 +304,7 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-    model, dataset_dir, output_dir, spacy_only, prefix, suffix, no_overwrite = args.model, args.dataset_dir, args.output_dir, args.spacy_only, args.file_prefix, args.file_suffix, args.no_overwrite
+    model, dataset_dir, output_dir, spacy_only, json_prefix, json_suffix, dataset_suffix, no_overwrite = args.model, args.dataset_dir, args.output_dir, args.spacy_only, args.json_prefix, args.json_suffix, args.dataset_suffix, args.no_overwrite
 
     if not os.path.exists(model):
         print("Path to model invalid")
@@ -329,5 +315,5 @@ if __name__ == '__main__':
             os.makedirs(output_dir)
 
         preprocess = Predict(model, dataset_dir, output_dir, spacy_only=spacy_only,
-                             name_prefix=prefix, name_suffix=suffix, no_overwrite=no_overwrite)
+                             json_prefix=json_prefix, json_suffix=json_suffix, dataset_suffix=dataset_suffix, no_overwrite=no_overwrite)
         preprocess.process_files()
