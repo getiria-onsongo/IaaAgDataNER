@@ -101,6 +101,7 @@ class Predict:
         tagging on them before saving as json.
         """
         files = glob.glob(self.dataset_dir+"/*"+self.dataset_suffix)
+        print(files)
         print("%s files to process." % str(len(files)))
 
         for f in files:
@@ -226,7 +227,7 @@ class Predict:
                     print()
         return ent
 
-    def file_save(self, pdf_name : str, url : str, chunk : int):
+    def file_save(self, pdf_name : str, url : str, chunk : str):
         """
         Simplifed version of GUI save file & continue_func which saves
         created json files to the output directory
@@ -243,15 +244,15 @@ class Predict:
         name = self.json_prefix
         if name == None:
             path_no_ending = pdf_name.split(".")[0].split("/")
-            name = path_no_ending[len(path_no_ending)-1].split("_")[0]
-        output_filename = self.output_dir + "/" + name + "_p" + str(chunk) + self.json_suffix
+            name = path_no_ending[len(path_no_ending)-1].split("_")[0] + "_p"
+        output_filename = self.output_dir + "/" + name + chunk + self.json_suffix
 
         if os.path.isfile(output_filename):
             if self.no_overwrite:
                 print("Making file copy...")
                 now = datetime.now()  # current date and time
                 date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-                output_filename = self.output_dir + "/" + name + "_" + date_time + "_p" + str(chunk) + self.json_suffix
+                output_filename = self.output_dir + "/" + name + date_time + "_p" + chunk + self.json_suffix
             else:
                 print("File will be overwritten.")
 

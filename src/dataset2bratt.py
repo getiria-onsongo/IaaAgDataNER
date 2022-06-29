@@ -3,17 +3,41 @@ import glob
 import argparse
 import os
 
-def extract_page_num(f, suffix):
-    num = 'error'
-    if f[len(f)-(len(suffix)+1)] in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
+"""
+File to convert a json dataset to bratt, also has page number extraction helper
+function
+
+Methods
+-------
+extract_page_num(self, f : str, suffix : str)
+    for file names with page numbers before the suffix, extracts the numerals
+dataset_to_bratt(input_dir, output_dir, file_pattern : str)
+    converts a json dataset to bratt format
+"""
+
+def extract_page_num(f : str, suffix : str):
+    """
+    Gets page number for files where the page numbers are the one or two
+    positive integers found directly before the file suffix
+
+    Parameters
+    ----------
+    f : str
+        file name
+    suffix : str
+        file ending
+
+    Returns page number as string, otherwise returns empty string
+    """
+    num = ""
+    if f[len(f)-(len(suffix)+1)].isdigit():
         num = f[len(f)-(len(suffix)+1)]
-        if f[len(f)-(len(suffix)+2)] in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
+        if f[len(f)-(len(suffix)+2)].isdigit():
             num = f[len(f)-(len(suffix)+2)] + num
     return num
 
-
-def dataset_to_bratt(input_dir, output_dir, file_pattern="/*_td.json", name_prefix=None):
-    '''
+def dataset_to_bratt(input_dir, output_dir, file_pattern="/*_td.json"):
+    """
     Converts a whole dataset into bratt and txt files.
 
     Parameters
@@ -23,10 +47,11 @@ def dataset_to_bratt(input_dir, output_dir, file_pattern="/*_td.json", name_pref
     output_dir : str
         dirctory to output to
     file_pattern : str
-        (optional) pattern of file endings in directory to select and convert
+        pattern of file endings in directory to select and convert,
+        default is "/*_td.json"
     name_prefix : str
-        (optional) start of name for new bratt and json files
-    '''
+        start of name for new bratt and json files
+    """
     files = glob.glob(input_dir+file_pattern)
     print(files)
     print("%s files to convert." % str(len(files)))
@@ -57,13 +82,11 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-    input, output = args.input_dir, args.output_dir
-    pattern, prefix = args.file_pattern, args.name_prefix
+    input, output, pattern = args.input_dir, args.output_dir, args.file_pattern
 
     if not os.path.exists(input):
         print("input dataset path does not exist")
     else:
         if not os.path.exists(output):
             os.makedirs(output)
-
         dataset_to_bratt(input, output, file_pattern=pattern)
