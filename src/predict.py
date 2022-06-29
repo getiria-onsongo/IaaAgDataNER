@@ -101,7 +101,6 @@ class Predict:
         tagging on them before saving as json.
         """
         files = glob.glob(self.dataset_dir+"/*"+self.dataset_suffix)
-        print(files)
         print("%s files to process." % str(len(files)))
 
         for f in files:
@@ -231,6 +230,14 @@ class Predict:
         """
         Simplifed version of GUI save file & continue_func which saves
         created json files to the output directory
+
+        When the json file name is generated the format is
+        "prefix page-number suffix", so for saving a file named barley_p1_td.json,
+        the prefix would be "barley_p",the page number 1, and the suffix _td.json.
+
+        Prefix extraction works with file names in the format
+        "text_ page-number suffix", the prefix will be any text before the
+        first underscore and then "_p" added on to the end
 
         Parameters
         ----------
