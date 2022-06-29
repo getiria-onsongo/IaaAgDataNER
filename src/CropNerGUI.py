@@ -1080,7 +1080,8 @@ class CropNerGUI:
         if self.cust_ents_dict:
             # Opens a tkinter save as file dialog and stores the file to a var
             json_file = fd.asksaveasfile(mode='w', defaultextension='.json')
-            if json_file is None:
+            if json_file is None or json_file.name[-4:] != "json":
+                self.msg.config(text="Invalid file chosen; annotations not saved.", foreground="red")
                 return
 
             input_text = self.cust_ents_dict[self.chunk][0]
