@@ -6,6 +6,7 @@ ner_2022_05/ner_2022_05_training_data.spacy
 ner_2022_05/ner_2022_05_validate_data.spacy
 ner_2022_05_training_data.jsonl
 ner_2022_05_validate_data.jsonl
+Data/DavisLJ11/archive/
 temp*
 .DS_Store
 temp.out
