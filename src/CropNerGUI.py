@@ -33,7 +33,12 @@ from tkinter.scrolledtext import ScrolledText
 # AS TRAITS WHILE ACCORDING TO THE SPECS WE SHOULD BE RETURNING
 # “Maturity” : “early maturity”, “Season”: “winter”
 #
-# 3) If we are able to get NER to be reasonably accurate, the next step is being able to link properties to a
+# 3) "It is medium maturing and medium tall (averages about 41 inches in plant height) with fair straw strength."
+#    In the sentence above, medium tall will be tagged as trait. There is additional useful information in brackets
+# that tells you exactly what medium tall means (above 41 inches). Is it possible to extract this additional
+# information about the definition of medium tall.
+#
+# 4) If we are able to get NER to be reasonably accurate, the next step is being able to link properties to a
 # particular crop variety. Identifying crop traits is good but what would even be better is to know what crop
 # variety these traits are associated with. EXAMPLE:
 #
@@ -44,7 +49,7 @@ from tkinter.scrolledtext import ScrolledText
 #
 # What would be very useful is knowing what "it" is referring to in the paragraph above.
 #
-# 4) Need to start thinking about an ontology
+# 5) Need to start thinking about an ontology
 
 
 # Create NER GUI class
@@ -929,6 +934,7 @@ class CropNerGUI:
             date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
             filename = file_prefix + "_" + date_time + ".json"
         else:
+            self.annotation_file = self.ann_file_entry.get()
             if isinstance(self.annotation_file, str):
                 filename = self.annotation_file
             else:
