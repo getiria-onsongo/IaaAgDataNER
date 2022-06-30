@@ -640,8 +640,7 @@ class CropNerGUI:
                 entry = entry + old_entry[i] 
             elif not(old_entry[i-1] == "-" or old_entry[i+1] == "-" or old_entry[i+1] == " "):
                     entry = entry + old_entry[i]
-        # Past this point, only single spaces that are next to a dash should exist. This could be something like -  -,
-        # but page_num_is_valid should catch that later.
+        # Past this point, only single spaces that aren't next to a dash should exist.
         if(self.is_spaced_range(entry)):
             self.msg.config(text="You have entered two numbers with spacing in between. Loading those pages and the pages between them.", foreground="orange")
             entry = entry.replace(" ", "-")
