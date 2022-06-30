@@ -456,7 +456,13 @@ class CropNerGUI:
             If the selected folder does not contain a valid spaCy pipeline, an OSError will be thrown and
         a default language model is used instead.
         """
-        self.model_dir = fd.askdirectory()
+        
+        dir = fd.askdirectory()
+        # Do nothing if the user presses cancel or X
+        if dir == "":
+            return
+
+        self.model_dir = dir
         try:
             self.nlp_agdata = spacy.load(self.model_dir)
             lang = self.nlp_agdata.lang # Attribute error thrown if valid language model is not selected
@@ -493,6 +499,10 @@ class CropNerGUI:
         )
         # show the open file dialog
         f = fd.askopenfile(filetypes=filetypes)
+
+        # Do nothing if the user presses cancel or X
+        if f is None:
+            return
 
         if file_type == "json":
             self.annotation_file = f
