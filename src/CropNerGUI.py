@@ -1028,9 +1028,14 @@ class CropNerGUI:
             self.msg.config(text="Please select an annotations file (json)", foreground="red")
         else:
             # Load annotation data
-            data = json_2_dict(self.annotation_file.name)
-            train_data = dict_2_mixed_type(data)
-            self.get_custom_labels(data)
+            try:
+                data = json_2_dict(self.annotation_file.name)
+                train_data = dict_2_mixed_type(data)
+                self.get_custom_labels(data)
+            except:
+                self.msg.config(text="WARNING!!: Couldn't load data from annotation file. Are you sure you loaded a valid json?", foreground="red")
+                self.annotation_file = None
+                return
             """
             doc = data['doc']
             url = data['url']
