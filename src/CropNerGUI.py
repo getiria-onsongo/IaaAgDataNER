@@ -15,13 +15,6 @@ import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
 
-# TODO: Even though users can add their own named entities, the tool does not recognize these user
-# defined named entities once they've quit the application. Basically, when a user customizes the GUI
-# the changes do not persist across sessions. Make customized additions to the GUI persistent across sessions.
-# One approach to implementing this would be to add a starting prompt that asks a user if they want to
-# 1) Annotate crop data 2) Annotate user data or 3) Review annotations. If they choose 2 or 3, build the GUI by
-# first scanning their annotations to determine what Named Entity tags (e.g., ALAS) to include in the GUI
-
 # 1) WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
 # ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
 # do not make sense because we need to be able to know
@@ -640,8 +633,7 @@ class CropNerGUI:
                 entry = entry + old_entry[i] 
             elif not(old_entry[i-1] == "-" or old_entry[i+1] == "-" or old_entry[i+1] == " "):
                     entry = entry + old_entry[i]
-        # Past this point, only single spaces that are next to a dash should exist. This could be something like -  -,
-        # but page_num_is_valid should catch that later.
+        # Past this point, only single spaces that aren't next to a dash should exist.
         if(self.is_spaced_range(entry)):
             self.msg.config(text="You have entered two numbers with spacing in between. Loading those pages and the pages between them.", foreground="orange")
             entry = entry.replace(" ", "-")
