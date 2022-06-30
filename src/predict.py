@@ -278,7 +278,7 @@ class Predict:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Prepares data for medacy validation",
-        epilog='python ValidationPreprocess.py model dir output_dir'
+        epilog='python predict.py model dir output_dir'
     )
     parser.add_argument(
         'model', help='path to trained model'
