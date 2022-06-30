@@ -23,7 +23,7 @@ from tkinter.scrolledtext import ScrolledText
 # first scanning their annotations to determine what Named Entity tags (e.g., ALAS) to include in the GUI
 
 # 1) WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
-# ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
+# "ROUGH AWNS" and "AWNS ARE ROUGH", WHITE ALEURONE AND ALEURONE IS WHITE. NOTE: Maybe compound traits
 # do not make sense because we need to be able to know
 # relationships. We should look at co-reference resolution.
 # See: https://medium.com/huggingface/state-of-the-art-neural-coreference-resolution-for-chatbots-3302365dcf30
@@ -32,8 +32,24 @@ from tkinter.scrolledtext import ScrolledText
 # MAKE SENSE TO THE USER. RIGHT NOW WE HAVE "early maturity" AND "winter"
 # AS TRAITS WHILE ACCORDING TO THE SPECS WE SHOULD BE RETURNING
 # “Maturity” : “early maturity”, “Season”: “winter”
-
-# 3) Need to start thinking about an ontology
+#
+# 3) "It is medium maturing and medium tall (averages about 41 inches in plant height) with fair straw strength."
+#    In the sentence above, medium tall will be tagged as trait. There is additional useful information in brackets
+# that tells you exactly what medium tall means (above 41 inches). Is it possible to extract this additional
+# information about the definition of medium tall.
+#
+# 4) If we are able to get NER to be reasonably accurate, the next step is being able to link properties to a
+# particular crop variety. Identifying crop traits is good but what would even be better is to know what crop
+# variety these traits are associated with. EXAMPLE:
+#
+# Alexis is a two-row spring malting and feed barley. It was released by Western Plant Breeders. It was selected from
+# the cross BI1622a/Triumph. It is midseason in maturity and is mid-tall with fair straw strength. At the time of
+# evaluation it was resistant to stripe rust. It was evaluated as Entry 966 in the UC Regional Cereal Testing program
+# in 1997 for spring planting in the intermountain region of northern California.
+#
+# What would be very useful is knowing what "it" is referring to in the paragraph above.
+#
+# 5) Need to start thinking about an ontology
 
 
 # Create NER GUI class
@@ -918,6 +934,7 @@ class CropNerGUI:
             date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
             filename = file_prefix + "_" + date_time + ".json"
         else:
+            self.annotation_file = self.ann_file_entry.get()
             if isinstance(self.annotation_file, str):
                 filename = self.annotation_file
             else:
