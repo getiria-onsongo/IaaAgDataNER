@@ -546,7 +546,10 @@ class CropNerGUI:
         # show the open file dialog
         f = fd.askopenfile(filetypes=filetypes)
 
-        if file_type == "json":
+        if f is None:
+            self.msg.config(text="No file was chosen", foreground="red")
+            return
+        elif file_type == "json":
             self.annotation_file = f
             self.review_annotations()
         elif file_type == "pdf/txt":
@@ -745,7 +748,6 @@ class CropNerGUI:
             self.update_scrolled_text_line_content_index()
             doc = self.tag_ner_with_spacy(input_text)
 
-            # TODO: Add a warning message if ent is empty so users know none of the custom tags were found
             custom_tags_present = False
             for ent in doc.ents:
                 # NER is in our list of custom tags
@@ -1079,9 +1081,9 @@ class CropNerGUI:
 
         if self.cust_ents_dict:
             # Opens a tkinter save as file dialog and stores the file to a var
-            json_file = fd.asksaveasfile(mode='w', defaultextension='.json')
+            json_file = fd.asksaveasfile(initialfile=self.file_name.split(".")[0]+"_pg"+str(self.page_number)+".json", mode='w', defaultextension='.json')
             if json_file is None or json_file.name[-4:] != "json":
-                self.msg.config(text="Invalid file chosen; annotations not saved.", foreground="red")
+                self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
                 return
 
             input_text = self.cust_ents_dict[self.chunk][0]
@@ -1092,6 +1094,7 @@ class CropNerGUI:
             dict_2_json_file(ann_train_dict, json_file)
 
             json_file.close()
+            self.msg.config(text="Data successfully saved!", foreground="orange")
         else:
             self.msg.config(text="No NER data detected to save", foreground="red")
 
@@ -1157,7 +1160,7 @@ class CropNerGUI:
                 #url = self.source_entry.get()
                 #ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.file_name, url)
                 #dict_2_json(ann_train_dict, filename)
-                #self.rootWin.destroy()
+                self.rootWin.destroy()
 
             def discard_and_quit():
                 """
@@ -1166,7 +1169,7 @@ class CropNerGUI:
                 self.rootWin.destroy()
 
             self.save_dialog = tk.Toplevel(self.rootWin)
-            label = tk.Label(self.save_dialog, text="You currently have unsaved changes to your annotation. Would you like to save or discard them?")
+            label = tk.Label(self.save_dialog, text="You currently have annotations in the workspace. Would you like to save or discard them?")
             label.pack(side=tk.TOP)
             savedialog_discard = tk.Button(self.save_dialog, text="Discard and Quit", command=discard_and_quit)
             savedialog_discard.pack(side=tk.BOTTOM)
