@@ -872,6 +872,9 @@ class CropNerGUI:
                 tags = self.cust_ents_dict[page_start]
                 self.cust_ents_dict[page_start] = [input_text, tags]
 
+            # Finish setting dictionary. The program will complain when the user tries to tag something if this isn't done.
+            self.cust_ents_dict[self.chunk][0] = self.text.get(1.0, "end")
+
     def overlap(self, interval_one: list, interval_two: list) -> bool:
         """
         Check to see if two intervals overlap.
