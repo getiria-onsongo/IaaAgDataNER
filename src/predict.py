@@ -250,8 +250,9 @@ class Predict:
         """
         name = self.json_prefix
         if name == None:
-            path_no_ending = pdf_name.split("/")
-            name = path_no_ending[len(path_no_ending)-1].split("_")[0] + "_p"
+            path_no_suffix = pdf_name.split(self.dataset_suffix)[0].split("/")
+            name = path_no_suffix[len(path_no_suffix)-1].split("p")[0] + "p"
+            print(name)
         output_filename = self.output_dir + "/" + name + chunk + self.json_suffix
 
         if os.path.isfile(output_filename):
