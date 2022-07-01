@@ -373,23 +373,32 @@ class CropNerGUI:
 
     def font_plus(self):
         """
-        Increase font size for text in ScrolledText (text box).
+        Increase font size for text in ScrolledText (text box), changing window size with it.
 
         Expects the global variable self.font_size which is of type string to be set. The default value is "16".
         This function increments self.font_size by 1 and then updates font size in self.text.
         """
+        prev_text_size = self.text.winfo_reqheight()
         self.font_size = str(int(self.font_size) + 1)
         self.text['font'] = "Times "+self.font_size
+        new_size = (self.text.winfo_reqheight() - prev_text_size) + self.rootWin.winfo_reqheight()
+        self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_size))
 
     def font_minus(self):
         """
-        Decrease font size for text in ScrolledText (text box).
+        Decrease font size for text in ScrolledText (text box), changing window size with it.
 
         Expects the global variable self.font_size which is of type string to be set. The default value is "16".
         This function decreases self.font_size by 1 and then updates font size in self.text.
         """
-        self.font_size = str(int(self.font_size) - 1)
+        prev_text_size = self.text.winfo_reqheight()
+        if not (int(self.font_size) <= 1):
+            self.font_size = str(int(self.font_size) - 1)
+        else:
+            self.msg.config(text="Font size can't get any smaller!", foreground="red")
         self.text['font'] = "Times "+self.font_size
+        new_size = (self.text.winfo_reqheight() - prev_text_size) + self.rootWin.winfo_reqheight()
+        self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_size))
 
     def add_ent(self):
         """
@@ -471,6 +480,10 @@ class CropNerGUI:
             self.msg.config(text="WARNING!!: Selected folder does not contain valid language model \n"
                                  "Default model 'en_core_web_lg' will be used.", foreground="red")
             self.nlp_agdata = spacy.load("en_core_web_lg")
+            # Resize window to fit error (it'll push buttons below the bottom if you don't
+            # do this and the window has been resized before)
+            new_height = self.rootWin.winfo_reqheight() + 15
+            self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_height))
         # NOTE: Commenting the line below for now. We will try using spaCy noun phrases instead
         # to capture tags such as 'rough owns'
         # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
