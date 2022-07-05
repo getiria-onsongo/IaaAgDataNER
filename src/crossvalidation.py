@@ -47,7 +47,23 @@ def cross_validate(fold_number, data, pos_split):
 
 
 
-
-
-
-cross_validate(5, "Data/DavisLJ11", False)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description="Spacy cross validation",
+        epilog='python crossvalidation.py Data/dataset_dir --folds 5 --pos_tagging'
+    )
+    parser.add_argument(
+        'dataset_dir', help='path to dataset'
+    )
+    parser.add_argument(
+        '--folds',
+        action='store', default=5,
+        help='number of folds'
+    )
+    parser.add_argument(
+            '--pos_tagging',
+            action='store_true', default=False,
+            help='do pos tagging after model training'
+    )
+    args = parser.parse_args()
+    cross_validate(args.folds, args.dataset_dir, args.pos_tagging)
