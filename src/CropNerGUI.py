@@ -936,8 +936,6 @@ class CropNerGUI:
         tag_label : str
             Label to assign to the named entity that was selected.
         """
-        # TODO: This function has a major bug. If you try to tag text that spans multiple pages, it will not only
-        # fail, but it will also remove some annotations.
 
         # Clear warning message, if one exists
         self.msg.config(text="")
