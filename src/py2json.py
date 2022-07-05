@@ -15,14 +15,12 @@ import importlib
 # all, I won't bother figuring out how to get the PYTHONPATH properly changed
 # or whatever needs to happen to fix this.
 
-def mixed_type_2_dict(data, chunk, doc='', url='', crop='', cvar=''):
+def mixed_type_2_dict(data, chunk, doc='', url=''):
     """ Convert ('sentence 1', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]})
      to:
      {'doc': 'BarCvDescLJ11.pdf', 
       'url': 'https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf', 
       'chunk': 2,
-      'crop': 'barley',
-      'cvar': 'eight-twelve',
       'sentences': {'sentence 1': {'entity 1': 
                                        {'start': 0, 'end': 3, 'label': 'TY1'}, 
                                    'entity 2': 
@@ -36,8 +34,6 @@ def mixed_type_2_dict(data, chunk, doc='', url='', crop='', cvar=''):
     result['doc'] = doc
     result['url'] = url
     result['chunk'] = chunk
-    result['crop'] = crop
-    result['cvar'] = cvar
     result['sentences'] = dict()
 
     for record in data:
@@ -65,7 +61,7 @@ if __name__ == "__main__":
     # Usage example: python3 src/py2json.py src/agData.py Data/DavisLJ11/barley_manual_ner.json  --doc 'BarCvDescLJ11.pdf' --url 'http://smalgrains.ucdavis.edu' 
     parser = argparse.ArgumentParser(
         description = "convert python nested lists to JSON",
-        epilog = "Example: python3 py2json.py pyInput jsonOutput (optional --doc 'BarCvDescLJ11.pdf' ; --url 'http://smalgrains.ucdavis.edu' ; --chunk 2 ; --crop 'barley' ; --cvar 'eight-twelve'"
+        epilog = "Example: python3 py2json.py pyInput jsonOutput (optional --doc 'BarCvDescLJ11.pdf' ; --url 'http://smalgrains.ucdavis.edu' ; --chunk 2'"
     )
     parser.add_argument(
         'pyInput', help = 'input python file.'
@@ -83,10 +79,10 @@ if __name__ == "__main__":
         '--chunk', help = 'integer page or chunk number within the document'
     )
     parser.add_argument(
-        '--crop', help='crop if the document has information for a single crop'
+        '--crop', help='DEPRECATED - crop if the document has information for a single crop'
     )
     parser.add_argument(
-        '--cvar', help='crop variety if the document has information for a single crop variety'
+        '--cvar', help='DEPRECATED - crop variety if the document has information for a single crop variety'
     )
 
     if len(sys.argv)<2:
@@ -109,5 +105,5 @@ if __name__ == "__main__":
     TRAIN_DATA = data_module.TRAIN_DATA
 
 
-    train_dict = mixed_type_2_dict(TRAIN_DATA, args.chunk, args.doc, args.url, args.crop, args.cvar)
+    train_dict = mixed_type_2_dict(TRAIN_DATA, args.chunk, args.doc, args.url)
     dict_2_json(train_dict, outfile)
