@@ -29,9 +29,7 @@ def cross_validate(fold_number, data, pos_split):
         os.makedirs("ner_2021_08")
 
     # create and convert dev set
-    for x in folds:
-        print(len(x))
-    dev = folds[len(folds) -1]
+    dev = folds[len(folds)-1]
     convertJsonToSpacyJsonl(outputFileName="ner_2021_08_dev_data.jsonl", filePaths=dev)
     convert(converter="json", input_path="ner_2021_08_dev_data.jsonl", output_dir="ner_2021_08")
 
