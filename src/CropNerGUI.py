@@ -335,7 +335,7 @@ class CropNerGUI:
         self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=self.next_page)
         self.next_btn.pack(side=tk.LEFT)
         # Save button
-        self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save_2)
+        self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save)
         self.save_btn.pack(side=tk.LEFT)
 
         # Frame that will contain messages being displayed to the user
@@ -1057,40 +1057,6 @@ class CropNerGUI:
 
     def file_save(self):
         """
-        Save current annotation.
-        """
-        # Check to see if user is trying to overwrite a file
-        if self.annotation_file is None:
-            # Check to make sure value has been initialized
-            if self.file_prefix is None:
-                self.file_prefix = "annotation_file"
-            self.annotation_file = self.file_prefix + "_pg" + str(self.page_number) + ".json"
-            if os.path.isfile(self.annotation_file):
-                self.msg.config( text="WARNING!! You are about to overwrite your annotation file. Click 'Overwrite' to overwite or 'Create Copy' \n and optionally enter meta-data in the fields provided.",foreground="red", anchor="w")
-                self.overwrite_btn.pack(side=tk.LEFT)
-                self.copy_btn.pack(side=tk.LEFT)
-            else:
-                self.msg.config(text="The file name shown in the text box will be used. Edit the name and optionally enter meta-data in the fields provided and click 'Continue' to Save.", foreground="red",anchor="w")
-                self.continue_btn.pack(side=tk.LEFT)
-
-        else:
-            self.msg.config(text="WARNING!! You are about to overwrite your annotation file. Click 'Overwrite' to overwite or 'Create Copy' \n and optionally enter meta-data in the fields provided.",foreground="red", anchor="w")
-            self.overwrite_btn.pack(side=tk.LEFT)
-            self.copy_btn.pack(side=tk.LEFT)
-
-        self.ann_file_entry.delete(0, tk.END)
-        if isinstance(self.annotation_file, str):
-            self.ann_file_entry.insert(0, self.annotation_file)
-        else:
-            self.ann_file_entry.insert(0, self.annotation_file.name)
-
-        self.ann_file_label.pack(side=tk.LEFT)
-        self.ann_file_entry.pack(side=tk.LEFT)
-        self.source_label.pack(side=tk.LEFT)
-        self.source_entry.pack(side=tk.LEFT)
-
-    def file_save_2(self):
-        """
         Brings up a file dialog to choose a file name/location then saves annotations to it in .json format.
         """
 
@@ -1159,7 +1125,7 @@ class CropNerGUI:
                 """
                 Callback method attached to the save and quit button in the save dialog window.
                 """
-                self.file_save_2()
+                self.file_save()
                 self.rootWin.destroy()
 
             # Button for discaring changes and quitting
