@@ -15,7 +15,7 @@ import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
 
-# TODO: Even though users can add their own named entities, the tool does not recognize these user
+# TODO *Done by Ruben: Even though users can add their own named entities, the tool does not recognize these user
 # defined named entities once they've quit the application. Basically, when a user customizes the GUI
 # the changes do not persist across sessions. Make customized additions to the GUI persistent across sessions.
 # One approach to implementing this would be to add a starting prompt that asks a user if they want to
@@ -23,7 +23,7 @@ from tkinter.scrolledtext import ScrolledText
 # first scanning their annotations to determine what Named Entity tags (e.g., ALAS) to include in the GUI
 
 # 1) WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
-# ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
+# "ROUGH AWNS" and "AWNS ARE ROUGH", WHITE ALEURONE AND ALEURONE IS WHITE. NOTE: Maybe compound traits
 # do not make sense because we need to be able to know
 # relationships. We should look at co-reference resolution.
 # See: https://medium.com/huggingface/state-of-the-art-neural-coreference-resolution-for-chatbots-3302365dcf30
@@ -32,8 +32,24 @@ from tkinter.scrolledtext import ScrolledText
 # MAKE SENSE TO THE USER. RIGHT NOW WE HAVE "early maturity" AND "winter"
 # AS TRAITS WHILE ACCORDING TO THE SPECS WE SHOULD BE RETURNING
 # “Maturity” : “early maturity”, “Season”: “winter”
-
-# 3) Need to start thinking about an ontology
+#
+# 3) "It is medium maturing and medium tall (averages about 41 inches in plant height) with fair straw strength."
+#    In the sentence above, medium tall will be tagged as trait. There is additional useful information in brackets
+# that tells you exactly what medium tall means (above 41 inches). Is it possible to extract this additional
+# information about the definition of medium tall.
+#
+# 4) If we are able to get NER to be reasonably accurate, the next step is being able to link properties to a
+# particular crop variety. Identifying crop traits is good but what would even be better is to know what crop
+# variety these traits are associated with. EXAMPLE:
+#
+# Alexis is a two-row spring malting and feed barley. It was released by Western Plant Breeders. It was selected from
+# the cross BI1622a/Triumph. It is midseason in maturity and is mid-tall with fair straw strength. At the time of
+# evaluation it was resistant to stripe rust. It was evaluated as Entry 966 in the UC Regional Cereal Testing program
+# in 1997 for spring planting in the intermountain region of northern California.
+#
+# What would be very useful is knowing what "it" is referring to in the paragraph above.
+#
+# 5) Need to start thinking about an ontology
 
 
 # Create NER GUI class
@@ -68,7 +84,7 @@ class CropNerGUI:
         natural to annotate a document in page increments.
     self.pdf_document : pyxpdf.Document
         PDF to be annotated that was selected using GUI
-    self.pdf_name : str
+    self.file_name : str
         Name of the pdf/text file being annotated. e.g., BarCvDescLJ11.pdf
     self.file_prefix : str
         File path prefix (minus file type) e.g., for BarCvDescLJ11.pdf path prefix is Data/DavisLJ11/BarCvDescLJ11
@@ -83,6 +99,8 @@ class CropNerGUI:
         Contains NER tag annotations. key = chunk number, values = entities
     self.page_number : int
         Current page number
+    self.metadata_toggle : bool
+        Boolean determining whether the metadata panel should be visible or not
 
     NOTE: Though the widgets are global variables, we will not document them here. Most are self-evident. We have
     added inline comments in the code itself.
@@ -157,13 +175,14 @@ class CropNerGUI:
         self.annotation_file = None
         self.chunk = None
         self.pdf_document = None
-        self.pdf_name = None
+        self.file_name = None
         self.file_prefix = None
         self.file_mode = None
         self.scrolled_text_line_content_index = {}
         self.nlp_agdata = None
         self.cust_ents_dict = {}
         self.page_number = 0
+        self.metadata_toggle = False
 
         # ----------------------- Widgets for GUI start here.
         # Default font size for text in ScrolledText. Should be a string format
@@ -237,7 +256,7 @@ class CropNerGUI:
 
         # Frame containing options for users to add their own NER tags
         self.edit_ent_frame = tk.Frame(self.rootWin)
-        self.edit_ent_frame.pack(side=tk.TOP, fill="x")
+        self.edit_ent_frame.pack(side=tk.TOP, fill="x", padx="40")
 
         # Label for text entry for a new NER tag defined by the user
         self.trait_label = tk.Label(self.edit_ent_frame, text="Enter Entity Label:", width=20)
@@ -255,11 +274,36 @@ class CropNerGUI:
         self.remove_ent_btn = tk.Button(self.edit_ent_frame, text="Remove Entity", width=10, command=self.remove_ent)
         self.remove_ent_btn.pack(side=tk.LEFT)
 
+        # Middle frame for text box and additional file elements like metadata entries
+        self.middle_frame = tk.Frame(self.rootWin)
+        self.middle_frame.pack(side=tk.TOP, fill="x")
+
         # Text box. Note, height defines height in widget in lines based on font size. If the font size is bigger,
         # you end up with a bigger textbox because each line will occupy more space.
-        self.text = ScrolledText(self.rootWin, height=25, width=140, font="Times "+self.font_size, wrap='word')
+        self.text = ScrolledText(self.middle_frame, height=25, width=140, font="Times "+self.font_size, wrap='word')
         self.text.focus_force()
         self.text.pack(side=tk.TOP)
+
+        # Metadata button for setting metadata for current raw file
+        self.metadata_btn = tk.Button(self.edit_ent_frame, text="Metadata", width=10, command = self.toggle_metadata)
+        self.metadata_btn.pack(side=tk.RIGHT)
+
+        # Doc label
+        self.doc_label = tk.Label(self.middle_frame, text="Document Name")
+        # Doc entry
+        self.doc_entry = tk.Entry(self.middle_frame, width=30)
+        # URL label
+        self.url_label = tk.Label(self.middle_frame, text="URL")
+        # URL entry
+        self.url_entry = tk.Entry(self.middle_frame, width=30)
+        # Crop label
+        self.crop_label = tk.Label(self.middle_frame, text="Crop")
+        # Crop entry
+        self.crop_entry = tk.Entry(self.middle_frame, width=30)
+        # Crop variety label
+        self.cvar_label = tk.Label(self.middle_frame, text="Crop Variety")
+        # Crop variety entry
+        self.cvar_entry = tk.Entry(self.middle_frame, width=30)
 
         # Specify how text will be highlighted in the textbox when a user selects it and click on a button to
         # tag the text. If we only had one button (ALAS), we would have done this using the command
@@ -289,9 +333,9 @@ class CropNerGUI:
         self.msg_btn.pack(side=tk.LEFT)
         # Next page button
         self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=self.next_page)
-        self.next_btn.pack(side = tk.LEFT)
+        self.next_btn.pack(side=tk.LEFT)
         # Save button
-        self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save)
+        self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save_2)
         self.save_btn.pack(side=tk.LEFT)
 
         # Frame that will contain messages being displayed to the user
@@ -364,6 +408,7 @@ class CropNerGUI:
         # Button to decrease font in the text box (Font +)
         self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
         self.font_minus.pack(side=tk.LEFT)
+        
 
     def font_plus(self):
         """
@@ -438,6 +483,33 @@ class CropNerGUI:
         self.colors.remove(color)
         self.tags.remove(ent_label)
 
+    def toggle_metadata(self):
+        """
+        A button toggle to introduce/remove entry boxes for setting metadata for the json file.
+        """
+        self.metadata_toggle = not self.metadata_toggle
+
+        if self.metadata_toggle:
+            self.text.pack(side=tk.LEFT, padx=(30,0))
+            self.doc_label.pack(side=tk.TOP)
+            self.doc_entry.pack(side=tk.TOP, pady=(0,10))
+            self.url_label.pack(side=tk.TOP)
+            self.url_entry.pack(side=tk.TOP, pady=(0,10))
+            self.crop_label.pack(side=tk.TOP)
+            self.crop_entry.pack(side=tk.TOP, pady=(0,10))
+            self.cvar_label.pack(side=tk.TOP)
+            self.cvar_entry.pack(side=tk.TOP, pady=(0,10))
+        else:
+            self.text.pack(side=tk.TOP)
+            self.doc_label.pack_forget()
+            self.doc_entry.pack_forget()
+            self.url_label.pack_forget()
+            self.url_entry.pack_forget()
+            self.crop_label.pack_forget()
+            self.crop_entry.pack_forget()
+            self.cvar_label.pack_forget()
+            self.cvar_entry.pack_forget()
+
     def get_ner_model_dir(self):
         """
         Select a folder containing spaCy nlp pipeline.
@@ -490,11 +562,18 @@ class CropNerGUI:
         # show the open file dialog
         f = fd.askopenfile(filetypes=filetypes)
 
-        if file_type == "json":
+        if f is None:
+            self.msg.config(text="No file was chosen", foreground="red")
+            return
+        elif file_type == "json":
             self.annotation_file = f
             self.review_annotations()
         elif file_type == "pdf/txt":
             self.raw_file=f
+
+            self.file_prefix = self.raw_file.name.split(".")[0]
+            self.file_name = self.raw_file.name.split("/")[-1]
+
             self.pdf_document = None
             self.load_page()
         else:
@@ -511,7 +590,7 @@ class CropNerGUI:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
 
         self.file_prefix = self.raw_file.name.split(".")[0]
-        self.pdf_name = self.raw_file.name.split("/")[-1]
+        self.file_name = self.raw_file.name.split("/")[-1]
         self.pdf_document = Document(self.raw_file.name)
 
     def load_page(self):
@@ -526,6 +605,12 @@ class CropNerGUI:
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
+
+            self.doc_entry.delete(0, tk.END)
+            self.doc_entry.insert(0, self.file_name)
+            self.url_entry.delete(0, tk.END)
+            self.crop_entry.delete(0, tk.END)
+            self.cvar_entry.delete(0, tk.END)
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
@@ -679,7 +764,6 @@ class CropNerGUI:
             self.update_scrolled_text_line_content_index()
             doc = self.tag_ner_with_spacy(input_text)
 
-            # TODO: Add a warning message if ent is empty so users know none of the custom tags were found
             custom_tags_present = False
             for ent in doc.ents:
                 # NER is in our list of custom tags
@@ -762,8 +846,6 @@ class CropNerGUI:
         tag_label : str
             Label to assign to the named entity that was selected.
         """
-        # TODO: This function has a major bug. If you try to tag text that spans multiple pages, it will not only
-        # fail, but it will also remove some annotations.
 
         # Clear warning message, if one exists
         self.msg.config(text="")
@@ -947,6 +1029,7 @@ class CropNerGUI:
             date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
             filename = file_prefix + "_" + date_time + ".json"
         else:
+            self.annotation_file = self.ann_file_entry.get()
             if isinstance(self.annotation_file, str):
                 filename = self.annotation_file
             else:
@@ -959,7 +1042,7 @@ class CropNerGUI:
             input_text = self.cust_ents_dict[self.chunk][0]
             entities = self.cust_ents_dict[self.chunk][1]
 
-            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.pdf_name, url)
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk)
             dict_2_json(ann_train_dict, filename)
         # Hide buttons
         self.overwrite_btn.pack_forget()
@@ -1006,6 +1089,31 @@ class CropNerGUI:
         self.source_label.pack(side=tk.LEFT)
         self.source_entry.pack(side=tk.LEFT)
 
+    def file_save_2(self):
+        """
+        Brings up a file dialog to choose a file name/location then saves annotations to it in .json format.
+        """
+
+        if self.cust_ents_dict:
+            # Opens a tkinter save as file dialog and stores the file to a var
+            json_file = fd.asksaveasfile(initialfile=self.file_name.split(".")[0]+"_pg"+str(self.page_number)+".json", mode='w', defaultextension='.json')
+            if json_file is None or json_file.name[-4:] != "json":
+                self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
+                return
+
+            input_text = self.cust_ents_dict[self.chunk][0]
+            entities = self.cust_ents_dict[self.chunk][1]
+
+            # Calls dict_2_json on the newly created json file
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.doc_entry.get(), self.url_entry.get(), self.crop_entry.get(), self.cvar_entry.get())
+            dict_2_json_file(ann_train_dict, json_file)
+
+            json_file.close()
+            self.msg.config(text="Data successfully saved!", foreground="orange")
+        else:
+            self.msg.config(text="No NER data detected to save", foreground="red")
+
+
     def next_page(self):
         """
         Load the next page.
@@ -1043,30 +1151,18 @@ class CropNerGUI:
 
         It check for unsaved changes and opens a save dialog window, otherwise it destroys the main window, which ends the program
         """
-        # TODO: If a user accidentally clicks the Exit button, the program quits without saving any of the current
-        # annotation. Add functionality to first ask the user if they want to save or discard their current annotation,
-        # if they have any. NOTE: Annotations are saved on self.cust_ents_dict. Checking to see if this dictionary
-        # is empty should be a reasonable check on if a user has annotations that need to be saved.
-
-        # Creates a save dialog window if the dictionary for new annotations is not empty.
+        # Creates a save dialog window if there are annotations in the workspace
         if self.cust_ents_dict:
 
-            # Function called by save and quit button in save dialog window
+            # Button for saving and quitting that invokes save dialog
             def save_and_quit():
                 """
                 Callback method attached to the save and quit button in the save dialog window.
                 """
-                file_prefix = self.raw_file.name.split(".")[0]
-                now = datetime.now()  # current date and time
-                date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-                filename = file_prefix + "_" + date_time + ".json"
-                input_text = self.cust_ents_dict[self.chunk][0]
-                entities = self.cust_ents_dict[self.chunk][1]
-
-                url = self.source_entry.get()
-                ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.pdf_name, url)
-                dict_2_json(ann_train_dict, filename)
+                self.file_save_2()
                 self.rootWin.destroy()
+
+            # Button for discaring changes and quitting
             def discard_and_quit():
                 """
                 Callback method attached to the discard and quit button in the save dialog window.
@@ -1074,7 +1170,7 @@ class CropNerGUI:
                 self.rootWin.destroy()
 
             self.save_dialog = tk.Toplevel(self.rootWin)
-            label = tk.Label(self.save_dialog, text="You currently have unsaved changes to your annotation. Would you like to save or discard them?")
+            label = tk.Label(self.save_dialog, text="You currently have annotations in the workspace. Would you like to save or discard them?")
             label.pack(side=tk.TOP)
             savedialog_discard = tk.Button(self.save_dialog, text="Discard and Quit", command=discard_and_quit)
             savedialog_discard.pack(side=tk.BOTTOM)
