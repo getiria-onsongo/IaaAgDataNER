@@ -1136,32 +1136,18 @@ class CropNerGUI:
 
         It check for unsaved changes and opens a save dialog window, otherwise it destroys the main window, which ends the program
         """
-        # TODO: If a user accidentally clicks the Exit button, the program quits without saving any of the current
-        # annotation. Add functionality to first ask the user if they want to save or discard their current annotation,
-        # if they have any. NOTE: Annotations are saved on self.cust_ents_dict. Checking to see if this dictionary
-        # is empty should be a reasonable check on if a user has annotations that need to be saved.
-
-        # Creates a save dialog window if the dictionary for new annotations is not empty.
+        # Creates a save dialog window if there are annotations in the workspace
         if self.cust_ents_dict:
 
-            # Function called by save and quit button in save dialog window
+            # Button for saving and quitting that invokes save dialog
             def save_and_quit():
                 """
                 Callback method attached to the save and quit button in the save dialog window.
                 """
                 self.file_save_2()
-                #file_prefix = self.raw_file.name.split(".")[0]
-                #now = datetime.now()  # current date and time
-                #date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-                #filename = file_prefix + "_" + date_time + ".json"
-                #input_text = self.cust_ents_dict[self.chunk][0]
-                #entities = self.cust_ents_dict[self.chunk][1]
-
-                #url = self.source_entry.get()
-                #ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.file_name, url)
-                #dict_2_json(ann_train_dict, filename)
                 self.rootWin.destroy()
 
+            # Button for discaring changes and quitting
             def discard_and_quit():
                 """
                 Callback method attached to the discard and quit button in the save dialog window.
