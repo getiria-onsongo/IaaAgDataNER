@@ -15,7 +15,7 @@ import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
 
-# TODO: Even though users can add their own named entities, the tool does not recognize these user
+# TODO *Done by Ruben: Even though users can add their own named entities, the tool does not recognize these user
 # defined named entities once they've quit the application. Basically, when a user customizes the GUI
 # the changes do not persist across sessions. Make customized additions to the GUI persistent across sessions.
 # One approach to implementing this would be to add a starting prompt that asks a user if they want to
