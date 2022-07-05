@@ -54,7 +54,8 @@ def cross_validate(fold_number, data, pos_split):
         train(config_path="senter_ner.cfg", output_path="ner_2021_08_model", overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_validate_data.spacy"})
 
         # evaulate model
-        evaluate(model="ner_2021_08_model", data_path="ner_2021_08/ner_2021_08_dev_data.spacy")
+        output_name = "output_metrics_fold" + str(v) + ".json"
+        evaluate(model="ner_2021_08_model/model-best", data_path="ner_2021_08/ner_2021_08_dev_data.spacy", output=output_name)
 
         if pos_split:
             print("Not implemented.")
