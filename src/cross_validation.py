@@ -40,10 +40,10 @@ class CrossValidation:
         convert(converter="json", input_path="ner_2021_08_dev_data.jsonl", output_dir="ner_2021_08")
 
         # k-fold cross validation
-        for v in range(0, fold_number):
+        for v in range(0, self.k_folds):
             # train - validate split
             training = []
-            for t in range(0, fold_number):
+            for t in range(0, self.k_folds):
                 if t != v:
                     training += folds[t]
             validation = folds[v]
@@ -133,6 +133,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     val = CrossValidation(k_folds=int(args.folds))
-    cross_validate(args.dataset_dir, args.pos_tagging)
+    val.cross_validate(args.dataset_dir, args.pos_tagging)
     avgs = val.average_metrics(val.extract_metrics())
     val.format_metrics(avgs)
