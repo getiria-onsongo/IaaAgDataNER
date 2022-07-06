@@ -445,13 +445,16 @@ class CropNerGUI:
         entity. It then removes this named entity from the application.
         """
         ent_label = self.trait_entry.get().upper()
-        color = self.tag_colors_buttonID[ent_label][0]
-        ent_btn = self.tag_colors_buttonID[ent_label][1]
-        ent_btn.pack_forget()
-        # Remove elements from dictionary and arrays
-        self.tag_colors_buttonID.pop(ent_label)
-        self.colors.remove(color)
-        self.tags.remove(ent_label)
+        try:
+            color = self.tag_colors_buttonID[ent_label][0]
+            ent_btn = self.tag_colors_buttonID[ent_label][1]
+            ent_btn.pack_forget()
+            # Remove elements from dictionary and arrays
+            self.tag_colors_buttonID.pop(ent_label)
+            self.colors.remove(color)
+            self.tags.remove(ent_label)
+        except:
+            self.msg.config(text="WARNING!! The entity you tried to remove does not exist.", foreground="red")
 
     def get_ner_model_dir(self):
         """
