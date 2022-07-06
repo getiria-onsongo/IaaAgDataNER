@@ -101,6 +101,8 @@ class CropNerGUI:
         Current page number
     self.metadata_toggle : bool
         Boolean determining whether the metadata panel should be visible or not
+    self.json_initialized : bool
+        Whether a json file has been initialized in the workspace or not
 
     NOTE: Though the widgets are global variables, we will not document them here. Most are self-evident. We have
     added inline comments in the code itself.
@@ -183,6 +185,7 @@ class CropNerGUI:
         self.cust_ents_dict = {}
         self.page_number = 0
         self.metadata_toggle = False
+        self.json_initialized = False
 
         # ----------------------- Widgets for GUI start here.
         # Default font size for text in ScrolledText. Should be a string format
@@ -250,6 +253,10 @@ class CropNerGUI:
         self.cust_ent_frame = tk.Frame(self.rootWin)
         self.cust_ent_frame.pack(side=tk.TOP, fill="x")
 
+        # Label displaying the current working json file
+        self.working_file_label = tk.Label(self.rootWin, text="Working Annotation File: "+str(self.annotation_file))
+        self.working_file_label.pack(side=tk.TOP)
+
         # Blank label for formatting
         self.blank_label_two = tk.Label(self.cust_ent_frame, text="   ")
         self.blank_label_two.pack(side=tk.LEFT)
@@ -296,6 +303,12 @@ class CropNerGUI:
         self.url_label = tk.Label(self.middle_frame, text="URL")
         # URL entry
         self.url_entry = tk.Entry(self.middle_frame, width=30)
+        # Date label
+        self.date_label = tk.Label(self.middle_frame, text="Date file created")
+        # Date entry
+        self.date_entry = tk.Entry(self.middle_frame, justify=tk.CENTER, width=30)
+        self.date_entry.insert(0, "File not initialized")
+        self.date_entry.config(state=tk.DISABLED)
         # Crop label
         self.crop_label = tk.Label(self.middle_frame, text="Crop")
         # Crop entry
@@ -495,6 +508,8 @@ class CropNerGUI:
             self.doc_entry.pack(side=tk.TOP, pady=(0,10))
             self.url_label.pack(side=tk.TOP)
             self.url_entry.pack(side=tk.TOP, pady=(0,10))
+            self.date_label.pack(side=tk.TOP)
+            self.date_entry.pack(side=tk.TOP, pady=(0,10))
             self.crop_label.pack(side=tk.TOP)
             self.crop_entry.pack(side=tk.TOP, pady=(0,10))
             self.cvar_label.pack(side=tk.TOP)
@@ -567,6 +582,8 @@ class CropNerGUI:
             return
         elif file_type == "json":
             self.annotation_file = f
+            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
+            #TODO: Update metadata fields with what the open json file contains
             self.review_annotations()
         elif file_type == "pdf/txt":
             self.raw_file=f
@@ -753,6 +770,9 @@ class CropNerGUI:
                     page_number = 0
                     input_text = self.text.get(1.0, "end")
 
+            if not self.json_initialized:
+                self.initialize_new_file()                
+
             self.text.delete(1.0, tk.END)
             self.text.insert("1.0", input_text)
 
@@ -817,6 +837,15 @@ class CropNerGUI:
             overlap = True
         return overlap
 
+    def initialize_new_file(self):
+        print("File initialized")
+        self.json_initialized = True
+        self.working_file_label.config(text="Working Annotation File: Untitled.json")
+        self.date_entry.config(state=tk.NORMAL)
+        self.date_entry.delete(0, tk.END)
+        self.date_entry.insert(0, datetime.now().strftime("%m_%d_%Y_%H_%M_%S"))
+        self.date_entry.config(state=tk.DISABLED)
+
     def get_selected_interval(self) -> tuple:
         """
         Determines the index of the first and last characters (char_start, char_end) selected by the user.
@@ -878,6 +907,7 @@ class CropNerGUI:
                 # Add the new NER tag into the dictionary
                 self.cust_ents_dict[self.chunk][1].append((ent_char_start,ent_char_end, tag_label))
             else:
+                self.initialize_new_file()
                 self.cust_ents_dict[self.chunk] = [input_text, [(ent_char_start,ent_char_end, tag_label)]]
 
             # Highlight the new NER  tag
@@ -1063,7 +1093,7 @@ class CropNerGUI:
         if self.cust_ents_dict:
             # Opens a tkinter save as file dialog and stores the file to a var
             date_time = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
-            json_file = fd.asksaveasfile(initialfile=self.file_name.split(".")[0]+"_pg"+str(self.page_number)+"_"+date_time+".json", mode='w', defaultextension='.json')
+            json_file = fd.asksaveasfile(initialfile=self.file_name.split(".")[0]+"_pg"+str(self.page_number)+".json", mode='w', defaultextension='.json')
             if json_file is None or json_file.name[-4:] != "json":
                 self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
                 return
@@ -1072,7 +1102,7 @@ class CropNerGUI:
             entities = self.cust_ents_dict[self.chunk][1]
 
             # Calls dict_2_json on the newly created json file
-            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.doc_entry.get(), self.url_entry.get(), date_time)
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.doc_entry.get(), self.url_entry.get(), datetime.now().strftime("%m_%d_%Y_%H_%M_%S"))
             dict_2_json_file(ann_train_dict, json_file)
 
             json_file.close()
