@@ -569,6 +569,15 @@ class CropNerGUI:
             self.annotation_file = f
             self.review_annotations()
         elif file_type == "pdf/txt":
+            if f.name.endswith(".txt"):
+                # Remove "Next Page" button if loading a txt file, which has no pages.
+                self.next_btn.pack_forget()
+            else:
+                # Bring back the "Next Page" button, placing it before the save button.
+                self.save_btn.pack_forget()
+                self.next_btn.pack(side=tk.LEFT)
+                self.save_btn.pack(side=tk.LEFT)
+
             self.raw_file=f
 
             self.file_prefix = self.raw_file.name.split(".")[0]
