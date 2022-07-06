@@ -3,7 +3,6 @@ from json2py import json_2_dict
 from spacy.cli.train import train
 from spacy.cli.convert import convert
 from spacy.cli.evaluate import evaluate
-from collections import defaultdict
 from agParse import *
 import glob
 import os
@@ -114,27 +113,26 @@ class CrossValidation:
                 print("\t F1: " + str(metrics[k][2]))
 
 if __name__ == '__main__':
-    val = CrossValidation()
-    metrics = val.extract_metrics()
-    avgs = val.average_metrics(metrics)
-    val.format_metrics(avgs)
+    parser = argparse.ArgumentParser(
+        description="Spacy cross validation",
+        epilog='python crossvalidation.py Data/dataset_dir --folds 5 --pos_tagging'
+    )
+    parser.add_argument(
+        'dataset_dir', help='path to dataset'
+    )
+    parser.add_argument(
+        '--folds',
+        action='store', default=5,
+        help='number of folds'
+    )
+    parser.add_argument(
+            '--pos_tagging',
+            action='store_true', default=False,
+            help='do pos tagging after model training'
+    )
+    args = parser.parse_args()
 
-    # parser = argparse.ArgumentParser(
-    #     description="Spacy cross validation",
-    #     epilog='python crossvalidation.py Data/dataset_dir --folds 5 --pos_tagging'
-    # )
-    # parser.add_argument(
-    #     'dataset_dir', help='path to dataset'
-    # )
-    # parser.add_argument(
-    #     '--folds',
-    #     action='store', default=5,
-    #     help='number of folds'
-    # )
-    # parser.add_argument(
-    #         '--pos_tagging',
-    #         action='store_true', default=False,
-    #         help='do pos tagging after model training'
-    # )
-    # args = parser.parse_args()
-    # cross_validate(int(args.folds), args.dataset_dir, args.pos_tagging)
+    val = CrossValidation(k_folds=int(args.folds))
+    cross_validate(args.dataset_dir, args.pos_tagging)
+    avgs = val.average_metrics(val.extract_metrics())
+    val.format_metrics(avgs)
