@@ -1,8 +1,9 @@
 from json2SpacyJson import convertJsonToSpacyJsonl
 from json2py import json_2_dict
-from spacy.cli.train import train
 from spacy.cli.convert import convert
+from spacy.cli.train import train
 from spacy.cli.evaluate import evaluate
+from validation_testing import execute
 from agParse import *
 import glob
 import os
@@ -14,7 +15,7 @@ class CrossValidation:
         self.tags = tags
 
     def cross_validate(self, data, pos_split):
-        # shuffles and divides data into k folds and a dev set
+    # shuffles and divides data into k folds and a dev set
         splits = self.k_folds + 1
         files = glob.glob(data+"/*.json") # add feature to search multiple dirs?
         random.shuffle(files)
@@ -24,11 +25,11 @@ class CrossValidation:
         for i in range(0, splits):
             if i != splits-1:
                 folds.append(files[files_per_divison*start:files_per_divison*end])
-                start += 10
+                start += 1
                 end += 1
             else:
                 folds.append(files[files_per_divison*start:len(files)])
-
+        print(folds)
         # makes spacy binary output dir if it doesn't exist
         if not os.path.exists("ner_2021_08"):
             os.makedirs("ner_2021_08")
@@ -37,7 +38,8 @@ class CrossValidation:
         # this is used for every fold's spacy training & doesn't change
         dev = folds[len(folds)-1]
         convertJsonToSpacyJsonl(outputFileName="ner_2021_08_dev_data.jsonl", filePaths=dev)
-        convert(converter="json", input_path="ner_2021_08_dev_data.jsonl", output_dir="ner_2021_08")
+        convert(input_path="ner_2021_08_dev_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
+        # execute("python3 -m spacy convert --converter json ner_2021_08_dev_data.jsonl ner_2021_08")
 
         # k-fold cross validation
         for v in range(0, self.k_folds):
@@ -53,11 +55,14 @@ class CrossValidation:
             convertJsonToSpacyJsonl(outputFileName="ner_2021_08_validate_data.jsonl", filePaths=validation)
 
             # spacy json to spacy binary
-            convert(converter="json", input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08")
-            convert(converter="json", input_path="ner_2021_08_validate_data.jsonl", output_dir="ner_2021_08")
+            # execute("python3 -m spacy convert --converter json ner_2021_08_training_data.jsonl ner_2021_08")
+            # execute("python3 -m spacy convert --converter json ner_2021_08_validate_data.jsonl ner_2021_08")
+            convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
+            convert(input_path="ner_2021_08_validate_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
             # train model
             train(config_path="senter_ner.cfg", output_path="ner_2021_08_model", overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
+
 
             # evaulate model
             output_name = "metrics_fold" + str(v) + ".json"
