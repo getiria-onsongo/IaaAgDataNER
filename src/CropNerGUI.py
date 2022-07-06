@@ -566,6 +566,7 @@ class CropNerGUI:
             self.msg.config(text="No file was chosen", foreground="red")
             return
         elif file_type == "json":
+            self.next_btn.pack_forget()
             self.annotation_file = f
             self.review_annotations()
         elif file_type == "pdf/txt":
