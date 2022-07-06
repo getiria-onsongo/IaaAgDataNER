@@ -1062,7 +1062,8 @@ class CropNerGUI:
 
         if self.cust_ents_dict:
             # Opens a tkinter save as file dialog and stores the file to a var
-            json_file = fd.asksaveasfile(initialfile=self.file_name.split(".")[0]+"_pg"+str(self.page_number)+".json", mode='w', defaultextension='.json')
+            date_time = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+            json_file = fd.asksaveasfile(initialfile=self.file_name.split(".")[0]+"_pg"+str(self.page_number)+"_"+date_time+".json", mode='w', defaultextension='.json')
             if json_file is None or json_file.name[-4:] != "json":
                 self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
                 return
@@ -1071,7 +1072,7 @@ class CropNerGUI:
             entities = self.cust_ents_dict[self.chunk][1]
 
             # Calls dict_2_json on the newly created json file
-            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.doc_entry.get(), self.url_entry.get(), self.crop_entry.get(), self.cvar_entry.get())
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.doc_entry.get(), self.url_entry.get(), date_time)
             dict_2_json_file(ann_train_dict, json_file)
 
             json_file.close()
