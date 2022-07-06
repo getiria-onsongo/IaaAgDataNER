@@ -26,6 +26,16 @@ class CrossValidation:
 
     Methods
     ----------
+    cross_validate(self, data : str, pos_split : bool)
+        preforms the k-fold cross validation
+    extract_metrics(self, prefix="metrics_fold", suffix=".json")
+        for json files created from spacy evaluation, extracts into dictionary
+    average_metrics(self, metrics : dict)
+        averages values across folds for dictonary created in extract_metrics
+    format_metrics(self, metrics : dict)
+        prints formated contents of dictonary created in average_metrics
+    create_dirs(self, dirs : list[str])
+        for a list of directories, checks if they exist and if not creates them
     """
     def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
         self.k_folds = k_folds
