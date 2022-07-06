@@ -823,11 +823,12 @@ class CropNerGUI:
             # Get page number
             page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
             if not page_num.isdigit(): # Either invalid or a range.
-                if self.page_num_is_valid(page_num) == False: # Invalid
-                    self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
-                    page_num = 1
-                else: # Range
-                    self.handle_page_range(page_num)
+                if not selection == "selection":
+                    if self.page_num_is_valid(page_num) == False: # Invalid
+                        self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
+                        page_num = 1
+                    else: # Range
+                        self.handle_page_range(page_num)
             else: # Single valid page
                 self.page_number = int(page_num)
                 self.chunk = self.page_number
@@ -1054,6 +1055,8 @@ class CropNerGUI:
             doc = data['doc']
             url = data['url']
             """
+            # TODO for myself (this todo should only be on dev_escobar) - put this in a try so that an invalid chunk value
+            # won't ruin everything
             self.chunk = int(data['chunk'])
             self.page_number = self.chunk
 
