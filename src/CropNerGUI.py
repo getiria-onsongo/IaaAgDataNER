@@ -1055,10 +1055,13 @@ class CropNerGUI:
             doc = data['doc']
             url = data['url']
             """
-            # TODO for myself (this todo should only be on dev_escobar) - put this in a try so that an invalid chunk value
-            # won't ruin everything
-            self.chunk = int(data['chunk'])
-            self.page_number = self.chunk
+            
+            try:
+                self.chunk = int(data['chunk'])
+                self.page_number = self.chunk
+            except:
+                self.msg.config(text="json did not contain a valid chunk. Continuing to load file anyway.", foreground="red")
+                self.page_number = 0
 
             # Empty text box so we can load annotations
             self.text.delete(1.0, tk.END)
