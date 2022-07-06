@@ -360,6 +360,7 @@ class CropNerGUI:
         self.page_label.pack(side=tk.LEFT)
         self.page_entry = tk.Entry(self.open_frame, width=5)
         self.page_entry.pack(side=tk.LEFT)
+        self.page_entry.bind("<Return>", self.load_page_from_button)
         # Select annotation file
         self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=20,
                                         command=partial(self.open_file, "json"))
@@ -684,7 +685,7 @@ class CropNerGUI:
             self.page_entry.insert(0, entry)
         return entry
 
-    def load_page_from_button(self):
+    def load_page_from_button(self, event=None):
         """
         Loading the page can cause warnings to pop on on the bottom, especially with ranges.
         If you press "load data" and the warning from your last page load is still there, it
