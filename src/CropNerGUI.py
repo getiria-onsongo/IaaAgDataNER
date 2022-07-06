@@ -280,7 +280,7 @@ class CropNerGUI:
 
         # Text box. Note, height defines height in widget in lines based on font size. If the font size is bigger,
         # you end up with a bigger textbox because each line will occupy more space.
-        self.text = ScrolledText(self.middle_frame, height=25, width=140, font="Times "+self.font_size, wrap='word')
+        self.text = ScrolledText(self.middle_frame, height=20, width=140, font="Times "+self.font_size, wrap='word')
         self.text.focus_force()
         self.text.pack(side=tk.TOP)
 
