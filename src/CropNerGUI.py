@@ -445,13 +445,16 @@ class CropNerGUI:
         entity. It then removes this named entity from the application.
         """
         ent_label = self.trait_entry.get().upper()
-        color = self.tag_colors_buttonID[ent_label][0]
-        ent_btn = self.tag_colors_buttonID[ent_label][1]
-        ent_btn.pack_forget()
-        # Remove elements from dictionary and arrays
-        self.tag_colors_buttonID.pop(ent_label)
-        self.colors.remove(color)
-        self.tags.remove(ent_label)
+        try:
+            color = self.tag_colors_buttonID[ent_label][0]
+            ent_btn = self.tag_colors_buttonID[ent_label][1]
+            ent_btn.pack_forget()
+            # Remove elements from dictionary and arrays
+            self.tag_colors_buttonID.pop(ent_label)
+            self.colors.remove(color)
+            self.tags.remove(ent_label)
+        except:
+            self.msg.config(text="WARNING!! The entity you tried to remove does not exist.", foreground="red")
 
     def get_ner_model_dir(self):
         """
@@ -820,11 +823,12 @@ class CropNerGUI:
             # Get page number
             page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
             if not page_num.isdigit(): # Either invalid or a range.
-                if self.page_num_is_valid(page_num) == False: # Invalid
-                    self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
-                    page_num = 1
-                else: # Range
-                    self.handle_page_range(page_num)
+                if not selection == "selection":
+                    if self.page_num_is_valid(page_num) == False: # Invalid
+                        self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
+                        page_num = 1
+                    else: # Range
+                        self.handle_page_range(page_num)
             else: # Single valid page
                 self.page_number = int(page_num)
                 self.chunk = self.page_number
@@ -1051,8 +1055,13 @@ class CropNerGUI:
             doc = data['doc']
             url = data['url']
             """
-            self.chunk = int(data['chunk'])
-            self.page_number = self.chunk
+            
+            try:
+                self.chunk = int(data['chunk'])
+                self.page_number = self.chunk
+            except:
+                self.msg.config(text="json did not contain a valid chunk. Continuing to load file anyway.", foreground="red")
+                self.page_number = 0
 
             # Empty text box so we can load annotations
             self.text.delete(1.0, tk.END)
