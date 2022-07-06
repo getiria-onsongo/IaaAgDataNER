@@ -8,6 +8,7 @@ from agParse import *
 import glob
 import os
 import random
+from predict import Predict
 
 class CrossValidation:
     def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
@@ -39,7 +40,6 @@ class CrossValidation:
         dev = folds[len(folds)-1]
         convertJsonToSpacyJsonl(outputFileName="ner_2021_08_dev_data.jsonl", filePaths=dev)
         convert(input_path="ner_2021_08_dev_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
-        # execute("python3 -m spacy convert --converter json ner_2021_08_dev_data.jsonl ner_2021_08")
 
         # k-fold cross validation
         for v in range(0, self.k_folds):
@@ -50,29 +50,33 @@ class CrossValidation:
                     training += folds[t]
             validation = folds[v]
 
-            # json to spacy json
+            # convert training data
             convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
-            convertJsonToSpacyJsonl(outputFileName="ner_2021_08_validate_data.jsonl", filePaths=validation)
-
-            # spacy json to spacy binary
-            # execute("python3 -m spacy convert --converter json ner_2021_08_training_data.jsonl ner_2021_08")
-            # execute("python3 -m spacy convert --converter json ner_2021_08_validate_data.jsonl ner_2021_08")
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
-            convert(input_path="ner_2021_08_validate_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
+
 
             # train model
-            train(config_path="senter_ner.cfg", output_path="ner_2021_08_model", overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
+            train(config_path="senter_ner.cfg", output_path="cv_2021_08_model", overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
 
             # evaulate model
-            output_name = "metrics_fold" + str(v) + ".json"
-            evaluate(model="ner_2021_08_model/model-best", data_path="ner_2021_08/ner_2021_08_validate_data.spacy", output=output_name)
-
             if pos_split:
-                print("Not implemented.")
+                # do pos tagging & entity expansion
+                name = "pos_cv_output" + str(v)
+                predict = Predict("cv_2021_08_model/model-best", name)
+                predict.preprocess(validate)
+                # evaluate
+                # need to implement
 
-            metrics = average_metrics()
-            print(metrics)
+            else:
+                # convert validate data
+                convertJsonToSpacyJsonl(outputFileName="ner_2021_08_validate_data.jsonl", filePaths=validation)
+                convert(input_path="ner_2021_08_validate_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
+                output_name = "metrics_fold" + str(v) + ".json"
+
+                # evaluate
+                evaluate(model="ner_2021_08_model/model-best", data_path="ner_2021_08/ner_2021_08_validate_data.spacy", output=output_name)
+
 
     def extract_metrics(self, prefix="metrics_fold", suffix=".json"):
         metrics = defaultdict(list)

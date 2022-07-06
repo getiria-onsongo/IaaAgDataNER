@@ -77,7 +77,7 @@ class Predict:
         saves json for a given page
     """
 
-    def __init__(self, model_dir, dataset_dir, output_dir, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
+    def __init__(self, model_dir, output_dir, dataset_dir=None, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
         self.model_dir = model_dir
         self.dataset_dir = dataset_dir
         self.output_dir = output_dir
@@ -95,24 +95,28 @@ class Predict:
         self.cust_ents_dict = {}
         self.nlp.add_pipe("compound_trait_entities", after="ner")
 
-    def process_files(self):
+    def process_files(self, files=None, json=False):
         """
         Gets a list of txt files from the dataset directory, then does ner
         tagging on them before saving as json.
         """
-        files = glob.glob(self.dataset_dir+"/*"+self.dataset_suffix)
+        if files == None:
+            files = glob.glob(self.dataset_dir+"/*"+self.dataset_suffix)
         print("%s files to process." % str(len(files)))
 
         for f in files:
             self.cust_ents_dict = {}
-            text = self.get_text(f)
+            if json:
+                text = self.get_json_text(f)
+            else:
+                text = self.get_text(f)
             page_number = extract_page_num(f, self.dataset_suffix)
             self.pre_tag(text, page_number)
             json_name = self.file_save(f, "", page_number)
 
     def get_text(self, file : str):
         """
-        Loads text from a given file to be able to preict on it
+        Loads text from a given  file to be able to predict on it
 
         Parameters
         ----------
@@ -124,6 +128,20 @@ class Predict:
         with open(file) as f:
             text = f.read()
         return text
+
+
+    def get_json_text(self, file : str):
+        """
+        Loads text from a given json file to be able to predict on it
+
+        Parameters
+        ----------
+        file : file name
+
+        Returns text from json files as a string.
+        """
+        json_dict = json_2_dict(file)
+        return json_dict["sentences"]
 
     def tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
         """
