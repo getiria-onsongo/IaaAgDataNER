@@ -95,6 +95,7 @@ class Predict:
         self.cust_ents_dict = {}
         self.nlp.add_pipe("compound_trait_entities", after="ner")
 
+
     def process_files(self, files=None, json=False):
         """
         Gets a list of txt files from the dataset directory, then does ner
@@ -129,7 +130,6 @@ class Predict:
             text = f.read()
         return text
 
-
     def get_json_text(self, file : str):
         """
         Loads text from a given json file to be able to predict on it
@@ -141,7 +141,8 @@ class Predict:
         Returns text from json files as a string.
         """
         json_dict = json_2_dict(file)
-        return json_dict["sentences"]
+
+        return next(iter(json_dict["sentences"]))
 
     def tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
         """
@@ -270,7 +271,6 @@ class Predict:
         if name == None:
             path_no_suffix = pdf_name.split(self.dataset_suffix)[0].split("/")
             name = path_no_suffix[len(path_no_suffix)-1].split("_p")[0] + "_p"
-            print(name)
         output_filename = self.output_dir + "/" + name + chunk + self.json_suffix
 
         if os.path.isfile(output_filename):
