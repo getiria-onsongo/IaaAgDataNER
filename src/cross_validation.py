@@ -46,7 +46,7 @@ class CrossValidation:
 
     def cross_validate(self, data, pos_split):
         # shuffles and divides data into k folds and a dev set
-        print("Shuffling and splitting data..")
+        print("Shuffling and splitting data...")
         splits = self.k_folds + 1
         files = glob.glob(data+"/*.json") # add feature to search multiple dirs?
         random.shuffle(files)
@@ -66,7 +66,7 @@ class CrossValidation:
 
         # create and convert the dev set
         # this is used for every fold's spacy training & doesn't change
-        print("Creating dev data...")
+        print("\nCreating and converting dev data...")
         print("____________________________")
         dev = folds[len(folds)-1]
         convertJsonToSpacyJsonl(outputFileName="ner_2021_08_dev_data.jsonl", filePaths=dev)
@@ -75,7 +75,7 @@ class CrossValidation:
         fold_counter = 1
         # k-fold cross validation
         for v in range(0, self.k_folds):
-            print("On fold %s:" %fold_counter)
+            print("\nOn fold %s:" %fold_counter)
             fold_counter += 1
             # train - validate split
             training = []
@@ -83,10 +83,10 @@ class CrossValidation:
                 if t != v:
                     training += folds[t]
             validation = folds[v]
-            self.test(validation, v)
 
             # convert training data into spacy json and then into spacy binary
-            print("Converting training data..")
+            print("\nConverting training data...")
+            print("____________________________")
             convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
@@ -95,7 +95,7 @@ class CrossValidation:
 
             # evaulate model
             if pos_split:
-                print("Creating output directories for POS entity expansion...")
+                print("\nCreating output directories for POS entity expansion...")
                 # create needed directories
                 json_name = "pos_val_" + str(v) + "_json"
                 bratt_name = "pos__val_" + str(v) + "_bratt"
@@ -104,7 +104,7 @@ class CrossValidation:
                 self.create_dirs([json_name, bratt_name, gold_json_name, gold_bratt_name])
 
                 # do pos tagging & entity expansion
-                print("Entity expansion post-processing..")
+                print("Entity expansion post-processing...")
                 predict = Predict(model_dir="cv_2021_08_model/model-best", output_dir=json_name, dataset_suffix="_td.json")
                 predict.process_files(validation, json=True)
 
@@ -122,7 +122,7 @@ class CrossValidation:
                 print("Converting to bratt...")
                 dataset_to_bratt(gold_json_name, gold_bratt_name)
                 dataset_to_bratt(json_name, bratt_name)
-                print("Results from this fold are ready for Medacy!")
+                print("Results from this fold are ready for Medacy!\n")
 
             else:
                 # convert validate data
@@ -183,28 +183,6 @@ class CrossValidation:
         for dir in dirs:
             if not os.path.exists(dir):
                 os.makedirs(dir)
-    def test(self, validation, v):
-        json_name = "pos_cv_val_" + str(v) + "_json"
-        bratt_name = "pos_cv_val_" + str(v) + "_bratt"
-        gold_json_name = "pos_cv_val_" + str(v) + "_gold_json"
-        gold_bratt_name = "pos_cv_val_" + str(v) + "_gold_bratt"
-        self.create_dirs([json_name, bratt_name, gold_json_name, gold_bratt_name])
-
-        # do pos tagging & entity expansion
-        predict = Predict(model_dir="senter_ner_model/model-best", output_dir=json_name, dataset_suffix="_td.json")
-        predict.process_files(validation, json=True)
-
-        # create gold standard dataset and convert both to bratt
-        # can now be run through medacy's inter_dataset_agreement tool for evaulation
-        for file in validation:
-            json_file = open(file)
-            contents = json.load(json_file)
-            file_name_list = file.split("/")
-            file_name = file_name_list[len(file_name_list)-1]
-            with open(gold_json_name+"/"+file_name, 'w') as f:
-                json.dump(contents, f)
-        dataset_to_bratt(gold_json_name, gold_bratt_name)
-        dataset_to_bratt(json_name, bratt_name)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
