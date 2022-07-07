@@ -10,6 +10,7 @@ import os
 import json
 import random
 from predict import Predict
+from collections import defaultdict
 from dataset2bratt import dataset_to_bratt
 
 class CrossValidation:
@@ -150,13 +151,13 @@ class CrossValidation:
 
     def format_metrics(self, metrics):
         print("ALL:")
-        print("\t precesion: " + str(metrics["ALL"][0]))
+        print("\t precision: " + str(metrics["ALL"][0]))
         print("\t recall: " +  str(metrics["ALL"][1]))
         print("\t F1: " +  str(metrics["ALL"][2]))
         for k,v in metrics.items():
             if k != "ALL":
                 print(k+":")
-                print("\t precesion: " + str(metrics[k][0]))
+                print("\t precision: " + str(metrics[k][0]))
                 print("\t recall: " + str(metrics[k][1]))
                 print("\t F1: " + str(metrics[k][2]))
 
@@ -186,6 +187,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     val = CrossValidation(k_folds=int(args.folds))
-    val.cross_validate(args.dataset_dir, args.pos_tagging)
+    # val.cross_validate(args.dataset_dir, args.pos_tagging)
     avgs = val.average_metrics(val.extract_metrics())
     val.format_metrics(avgs)
