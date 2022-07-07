@@ -219,7 +219,7 @@ class Predict:
             ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
         return ent
 
-    def adj_combine_noun_ent(self, doc : spacy.doc, current_index : int, ent : str, label : str) -> str:
+    def adj_combine_noun_ent(self, doc : spacy.tokens.Doc, current_index : int, ent : str, label : str) -> str:
         """
         If the first token in an entity is a noun or proper noun, finds all
         adjectives proceeding the entity and expands the span to contain

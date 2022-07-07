@@ -1,20 +1,37 @@
-from medacy.tools.calculators.inter_dataset_agreement import measure_dataset
-from medacy.tools.calculators.inter_dataset_agreement import format_results
-from medacy.data.dataset import Dataset
+from inter_dataset_agreement import measure_dataset
+from inter_dataset_agreement import format_results
+from dataset import Dataset
 import json
 
-gold_dataset = Dataset("Data/converted/DavisLJ11")
-spacy_dataset = Dataset("Data/predictions/DavisLJ11SpacyAnn")
-pos_dataset = Dataset("Data/predictions/DavisLJ11PosAnn")
 
-print("Spacy results")
+print("Fold 0")
 print("____________________________")
-result = measure_dataset(gold_dataset, spacy_dataset, 'lenient')
+result = measure_dataset(Dataset("fold_0_results/gold_bratt"), Dataset("fold_0_results/pred_bratt"), 'lenient')
 output = format_results(result)
 print(output)
 
-print("\nPOS results")
+print("\nFold 1")
 print("____________________________")
-result = measure_dataset(gold_dataset, pos_dataset, 'lenient')
+result = measure_dataset(Dataset("fold_1_results/gold_bratt"), Dataset("fold_1_results/pred_bratt"), 'lenient')
+output = format_results(result)
+print(output)
+
+
+print("\nFold 2")
+print("____________________________")
+result = measure_dataset(Dataset("fold_2_results/gold_bratt"), Dataset("fold_2_results/pred_bratt"), 'lenient')
+output = format_results(result)
+print(output)
+
+
+print("\nFold 3")
+print("____________________________")
+result = measure_dataset(Dataset("fold_3_results/gold_bratt"), Dataset("fold_3_results/pred_bratt"), 'lenient')
+output = format_results(result)
+print(output)
+
+print("\nFold 4")
+print("____________________________")
+result = measure_dataset(Dataset("fold_4_results/gold_bratt"), Dataset("fold_4_results/pred_bratt"), 'lenient')
 output = format_results(result)
 print(output)
