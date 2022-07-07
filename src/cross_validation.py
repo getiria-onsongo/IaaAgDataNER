@@ -37,7 +37,7 @@ class CrossValidation:
     format_metrics(self, metrics : dict)
         prints formated contents of dictonary created in average_metrics
     create_dirs(self, dirs : list[str])
-        for a list of directories, checks if they exist and if not creates them
+        creates directories from a given list
     """
     def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
         self.k_folds = k_folds
@@ -45,6 +45,9 @@ class CrossValidation:
         warnings.filterwarnings('ignore')
 
     def cross_validate(self, data, pos_split):
+        """
+
+        """
         # shuffles and divides data into k folds and a dev set
         print("Shuffling and splitting data...")
         splits = self.k_folds + 1
@@ -168,6 +171,13 @@ class CrossValidation:
         return avg_metrics
 
     def format_metrics(self, metrics):
+        """
+        Takes a dictonary of metric averages, and formats & prints the metrics.
+
+        Parameters
+        ----------
+
+        """
         print("ALL:")
         print("\t precision: " + str(metrics["ALL"][0]))
         print("\t recall: " +  str(metrics["ALL"][1]))
@@ -180,6 +190,17 @@ class CrossValidation:
                 print("\t F1: " + str(metrics[k][2]))
 
     def create_dirs(self, dirs):
+        """
+        Takes a list of directories, and for each one checks if it exists, and
+        if not creates the directory. Unless specified in the directory's name,
+        creates the new directory in the current directory.
+
+        Parameters
+        ----------
+        dirs : list[str]
+            list of directories to create, can be a list of just one directory,
+            if only one needs to be created.
+        """
         for dir in dirs:
             if not os.path.exists(dir):
                 os.makedirs(dir)
@@ -206,5 +227,6 @@ if __name__ == '__main__':
 
     val = CrossValidation(k_folds=int(args.folds))
     val.cross_validate(args.dataset_dir, args.pos_tagging)
-    avgs = val.average_metrics(val.extract_metrics())
-    val.format_metrics(avgs)
+    if args.pos_tagging is False:
+        avgs = val.average_metrics(val.extract_metrics())
+        val.format_metrics(avgs)

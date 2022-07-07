@@ -62,22 +62,24 @@ class Predict:
     process_files(self)
         process files by running through model then converting and saving
         as json files
-    get_text(self, file : str)
-        reads in file and returns contents as a string
+    get_text(self, file : str) -> str
+        reads in a text file and returns contents
+    get_json_text(self, file : str) -> str
+        reads in a json annotation file and returns text contents
     tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
         creates spacy doc from inputed text and the trained ner spacy model
-    pre_tag(self, pdf_document : pyxpdf.Document, page_number : int)
+    pre_tag(self, input_text : str, page_number : int)
         finds entities for a given page in a pdf
-    get_pos(self, ent : str )
+    get_pos(self, ent : str ) -> str
         finds the part of speech for an entity and expands if needed
-    adj_combine_noun_ent(self, doc : spacy.Doc, current_index : int, ent :
-    str, label : str)
+    adj_combine_noun_ent(self, doc : spacy.tokens.Doc, current_index : int, ent :
+    str, label : str) -> str
         expands an entity to contain adjectives
-    file_save(self, pdf_name : str, url : str, chunk : int)
+    file_save(self, pdf_name : str, url : str, chunk : int) -> str
         saves json for a given page
     """
 
-    def __init__(self, model_dir, output_dir, dataset_dir=None, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
+    def __init__(self, model_dir : str, output_dir : str, dataset_dir=None, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
         self.model_dir = model_dir
         self.dataset_dir = dataset_dir
         self.output_dir = output_dir
@@ -96,32 +98,45 @@ class Predict:
         self.nlp.add_pipe("compound_trait_entities", after="ner")
 
 
-    def process_files(self, files=None, json=False):
+    def process_files(self, file_list=None, json=False):
         """
         Gets a list of txt files from the dataset directory, then does ner
         tagging on them before saving as json.
-        """
-        if files == None:
-            files = glob.glob(self.dataset_dir+"/*"+self.dataset_suffix)
-        print("%s files to process." % str(len(files)))
 
+        Parameters
+        ----------
+        file_list : list[str]
+            list of file names to use instead of searching a directory for files
+        json : bool
+            flag to use json text reader
+        """
+        if file_list == None:
+            # get files from directory
+            files = glob.glob(self.dataset_dir + "/*" + self.dataset_suffix)
+        else:
+            files = file_list
+
+        print("%s files to process." % str(len(files)))
         for f in files:
             self.cust_ents_dict = {}
+            # get text & page numbers from files
             if json:
                 text = self.get_json_text(f)
             else:
                 text = self.get_text(f)
             page_number = extract_page_num(f, self.dataset_suffix)
+            # predict on text and save as new json files
             self.pre_tag(text, page_number)
             json_name = self.file_save(f, "", page_number)
 
-    def get_text(self, file : str):
+    def get_text(self, file : str) -> str:
         """
-        Loads text from a given  file to be able to predict on it
+        Loads text from a given text file to be able to predict on it
 
         Parameters
         ----------
-        file : file name
+        file : str
+            file name
 
         Returns text from file as a string.
         """
@@ -130,23 +145,30 @@ class Predict:
             text = f.read()
         return text
 
-    def get_json_text(self, file : str):
+    def get_json_text(self, file : str) -> str:
         """
         Loads text from a given json file to be able to predict on it
 
         Parameters
         ----------
-        file : file name
+        file : str
+            file name
 
         Returns text from json files as a string.
         """
         json_dict = json_2_dict(file)
-
         return next(iter(json_dict["sentences"]))
 
     def tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
         """
         Use NLP pipeline to identify named entities in the text.
+
+        Parameters
+        ----------
+        text : str
+            text to give spacy model
+
+        Returns spacy doc
         """
         doc = self.nlp(text)
         return doc
@@ -177,8 +199,7 @@ class Predict:
             tags = self.cust_ents_dict[page_number]
             self.cust_ents_dict[page_number] = [input_text, tags]
 
-
-    def get_pos(self, ent):
+    def get_pos(self, ent : str) -> str:
         """
         Proceses a given entity with rules that use part of speech data to
         expand the entity span if needed.
@@ -196,10 +217,9 @@ class Predict:
             label = ent.label_
             # functions that contain rules to expand the entity's span
             ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
-            # ent = self.num_combine_ent(doc, current_index, ent, label)
         return ent
 
-    def adj_combine_noun_ent(self, doc, current_index, ent, label):
+    def adj_combine_noun_ent(self, doc : spacy.doc, current_index : int, ent : str, label : str) -> str:
         """
         If the first token in an entity is a noun or proper noun, finds all
         adjectives proceeding the entity and expands the span to contain
@@ -245,7 +265,7 @@ class Predict:
                     print()
         return ent
 
-    def file_save(self, pdf_name : str, url : str, chunk : str):
+    def file_save(self, pdf_name : str, url : str, chunk : str) -> str:
         """
         Simplifed version of GUI save file & continue_func which saves
         created json files to the output directory
@@ -266,13 +286,17 @@ class Predict:
             url of pdf file
         chunk : int
             current chunk of file being saved, corresponds to page number
+
+        Returns saved file name.
         """
+        # generates file name
         name = self.json_prefix
         if name == None:
             path_no_suffix = pdf_name.split(self.dataset_suffix)[0].split("/")
             name = path_no_suffix[len(path_no_suffix)-1].split("_p")[0] + "_p"
         output_filename = self.output_dir + "/" + name + chunk + self.json_suffix
 
+        # creates file copy if needed
         if os.path.isfile(output_filename):
             if self.no_overwrite:
                 print("Making file copy...")
@@ -282,6 +306,7 @@ class Predict:
             else:
                 print("File will be overwritten.")
 
+        # turns data dict to a json and saves to file
         if len(self.cust_ents_dict) == 0:
             print("No annotations to save.")
         else:
@@ -341,6 +366,6 @@ if __name__ == '__main__':
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        preprocess = Predict(model, dataset_dir, output_dir, spacy_only=spacy_only,
+        preprocess = Predict(model, output_dir, dataset_dir, spacy_only=spacy_only,
                              json_prefix=json_prefix, json_suffix=json_suffix, dataset_suffix=dataset_suffix, no_overwrite=no_overwrite)
         preprocess.process_files()
