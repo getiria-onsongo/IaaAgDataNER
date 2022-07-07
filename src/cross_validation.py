@@ -58,7 +58,6 @@ class CrossValidation:
         pos_split : bool
             flag to do pos tagging and entity expansion
         """
-        self.medacy_eval()
         # shuffles and divides data into k folds and a dev set
         print("Shuffling and splitting data...")
         splits = self.k_folds + 1
