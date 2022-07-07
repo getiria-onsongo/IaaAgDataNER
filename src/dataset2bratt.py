@@ -9,13 +9,13 @@ function
 
 Methods
 -------
-extract_page_num(self, f : str, suffix : str)
+extract_page_num(self, f : str, suffix : str) -> str
     for file names with page numbers before the suffix, extracts the numerals
-dataset_to_bratt(input_dir, output_dir, file_pattern : str)
+dataset_to_bratt(input_dir : str, output_dir : str, file_pattern : str)
     converts a json dataset to bratt format
 """
 
-def extract_page_num(f : str, suffix : str):
+def extract_page_num(f : str, suffix : str) -> str:
     """
     Gets page number for files where the page numbers are the one or two
     positive integers found directly before the file suffix
@@ -36,7 +36,7 @@ def extract_page_num(f : str, suffix : str):
             num = f[len(f)-(len(suffix)+2)] + num
     return num
 
-def dataset_to_bratt(input_dir, output_dir, file_pattern="/*_td.json"):
+def dataset_to_bratt(input_dir : str, output_dir : str, file_pattern="/*_td.json"):
     """
     Converts a whole dataset into bratt and txt files.
 
