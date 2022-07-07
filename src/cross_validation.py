@@ -30,13 +30,13 @@ class CrossValidation:
     ----------
     cross_validate(self, data : str, pos_split : bool)
         preforms the k-fold cross validation
-    extract_metrics(self, prefix="metrics_fold", suffix=".json")
+    extract_metrics(self, prefix="metrics_fold", suffix=".json") -> dict
         for json files created from spacy evaluation, extracts into dictionary
-    average_metrics(self, metrics : dict)
+    average_metrics(self, metrics : dict) -> dict
         averages values across folds for dictonary created in extract_metrics
     format_metrics(self, metrics : dict)
         prints formated contents of dictonary created in average_metrics
-    create_dirs(self, dirs : list[str])
+    create_dirs(self, dirs : list)
         creates directories from a given list
     """
     def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
@@ -44,9 +44,16 @@ class CrossValidation:
         self.tags = tags
         warnings.filterwarnings('ignore')
 
-    def cross_validate(self, data, pos_split):
+    def cross_validate(self, data : str, pos_split : bool):
         """
+        Preforms cross validation on spacy model.
 
+        Parameters
+        ----------
+        data : str
+            directory name where data is found
+        pos_split : bool
+            flag to do pos tagging and entity expansion
         """
         # shuffles and divides data into k folds and a dev set
         print("Shuffling and splitting data...")
@@ -138,7 +145,19 @@ class CrossValidation:
                 print("Evaluating...")
                 evaluate(model="ner_2021_08_model/model-best", data_path="ner_2021_08/ner_2021_08_validate_data.spacy", output=output_name)
 
-    def extract_metrics(self, prefix="metrics_fold", suffix=".json"):
+    def extract_metrics(self, prefix="metrics_fold", suffix=".json") -> dict:
+        """
+        Extracts a dictonary of metrics from spacy json file of metrics.
+
+        Parameters
+        ----------
+        prefix : string
+            start of name for each json file, going up to fold number
+        suffix : string
+            end of name for each json file, starting after fold number
+
+        Returns dictonary of metrics.
+        """
         metrics = defaultdict(list)
         for i in range(0, self.k_folds):
             file_name = prefix + str(i) + suffix
@@ -149,7 +168,17 @@ class CrossValidation:
                     metrics[tag].append(data)
         return metrics
 
-    def average_metrics(self, metrics):
+    def average_metrics(self, metrics : dict) -> dict:
+        """
+        Averages across folds metrics for each label as well as overall.
+
+        Parameters
+        ----------
+        metrics : dict
+            dictonary of metrics extracted from spacy json
+
+        Returns dictonary of averages.
+        """
         avg_metrics = {}
         p_all = []
         r_all = []
@@ -170,13 +199,14 @@ class CrossValidation:
             avg_metrics["ALL"] = [sum(p_all)/len(p_all), sum(r_all)/len(r_all), sum(f_all)/len(f_all)]
         return avg_metrics
 
-    def format_metrics(self, metrics):
+    def format_metrics(self, metrics : dict):
         """
         Takes a dictonary of metric averages, and formats & prints the metrics.
 
         Parameters
         ----------
-
+        metrics : dict
+            dictonary of the averaged metrics
         """
         print("ALL:")
         print("\t precision: " + str(metrics["ALL"][0]))
@@ -189,7 +219,7 @@ class CrossValidation:
                 print("\t recall: " + str(metrics[k][1]))
                 print("\t F1: " + str(metrics[k][2]))
 
-    def create_dirs(self, dirs):
+    def create_dirs(self, dirs : list):
         """
         Takes a list of directories, and for each one checks if it exists, and
         if not creates the directory. Unless specified in the directory's name,

@@ -52,7 +52,7 @@ class Predict:
         model for part of speech tagging
     self.nlp : spacy.Language
         model for ner tagging
-    self.tags : list[str]
+    self.tags : list
         list of possible ner tags
     self.cust_ents_dict : dict
         dictionary to keep track of entities found
