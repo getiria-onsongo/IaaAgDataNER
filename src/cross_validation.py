@@ -38,7 +38,7 @@ class CrossValidation:
     create_dirs(self, dirs : list[str])
         for a list of directories, checks if they exist and if not creates them
     """
-    def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
+    def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
         self.k_folds = k_folds
         self.tags = tags
 
@@ -124,8 +124,9 @@ class CrossValidation:
             file_name = prefix + str(i) + suffix
             json_dict = json_2_dict(file_name)
             for tag in self.tags:
-                data = json_dict["ents_per_type"][tag]
-                metrics[tag].append(data)
+                if tag in json_dict["ents_per_type"].keys():
+                    data = json_dict["ents_per_type"][tag]
+                    metrics[tag].append(data)
         return metrics
 
     def average_metrics(self, metrics):
