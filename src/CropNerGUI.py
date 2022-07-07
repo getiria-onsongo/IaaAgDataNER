@@ -1,4 +1,5 @@
 #!/bin/env python3
+import platform
 import spacy.tokens
 
 from agParse import *
@@ -208,6 +209,11 @@ class CropNerGUI:
             # Create button
             btn = tk.Button(self.top_frame, highlightbackground=color_value,text=tag_value,
                             command=partial(self.get_ner, tag_value))
+            # Button colors already behaved differently between all 3 major platforms (highlightbackground
+            # behaves... weirdly on MacOS, just has an outline for Linux, and doesn't work on Windows). Now
+            # it still behaves differently on all of them, but fully highlights the button on Windows.
+            if(platform.system() == "Windows"):
+                btn.config(bg=color_value)
             btn.pack(side=tk.LEFT)
             self.tag_colors_buttonID[tag_value] = [color_value, btn]
 
@@ -434,6 +440,8 @@ class CropNerGUI:
             self.tags.append(ent_label)
             btn = tk.Button(self.cust_ent_frame, highlightbackground=color, text=ent_label,
                             command=partial(self.get_ner, ent_label))
+            if(platform.system() == "Windows"):
+                btn.config(bg=color)
             btn.pack(side=tk.LEFT)
             self.text.tag_configure(ent_label, background=color)
             self.tag_colors_buttonID[ent_label] = [color, btn]
