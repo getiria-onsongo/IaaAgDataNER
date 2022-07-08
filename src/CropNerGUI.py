@@ -150,8 +150,6 @@ class CropNerGUI:
         Remove all the NER tags on text loaded in the text box.
     tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc
         Use NLP pipeline to identify named entities in the text.
-    continue_func(self, save_choice: str)
-        Continue the process of either saving annotation in a new file or overwriting an existing file.
     file_save(self)
         Save current annotation.
     next_page(self)
@@ -349,40 +347,6 @@ class CropNerGUI:
         # Label to display messages
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
         self.msg.pack(side=tk.LEFT)
-        # Continue button
-        self.continue_btn = tk.Button(self.msg_frame, text="Continue", width=10,
-                                      command=partial(self.continue_func, "save"))
-        self.continue_btn.pack(side=tk.LEFT)
-        self.continue_btn.pack_forget()
-        # Button to overwrite a file when saving
-        self.overwrite_btn = tk.Button(self.msg_frame, text="Overwrite", width=10,
-                                       command=partial(self.continue_func, "save"))
-        self.overwrite_btn.pack(side=tk.LEFT)
-        self.overwrite_btn.pack_forget()
-        # Button to create a copy as opposed to overwriting a file
-        self.copy_btn = tk.Button(self.msg_frame, text="Create Copy", width=10,
-                                  command=partial(self.continue_func, "copy"))
-        self.copy_btn.pack(side=tk.LEFT)
-        self.copy_btn.pack_forget()
-
-        # Metadata Frame. When a user is about to save a file, two text entry options will appear giving users
-        # an option to enter meta-data for the annotation such as source of the PDF/text
-        self.metadata_frame = tk.Frame(self.rootWin)
-        self.metadata_frame.pack(side=tk.TOP)
-        # Shows the name that will be used for the annotation file
-        self.ann_file_label = tk.Label(self.metadata_frame, text="Annotation File Name (json):", width=20, anchor="w")
-        self.ann_file_label.pack(side=tk.LEFT)
-        self.ann_file_label.pack_forget()
-        self.ann_file_entry = tk.Entry(self.metadata_frame, width=30)
-        self.ann_file_entry.pack(side=tk.LEFT)
-        self.ann_file_entry.pack_forget()
-        # Users can specify the source of the annotation. This source will be embedded in the annotation json file
-        self.source_label = tk.Label(self.metadata_frame, text="PDF/Text URL (source):", width=15, anchor="w")
-        self.source_label.pack(side=tk.LEFT)
-        self.source_label.pack_forget()
-        self.source_entry = tk.Entry(self.metadata_frame, width=30)
-        self.source_entry.pack(side=tk.LEFT)
-        self.source_entry.pack_forget()
 
         # Frame for selecting files and folders
         self.open_frame = tk.Frame(self.rootWin)
@@ -1049,43 +1013,6 @@ class CropNerGUI:
         doc = self.nlp_agdata(text)
         return doc
 
-    def continue_func(self, save_choice: str):
-        """
-        Continue the process of either saving annotation in a new file or overwriting an existing file.
-        """
-        filename = None
-        if save_choice == 'copy':
-            file_prefix = self.raw_file.name.split(".")[0]
-            now = datetime.now()  # current date and time
-            date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-            filename = file_prefix + "_" + date_time + ".json"
-        else:
-            self.annotation_file = self.ann_file_entry.get()
-            if isinstance(self.annotation_file, str):
-                filename = self.annotation_file
-            else:
-                filename = self.annotation_file.name
-
-        url = self.source_entry.get()
-        if len(self.cust_ents_dict) == 0:
-            self.msg.config(text="Warning!! No annotations to save.", foreground="red")
-        else:
-            input_text = self.cust_ents_dict[self.chunk][0]
-            entities = self.cust_ents_dict[self.chunk][1]
-
-            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk)
-            dict_2_json(ann_train_dict, filename)
-        # Hide buttons
-        self.overwrite_btn.pack_forget()
-        self.continue_btn.pack_forget()
-        self.copy_btn.pack_forget()
-        self.ann_file_label.pack_forget()
-        self.ann_file_entry.pack_forget()
-        self.source_label.pack_forget()
-        self.source_entry.pack_forget()
-        # Clear data after saving
-        self.remove_all_tags()
-
     def file_save(self):
         """
         Brings up a file dialog to choose a file name/location then saves annotations to it in .json format.
@@ -1093,7 +1020,6 @@ class CropNerGUI:
 
         if self.cust_ents_dict:
             # Opens a tkinter save as file dialog and stores the file to a var
-            date_time = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
             json_file = fd.asksaveasfile(initialfile=self.file_name.split(".")[0]+"_pg"+str(self.page_number)+".json", mode='w', defaultextension='.json')
 
             if json_file is None or json_file.name[-4:] != "json":
