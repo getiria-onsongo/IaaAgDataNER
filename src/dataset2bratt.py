@@ -7,7 +7,7 @@ import os
 File to convert a json dataset to bratt, also has page number extraction helper
 function
 
-Methods
+Functions
 -------
 extract_page_num(self, f : str, suffix : str) -> str
     for file names with page numbers before the suffix, extracts the numerals

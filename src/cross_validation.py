@@ -31,7 +31,7 @@ class CrossValidation:
 
     Methods
     ----------
-    create_config(self, name : str)
+    create_config(self, name : str) -> str
         creates spacy model config file
     cross_validate(self, data : str, spacy_only : bool)
         preforms the k-fold cross validation
@@ -49,7 +49,7 @@ class CrossValidation:
         self.tags = tags
         warnings.filterwarnings('ignore')
 
-    def create_config(self, name="senter_ner.cfg"):
+    def create_config(self, name="senter_ner.cfg") -> str:
         """
         Creates spacy model config file
 
@@ -183,8 +183,6 @@ class CrossValidation:
         print("Converting to bratt...")
         dataset_to_bratt(gold_json_name, gold_bratt_name)
         dataset_to_bratt(json_name, bratt_name)
-
-
 
     def medacy_eval(self):
         """

@@ -1,4 +1,17 @@
-def extract_metrics(self, prefix="metrics_fold", suffix=".json") -> dict:
+"""
+File with functions to extract and average json outputs of spacy evaluate
+function. Ended up not using this now, but saving for possible later use.
+
+
+Functions
+----------
+extract_metrics(self, prefix="metrics_fold", suffix=".json") -> dict
+    creates a dict with important metrics from spacy json
+average_metrics(metrics : dict) -> dict
+    averages metrics
+"""
+
+def extract_metrics(prefix="metrics_fold", suffix=".json") -> dict:
       """
       Extracts a dictonary of metrics from spacy json file of metrics.
 
@@ -21,7 +34,7 @@ def extract_metrics(self, prefix="metrics_fold", suffix=".json") -> dict:
                   metrics[tag].append(data)
       return metrics
 
-  def average_metrics(self, metrics : dict) -> dict:
+  def average_metrics(metrics : dict) -> dict:
       """
       Averages across folds metrics for each label as well as overall.
 
