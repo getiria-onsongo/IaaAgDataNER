@@ -1,21 +1,20 @@
-from json2SpacyJson import convertJsonToSpacyJsonl
-from json2py import json_2_dict
-from spacy.cli.convert import convert
-from spacy.cli.train import train
-from spacy.cli.evaluate import evaluate
-from validation_testing import execute
-from agParse import *
 import glob
 import os
 import json
 import random
-from predict import Predict
-from collections import defaultdict
-from dataset2bratt import dataset_to_bratt
-from inter_dataset_agreement import measure_dataset
-from inter_dataset_agreement import format_results
-from dataset import Dataset
 import warnings
+import argparse
+from collections import defaultdict
+from spacy.cli.convert import convert
+from spacy.cli.train import train
+from spacy.cli.evaluate import evaluate
+from predict import Predict
+from dataset import Dataset
+from inter_dataset_agreement import measure_dataset, format_results
+from json2SpacyJson import convertJsonToSpacyJsonl
+from json2py import json_2_dict
+from dataset2bratt import dataset_to_bratt
+from validation_testing import execute
 
 class CrossValidation:
     """
@@ -47,7 +46,7 @@ class CrossValidation:
         self.tags = tags
         warnings.filterwarnings('ignore')
 
-    def cross_validate(self, data : str, pos_split : bool):
+    def cross_validate(self, data : str, pos_tagging : bool):
         """
         Preforms cross validation on spacy model.
 
@@ -97,20 +96,18 @@ class CrossValidation:
                     training += folds[t]
             validation = folds[v]
 
-            # convert training data into spacy json and then into spacy binary
-            print("\nConverting training data...")
-            print("____________________________")
-            convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
-            convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
-
+            # # convert training data into spacy json and then into spacy binary
+            # print("\nConverting training data...")
+            # print("____________________________")
+            # convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
+            # convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
+            #
             # # train model
-            train(config_path="senter_ner.cfg", output_path="cv_2021_08_model", overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
+            # train(config_path="senter_ner.cfg", output_path="cv_2021_08_model", overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # evaulate model
-            if pos_split:
+            if pos_tagging:
                 self.pos_tagging(validation, v)
-                self.medacy_eval()
-
             else:
                 # convert validate data
                 print("Converting validation data...")
@@ -121,6 +118,10 @@ class CrossValidation:
                 # evaluate
                 print("Evaluating...")
                 evaluate(model="ner_2021_08_model/model-best", data_path="ner_2021_08/ner_2021_08_validate_data.spacy", output=output_name)
+
+        if pos_tagging:
+            self.medacy_eval()
+
 
     def pos_tagging(self, validation : list, v : int):
         print("\nCreating output directories for POS entity expansion...")
@@ -134,7 +135,7 @@ class CrossValidation:
 
         # do pos tagging & entity expansion
         print("Entity expansion post-processing...")
-        predict = Predict(model_dir="cv_2021_08_model/model-best", output_dir=json_name, dataset_suffix="_td.json")
+        predict = Predict(model_dir="senter_ner_model/model-best", output_dir=json_name, dataset_suffix="_td.json")
         predict.process_files(validation, json=True)
 
         # create gold standard dataset and convert both to bratt
