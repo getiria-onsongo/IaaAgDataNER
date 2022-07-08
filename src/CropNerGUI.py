@@ -309,14 +309,6 @@ class CropNerGUI:
         self.date_entry = tk.Entry(self.middle_frame, justify=tk.CENTER, width=30)
         self.date_entry.insert(0, "File not initialized")
         self.date_entry.config(state=tk.DISABLED)
-        # Crop label
-        self.crop_label = tk.Label(self.middle_frame, text="Crop")
-        # Crop entry
-        self.crop_entry = tk.Entry(self.middle_frame, width=30)
-        # Crop variety label
-        self.cvar_label = tk.Label(self.middle_frame, text="Crop Variety")
-        # Crop variety entry
-        self.cvar_entry = tk.Entry(self.middle_frame, width=30)
 
         # Specify how text will be highlighted in the textbox when a user selects it and click on a button to
         # tag the text. If we only had one button (ALAS), we would have done this using the command
@@ -510,20 +502,14 @@ class CropNerGUI:
             self.url_entry.pack(side=tk.TOP, pady=(0,10))
             self.date_label.pack(side=tk.TOP)
             self.date_entry.pack(side=tk.TOP, pady=(0,10))
-            self.crop_label.pack(side=tk.TOP)
-            self.crop_entry.pack(side=tk.TOP, pady=(0,10))
-            self.cvar_label.pack(side=tk.TOP)
-            self.cvar_entry.pack(side=tk.TOP, pady=(0,10))
         else:
             self.text.pack(side=tk.TOP)
             self.doc_label.pack_forget()
             self.doc_entry.pack_forget()
             self.url_label.pack_forget()
             self.url_entry.pack_forget()
-            self.crop_label.pack_forget()
-            self.crop_entry.pack_forget()
-            self.cvar_label.pack_forget()
-            self.cvar_entry.pack_forget()
+            self.date_label.pack_forget()
+            self.date_entry.pack_forget()
 
     def get_ner_model_dir(self):
         """
@@ -582,16 +568,18 @@ class CropNerGUI:
             return
         elif file_type == "json":
             self.annotation_file = f
+            self.file_prefix = self.annotation_file.name.split(".")[0]
+            self.file_name = self.annotation_file.name.split("/")[-1]
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
             #TODO: Update metadata fields with what the open json file contains
             self.review_annotations()
         elif file_type == "pdf/txt":
             self.raw_file=f
-
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
-
             self.pdf_document = None
+            self.annotation_file = None
+            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
             self.load_page()
         else:
             self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
@@ -626,8 +614,7 @@ class CropNerGUI:
             self.doc_entry.delete(0, tk.END)
             self.doc_entry.insert(0, self.file_name)
             self.url_entry.delete(0, tk.END)
-            self.crop_entry.delete(0, tk.END)
-            self.cvar_entry.delete(0, tk.END)
+            self.date_entry.delete(0, tk.END)
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
@@ -972,6 +959,20 @@ class CropNerGUI:
             doc = data['doc']
             url = data['url']
             """
+            try:
+                self.doc_entry.delete(0, tk.END)
+                self.doc_entry.insert(0, data['doc'])
+                self.url_entry.delete(0, tk.END)
+                self.url_entry.insert(0, data['url'])
+                self.date_entry.config(state=tk.NORMAL)
+                self.date_entry.delete(0, tk.END)
+                self.date_entry.insert(0, data['date'])
+                self.date_entry.config(state=tk.DISABLED)
+            except:
+                self.msg.config(text="Error retrieving metadata; please verify metadata manually", foreground="red")
+                self.date_entry.config(state=tk.NORMAL)
+
+
             self.chunk = int(data['chunk'])
             self.page_number = self.chunk
 
@@ -1094,15 +1095,19 @@ class CropNerGUI:
             # Opens a tkinter save as file dialog and stores the file to a var
             date_time = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
             json_file = fd.asksaveasfile(initialfile=self.file_name.split(".")[0]+"_pg"+str(self.page_number)+".json", mode='w', defaultextension='.json')
+
             if json_file is None or json_file.name[-4:] != "json":
                 self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
                 return
+            else:
+                self.annotation_file = json_file
+                self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
 
             input_text = self.cust_ents_dict[self.chunk][0]
             entities = self.cust_ents_dict[self.chunk][1]
 
             # Calls dict_2_json on the newly created json file
-            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.doc_entry.get(), self.url_entry.get(), datetime.now().strftime("%m_%d_%Y_%H_%M_%S"))
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.doc_entry.get(), self.url_entry.get(), self.date_entry.get())
             dict_2_json_file(ann_train_dict, json_file)
 
             json_file.close()
