@@ -96,14 +96,14 @@ class CrossValidation:
                     training += folds[t]
             validation = folds[v]
 
-            # # convert training data into spacy json and then into spacy binary
-            # print("\nConverting training data...")
-            # print("____________________________")
-            # convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
-            # convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
-            #
-            # # train model
-            # train(config_path="senter_ner.cfg", output_path="cv_2021_08_model", overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
+            # convert training data into spacy json and then into spacy binary
+            print("\nConverting training data...")
+            print("____________________________")
+            convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
+            convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
+
+            # train model
+            train(config_path="senter_ner.cfg", output_path="senter_ner_model", overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # evaulate model
             if pos_tagging:
