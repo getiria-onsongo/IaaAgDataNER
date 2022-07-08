@@ -196,7 +196,7 @@ class CropNerGUI:
         self.file_menu.add_command(label="Open Annotation")
         self.file_menu.add_command(label="Save")
         self.file_menu.add_command(label="Save As...")
-        self.file_menu.add_command(label="Close Editor")
+        self.file_menu.add_command(label="Close Editor", command = self.return_to_welcome)
         self.file_menu.add_command(label="Exit")
         self.view_menu = tk.Menu(self.menubar, tearoff=0)
         self.view_menu.add_command(label="Font +")
@@ -213,24 +213,26 @@ class CropNerGUI:
         self.welcome_label = tk.Label(self.welcome_frame, text="Welcome Page")
         self.welcome_label.pack(side=tk.TOP)
 
-        self.annotate_btn = tk.Button(self.welcome_frame, text="Annotate NER Data")
+        self.annotate_btn = tk.Button(self.welcome_frame, text="Annotate NER Data", command = self.switch_annotate)
         self.annotate_btn.pack(side=tk.TOP)
 
         tk.Label(self.welcome_frame, text="or").pack(side=tk.TOP)
 
-        self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations")
+        self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations", command = self.switch_annotate)
         self.validate_btn.pack(side=tk.TOP)
 
 
+        # Frame for the annotation/validation widgets [INCOMPLETE; WILL SEPERATE LATER]
+        self.annotation_frame = tk.Frame(self.rootWin)
 
         # Top level frame for GUI
-        self.top_frame = tk.Frame(self.rootWin)
-        # self.top_frame.pack(side=tk.TOP, fill="x")
+        self.top_frame = tk.Frame(self.annotation_frame)
+        self.top_frame.pack(side=tk.TOP, fill="x")
 
         # Blank label with 3 empty spaces used for formatting. Ensures there is some
         # space between the edge and first widget e.g., button
         self.blank_label_one = tk.Label(self.top_frame, text="   ")
-        # self.blank_label_one.pack(side=tk.LEFT)
+        self.blank_label_one.pack(side=tk.LEFT)
 
         # The loops below is used to create buttons the user will click to tag words/phrases
         #
@@ -255,76 +257,76 @@ class CropNerGUI:
             # Create button
             btn = tk.Button(self.top_frame, highlightbackground=color_value,text=tag_value,
                             command=partial(self.get_ner, tag_value))
-            # btn.pack(side=tk.LEFT)
+            btn.pack(side=tk.LEFT)
             self.tag_colors_buttonID[tag_value] = [color_value, btn]
 
         # Blank label with empty spaces used for formatting.
         self.space_label = tk.Label(self.top_frame, text=" ", width=3)
-        # self.space_label.pack(side=tk.LEFT)
+        self.space_label.pack(side=tk.LEFT)
 
         # Button user will click to tag selected text
         self.pre_tag_selection_btn = tk.Button(self.top_frame, text="Pre-Tag Selection",
                                                command=partial(self.pre_tag, "selection"))
-        # self.pre_tag_selection_btn.pack(side=tk.LEFT)
+        self.pre_tag_selection_btn.pack(side=tk.LEFT)
 
         # Button user will click to remove tags
         self.clear_tag_btn = tk.Button(self.top_frame, text="Remove-Tag(s)", command=self.remove_tag)
-        # self.clear_tag_btn.pack(side=tk.LEFT)
+        self.clear_tag_btn.pack(side=tk.LEFT)
 
         # Button user will click to tag all the text in the text box
         self.pre_tag_page_btn = tk.Button(self.top_frame, text="Pre-Tag Page(s)", command=partial(self.pre_tag, "page"))
-        # self.pre_tag_page_btn.pack(side=tk.LEFT)
+        self.pre_tag_page_btn.pack(side=tk.LEFT)
 
         # Remove all tags button
         self.clear_btn = tk.Button(self.top_frame, text="Remove All Tags", width=15, command=self.remove_all_tags)
-        # self.clear_btn.pack(side = tk.LEFT)
+        self.clear_btn.pack(side = tk.LEFT)
 
         # Frame with buttons that will contain user defined NER tags. Button with NER tags added by users will
         # be added to this frame. This is done in the function add_ent
-        self.cust_ent_frame = tk.Frame(self.rootWin)
-        # self.cust_ent_frame.pack(side=tk.TOP, fill="x")
+        self.cust_ent_frame = tk.Frame(self.annotation_frame)
+        self.cust_ent_frame.pack(side=tk.TOP, fill="x")
 
         # Label displaying the current working json file
-        self.working_file_label = tk.Label(self.rootWin, text="Working Annotation File: "+str(self.annotation_file))
-        # self.working_file_label.pack(side=tk.TOP)
+        self.working_file_label = tk.Label(self.annotation_frame, text="Working Annotation File: "+str(self.annotation_file))
+        self.working_file_label.pack(side=tk.TOP)
 
         # Blank label for formatting
         self.blank_label_two = tk.Label(self.cust_ent_frame, text="   ")
-        # self.blank_label_two.pack(side=tk.LEFT)
+        self.blank_label_two.pack(side=tk.LEFT)
 
         # Frame containing options for users to add their own NER tags
-        self.edit_ent_frame = tk.Frame(self.rootWin)
-        # self.edit_ent_frame.pack(side=tk.TOP, fill="x", padx="40")
+        self.edit_ent_frame = tk.Frame(self.annotation_frame)
+        self.edit_ent_frame.pack(side=tk.TOP, fill="x", padx="40")
 
         # Label for text entry for a new NER tag defined by the user
         self.trait_label = tk.Label(self.edit_ent_frame, text="Enter Entity Label:", width=20)
-        # self.trait_label.pack(side=tk.LEFT)
+        self.trait_label.pack(side=tk.LEFT)
 
         # Text entry widget for user to type the name of a user defined NER tag they want to add
         self.trait_entry = tk.Entry(self.edit_ent_frame, width=10)
-        # self.trait_entry.pack(side=tk.LEFT)
+        self.trait_entry.pack(side=tk.LEFT)
 
         # Button to add new NER tag
         self.add_ent_btn = tk.Button(self.edit_ent_frame, text="Add Entity", width=10, command=self.add_ent)
-        # self.add_ent_btn.pack(side=tk.LEFT)
+        self.add_ent_btn.pack(side=tk.LEFT)
 
         # Button to remove NER tag added by the user
         self.remove_ent_btn = tk.Button(self.edit_ent_frame, text="Remove Entity", width=10, command=self.remove_ent)
-        # self.remove_ent_btn.pack(side=tk.LEFT)
+        self.remove_ent_btn.pack(side=tk.LEFT)
 
         # Middle frame for text box and additional file elements like metadata entries
-        self.middle_frame = tk.Frame(self.rootWin)
-        # self.middle_frame.pack(side=tk.TOP, fill="x")
+        self.middle_frame = tk.Frame(self.annotation_frame)
+        self.middle_frame.pack(side=tk.TOP, fill="x")
 
         # Text box. Note, height defines height in widget in lines based on font size. If the font size is bigger,
         # you end up with a bigger textbox because each line will occupy more space.
         self.text = ScrolledText(self.middle_frame, height=20, width=140, font="Times "+self.font_size, wrap='word')
         self.text.focus_force()
-        # self.text.pack(side=tk.TOP)
+        self.text.pack(side=tk.TOP)
 
         # Metadata button for setting metadata for current raw file
         self.metadata_btn = tk.Button(self.edit_ent_frame, text="Metadata", width=10, command = self.toggle_metadata)
-        # self.metadata_btn.pack(side=tk.RIGHT)
+        self.metadata_btn.pack(side=tk.RIGHT)
 
         # Doc label
         self.doc_label = tk.Label(self.middle_frame, text="Document Name")
@@ -350,67 +352,75 @@ class CropNerGUI:
             self.text.tag_configure(tag, background=color)
 
         # Frame just below the text box. It contains buttons in the "Exit" button row
-        self.bottom_frame = tk.Frame(self.rootWin)
-        # self.bottom_frame.pack(side=tk.TOP, fill="x")
+        self.bottom_frame = tk.Frame(self.annotation_frame)
+        self.bottom_frame.pack(side=tk.TOP, fill="x")
         # Blank label for formatting
         self.blank_label_three = tk.Label(self.bottom_frame, text="   ")
-        # self.blank_label_three.pack(side=tk.LEFT)
+        self.blank_label_three.pack(side=tk.LEFT)
         # Exit button
         self.exit_btn = tk.Button(self.bottom_frame, text="Exit",width=10,command=self.quit)
-        # self.exit_btn.pack(side = tk.LEFT)
+        self.exit_btn.pack(side = tk.LEFT)
         # Load button
         self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.load_page)
-        # self.load_btn.pack(side=tk.LEFT)
+        self.load_btn.pack(side=tk.LEFT)
         # Clear data button
         self.clear_data_btn = tk.Button(self.bottom_frame, text="Clear Data", width=10, command=self.clear_data)
-        # self.clear_data_btn.pack(side=tk.LEFT)
+        self.clear_data_btn.pack(side=tk.LEFT)
         # Clear message button
         self.msg_btn = tk.Button(self.bottom_frame, text="Clear Warning Message", width=20, command=self.clear_message)
-        # self.msg_btn.pack(side=tk.LEFT)
+        self.msg_btn.pack(side=tk.LEFT)
         # Next page button
         self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=self.next_page)
-        # self.next_btn.pack(side=tk.LEFT)
+        self.next_btn.pack(side=tk.LEFT)
         # Save button
         self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save)
-        # self.save_btn.pack(side=tk.LEFT)
+        self.save_btn.pack(side=tk.LEFT)
 
         # Frame that will contain messages being displayed to the user
-        self.msg_frame = tk.Frame(self.rootWin)
-        # self.msg_frame.pack(side=tk.TOP)
+        self.msg_frame = tk.Frame(self.annotation_frame)
+        self.msg_frame.pack(side=tk.TOP)
         # Label to display messages
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
-        # self.msg.pack(side=tk.LEFT)
+        self.msg.pack(side=tk.LEFT)
 
         # Frame for selecting files and folders
-        self.open_frame = tk.Frame(self.rootWin)
-        # self.open_frame.pack(side=tk.TOP,fill="x")
+        self.open_frame = tk.Frame(self.annotation_frame)
+        self.open_frame.pack(side=tk.TOP,fill="x")
         # Blank label for formatting
         self.blank_label_five = tk.Label(self.open_frame, text="   ")
-        # self.blank_label_five.pack(side=tk.LEFT)
+        self.blank_label_five.pack(side=tk.LEFT)
         # Select file to be annotated button
         self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF/txt)', width=18,
                                      command=partial(self.open_file, "pdf/txt"))
-        # self.open_button.pack(side=tk.LEFT)
+        self.open_button.pack(side=tk.LEFT)
         # Select folder with language model
         self.ner_model_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,
                                           command=self.get_ner_model_dir)
-        # self.ner_model_button.pack(side=tk.LEFT)
+        self.ner_model_button.pack(side=tk.LEFT)
         # Enter page you would like to load. Start with 1 as opposed to the conventional 0 numbering in CS
         self.page_label = tk.Label(self.open_frame, text="Raw Data File Page Num:", width=18)
-        # self.page_label.pack(side=tk.LEFT)
+        self.page_label.pack(side=tk.LEFT)
         self.page_entry = tk.Entry(self.open_frame, width=5)
-        # self.page_entry.pack(side=tk.LEFT)
+        self.page_entry.pack(side=tk.LEFT)
         # Select annotation file
         self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=20,
                                         command=partial(self.open_file, "json"))
-        # self.annotation_btn.pack(side=tk.LEFT)
+        self.annotation_btn.pack(side=tk.LEFT)
         # Button to increase font in the text box (Font +)
         self.font_plus = tk.Button(self.open_frame, text="Font +", width=10, command=self.font_plus)
-        # self.font_plus.pack(side=tk.LEFT)
+        self.font_plus.pack(side=tk.LEFT)
         # Button to decrease font in the text box (Font +)
         self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
-        # self.font_minus.pack(side=tk.LEFT)
+        self.font_minus.pack(side=tk.LEFT)
         
+
+    def switch_annotate(self):
+        self.welcome_frame.pack_forget()
+        self.annotation_frame.pack(fill="x")
+
+    def return_to_welcome(self):
+        self.annotation_frame.pack_forget()
+        self.welcome_frame.pack()
 
     def font_plus(self):
         """
