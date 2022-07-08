@@ -53,7 +53,6 @@ def dataset_to_bratt(input_dir : str, output_dir : str, file_pattern="/*_td.json
         start of name for new bratt and json files
     """
     files = glob.glob(input_dir+file_pattern)
-    print(files)
     print("%s files to convert." % str(len(files)))
 
     for f in files:

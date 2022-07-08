@@ -185,11 +185,14 @@ class Predict:
         page_number : str
             current page number
         """
+        if self.spacy_only is False:
+            print("doing part of speech based entity expansion...")
+
         self.cust_ents_dict = {}
         doc = self.tag_ner_with_spacy(input_text)
         for ent in doc.ents:
             if ent.label_ in self.tags:
-                if self.spacy_only is not True:
+                if self.spacy_only is False:
                     ent = self.get_pos(ent)
                 if self.cust_ents_dict.get(page_number, False):
                     self.cust_ents_dict[page_number].append((ent.start_char, ent.end_char, ent.label_))
@@ -246,8 +249,8 @@ class Predict:
 
             if pos_current == "NOUN" or pos_current == "PROPN":
                 if pos_left == "ADJ":
-                    print("Adj expanding...")
-                    print("entity: " + str(ent))
+                    # print("Adj expanding...")
+                    # print("entity: " + str(ent))
                     i = current_index
                     start_index = ent.start
                     # keeps searching until all adjectives are found
@@ -260,9 +263,9 @@ class Predict:
                     first_tok = doc[start_index]
                     ent = doc[first_tok.i:ent.end]
                     ent.label_ = label
-                    print("new: " + str(ent))
-                    print("label: " + str(ent.label_))
-                    print()
+                    # print("new: " + str(ent))
+                    # print("label: " + str(ent.label_))
+                    # print()
         return ent
 
     def file_save(self, pdf_name : str, url : str, chunk : str) -> str:

@@ -88,14 +88,13 @@ def conversion(infile, outfile):
                         f.write(t_entry)
                         f.write("\n")
 
-                else:
-                    print(
-                        f"\n{x} sentence has been skipped because, \033[91m\033[1m{keyterm}\033[0m is not defined in the dictionary")
+                # else:
+                    # print(
+                    #    f"\n{x} sentence has been skipped because, \033[91m\033[1m{keyterm}\033[0m is not defined in the dictionary")
 
             # Exception if the sentence has not been formatted properly
             except:
-                raise ValueError(
-                    f"\033[91m{x}\033[0m is not formatted correctly so it has been skipped")
+                raise ValueError(f"\033[91m{x}\033[0m is not formatted correctly so it has been skipped")
 
             tindx += 1
             i += 1

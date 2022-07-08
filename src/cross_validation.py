@@ -1,5 +1,6 @@
 import glob
 import os
+import shutil
 import json
 import random
 import warnings
@@ -46,7 +47,7 @@ class CrossValidation:
         self.tags = tags
         warnings.filterwarnings('ignore')
 
-    def cross_validate(self, data : str, pos_tagging : bool):
+    def cross_validate(self, data : str, spacy_only : bool):
         """
         Preforms cross validation on spacy model.
 
@@ -106,25 +107,13 @@ class CrossValidation:
             train(config_path="senter_ner.cfg", output_path="senter_ner_model", overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # evaulate model
-            if pos_tagging:
-                self.pos_tagging(validation, v)
-            else:
-                # convert validate data
-                print("Converting validation data...")
-                convertJsonToSpacyJsonl(outputFileName="ner_2021_08_validate_data.jsonl", filePaths=validation)
-                convert(input_path="ner_2021_08_validate_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
-                output_name = "metrics_fold" + str(v) + ".json"
+            self.predict(validation, v, spacy_only)
+        # average metrics and print
+        avgs, ents = self.medacy_eval()
+        self.format_metrics(avgs, ents)
 
-                # evaluate
-                print("Evaluating...")
-                evaluate(model="ner_2021_08_model/model-best", data_path="ner_2021_08/ner_2021_08_validate_data.spacy", output=output_name)
-
-        if pos_tagging:
-            self.medacy_eval()
-
-
-    def pos_tagging(self, validation : list, v : int):
-        print("\nCreating output directories for POS entity expansion...")
+    def predict(self, validation : list, v : int, spacy_only : bool):
+        print("\nCreating output directories...")
         # create output directories
         fold_dir = "fold_" + str(v) + "_results"
         json_name = fold_dir + "/pred_json"
@@ -134,8 +123,8 @@ class CrossValidation:
         self.create_dirs([fold_dir, json_name, bratt_name, gold_json_name, gold_bratt_name])
 
         # do pos tagging & entity expansion
-        print("Entity expansion post-processing...")
-        predict = Predict(model_dir="senter_ner_model/model-best", output_dir=json_name, dataset_suffix="_td.json")
+        print("Predicting on validation data...")
+        predict = Predict(model_dir="senter_ner_model/model-best", output_dir=json_name, dataset_suffix="_td.json", spacy_only=spacy_only)
         predict.process_files(validation, json=True)
 
         # create gold standard dataset and convert both to bratt
@@ -152,96 +141,90 @@ class CrossValidation:
         print("Converting to bratt...")
         dataset_to_bratt(gold_json_name, gold_bratt_name)
         dataset_to_bratt(json_name, bratt_name)
-        print("Results from this fold are ready for Medacy!\n")
 
     def medacy_eval(self):
-        print("Fold 0")
-        print("____________________________")
-        result = measure_dataset(Dataset("fold_0_results/gold_bratt"), Dataset("fold_0_results/pred_bratt"), 'lenient')
-        output = format_results(result)
-        print(output)
-
-        print("\nFold 1")
-        print("____________________________")
-        result = measure_dataset(Dataset("fold_1_results/gold_bratt"), Dataset("fold_1_results/pred_bratt"), 'lenient')
-        output = format_results(result)
-        print(output)
-
-
-        print("\nFold 2")
-        print("____________________________")
-        result = measure_dataset(Dataset("fold_2_results/gold_bratt"), Dataset("fold_2_results/pred_bratt"), 'lenient')
-        output = format_results(result)
-        print(output)
-
-
-        print("\nFold 3")
-        print("____________________________")
-        result = measure_dataset(Dataset("fold_3_results/gold_bratt"), Dataset("fold_3_results/pred_bratt"), 'lenient')
-        output = format_results(result)
-        print(output)
-
-        print("\nFold 4")
-        print("____________________________")
-        result = measure_dataset(Dataset("fold_4_results/gold_bratt"), Dataset("fold_4_results/pred_bratt"), 'lenient')
-        output = format_results(result)
-        print(output)
-
-    def extract_metrics(self, prefix="metrics_fold", suffix=".json") -> dict:
-        """
-        Extracts a dictonary of metrics from spacy json file of metrics.
-
-        Parameters
-        ----------
-        prefix : string
-            start of name for each json file, going up to fold number
-        suffix : string
-            end of name for each json file, starting after fold number
-
-        Returns dictonary of metrics.
-        """
-        metrics = defaultdict(list)
-        for i in range(0, self.k_folds):
-            file_name = prefix + str(i) + suffix
-            json_dict = json_2_dict(file_name)
-            for tag in self.tags:
-                if tag in json_dict["ents_per_type"].keys():
-                    data = json_dict["ents_per_type"][tag]
-                    metrics[tag].append(data)
-        return metrics
-
-    def average_metrics(self, metrics : dict) -> dict:
-        """
-        Averages across folds metrics for each label as well as overall.
-
-        Parameters
-        ----------
-        metrics : dict
-            dictonary of metrics extracted from spacy json
-
-        Returns dictonary of averages.
-        """
-        avg_metrics = {}
+        avg_metrics = defaultdict()
+        ents = defaultdict()
+        ents["ALL"] = []
         p_all = []
         r_all = []
         f_all = []
-        for k,v in metrics.items():
-            p_temp = []
-            r_temp = []
-            f_temp = []
-            for i in v:
-                p_all.append(i.get("p"))
-                r_all.append(i.get("r"))
-                f_all.append(i.get("f"))
 
-                p_temp.append(i.get("p"))
-                r_temp.append(i.get("r"))
-                f_temp.append(i.get("f"))
-                avg_metrics[k] = [sum(p_temp)/len(p_temp), sum(r_temp)/len(r_temp), sum(f_temp)/len(f_temp)]
-            avg_metrics["ALL"] = [sum(p_all)/len(p_all), sum(r_all)/len(r_all), sum(f_all)/len(f_all)]
-        return avg_metrics
+        ent_counter = 0
+        result0 = measure_dataset(Dataset("fold_0_results/gold_bratt"), Dataset("fold_0_results/pred_bratt"), 'strict')
+        for k,v in result0.items():
+            p_all.append(v.precision())
+            r_all.append(v.recall())
+            f_all.append(v.f_score())
+            avg_metrics[k] = [[v.precision()], [v.recall()], [v.f_score()]]
+            ent_counter += v.tp + v.tn + v.fp + v.fn
+            ents[k] = [v.tp + v.tn + v.fp + v.fn]
+        ents["ALL"].append(ent_counter)
+        ent_counter = 0
 
-    def format_metrics(self, metrics : dict):
+        result1 = measure_dataset(Dataset("fold_1_results/gold_bratt"), Dataset("fold_1_results/pred_bratt"), 'strict')
+        for k,v in result1.items():
+            p_all.append(v.precision())
+            r_all.append(v.recall())
+            f_all.append(v.f_score())
+            avg_metrics[k][0].append(v.precision())
+            avg_metrics[k][1].append(v.recall())
+            avg_metrics[k][2].append(v.f_score())
+            ent_counter += v.tp + v.tn + v.fp + v.fn
+            ents[k].append(v.tp + v.tn + v.fp + v.fn)
+        ents["ALL"].append(ent_counter)
+        ent_counter = 0
+
+        result2 = measure_dataset(Dataset("fold_2_results/gold_bratt"), Dataset("fold_2_results/pred_bratt"), 'strict')
+        for k,v in result2.items():
+            p_all.append(v.precision())
+            r_all.append(v.recall())
+            f_all.append(v.f_score())
+            avg_metrics[k][0].append(v.precision())
+            avg_metrics[k][1].append(v.recall())
+            avg_metrics[k][2].append(v.f_score())
+            ent_counter += v.tp + v.tn + v.fp + v.fn
+            ents[k].append(v.tp + v.tn + v.fp + v.fn)
+        ents["ALL"].append(ent_counter)
+        ent_counter = 0
+
+        result3 = measure_dataset(Dataset("fold_3_results/gold_bratt"), Dataset("fold_3_results/pred_bratt"), 'strict')
+        for k,v in result3.items():
+            p_all.append(v.precision())
+            r_all.append(v.recall())
+            f_all.append(v.f_score())
+            avg_metrics[k][0].append(v.precision())
+            avg_metrics[k][1].append(v.recall())
+            avg_metrics[k][2].append(v.f_score())
+            ent_counter += v.tp + v.tn + v.fp + v.fn
+            ents[k].append(v.tp + v.tn + v.fp + v.fn)
+        ents["ALL"].append(ent_counter)
+        ent_counter = 0
+
+        result4 = measure_dataset(Dataset("fold_4_results/gold_bratt"), Dataset("fold_4_results/pred_bratt"), 'strict')
+        for k,v in result4.items():
+            p_all.append(v.precision())
+            r_all.append(v.recall())
+            f_all.append(v.f_score())
+            avg_metrics[k][0].append(v.precision())
+            avg_metrics[k][1].append(v.recall())
+            avg_metrics[k][2].append(v.f_score())
+            ent_counter += v.tp + v.tn + v.fp + v.fn
+            ents[k].append(v.tp + v.tn + v.fp + v.fn)
+        ents["ALL"].append(ent_counter)
+        ent_counter = 0
+
+        avg_metrics["ALL"] = [sum(p_all)/len(p_all), sum(r_all)/len(r_all), sum(f_all)/len(f_all)]
+        ents["ALL AVG"] = sum(ents["ALL"]) / 5
+        for k,v in avg_metrics.items():
+            if k != "ALL":
+                avg_metrics[k][0] = sum(avg_metrics[k][0]) / len(avg_metrics[k][0])
+                avg_metrics[k][1] = sum(avg_metrics[k][1]) / len(avg_metrics[k][1])
+                avg_metrics[k][2] = sum(avg_metrics[k][2]) / len(avg_metrics[k][2])
+                ents[k+" AVG"] = sum(ents[k])/ 5
+        return avg_metrics, ents
+
+    def format_metrics(self, metrics : dict, ents : dict):
         """
         Takes a dictonary of metric averages, and formats & prints the metrics.
 
@@ -254,12 +237,16 @@ class CrossValidation:
         print("\t precision: " + str(metrics["ALL"][0]))
         print("\t recall: " +  str(metrics["ALL"][1]))
         print("\t F1: " +  str(metrics["ALL"][2]))
+        print("\t entities each fold: " + str(ents["ALL"]))
+        print("\t average entities per fold: " + str(ents["ALL AVG"]))
         for k,v in metrics.items():
             if k != "ALL":
                 print(k+":")
                 print("\t precision: " + str(metrics[k][0]))
                 print("\t recall: " + str(metrics[k][1]))
                 print("\t F1: " + str(metrics[k][2]))
+                print("\t entities each fold: " + str(ents[k]))
+                print("\t average entities per fold: " + str(ents[k+ " AVG"]))
 
     def create_dirs(self, dirs : list):
         """
@@ -276,6 +263,9 @@ class CrossValidation:
         for dir in dirs:
             if not os.path.exists(dir):
                 os.makedirs(dir)
+            else:
+                shutil.rmtree(dir)
+                os.makedirs(dir)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -291,15 +281,12 @@ if __name__ == '__main__':
         help='number of folds'
     )
     parser.add_argument(
-            '--pos_tagging',
+            '--spacy_only',
             action='store_true',
-            help='do pos tagging after model training'
+            default = False,
+            help='only use spacy, no pos_tagging'
     )
     args = parser.parse_args()
 
     val = CrossValidation(k_folds=int(args.folds))
-    val.medacy_eval()
-    # val.cross_validate(args.dataset_dir, args.pos_tagging)
-    # if args.pos_tagging is False:
-    #     avgs = val.average_metrics(val.extract_metrics())
-    #     val.format_metrics(avgs)
+    val.cross_validate(args.dataset_dir, args.spacy_only)

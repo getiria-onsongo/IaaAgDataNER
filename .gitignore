@@ -41,4 +41,4 @@ ner_2021_08_dev_data.jsonl
 *2021_08_model/*
 Data/*
 *env/*
-pos_cv_val_*/*
+fold*/*
