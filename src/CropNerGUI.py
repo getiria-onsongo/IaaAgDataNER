@@ -283,7 +283,7 @@ class CropNerGUI:
 
         # Text box. Note, height defines height in widget in lines based on font size. If the font size is bigger,
         # you end up with a bigger textbox because each line will occupy more space.
-        self.text = ScrolledText(self.middle_frame, height=25, width=140, font="Times "+self.font_size, wrap='word')
+        self.text = ScrolledText(self.middle_frame, height=20, width=140, font="Times "+self.font_size, wrap='word')
         self.text.focus_force()
         self.text.pack(side=tk.TOP)
 
@@ -529,6 +529,7 @@ class CropNerGUI:
             self.msg.config(text="No file was chosen", foreground="red")
             return
         elif file_type == "json":
+            self.next_btn.pack_forget()
             self.annotation_file = f
             self.file_prefix = self.annotation_file.name.split(".")[0]
             self.file_name = self.annotation_file.name.split("/")[-1]
@@ -536,6 +537,15 @@ class CropNerGUI:
             self.json_initialized = True
             self.review_annotations()
         elif file_type == "pdf/txt":
+            if f.name.endswith(".txt"):
+                # Remove "Next Page" button if loading a txt file, which has no pages.
+                self.next_btn.pack_forget()
+            else:
+                # Bring back the "Next Page" button, placing it before the save button.
+                self.save_btn.pack_forget()
+                self.next_btn.pack(side=tk.LEFT)
+                self.save_btn.pack(side=tk.LEFT)
+
             self.raw_file=f
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
