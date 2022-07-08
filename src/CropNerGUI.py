@@ -121,8 +121,6 @@ class CropNerGUI:
         Select a folder containing spaCy nlp pipeline.
     open_file(self, file_type: str)
         Open a file (pdf/text) to be annotated or an annotation file (json) to be reviewed. selected using the GUI.
-    load_pdf(self)
-        Load  PDF file.
     load_page(self)
         Load contents of a PDF or text file into text box.
     update_scrolled_text_line_content_index(self)
@@ -535,32 +533,16 @@ class CropNerGUI:
             self.file_prefix = self.annotation_file.name.split(".")[0]
             self.file_name = self.annotation_file.name.split("/")[-1]
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
-            #TODO: Update metadata fields with what the open json file contains
+            self.json_initialized = True
             self.review_annotations()
         elif file_type == "pdf/txt":
             self.raw_file=f
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
             self.pdf_document = None
-            self.annotation_file = None
-            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
             self.load_page()
         else:
             self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
-
-    def load_pdf(self):
-        """
-        Load  PDF file.
-
-        Expects the self.raw_file global variable to be set. If not, a warning message is displayed.
-        """
-
-        if self.raw_file is None:
-            self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
-
-        self.file_prefix = self.raw_file.name.split(".")[0]
-        self.file_name = self.raw_file.name.split("/")[-1]
-        self.pdf_document = Document(self.raw_file.name)
 
     def load_page(self):
         """
@@ -575,6 +557,8 @@ class CropNerGUI:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
 
+            self.annotation_file = None
+            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
             self.doc_entry.delete(0, tk.END)
             self.doc_entry.insert(0, self.file_name)
             self.url_entry.delete(0, tk.END)
@@ -605,7 +589,7 @@ class CropNerGUI:
 
                 # Load PDF file
                 if self.pdf_document is None:
-                    self.load_pdf()
+                    self.pdf_document = Document(self.raw_file.name)
 
                 # Extract text from pdf while maintaining layout
                 control = TextControl(mode="physical")
@@ -789,7 +773,6 @@ class CropNerGUI:
         return overlap
 
     def initialize_new_file(self):
-        print("File initialized")
         self.json_initialized = True
         self.working_file_label.config(text="Working Annotation File: Untitled.json")
         self.date_entry.config(state=tk.NORMAL)
