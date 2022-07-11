@@ -103,6 +103,8 @@ class CropNerGUI:
         Boolean determining whether the metadata panel should be visible or not
     self.json_initialized : bool
         Whether a json file has been initialized in the workspace or not
+    self.current_page : str
+        Stores the current page the program is in (welcome, annotation, validation, etc.)
 
     NOTE: Though the widgets are global variables, we will not document them here. Most are self-evident. We have
     added inline comments in the code itself.
@@ -182,6 +184,7 @@ class CropNerGUI:
         self.page_number = 0
         self.metadata_toggle = False
         self.json_initialized = False
+        self.current_page = "Welcome"
 
         # ----------------------- Widgets for GUI start here.
         # Default font size for text in ScrolledText. Should be a string format
@@ -192,11 +195,11 @@ class CropNerGUI:
         self.menubar = tk.Menu(self.rootWin)
         self.file_menu = tk.Menu(self.menubar, tearoff=0)
         self.file_menu.add_command(label="New")
-        self.file_menu.add_command(label="Open Raw File")
-        self.file_menu.add_command(label="Open Annotation")
+        self.file_menu.add_command(label="Open Raw File", command=partial(self.open_file, "pdf/txt"))
+        self.file_menu.add_command(label="Open Annotation", command=partial(self.open_file, "json"))
         self.file_menu.add_command(label="Save")
         self.file_menu.add_command(label="Save As...")
-        self.file_menu.add_command(label="Close Editor", command = self.return_to_welcome)
+        self.file_menu.add_command(label="Close Editor", command=self.return_to_welcome)
         self.file_menu.add_command(label="Exit")
         self.view_menu = tk.Menu(self.menubar, tearoff=0)
         self.view_menu.add_command(label="Font +")
@@ -415,13 +418,29 @@ class CropNerGUI:
         
 
     def switch_annotate(self):
+        """
+        Switches GUI elements to annotation mode
+        """
         self.welcome_frame.pack_forget()
         self.annotation_frame.pack(fill="x")
+        self.current_page = "Annotate"
+
+    def switch_validate(self):
+        """
+        Switches GUI elements to validation mode
+        """
+        self.welcome_frame.pack_forget()
+        self.annotation_frame.pack(fill="x")
+        self.current_page = "Validate"
 
     def return_to_welcome(self):
+        """
+        Returns the GUI to the initial page where you choose to validate/annotate
+        """
         self.clear_data()
         self.annotation_frame.pack_forget()
         self.welcome_frame.pack()
+        self.current_page = "Welcome"
 
     def font_plus(self):
         """
@@ -613,12 +632,17 @@ class CropNerGUI:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
 
+            if self.current_page != "Annotation":
+                self.switch_annotate()
             self.annotation_file = None
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
             self.doc_entry.delete(0, tk.END)
             self.doc_entry.insert(0, self.file_name)
             self.url_entry.delete(0, tk.END)
+            self.date_entry.config(state=tk.NORMAL)
             self.date_entry.delete(0, tk.END)
+            self.date_entry.insert(0, "File not initialized")
+            self.date_entry.config(state=tk.DISABLED)
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
@@ -955,6 +979,10 @@ class CropNerGUI:
         if self.annotation_file is None:
             self.msg.config(text="Please select an annotations file (json)", foreground="red")
         else:
+
+            if self.current_page != "Validate":
+                self.switch_validate()
+
             # Load annotation data
             data = json_2_dict(self.annotation_file.name)
             train_data = dict_2_mixed_type(data)
