@@ -240,7 +240,7 @@ class CropNerGUI:
 
         # Top level frame for GUI
         self.top_frame = tk.Frame(self.annotation_frame)
-        self.top_frame.pack(side=tk.TOP, fill="x")
+        self.top_frame.pack(side=tk.TOP, fill="x", pady=(10,0))
 
         # Blank label with 3 empty spaces used for formatting. Ensures there is some
         # space between the edge and first widget e.g., button
@@ -370,11 +370,8 @@ class CropNerGUI:
         # Blank label for formatting
         self.blank_label_three = tk.Label(self.bottom_frame, text="   ")
         self.blank_label_three.pack(side=tk.LEFT)
-        # Exit button
-        self.exit_btn = tk.Button(self.bottom_frame, text="Exit",width=10,command=self.quit)
-        self.exit_btn.pack(side = tk.LEFT)
-        # Load button
-        self.load_btn = tk.Button(self.bottom_frame, text="Load Data", width=10, command=self.load_page)
+        # Reload button
+        self.load_btn = tk.Button(self.bottom_frame, text="Reload Page", width=10, command=self.load_page)
         self.load_btn.pack(side=tk.LEFT)
         # Clear data button
         self.clear_data_btn = tk.Button(self.bottom_frame, text="Clear Data", width=10, command=self.clear_data)
@@ -385,9 +382,6 @@ class CropNerGUI:
         # Next page button
         self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=self.next_page)
         self.next_btn.pack(side=tk.LEFT)
-        # Save button
-        self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=partial(self.file_save, "new"))
-        self.save_btn.pack(side=tk.LEFT)
 
         # Frame that will contain messages being displayed to the user
         self.msg_frame = tk.Frame(self.annotation_frame)
@@ -402,10 +396,6 @@ class CropNerGUI:
         # Blank label for formatting
         self.blank_label_five = tk.Label(self.open_frame, text="   ")
         self.blank_label_five.pack(side=tk.LEFT)
-        # Select file to be annotated button
-        self.open_button = tk.Button(self.open_frame,text='Select Raw Data File(PDF/txt)', width=18,
-                                     command=partial(self.open_file, "pdf/txt"))
-        self.open_button.pack(side=tk.LEFT)
         # Select folder with language model
         self.ner_model_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,
                                           command=self.get_ner_model_dir)
@@ -415,10 +405,6 @@ class CropNerGUI:
         self.page_label.pack(side=tk.LEFT)
         self.page_entry = tk.Entry(self.open_frame, width=5)
         self.page_entry.pack(side=tk.LEFT)
-        # Select annotation file
-        self.annotation_btn = tk.Button(self.open_frame, text="Select Annotation File(JSON)",width=20,
-                                        command=partial(self.open_file, "json"))
-        self.annotation_btn.pack(side=tk.LEFT)
         # Button to increase font in the text box (Font +)
         self.font_plus = tk.Button(self.open_frame, text="Font +", width=10, command=self.font_plus)
         self.font_plus.pack(side=tk.LEFT)
