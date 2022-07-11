@@ -419,6 +419,7 @@ class CropNerGUI:
         self.annotation_frame.pack(fill="x")
 
     def return_to_welcome(self):
+        self.clear_data()
         self.annotation_frame.pack_forget()
         self.welcome_frame.pack()
 
@@ -757,7 +758,7 @@ class CropNerGUI:
                     input_text = page.text()
                 else:
                     # To not interferse with how the dictionary is structured the program will use page 0 for non-PDF files for now.
-                    page_number = 0
+                    self.page_number = 0
                     input_text = self.text.get(1.0, "end")
 
             if not self.json_initialized:
@@ -1025,11 +1026,24 @@ class CropNerGUI:
         # Clear annotations
         self.cust_ents_dict = {}
 
+        # Clear current annotation file
+        self.annotation_file = None
+
+        # Update annotation file label
+        self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
+
         # Clear warning message
         self.msg.config(text="")
 
         # Clear content
         self.text.delete(1.0, tk.END)
+
+        # Clear metadata panel
+        self.doc_entry.delete(0, tk.END)
+        self.url_entry.delete(0, tk.END)
+        self.date_entry.config(state=tk.NORMAL)
+        self.date_entry.delete(0, tk.END)
+        self.date_entry.config(state=tk.DISABLED)
 
     def remove_all_tags(self):
         """
