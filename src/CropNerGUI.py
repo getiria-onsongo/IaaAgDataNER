@@ -191,16 +191,26 @@ class CropNerGUI:
         # for a number e.g., '16'
         self.font_size = "16"
 
-
+        # Creates a menu bar at the top of the window with program functions
         self.menubar = tk.Menu(self.rootWin)
+
+        # File menu for handling file operations
         self.file_menu = tk.Menu(self.menubar, tearoff=0)
         self.file_menu.add_command(label="New")
+        # Opens a raw file and switches GUI to annotation mode if not in it
         self.file_menu.add_command(label="Open Raw File", command=partial(self.open_file, "pdf/txt"))
+        # Opens an annotation file and switches GUI to validation mode if not in it
         self.file_menu.add_command(label="Open Annotation", command=partial(self.open_file, "json"))
+        # Saves an existing annotation file if one exists, otherwise opens file dialog to create a new one
         self.file_menu.add_command(label="Save", command=partial(self.file_save, "update"))
+        # Opens file dialog to create and save new annotation file
         self.file_menu.add_command(label="Save As...", command=partial(self.file_save, "new"))
+        # Switches the GUI to the welcome page and clears all raw data/annotations
         self.file_menu.add_command(label="Close Editor", command=self.return_to_welcome)
-        self.file_menu.add_command(label="Exit")
+        # Exits the program, asks to save unsaved changes
+        self.file_menu.add_command(label="Exit", command=self.quit)
+
+        # Menu for changing visual aspects of GUI
         self.view_menu = tk.Menu(self.menubar, tearoff=0)
         self.view_menu.add_command(label="Font +")
         self.view_menu.add_command(label="Font -")
