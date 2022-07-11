@@ -98,7 +98,7 @@ class Predict:
         self.nlp.add_pipe("compound_trait_entities", after="ner")
 
 
-    def process_files(self, file_list=None, json=False):
+    def process_files(self, file_list=None, json=True):
         """
         Gets a list of txt files from the dataset directory, then does ner
         tagging on them before saving as json.
@@ -118,7 +118,6 @@ class Predict:
 
         print("%s files to process." % str(len(files)))
         for f in files:
-            self.cust_ents_dict = {}
             # get text & page numbers from files
             if json:
                 text = self.get_json_text(f)
@@ -249,8 +248,8 @@ class Predict:
 
             if pos_current == "NOUN" or pos_current == "PROPN":
                 if pos_left == "ADJ":
-                    # print("Adj expanding...")
-                    # print("entity: " + str(ent))
+                    print("Adj expanding...")
+                    print("entity: " + str(ent))
                     i = current_index
                     start_index = ent.start
                     # keeps searching until all adjectives are found
@@ -263,9 +262,9 @@ class Predict:
                     first_tok = doc[start_index]
                     ent = doc[first_tok.i:ent.end]
                     ent.label_ = label
-                    # print("new: " + str(ent))
-                    # print("label: " + str(ent.label_))
-                    # print()
+                    print("new: " + str(ent))
+                    print("label: " + str(ent.label_))
+                    print()
         return ent
 
     def file_save(self, pdf_name : str, url : str, chunk : str) -> str:
