@@ -309,15 +309,15 @@ class Predict:
                 print("File will be overwritten.")
 
         # turns data dict to a json and saves to file
-        if len(self.cust_ents_dict) == 0:
-            print("No annotations to save.")
-        else:
-            input_text = self.cust_ents_dict[chunk][0]
-            entities = self.cust_ents_dict[chunk][1]
-            ann_train_dict = mixed_type_2_dict(
-                [(input_text, {"entities": entities})], chunk, pdf_name, url)
-            dict_2_json(ann_train_dict, output_filename)
-            print("Created %s." % output_filename)
+        # if len(self.cust_ents_dict) == 0:
+        #     print("No annotations to save.")
+        # else:
+        input_text = self.cust_ents_dict[chunk][0]
+        entities = self.cust_ents_dict[chunk][1]
+        ann_train_dict = mixed_type_2_dict(
+        [(input_text, {"entities": entities})], chunk, pdf_name, url)
+        dict_2_json(ann_train_dict, output_filename)
+        print("Created %s." % output_filename)
 
         return output_filename
 
