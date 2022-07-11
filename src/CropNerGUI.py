@@ -150,8 +150,8 @@ class CropNerGUI:
         Remove all the NER tags on text loaded in the text box.
     tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc
         Use NLP pipeline to identify named entities in the text.
-    file_save(self)
-        Save current annotation.
+    file_save(self, mode: str)
+        Save current annotation. Mode tells the method whether the user is updating a file (save) or creating a new file (save as)
     next_page(self)
         Load the next page.
     go(self)
@@ -197,8 +197,8 @@ class CropNerGUI:
         self.file_menu.add_command(label="New")
         self.file_menu.add_command(label="Open Raw File", command=partial(self.open_file, "pdf/txt"))
         self.file_menu.add_command(label="Open Annotation", command=partial(self.open_file, "json"))
-        self.file_menu.add_command(label="Save")
-        self.file_menu.add_command(label="Save As...")
+        self.file_menu.add_command(label="Save", command=partial(self.file_save, "update"))
+        self.file_menu.add_command(label="Save As...", command=partial(self.file_save, "new"))
         self.file_menu.add_command(label="Close Editor", command=self.return_to_welcome)
         self.file_menu.add_command(label="Exit")
         self.view_menu = tk.Menu(self.menubar, tearoff=0)
@@ -376,7 +376,7 @@ class CropNerGUI:
         self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=self.next_page)
         self.next_btn.pack(side=tk.LEFT)
         # Save button
-        self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=self.file_save)
+        self.save_btn = tk.Button(self.bottom_frame, text="Save", width=10, command=partial(self.file_save, "new"))
         self.save_btn.pack(side=tk.LEFT)
 
         # Frame that will contain messages being displayed to the user
@@ -634,7 +634,9 @@ class CropNerGUI:
 
             if self.current_page != "Annotation":
                 self.switch_annotate()
+            
             self.annotation_file = None
+            self.json_initialized = False
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
             self.doc_entry.delete(0, tk.END)
             self.doc_entry.insert(0, self.file_name)
@@ -1056,6 +1058,7 @@ class CropNerGUI:
 
         # Clear current annotation file
         self.annotation_file = None
+        self.json_initialized = False
 
         # Update annotation file label
         self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
@@ -1093,15 +1096,26 @@ class CropNerGUI:
         doc = self.nlp_agdata(text)
         return doc
 
-    def file_save(self):
+    def file_save(self, mode):
         """
         Brings up a file dialog to choose a file name/location then saves annotations to it in .json format.
         """
 
         if self.cust_ents_dict:
-            # Opens a tkinter save as file dialog and stores the file to a var
-            json_file = fd.asksaveasfile(initialfile=self.file_name.split(".")[0]+"_pg"+str(self.page_number)+".json", mode='w', defaultextension='.json')
 
+            # Opens a file dialog for saving if the user clicks "Save As" or if they save and an annotation file is not present, otherwise writes to existing annotation file
+            if mode == "new" or self.annotation_file == None:
+                # Sets a pre-determined file name or the old file name if file is already present
+                if self.annotation_file is None:
+                    save_name = self.file_name.split(".")[0]+"_pg"+str(self.page_number)+".json"
+                else:
+                    save_name = self.file_name
+                json_file = fd.asksaveasfile(initialfile=save_name, mode='w', defaultextension='.json')
+            else:
+                json_file = open(self.annotation_file.name, 'w')
+                
+
+            # Cancels operation if invalid file chosen to save to, otherwise updates current working file
             if json_file is None or json_file.name[-4:] != "json":
                 self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
                 return
@@ -1143,6 +1157,7 @@ class CropNerGUI:
 
             # Reset annotation data
             self.annotation_file = None
+            self.json_initialized = False
 
             # Load data
             self.load_page()
