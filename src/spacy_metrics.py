@@ -1,6 +1,6 @@
 """
 File with functions to extract and average json outputs of spacy evaluate
-function. Ended up not using this now, but saving for possible later use.
+feature. Ended up not using this now, but saving for possible later use.
 
 
 Functions
