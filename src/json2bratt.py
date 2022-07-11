@@ -104,7 +104,7 @@ def conversion(infile, outfile):
             f.write(x)
         # This is the part which decides if you wanna do document or sentence level
         counter += len(x)  # Do 0 if you want sentence level
-    print(f"\nFile converted to bratt as {annfile} and {txtfile}")
+    print(f"File converted to bratt as {annfile} and {txtfile}")
 
 
 # Calls the method if the script is getting executed directly

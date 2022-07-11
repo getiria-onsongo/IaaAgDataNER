@@ -1,4 +1,4 @@
-python3 src/json2SpacyJson.py Data/train ner_2021_08 en_core_web_lg --suffix '.json' --split True --test_size 0.2 --reserve_test True --reserve_test_dir Data/reserved_test
+python3 src/json2SpacyJson.py Data ner_2021_08 en_core_web_lg --suffix '.json' --split True --test_size 0.2 --reserve_test True --reserve_test_dir Data/reserved_test
 mkdir ner_2021_08
 python3 -m spacy convert --converter json ner_2021_08_training_data.jsonl ner_2021_08
 python3 -m spacy convert --converter json ner_2021_08_validate_data.jsonl ner_2021_08

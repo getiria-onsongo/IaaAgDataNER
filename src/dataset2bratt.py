@@ -56,7 +56,6 @@ def dataset_to_bratt(input_dir : str, output_dir : str, file_pattern="/*_td.json
     print("%s files to convert." % str(len(files)))
 
     for f in files:
-        print("Converting %s..." % f)
         path_no_suffix = f.split(".json")[0].split("/")
         prefix = path_no_suffix[len(path_no_suffix)-1]
         conversion(f, output_dir+"/"+prefix)

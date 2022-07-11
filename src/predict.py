@@ -98,7 +98,7 @@ class Predict:
         self.nlp.add_pipe("compound_trait_entities", after="ner")
 
 
-    def process_files(self, file_list=None, json=True):
+    def process_files(self):
         """
         Gets a list of txt files from the dataset directory, then does ner
         tagging on them before saving as json.
@@ -110,19 +110,12 @@ class Predict:
         json : bool
             flag to use json text reader
         """
-        if file_list == None:
-            # get files from directory
-            files = glob.glob(self.dataset_dir + "/*" + self.dataset_suffix)
-        else:
-            files = file_list
+        files = glob.glob(self.dataset_dir + "/*" + self.dataset_suffix)
 
         print("%s files to process." % str(len(files)))
         for f in files:
             # get text & page numbers from files
-            if json:
-                text = self.get_json_text(f)
-            else:
-                text = self.get_text(f)
+            text = self.get_text(f)
             page_number = extract_page_num(f, self.dataset_suffix)
             # predict on text and save as new json files
             self.pre_tag(text, page_number)
@@ -144,20 +137,6 @@ class Predict:
             text = f.read()
         return text
 
-    def get_json_text(self, file : str) -> str:
-        """
-        Loads text from a given json file to be able to predict on it
-
-        Parameters
-        ----------
-        file : str
-            file name
-
-        Returns text from json files as a string.
-        """
-        json_dict = json_2_dict(file)
-        return next(iter(json_dict["sentences"]))
-
     def tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
         """
         Use NLP pipeline to identify named entities in the text.
@@ -175,7 +154,7 @@ class Predict:
     def pre_tag(self, input_text : str, page_number : int):
         """
         Tags input text using model for ner taging and saves to
-        the cust_ent_dict dictionary
+        the cust_ents_dict dictionary
 
         Parameters
         ----------
@@ -190,16 +169,20 @@ class Predict:
         self.cust_ents_dict = {}
         doc = self.tag_ner_with_spacy(input_text)
         for ent in doc.ents:
+            # NER is in our list of custom tags
             if ent.label_ in self.tags:
-                if self.spacy_only is False:
+                if not self.spacy_only:
                     ent = self.get_pos(ent)
+                # index = self.tags.index(ent.label_) # Find index for an element in a list
                 if self.cust_ents_dict.get(page_number, False):
                     self.cust_ents_dict[page_number].append((ent.start_char, ent.end_char, ent.label_))
                 else:
                     self.cust_ents_dict[page_number] = [(ent.start_char, ent.end_char, ent.label_)]
+
         if self.cust_ents_dict.get(page_number, False):
             tags = self.cust_ents_dict[page_number]
             self.cust_ents_dict[page_number] = [input_text, tags]
+
 
     def get_pos(self, ent : str) -> str:
         """
@@ -217,7 +200,7 @@ class Predict:
         if(len(doc[ent.start:ent.end]) > 0):
             current_index = doc[ent.start:ent.end][0].i
             label = ent.label_
-            # functions that contain rules to expand the entity's span
+            # functions that expands ents to contain proceeding adjectives
             ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
         return ent
 
