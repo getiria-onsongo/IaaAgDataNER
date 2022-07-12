@@ -72,11 +72,13 @@ class CrossValidation:
             directory name where data is found
         spacy_only : bool
             flag to only use spacy, not part of speech based entity expansion
+        config : str
+            path to the model config file
         model_dir : str
             output path for the model, after each fold the model is just
             overwritten
-        config : str
-            path to the model config file
+        sentence_level : bool
+            if bratt conversion should take place on the sentence level
         """
         # shuffles and divides data into k folds and a dev set
         print("Shuffling and splitting data...")
@@ -95,7 +97,7 @@ class CrossValidation:
             else:
                 folds.append(files[files_per_divison*start:len(files)])
 
-        # makes spacy binary output dir if it doesn't exist
+        # makes spacy binary output dir
         self.create_dirs(["ner_2021_08"])
 
         # create and convert the dev set
@@ -126,10 +128,8 @@ class CrossValidation:
             # train model
             train(config_path=config, output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
-            # evaulate model
-            self.predict(validation, f, spacy_only, model_dir+"/model-best")
-
-
+            # evaulate model on validation data
+            self.predict(validation, f, spacy_only, model_dir+"/model-best", sentence_level)
             fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pred_bratt"), 'strict')
             print("Fold %s results: " %fold_counter)
             print(format_results(fold_results))
@@ -139,7 +139,7 @@ class CrossValidation:
         avgs, ents = self.medacy_eval()
         self.print_metrics(avgs, ents)
 
-    def predict(self, validation : list, fold : int, spacy_only : bool, model_dir="cv_model/model-best"):
+    def predict(self, validation : list, fold : int, spacy_only : bool, model_dir="cv_model/model-best", sentence_level=False):
         """
         For a given fold, predicts on the validation data and saves to json.
         Also moves the gold standard validation data in json format to a new
@@ -155,8 +155,8 @@ class CrossValidation:
             if the model should only use spacy and not pos tagging & expansion
         model_dir : str
             path to spacy model to predict with
-        dataset_suffix : str
-            file ending of validation data
+        sentence_level : bool
+            if bratt conversion should take place on the sentence level
         """
         # create output directories
         print("\nCreating output directories...")
@@ -167,7 +167,7 @@ class CrossValidation:
         gold_bratt_name = fold_dir + "/gold_bratt"
         self.create_dirs([fold_dir, json_name, bratt_name, gold_json_name, gold_bratt_name])
 
-        # create gold standard dataset
+        # create and convert to bratt gold standard dataset
         print("\nCreating gold standard validation dataset...")
         for file in validation:
             json_file = open(file)
@@ -176,18 +176,17 @@ class CrossValidation:
             file_name = name_split[len(name_split)-1]
             with open(gold_json_name+"/"+file_name, 'w') as f:
                 json.dump(contents, f)
-
         print("Converting gold standard to bratt...")
-        dataset_to_bratt(gold_json_name, gold_bratt_name, self.sentence_level)
+        dataset_to_bratt(gold_json_name, gold_bratt_name, sentence_level)
 
         # do pos tagging & entity expansion
         print("\nPredicting on validation data...")
         predict = Predict(model_dir=model_dir, dataset_dir=gold_bratt_name, output_dir=json_name, spacy_only=spacy_only)
         predict.process_files()
 
-        # convert gold standard & predictions to bratt format to use with medacy
+        # convert predictions to bratt format
         print("Converting predictions to bratt...")
-        dataset_to_bratt(json_name, bratt_name, self.sentence_level)
+        dataset_to_bratt(json_name, bratt_name, sentence_level)
 
     def medacy_eval(self):
         """
@@ -300,7 +299,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--sentence_level',
         action='store_false', default = True,
-        help='only use spacy, no pos tagging & entity expansion'
+        help='preform conversion to bratt on the sentence level'
     )
     args = parser.parse_args()
 
