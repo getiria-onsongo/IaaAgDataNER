@@ -62,7 +62,7 @@ class CrossValidation:
         execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
         return name
 
-    def cross_validate(self, data : str, spacy_only : bool, config, model_dir="cv_model"):
+    def cross_validate(self, data : str, spacy_only : bool, config, model_dir="cv_model", sentence_level=False):
         """
         Preforms cross validation on spacy model.
 
@@ -178,7 +178,7 @@ class CrossValidation:
                 json.dump(contents, f)
 
         print("Converting gold standard to bratt...")
-        dataset_to_bratt(gold_json_name, gold_bratt_name)
+        dataset_to_bratt(gold_json_name, gold_bratt_name, self.sentence_level)
 
         # do pos tagging & entity expansion
         print("\nPredicting on validation data...")
@@ -187,7 +187,7 @@ class CrossValidation:
 
         # convert gold standard & predictions to bratt format to use with medacy
         print("Converting predictions to bratt...")
-        dataset_to_bratt(json_name, bratt_name)
+        dataset_to_bratt(json_name, bratt_name, self.sentence_level)
 
     def medacy_eval(self):
         """
@@ -297,8 +297,13 @@ if __name__ == '__main__':
         action='store_true', default = False,
         help='only use spacy, no pos tagging & entity expansion'
     )
+    parser.add_argument(
+        '--sentence_level',
+        action='store_false', default = True,
+        help='only use spacy, no pos tagging & entity expansion'
+    )
     args = parser.parse_args()
 
     val = CrossValidation(k_folds=int(args.folds))
     config_name = val.create_config()
-    val.cross_validate(args.dataset_dir, args.spacy_only, config_name)
+    val.cross_validate(data=args.dataset_dir, spacy_only=args.spacy_only, config=config_name, sentence_level=args.sentence_level)

@@ -36,7 +36,7 @@ def extract_page_num(f : str, suffix : str) -> str:
             num = f[len(f)-(len(suffix)+2)] + num
     return num
 
-def dataset_to_bratt(input_dir : str, output_dir : str, file_pattern="/*_td.json"):
+def dataset_to_bratt(input_dir : str, output_dir : str, file_pattern="/*_td.json", sentence_level=False):
     """
     Converts a whole dataset into bratt and txt files.
 
@@ -52,13 +52,14 @@ def dataset_to_bratt(input_dir : str, output_dir : str, file_pattern="/*_td.json
     name_prefix : str
         start of name for new bratt and json files
     """
-    files = glob.glob(input_dir+file_pattern)
+    files = glob.glob(input_dir+"/**/*.json", recursive=True)
+    print(files)
     print("%s files to convert." % str(len(files)))
 
     for f in files:
         path_no_suffix = f.split(".json")[0].split("/")
         prefix = path_no_suffix[len(path_no_suffix)-1]
-        conversion(f, output_dir+"/"+prefix)
+        conversion(f, output_dir+"/"+prefix, sentence_level)
 
     print("Finished dataset conversion, new files in %s." % output_dir)
 
@@ -78,13 +79,17 @@ if __name__ == '__main__':
         '--file_pattern', help='file ending of files to convert',
         action='store', default="/*_td.json"
     )
+    parser.add_argument(
+        '--sentence_level',
+        action='store_true', default=False
+    )
 
     args = parser.parse_args()
-    input, output, pattern = args.input_dir, args.output_dir, args.file_pattern
+    input, output, pattern, sentence_level = args.input_dir, args.output_dir, args.file_pattern, args.sentence_level
 
     if not os.path.exists(input):
         print("input dataset path does not exist")
     else:
         if not os.path.exists(output):
             os.makedirs(output)
-        dataset_to_bratt(input, output, file_pattern=pattern)
+        dataset_to_bratt(input, output, file_pattern=pattern, sentence_level=sentence_level)

@@ -21,7 +21,7 @@ if __name__ == "__main__":
     outfile = input("\nName your output file: ")
 
 
-def conversion(infile, outfile):
+def conversion(infile, outfile, sentence_level=False):
     annfile = outfile + ".ann"
     txtfile = outfile + ".txt"
 
@@ -103,7 +103,11 @@ def conversion(infile, outfile):
         with open(txtfile, "a") as f:
             f.write(x)
         # This is the part which decides if you wanna do document or sentence level
-        counter += len(x)  # Do 0 if you want sentence level
+        if sentence_level:
+            counter += len(x)
+        else:
+            counter = 0
+
     print(f"File converted to bratt as {annfile} and {txtfile}")
 
 

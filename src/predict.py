@@ -79,7 +79,7 @@ class Predict:
         saves json for a given page
     """
 
-    def __init__(self, model_dir : str, output_dir : str, dataset_dir=None, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
+    def __init__(self, model_dir : str, dataset_dir : str, output_dir=None, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
         self.model_dir = model_dir
         self.dataset_dir = dataset_dir
         self.output_dir = output_dir
@@ -119,7 +119,6 @@ class Predict:
             page_number = extract_page_num(f, self.dataset_suffix)
             # predict on text and save as new json files
             self.pre_tag(text, page_number)
-            print(self.cust_ents_dict)
             json_name = self.file_save(f, "", page_number)
 
     def get_text(self, file : str) -> str:
@@ -174,7 +173,6 @@ class Predict:
             if ent.label_ in self.tags:
                 if not self.spacy_only:
                     ent = self.get_pos(ent)
-                # index = self.tags.index(ent.label_) # Find index for an element in a list
                 if self.cust_ents_dict.get(page_number, False):
                     self.cust_ents_dict[page_number].append((ent.start_char, ent.end_char, ent.label_))
                 else:
@@ -351,6 +349,6 @@ if __name__ == '__main__':
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        preprocess = Predict(model, output_dir, dataset_dir, spacy_only=spacy_only,
+        preprocess = Predict(model, dataset_dir, output_dir, spacy_only=spacy_only,
                              json_prefix=json_prefix, json_suffix=json_suffix, dataset_suffix=dataset_suffix, no_overwrite=no_overwrite)
         preprocess.process_files()
