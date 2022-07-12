@@ -766,7 +766,7 @@ class CropNerGUI:
                 self.page_number = int(page_num)
                 self.chunk=self.page_number
             else: # Range of numbers
-                self.handle_page_range(page_num)
+                self.handle_page_range(page_num) 
 
             # Delete contents
             self.text.delete(1.0, tk.END)
