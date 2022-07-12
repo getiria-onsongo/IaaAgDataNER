@@ -891,8 +891,7 @@ class CropNerGUI:
             else:
                 if self.file_mode == "pdf":
                     if self.pdf_document is None:
-                        self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
-                        self.load_pdf()
+                        self.msg.config(text="Warning!! No PDF was detected. Will attempt to load currently loaded data", foreground="red")
                     input_text = self.load_page()
                 else:
                     # To not interfere with how the dictionary is structured the program will use page 0 for non-PDF files for now.
