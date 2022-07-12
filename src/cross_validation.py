@@ -298,7 +298,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--sentence_level',
-        action='store_false', default = True,
+        action='store_true', default = False,
         help='preform conversion to bratt on the sentence level'
     )
     args = parser.parse_args()
