@@ -1,0 +1,80 @@
+13	Eight-Twelve	CVAR
+13	six-rowed	TRAT
+13	winter	TRAT
+13	feed	CVAR
+13	barley	CROP
+14	USDA-ARS	ORG
+14	Idaho AES	ORG
+14	1991	DATE
+15	Steveland/Luther//Wintermalt	PED
+16	79Ab812	ALAS
+17	awns	PLAN
+17	maturity	TRAT
+17	winter hardiness	TRAT
+17	height	TRAT
+17	lodging resistance	TRAT
+18	Spikes	PLAN
+19	Kernels	PLAN
+19	aleurone	PLAN
+19	rachilla hairs	PLAN
+20	susceptible	PPTD
+20	stripe rust	PATH
+20	scald	PATH
+20	snow mold	PATH
+20	moderately susceptible	PPTD
+20	BYD	PATH
+22	Crop Science 32(3):828 (1992)	JRNL
+24	Maja	CVAR
+24	six-rowed	TRAT
+24	winter	TRAT
+24	feed	TRAT
+24	malt	TRAT
+24	barley	CROP
+25	Oregon AES	ORG
+25	2006	DATE
+25	AgriSource	ORG
+25	Burley, Idaho	GPE
+26	doubled haploid	TRAT
+26	Strider/88Ab536	PED
+27	STAB 113	ALAS
+28	Maja	CVAR
+28	88Ab536	CVAR
+28	facultative	TRAT
+30	height	TRAT
+30	straw strength	TRAT
+30	awns	PLAN
+30	spike	PLAN
+31	grain	PLAN
+31	aleurone	PLAN
+32	Maja	CVAR
+32	test weight	TRAT
+32	barley	CROP
+32	American Malting Barley Association	ORG
+33	grain protein	TRAT
+33	enzyme level	TRAT
+34	resistant	PPTD
+34	stripe rust	PATH
+34	susceptible	PPTD
+34	scald	PATH
+36	Strider	CVAR
+36	six-rowed	TRAT
+36	winter	TRAT
+36	feed	TRAT
+36	barley	CROP
+37	Oregon AES	ORG
+37	1997	DATE
+38	doubled-haploid	TRAT
+39	I1162-19/J-126//WA1245///Steptoe	PED
+40	ORW-6	ALAS
+41	height	TRAT
+42	Kold	CVAR
+42	maturing	TRAT
+42	straw strength	TRAT
+43	awns	PLAN
+43	spike	PLAN
+44	resistant	PPTD
+44	stripe rust	PATH
+44	moderately susceptible	PPTD
+44	scald	PATH
+44	net blotch	PATH
+44	BYD	PATH

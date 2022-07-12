@@ -1,0 +1,162 @@
+1	Fiesta	CVAR
+1	six-rowed	TRAT
+1	spring	TRAT
+1	feed	TRAT
+1	barley	CROP
+5	semi-dwarf	TRAT
+5	stiff straw	TRAT
+5	lodging resistance	TRAT
+5	maturity	TRAT
+7	spike	PLAN
+7	rachis edges	PLAN
+7	hairs	PLAN
+8	Glumes	PLAN
+8	lemma	PLAN
+8	awns	PLAN
+8	glumes	PLAN
+9	Lemma awns	PLAN
+9	teeth	PLAN
+9	hairs	PLAN
+10	Kernels	PLAN
+10	rachilla hairs	PLAN
+10	hulls	PLAN
+10	aleurone	PLAN
+11	Fiesta	CVAR
+11	resistant	PPTD
+11	BYD	PATH
+11	susceptible	PPTD
+11	moderately susceptible	PPTD
+11	net blotch	PATH
+11	leaf rust	PATH
+11	stripe rust	PATH
+11	scald	PATH
+11	powdery mildew	PATH
+13	Foster	CVAR
+13	six-rowed	TRAT
+13	spring	TRAT
+13	malting	TRAT
+13	feed	TRAT
+13	barley	CROP
+14	North Dakota AES	ORG
+14	1995	DATE
+15	Robust/6/Glenn/4/Nordic//Dickson/Trophy/3/Azure/5/Glenn/Karl	PED
+16	ND11055	ALAS
+17	maturity	TRAT
+18	Robust	CVAR
+18	mid-tall	TRAT
+18	shorter	TRAT
+18	straw	PLAN
+19	Foster	CVAR
+19	awns	PLAN
+20	spike	PLAN
+21	Kernels	PLAN
+22	Rachilla hairs	PLAN
+23	Aleurone	PLAN
+24	lateral veins	PLAN
+25	barbs	PLAN
+25	lateral veins	PLAN
+26	crease	PLAN
+26	base	PLAN
+27	Lateral kernels	PLAN
+28	Percent grain protein	TRAT
+28	Robust	CVAR
+29	Foster	CVAR
+29	kernels	PLAN
+29	malt extract	TRAT
+29	enzymatic activity	TRAT
+29	Morex	CVAR
+30	resistant	PPTD
+30	spot blotch	PATH
+30	stem rust	PATH
+30	moderately susceptible	PPTD
+30	net blotch	PATH
+30	BYD	PATH
+30	susceptible	PPTD
+30	loose smut	PATH
+30	scald	PATH
+30	stripe rust	PATH
+30	Septoria sp	PATH
+30	Fusarium spp	PATH
+32	Crop Science 37:1018 (1997)	JRNL
+34	Galena	CVAR
+34	two-rowed	TRAT
+34	spring	TRAT
+34	malting	TRAT
+34	barley	CROP
+35	Coors Brewing Company	ORG
+35	1993	DATE
+36	Triumph/Crystal	PED
+38	maturity	TRAT
+38	Triumph	CVAR
+38	Crystal	CVAR
+38	straw	PLAN
+39	Spikes	PLAN
+40	Rachis edges	PLAN
+41	Awns	PLAN
+42	glume	PLAN
+42	lemma	PLAN
+43	hairs	PLAN
+43	glume	PLAN
+44	Glume awns	PLAN
+44	glume	PLAN
+45	hull	PLAN
+46	aleurone	PLAN
+47	Rachilla hairs	PLAN
+48	Lateral veins	PLAN
+49	barbs	PLAN
+49	lateral veins	PLAN
+50	crease	PLAN
+50	base	PLAN
+51	moderately susceptible	PPTD
+51	stripe rust	PATH
+51	susceptible	PPTD
+51	scald	PATH
+51	BYD	PATH
+54	Gallatin	CVAR
+54	two-rowed	TRAT
+54	spring	TRAT
+54	feed	TRAT
+54	barley	CROP
+55	USDA-ARS	ORG
+55	Montana and Idaho AESs	ORG
+55	1986	DATE
+56	Summit/Hector	PED
+57	MT 313104	ALAS
+59	maturity	TRAT
+59	heading	TRAT
+59	Hector	CVAR
+60	mid-tall	TRAT
+60	straw strength	TRAT
+60	straw	PLAN
+60	Hector	CVAR
+61	Spikes	PLAN
+61	awns	PLAN
+62	Kernels	PLAN
+62	rachilla hairs	PLAN
+62	hulls	PLAN
+63	Veins	PLAN
+64	barbs	PLAN
+64	lateral veins	PLAN
+65	crease	PLAN
+65	base	PLAN
+65	beard	PLAN
+66	Gallatin	CVAR
+66	test weight	TRAT
+66	percentage of plump kernels	TRAT
+66	Hector	CVAR
+67	moderately resistant	PPTD
+67	net blotch	PATH
+67	susceptible	PPTD
+67	scald	PATH
+69	Crop Science 27:815 (1987)	JRNL
+70	Garnet	CVAR
+70	two-rowed	TRAT
+70	spring	TRAT
+70	feed	TRAT
+70	malting	TRAT
+70	barley	CROP
+71	USDA-ARS	ORG
+71	Idaho AES	ORG
+71	1999	DATE
+72	Harrington/78Ab6871(Crystal)	PED
+73	86Ab2317	ALAS
