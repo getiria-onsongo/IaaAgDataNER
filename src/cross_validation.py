@@ -62,7 +62,7 @@ class CrossValidation:
         execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
         return name
 
-    def cross_validate(self, data : str, spacy_only : bool, model_dir="cv_model", config="senter_ner_test.cfg"):
+    def cross_validate(self, data : str, spacy_only : bool, config, model_dir="cv_model"):
         """
         Preforms cross validation on spacy model.
 
@@ -300,5 +300,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     val = CrossValidation(k_folds=int(args.folds))
-    val.create_config()
-    val.cross_validate(args.dataset_dir, args.spacy_only)
+    config_name = val.create_config()
+    val.cross_validate(args.dataset_dir, args.spacy_only, config_name)
