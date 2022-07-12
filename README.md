@@ -48,7 +48,7 @@ pip3 install -U pip setuptools wheel
 pip3 install -U spacy
 pip3 install spacy-transformers
 pip3 install -U scikit-learn
-pip3 install -U PyPDF2
+pip3 install -U pyxpdf
 
 ```
 
