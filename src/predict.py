@@ -119,6 +119,7 @@ class Predict:
             page_number = extract_page_num(f, self.dataset_suffix)
             # predict on text and save as new json files
             self.pre_tag(text, page_number)
+            print(self.cust_ents_dict)
             json_name = self.file_save(f, "", page_number)
 
     def get_text(self, file : str) -> str:

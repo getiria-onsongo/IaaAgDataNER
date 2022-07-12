@@ -62,7 +62,7 @@ class CrossValidation:
         execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
         return name
 
-    def cross_validate(self, data : str, spacy_only : bool, model_dir="senter_ner_model", config="senter_ner.cfg"):
+    def cross_validate(self, data : str, spacy_only : bool, model_dir="cv_model", config="senter_ner_test.cfg"):
         """
         Preforms cross validation on spacy model.
 
@@ -81,7 +81,8 @@ class CrossValidation:
         # shuffles and divides data into k folds and a dev set
         print("Shuffling and splitting data...")
         splits = self.k_folds + 1
-        files = glob.glob(data+"/*.json") # add feature to search multiple dirs?
+        files = glob.glob(data+"/**/*.json", recursive=True)
+        print(files)
         random.shuffle(files)
         files_per_divison = (len(files) // splits)
         folds = []
@@ -123,10 +124,12 @@ class CrossValidation:
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
             # train model
-            train(config_path="senter_ner.cfg", output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
+            train(config_path=config, output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # evaulate model
             self.predict(validation, f, spacy_only, model_dir+"/model-best")
+
+
             fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pred_bratt"), 'strict')
             print("Fold %s results: " %fold_counter)
             print(format_results(fold_results))
@@ -136,7 +139,7 @@ class CrossValidation:
         avgs, ents = self.medacy_eval()
         self.print_metrics(avgs, ents)
 
-    def predict(self, validation : list, fold : int, spacy_only : bool, model_dir="senter_ner_model/model-best", dataset_suffix="_td.json"):
+    def predict(self, validation : list, fold : int, spacy_only : bool, model_dir="cv_model/model-best"):
         """
         For a given fold, predicts on the validation data and saves to json.
         Also moves the gold standard validation data in json format to a new
@@ -164,13 +167,8 @@ class CrossValidation:
         gold_bratt_name = fold_dir + "/gold_bratt"
         self.create_dirs([fold_dir, json_name, bratt_name, gold_json_name, gold_bratt_name])
 
-        # do pos tagging & entity expansion
-        print("Predicting on validation data...")
-        predict = Predict(model_dir=model_dir, output_dir=json_name, dataset_suffix=dataset_suffix, spacy_only=spacy_only)
-        predict.process_files(validation, json=True)
-
         # create gold standard dataset
-        print("Creating gold standard validation dataset...")
+        print("\nCreating gold standard validation dataset...")
         for file in validation:
             json_file = open(file)
             contents = json.load(json_file)
@@ -179,9 +177,16 @@ class CrossValidation:
             with open(gold_json_name+"/"+file_name, 'w') as f:
                 json.dump(contents, f)
 
-        # convert gold standard & predictions to bratt format to use with medacy
-        print("Converting to bratt...")
+        print("Converting gold standard to bratt...")
         dataset_to_bratt(gold_json_name, gold_bratt_name)
+
+        # do pos tagging & entity expansion
+        print("\nPredicting on validation data...")
+        predict = Predict(model_dir=model_dir, dataset_dir=gold_bratt_name, output_dir=json_name, spacy_only=spacy_only)
+        predict.process_files()
+
+        # convert gold standard & predictions to bratt format to use with medacy
+        print("Converting predictions to bratt...")
         dataset_to_bratt(json_name, bratt_name)
 
     def medacy_eval(self):
