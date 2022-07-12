@@ -889,22 +889,13 @@ class CropNerGUI:
                     self.msg.config(text="No selection detected; no text was tagged.", foreground="red")
                     return
             else:
-                # The code reserved for PDFs is currently a little unnecessary and the code will work without it, but if we eventually want the user to be able to type a page range and pre-tag them without reloading the text box first then this is where that will happen.
                 if self.file_mode == "pdf":
-                    # Get page number
-                    page_num = self.page_entry.get()
-                    if not page_num.isdigit():
-                        self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
-                        page_num = 1
-                    self.page_number = int(page_num)
-                    self.chunk = self.page_number
-                    # Extract text from pdf while maintaining layout
-                    control = TextControl(mode="physical")
-
-                    page = self.pdf_document[self.page_number - 1]
-                    input_text = page.text()
+                    if self.pdf_document is None:
+                        self.msg.config(text="Warning!! No PDF was detected. Will attempt to load PDF ", foreground="red")
+                        self.load_pdf()
+                    input_text = self.load_page()
                 else:
-                    # To not interferse with how the dictionary is structured the program will use page 0 for non-PDF files for now.
+                    # To not interfere with how the dictionary is structured the program will use page 0 for non-PDF files for now.
                     page_number = 0
                     input_text = self.text.get(1.0, "end")
 
