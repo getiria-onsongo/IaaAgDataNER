@@ -560,6 +560,7 @@ class CropNerGUI:
             self.file_name = self.annotation_file.name.split("/")[-1]
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
             self.json_initialized = True
+            self.raw_file=None
             self.review_annotations()
         elif file_type == "pdf/txt":
             if f.name.endswith(".txt"):
@@ -890,9 +891,12 @@ class CropNerGUI:
                     return
             else:
                 if self.file_mode == "pdf":
-                    if self.pdf_document is None:
-                        self.msg.config(text="Warning!! No PDF was detected. Will attempt to load currently loaded data", foreground="red")
-                    input_text = self.load_page()
+                    if self.raw_file is None:
+                        self.msg.config(text="Warning!! No PDF or txt file was detected. Attempting to tag what's currently in the text box.", foreground="red")
+                        # Will pre-tag whatever's in the current text box without trying to load data.
+                        input_text = self.text.get(1.0, "end")
+                    else:
+                        input_text = self.load_page()
                 else:
                     # To not interfere with how the dictionary is structured the program will use page 0 for non-PDF files for now.
                     page_number = 0
