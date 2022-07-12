@@ -752,38 +752,26 @@ class CropNerGUI:
             self.cust_ents_dict = {}
 
             # Detects file type
-            self.file_mode = self.raw_file.name[-3:]
-
-            page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
-            page_num_valid = self.page_num_is_valid(page_num)
-            if page_num_valid == False:
-                self.msg.config(text="Valid page number not entered. Value initialized to 1", foreground="red")
-                self.page_number = 1
-                self.page_entry.delete(0,tk.END)
-                self.page_entry.insert(0, str(self.page_number))
-                self.chunk=self.page_number
-            elif page_num_valid == True:
-                self.page_number = int(page_num)
-                self.chunk=self.page_number
-            else: # Range of numbers
-                self.handle_page_range(page_num) 
+            self.file_mode = self.raw_file.name[-3:] 
 
             # Delete contents
             self.text.delete(1.0, tk.END)
 
             # Calls pyxpdf in case the file is a PDF, otherwise reads as txt
             if self.file_mode == "pdf":
-                # Read valid page number, otherwise reset to 1
-                page_num = self.page_entry.get()
-                if not page_num.isdigit():
-                    self.msg.config(text="Page number not entered. Value initialized to 1", foreground="red")
+                page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
+                page_num_valid = self.page_num_is_valid(page_num)
+                if page_num_valid == False:
+                    self.msg.config(text="Valid page number not entered. Value initialized to 1", foreground="red")
                     self.page_number = 1
                     self.page_entry.delete(0,tk.END)
                     self.page_entry.insert(0, str(self.page_number))
-                else:
-                    self.page_number = int(page_num)
-
                     self.chunk=self.page_number
+                elif page_num_valid == True:
+                    self.page_number = int(page_num)
+                    self.chunk=self.page_number
+                else: # Range of numbers
+                    self.handle_page_range(page_num)
 
                 # Load PDF file
                 if self.pdf_document is None:
