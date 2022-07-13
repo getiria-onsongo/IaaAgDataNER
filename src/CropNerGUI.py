@@ -755,7 +755,6 @@ class CropNerGUI:
             self.cust_ents_dict = {}
 
             # Detects file type
-            # TODO: (For Emydius) Switch this to raw_file.name.split(.)[-1]
             self.file_mode = self.raw_file.name.split(".")[-1] 
 
             # Delete contents
@@ -794,11 +793,14 @@ class CropNerGUI:
                     for page in self.pdf_document[self.page_number[0] - 1 : self.page_number[1]]:
                         txt = txt + page.text().replace("\r", "").replace("", "")
             else:
+                print("Runs the else statement for txt files")
+                print(f'Raw File: {self.raw_file}')
                 self.page_number = 0
                 self.chunk = self.page_number
                 txt = self.raw_file.read()
+                print(txt)
 
-            self.text.insert("1.0",txt)
+            self.text.insert(1.0,txt)
             return txt
 
     def update_scrolled_text_line_content_index(self):
@@ -878,17 +880,18 @@ class CropNerGUI:
         else:
             input_text = None
             # Get page number
-            page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
-            if not page_num.isdigit(): # Either invalid or a range.
-                if not selection == "selection":
-                    if self.page_num_is_valid(page_num) == False: # Invalid
-                        self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
-                        page_num = 1
-                    else: # Range
-                        self.handle_page_range(page_num)
-            else: # Single valid page
-                self.page_number = int(page_num)
-                self.chunk = self.page_number
+            if self.file_mode == "pdf":
+                page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
+                if not page_num.isdigit(): # Either invalid or a range.
+                    if not selection == "selection":
+                        if self.page_num_is_valid(page_num) == False: # Invalid
+                            self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
+                            page_num = 1
+                        else: # Range
+                            self.handle_page_range(page_num)
+                else: # Single valid page
+                    self.page_number = int(page_num)
+                    self.chunk = self.page_number
 
             if selection == "selection":
                 if (len(self.text.tag_ranges("sel")) > 0):
@@ -897,17 +900,12 @@ class CropNerGUI:
                     self.msg.config(text="No selection detected; no text was tagged.", foreground="red")
                     return
             else:
-                if self.file_mode == "pdf":
-                    if self.raw_file is None:
-                        self.msg.config(text="Warning!! No PDF or txt file was detected. Attempting to tag what's currently in the text box.", foreground="red")
-                        # Will pre-tag whatever's in the current text box without trying to load data.
-                        input_text = self.text.get(1.0, "end")
-                    else:
-                        input_text = self.load_page()
-                else:
-                    # To not interfere with how the dictionary is structured the program will use page 0 for non-PDF files for now.
-                    page_number = 0
+                if self.raw_file is None:
+                    self.msg.config(text="Warning!! No PDF or txt file was detected. Attempting to tag what's currently in the text box.", foreground="red")
+                    # Will pre-tag whatever's in the current text box without trying to load data.
                     input_text = self.text.get(1.0, "end")
+                else:
+                    input_text = self.load_page()
 
             if not self.json_initialized:
                 self.initialize_new_file()                
@@ -1071,7 +1069,11 @@ class CropNerGUI:
         self.msg.config(text="")
 
         # Get indices for the first and last characters selected
-        (selection_start, selection_end) = self.get_selected_interval()
+        try:
+            (selection_start, selection_end) = self.get_selected_interval()
+        except:
+            self.msg.config(text="No selection detected!", foreground="red")
+            return
 
         new_ents = []
         overlapping_tags = []
