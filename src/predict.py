@@ -96,6 +96,7 @@ class Predict:
         self.tags = ["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]
         self.cust_ents_dict = {}
         self.ent_counts = defaultdict()
+        self.ent_counts["ALL"] = 0
         self.nlp.add_pipe("compound_trait_entities", after="ner")
 
 
@@ -176,7 +177,8 @@ class Predict:
                     self.ent_counts[ent.label_] = 1
                 else:
                     self.ent_counts[ent.label_] += 1
-                    
+                self.ent_counts["ALL"] += 1
+
                 if not self.spacy_only and ent.label_ is not  in ["ALAS", "CROP"]:
                     ent = self.get_pos(ent)
                 if self.cust_ents_dict.get(page_number, False):
