@@ -461,6 +461,22 @@ class CropNerGUI:
             self.tag_colors_buttonID.pop(ent_label)
             self.colors.remove(color)
             self.tags.remove(ent_label)
+
+            # Remove highlighting
+            self.text.tag_remove(ent_label, "1.0", "end")
+
+            # Remove from annotation dictionary. This can probably be simplified.
+            new_ents = []
+            input_text = self.cust_ents_dict[self.chunk][0]
+            entities = self.cust_ents_dict[self.chunk][1]
+            for ent in entities:
+                if not (ent[2] == ent_label):
+                    new_ents.append(ent)
+            new_ents.sort()
+            self.cust_ents_dict[self.chunk] = [input_text, new_ents]
+
+            # Clear warning message
+            self.msg.config(text="")
         except:
             self.msg.config(text="WARNING!! The entity you tried to remove does not exist.", foreground="red")
 
