@@ -9,6 +9,7 @@ from pyxpdf import Document
 from pyxpdf.xpdf import TextControl
 from json2bratt import conversion
 from dataset2bratt import extract_page_num
+from collections import defaultdict
 
 class Predict:
     """

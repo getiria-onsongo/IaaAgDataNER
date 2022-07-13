@@ -63,7 +63,7 @@ class CrossValidation:
         execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
         return name
 
-    def cross_validate(self, data : str, spacy_only : bool, config, model_dir="cv_model", sentence_level=False):
+    def cross_validate(self, data : str, spacy_only : bool, config, model_dir_prefix="cv_model", sentence_level=False):
         """
         Preforms cross validation on spacy model.
 
@@ -75,9 +75,9 @@ class CrossValidation:
             flag to only use spacy, not part of speech based entity expansion
         config : str
             path to the model config file
-        model_dir : str
-            output path for the model, after each fold the model is just
-            overwritten
+        model_dir_prefix : str
+            start of output path for the model, each fold creates a model with
+            that prefix and the suffix of _XFold where X is the fold number
         sentence_level : bool
             if bratt conversion should take place on the sentence level
         """
@@ -127,6 +127,7 @@ class CrossValidation:
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
             # train model
+            model_dir = model_dir_prefix + "_fold" + str(f)
             train(config_path=config, output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # evaulate model on validation data
