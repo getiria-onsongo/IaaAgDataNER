@@ -179,7 +179,7 @@ class Predict:
                     self.ent_counts[ent.label_] += 1
                 self.ent_counts["ALL"] += 1
 
-                if not self.spacy_only and ent.label_ is not  in ["ALAS", "CROP"]:
+                if not self.spacy_only and ent.label_ not in ["ALAS", "CROP"]:
                     ent = self.get_pos(ent)
                 if self.cust_ents_dict.get(page_number, False):
                     self.cust_ents_dict[page_number].append((ent.start_char, ent.end_char, ent.label_))

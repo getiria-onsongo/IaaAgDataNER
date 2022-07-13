@@ -140,9 +140,6 @@ class CrossValidation:
         avgs, ents = self.medacy_eval()
         self.print_metrics(avgs, ents)
 
-        avgs, ents = self.medacy_eval()
-        self.print_metrics(avgs, ents)
-
 
     def predict(self, validation : list, fold : int, spacy_only : bool, model_dir="cv_model/model-best", sentence_level=False):
         """
