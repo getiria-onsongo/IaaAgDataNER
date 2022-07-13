@@ -747,13 +747,16 @@ class CropNerGUI:
             self.doc_entry.delete(0, tk.END)
             self.doc_entry.insert(0, self.file_name)
             self.url_entry.delete(0, tk.END)
+            self.date_entry.config(state=tk.NORMAL)
             self.date_entry.delete(0, tk.END)
+            self.date_entry.config(state=tk.DISABLED)
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
 
             # Detects file type
-            self.file_mode = self.raw_file.name[-3:] 
+            # TODO: (For Emydius) Switch this to raw_file.name.split(.)[-1]
+            self.file_mode = self.raw_file.name.split(".")[-1] 
 
             # Delete contents
             self.text.delete(1.0, tk.END)
@@ -790,6 +793,10 @@ class CropNerGUI:
                     txt = ""
                     for page in self.pdf_document[self.page_number[0] - 1 : self.page_number[1]]:
                         txt = txt + page.text().replace("\r", "").replace("", "")
+            else:
+                self.page_number = 0
+                self.chunk = self.page_number
+                txt = self.raw_file.read()
 
             self.text.insert("1.0",txt)
             return txt
