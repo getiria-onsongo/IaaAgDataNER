@@ -573,14 +573,18 @@ class CropNerGUI:
                 self.save_btn.pack(side=tk.LEFT)
 
             self.raw_file=f
+
+            # Ends the operation if a raw file wasn't selected
             if self.raw_file is None:
                 self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
                 return
+
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
             self.pdf_document = None
             self.annotation_file = None
             self.json_initialized = False
+            self.page_entry.delete(0, tk.END)
 
             # Reset metadata
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
@@ -876,25 +880,12 @@ class CropNerGUI:
         """
         # Clear warning message, if one exists
         self.msg.config(text="")
+
+        # Checks if there is an active NER model
         if self.model_dir is None:
             self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
         # Pre-tag with NER model
         else:
-            input_text = None
-            # Get page number
-            if self.file_mode == "pdf":
-                page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
-                if not page_num.isdigit(): # Either invalid or a range.
-                    if not selection == "selection":
-                        if self.page_num_is_valid(page_num) == False: # Invalid
-                            self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
-                            page_num = 1
-                        else: # Range
-                            self.handle_page_range(page_num)
-                else: # Single valid page
-                    self.page_number = int(page_num)
-                    self.chunk = self.page_number
-
             if selection == "selection":
                 if (len(self.text.tag_ranges("sel")) > 0):
                     input_text =  self.text.get("sel.first", "sel.last")
@@ -913,7 +904,7 @@ class CropNerGUI:
                 self.initialize_new_file()                
 
             self.text.delete(1.0, tk.END)
-            self.text.insert("1.0", input_text)
+            self.text.insert(1.0, input_text)
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
@@ -1187,7 +1178,7 @@ class CropNerGUI:
                 entities = text_annotation[1]['entities']
                 self.cust_ents_dict[self.chunk] = [annotated_text,entities]
 
-            self.text.insert("1.0", annotated_text + '\n')
+            self.text.insert(1.0, annotated_text + '\n')
 
             # Update variable that holds number of lines in textbox. You need this update
             # for highlight_ent to work
