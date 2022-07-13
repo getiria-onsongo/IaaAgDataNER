@@ -573,9 +573,25 @@ class CropNerGUI:
                 self.save_btn.pack(side=tk.LEFT)
 
             self.raw_file=f
+            if self.raw_file is None:
+                self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
+                return
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
             self.pdf_document = None
+            self.annotation_file = None
+            self.json_initialized = False
+
+            # Reset metadata
+            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
+            self.doc_entry.delete(0, tk.END)
+            self.doc_entry.insert(0, self.file_name)
+            self.url_entry.delete(0, tk.END)
+            self.date_entry.config(state=tk.NORMAL)
+            self.date_entry.delete(0, tk.END)
+            self.date_entry.insert(0, "File not initialized")
+            self.date_entry.config(state=tk.DISABLED)
+
             self.load_page()
         else:
             self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
@@ -738,68 +754,56 @@ class CropNerGUI:
         If the entry box for page number has a value, it will load the page specified. If not, by default it will
         load the first page.
         """
-        if self.raw_file is None:
-            self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
+
+        # Reset annotation dictionary
+        self.cust_ents_dict = {}
+
+        # Detects file type
+        self.file_mode = self.raw_file.name.split(".")[-1] 
+
+        # Delete contents
+        self.text.delete(1.0, tk.END)
+
+        # Calls pyxpdf in case the file is a PDF, otherwise reads as txt
+        if self.file_mode == "pdf":
+            page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
+            page_num_valid = self.page_num_is_valid(page_num)
+            if page_num_valid == False:
+                self.msg.config(text="Valid page number not entered. Value initialized to 1", foreground="red")
+                self.page_number = 1
+                self.page_entry.delete(0,tk.END)
+                self.page_entry.insert(0, str(self.page_number))
+                self.chunk=self.page_number
+            elif page_num_valid == True:
+                self.page_number = int(page_num)
+                self.chunk=self.page_number
+            else: # Range of numbers
+                self.handle_page_range(page_num)
+
+            # Load PDF file
+            if self.pdf_document is None:
+                self.pdf_document = Document(self.raw_file.name)
+
+            self.handle_bad_page_requests(page_num_valid)
+
+            if not (page_num_valid == -1): # Single page, whether page_num_valid is true or false
+                page = self.pdf_document[self.page_number - 1]
+                #  doesn't necessarily have to be removed for a single page; It gets removed in
+                # the else because tagging across multiple pages doesn't work correctly if  exists.
+                # However, it's removed here as well for consistency and neatness.
+                txt = page.text().replace("\r", "").replace("", "")
+            else: # Page range
+                txt = ""
+                for page in self.pdf_document[self.page_number[0] - 1 : self.page_number[1]]:
+                    txt = txt + page.text().replace("\r", "").replace("", "")
         else:
+            self.page_number = 0
+            self.chunk = self.page_number
+            txt = self.raw_file.read()
+            self.raw_file.seek(0)
 
-            self.annotation_file = None
-            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
-            self.doc_entry.delete(0, tk.END)
-            self.doc_entry.insert(0, self.file_name)
-            self.url_entry.delete(0, tk.END)
-            self.date_entry.config(state=tk.NORMAL)
-            self.date_entry.delete(0, tk.END)
-            self.date_entry.config(state=tk.DISABLED)
-
-            # Reset annotation dictionary
-            self.cust_ents_dict = {}
-
-            # Detects file type
-            self.file_mode = self.raw_file.name.split(".")[-1] 
-
-            # Delete contents
-            self.text.delete(1.0, tk.END)
-
-            # Calls pyxpdf in case the file is a PDF, otherwise reads as txt
-            if self.file_mode == "pdf":
-                page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
-                page_num_valid = self.page_num_is_valid(page_num)
-                if page_num_valid == False:
-                    self.msg.config(text="Valid page number not entered. Value initialized to 1", foreground="red")
-                    self.page_number = 1
-                    self.page_entry.delete(0,tk.END)
-                    self.page_entry.insert(0, str(self.page_number))
-                    self.chunk=self.page_number
-                elif page_num_valid == True:
-                    self.page_number = int(page_num)
-                    self.chunk=self.page_number
-                else: # Range of numbers
-                    self.handle_page_range(page_num)
-
-                # Load PDF file
-                if self.pdf_document is None:
-                    self.pdf_document = Document(self.raw_file.name)
-
-                self.handle_bad_page_requests(page_num_valid)
-
-                if not (page_num_valid == -1): # Single page, whether page_num_valid is true or false
-                    page = self.pdf_document[self.page_number - 1]
-                    #  doesn't necessarily have to be removed for a single page; It gets removed in
-                    # the else because tagging across multiple pages doesn't work correctly if  exists.
-                    # However, it's removed here as well for consistency and neatness.
-                    txt = page.text().replace("\r", "").replace("", "")
-                else: # Page range
-                    txt = ""
-                    for page in self.pdf_document[self.page_number[0] - 1 : self.page_number[1]]:
-                        txt = txt + page.text().replace("\r", "").replace("", "")
-            else:
-                self.page_number = 0
-                self.chunk = self.page_number
-                txt = self.raw_file.read()
-                self.raw_file.seek(0)
-
-            self.text.insert(1.0,txt)
-            return txt
+        self.text.insert(1.0,txt)
+        return txt
 
     def update_scrolled_text_line_content_index(self):
         """
