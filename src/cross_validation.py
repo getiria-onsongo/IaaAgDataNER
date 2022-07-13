@@ -42,6 +42,8 @@ class CrossValidation:
         uses medacy to evaluate results
     print_metrics(self, metrics : dict, ents : dict)
         prints and formats metrics and entity counts
+    count_entities()
+        counts entities in gold standard data for each fold
     create_dirs(self, dirs : list)
         creates directories from a given list
     """
@@ -197,17 +199,16 @@ class CrossValidation:
         Finds average metrics and entity counts across all folds.
         Uses medacy's inter_dataset_agreement calculator to get
         precesion, recall, and f-score for each label and overall for each fold.
-        Then finds averages of those metrics across every folds. Kkeeps track
-        of entity counts (overall & for each label) for each fold and finds
-        overall averages.
+        Then finds averages of those metrics across every folds. Also keeps
+        track of found entity counts and entitiy counts from gold standard.
 
-        Returns dictonary of average metrics and dictonary of entity counts.
+        Returns dictonary of average metrics, found entity counts, and
+        count of entities found in gold standard data.
         """
         avg_metrics, ents_found = defaultdict(), defaultdict()
         ent_counts = self.count_entities()
         p_all, r_all, f_all = [], [], []
         p_weights, r_weights, f_weights = [], [], []
-
 
         # inter_dataset_agreement for each fold
         ents_found["ALL"] = 0
@@ -229,7 +230,6 @@ class CrossValidation:
                 else:
                     ents_found[k] += v.tp + v.fp
                 ents_found["ALL"] += v.tp + v.fp
-
 
         # averaging
         avg_metrics["ALL"] = {}
@@ -259,7 +259,9 @@ class CrossValidation:
         metrics : dict
             dictonary of the averaged metrics from medacy_eval()
         ents : dict
-            dictonary of entity counts from medacy_eval()
+            dictonary of found entity counts from medacy_eval()
+        counts : dict
+            dictonary of toatl entity counts in gold standard from count_entities()
         """
         print("ALL:")
         print("\t precision: " + str(metrics["ALL"][0]))
@@ -284,32 +286,14 @@ class CrossValidation:
                 print("\t average entities per fold: " + str(counts[k+ " AVG"]))
                 print("\n")
 
-
-    def create_dirs(self, dirs : list):
-        """
-        Takes a list of directories, and for if it
-        doesn't exist, creates a new directory and if it does exist, deletes the
-        current one and creates a new empty one. Unless specified in the
-        directory's name, creates the new directory in the current directory.
-
-        Parameters
-        ----------
-        dirs : list[str]
-            list of directories to create, can be a list of just one directory,
-            if only one needs to be created.
-        """
-        for dir in dirs:
-            if not os.path.exists(dir):
-                os.makedirs(dir)
-            else:
-                shutil.rmtree(dir)
-                os.makedirs(dir)
-
     def count_entities(self):
+        """
+        Counts number of entities in gold standard data for each fold.
+
+        Returns dictonary of entity counts.
+        """
         counts = defaultdict()
         counts["ALL"] = 0
-
-        # counting entities
         for f in range(0, self.k_folds):
             current_dir = "fold_" + str(f) + "_results/gold_json"
             files = glob.glob(current_dir+"/*.json", recursive=True)
@@ -331,8 +315,28 @@ class CrossValidation:
                         else:
                             counts[lab+" SUM"] += 1
                         counts["ALL"] += 1
-        print(counts)
         return counts
+
+    def create_dirs(self, dirs : list):
+        """
+        Takes a list of directories, and for if it
+        doesn't exist, creates a new directory and if it does exist, deletes the
+        current one and creates a new empty one. Unless specified in the
+        directory's name, creates the new directory in the current directory.
+
+        Parameters
+        ----------
+        dirs : list[str]
+            list of directories to create, can be a list of just one directory,
+            if only one needs to be created.
+        """
+        for dir in dirs:
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+            else:
+                shutil.rmtree(dir)
+                os.makedirs(dir)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
