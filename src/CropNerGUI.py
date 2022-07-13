@@ -803,7 +803,7 @@ class CropNerGUI:
         else:
             self.page_number = 0
             self.chunk = self.page_number
-            txt = self.raw_file.read()
+            txt = self.raw_file.read().replace("\r", "").replace("", "")
             self.raw_file.seek(0)
 
         self.text.insert(1.0,txt)
