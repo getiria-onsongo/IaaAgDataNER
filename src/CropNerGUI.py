@@ -1289,21 +1289,23 @@ class CropNerGUI:
                 # Instances where a user might not want to save annotations when they click next page
                 # self.file_save()
 
-        # Increment page number
-        try:
-            self.page_number = self.page_number + 1
-            self.page_entry.delete(0, tk.END)
-            self.page_entry.insert(0, str(self.page_number))
+            # Increment page number
+            try:
+                self.page_number = self.page_number + 1
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, str(self.page_number))
 
-            # Reset annotation data
-            self.annotation_file = None
+                # Reset annotation data
+                self.annotation_file = None
 
-            # Load data
-            self.load_page()
-        except TypeError:
-            # While this would be easy to add, it's not clear what exactly SHOULD be incremented
-            # if the user clicks "next page" on a range, so that's left to the user.
-            self.msg.config(text="WARNING!! Cannot increment a range of pages.", foreground="red")
+                # Load data
+                self.load_page()
+            except TypeError:
+                # While this would be easy to add, it's not clear what exactly SHOULD be incremented
+                # if the user clicks "next page" on a range, so that's left to the user.
+                self.msg.config(text="WARNING!! Cannot increment a range of pages.", foreground="red")
+        else:
+            self.msg.config(text="Warning!! No PDF is currently loaded, so the next page of it can't be loaded either.", foreground="red")
 
     def go(self):
         """
