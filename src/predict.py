@@ -95,6 +95,7 @@ class Predict:
         self.nlp = spacy.load(self.model_dir)
         self.tags = ["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]
         self.cust_ents_dict = {}
+        self.ent_counts = defaultdict()
         self.nlp.add_pipe("compound_trait_entities", after="ner")
 
 
@@ -171,7 +172,12 @@ class Predict:
         for ent in doc.ents:
             # NER is in our list of custom tags
             if ent.label_ in self.tags:
-                if not self.spacy_only:
+                if ent.label_ not in self.ent_counts.keys():
+                    self.ent_counts[ent.label_] = 1
+                else:
+                    self.ent_counts[ent.label_] += 1
+                    
+                if not self.spacy_only and ent.label_ is not  in ["ALAS", "CROP"]:
                     ent = self.get_pos(ent)
                 if self.cust_ents_dict.get(page_number, False):
                     self.cust_ents_dict[page_number].append((ent.start_char, ent.end_char, ent.label_))

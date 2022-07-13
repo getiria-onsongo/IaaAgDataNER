@@ -47,6 +47,7 @@ class CrossValidation:
     def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
         self.k_folds = k_folds
         self.tags = tags
+        self.ent_counts = defaultdict()
         warnings.filterwarnings('ignore')
 
     def create_config(self, name="senter_ner.cfg") -> str:
@@ -139,6 +140,10 @@ class CrossValidation:
         avgs, ents = self.medacy_eval()
         self.print_metrics(avgs, ents)
 
+        avgs, ents = self.medacy_eval()
+        self.print_metrics(avgs, ents)
+
+
     def predict(self, validation : list, fold : int, spacy_only : bool, model_dir="cv_model/model-best", sentence_level=False):
         """
         For a given fold, predicts on the validation data and saves to json.
@@ -184,9 +189,12 @@ class CrossValidation:
         predict = Predict(model_dir=model_dir, dataset_dir=gold_bratt_name, output_dir=json_name, spacy_only=spacy_only)
         predict.process_files()
 
+        self.ent_counts = predict.ent_counts
+
         # convert predictions to bratt format
         print("Converting predictions to bratt...")
         dataset_to_bratt(json_name, bratt_name, sentence_level)
+
 
     def medacy_eval(self):
         """
@@ -199,39 +207,49 @@ class CrossValidation:
 
         Returns dictonary of average metrics and dictonary of entity counts.
         """
-        avg_metrics = defaultdict()
-        ents = defaultdict()
-        ents["ALL"] = []
-        p_all = []
-        r_all = []
-        f_all = []
+        avg_metrics, ents_found = defaultdict(), defaultdict()
+        p_all, r_all, f_all = [], [], []
+        p_weights, r_weights, f_weights = [], [], []
+        ents_found["ALL"] = []
 
         # inter_dataset_agreement for each fold
         for f in range(0, self.k_folds):
-            ent_counter = 0
+            ents_found_counter = 0
             result = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pred_bratt"), 'strict')
             for k,v in result.items():
                 p_all.append(v.precision())
+                p_weights.append(self.ent_counts[k])
+
                 r_all.append(v.recall())
+                r_weights.append(self.ent_counts[k])
+
                 f_all.append(v.f_score())
+                f_weights.append(self.ent_counts[k])
+
                 avg_metrics[k] = [[v.precision()], [v.recall()], [v.f_score()]]
-                ent_counter += v.tp + v.tn + v.fp + v.fn
-                ents[k] = [v.tp + v.tn + v.fp + v.fn]
-            ents["ALL"].append(ent_counter)
+                ents_found[k] += v.tp + v.fp
+                ents_found_counter += v.tp + v.fp
+
+            ents_found["ALL"] = ents_found_counter
 
         # averaging
-        avg_metrics["ALL"] = [sum(p_all)/len(p_all), sum(r_all)/len(r_all), sum(f_all)/len(f_all)]
-        ents["ALL AVG"] = sum(ents["ALL"]) / self.k_folds
+        avg_metrics["ALL"][0] = np.average(p_all, p_weights)
+        avg_metrics["ALL"][1] = np.average(r_all, r_weights)
+        avg_metrics["ALL"][2] = np.average(r_all, r_weights)
+        ents_found["ALL AVG"] = ents_found["ALL"] / self.k_folds
+        self.ent_counts["ALL AVG"] = self.ents_found["ALL"] / self.k_folds
+
         for k,v in avg_metrics.items():
             if k != "ALL":
                 avg_metrics[k][0] = sum(avg_metrics[k][0]) / len(avg_metrics[k][0])
                 avg_metrics[k][1] = sum(avg_metrics[k][1]) / len(avg_metrics[k][1])
                 avg_metrics[k][2] = sum(avg_metrics[k][2]) / len(avg_metrics[k][2])
-                ents[k+" AVG"] = sum(ents[k])/ self.k_folds
+                ents_found[k+" AVG"] = ents_found[k] / self.k_folds
+                self.ent_counts[k + " AVG"] = self.ent_counts[k] / self.k_folds
 
-        return avg_metrics, ents
+        return avg_metrics, ents_found
 
-    def print_metrics(self, metrics : dict, ents : dict):
+    def print_metrics(self, metrics : dict, ents_found : dict):
         """
         Takes a dictonary of averages & entity counts created by medacy_eval()
         and formats & prints the averages and counts.
@@ -247,16 +265,23 @@ class CrossValidation:
         print("\t precision: " + str(metrics["ALL"][0]))
         print("\t recall: " +  str(metrics["ALL"][1]))
         print("\t F1: " +  str(metrics["ALL"][2]))
-        print("\t entities each fold: " + str(ents["ALL"]))
-        print("\t average entities per fold: " + str(ents["ALL AVG"]))
-        for k,v in metrics.items():
+        print("\t entities found across all folds: " + str(ents_found["ALL"]))
+        print("\t average entities found per fold: " + str(ents_found["ALL AVG"]))
+        print("\t\n entities across all folds: " + str(self.ent_counter["ALL"]))
+        print("\t average entities per fold: " + str(self.ent_counter["ALL AVG"]))
+        print("\n")
+        for k,v in sorted(metrics.items()):
             if k != "ALL":
                 print(k+":")
                 print("\t precision: " + str(metrics[k][0]))
                 print("\t recall: " + str(metrics[k][1]))
                 print("\t F1: " + str(metrics[k][2]))
-                print("\t entities each fold: " + str(ents[k]))
-                print("\t average entities per fold: " + str(ents[k+ " AVG"]))
+                print("\t entities found across all folds: " + str(ents_found[k]))
+                print("\t average entities found per fold: " + str(ents_found[k+ " AVG"]))
+                print("\t\n entities across all folds: " + str(self.ent_counts[k]))
+                print("\t average entities per fold: " + str(self.ent_counts[k+ " AVG"]))
+                print("\n")
+
 
     def create_dirs(self, dirs : list):
         """
