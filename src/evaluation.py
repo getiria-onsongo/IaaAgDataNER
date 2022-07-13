@@ -1,4 +1,4 @@
-from cross_validation import crossvalidation
+from cross_validation import CrossValidation
 
 class evaluation:
     def __init__(model):
