@@ -5,6 +5,7 @@ import json
 import random
 import warnings
 import argparse
+import numpy as np
 from collections import defaultdict
 from spacy.cli.convert import convert
 from spacy.cli.train import train
@@ -47,7 +48,6 @@ class CrossValidation:
     def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
         self.k_folds = k_folds
         self.tags = tags
-        self.ent_counts = defaultdict()
         warnings.filterwarnings('ignore')
 
     def create_config(self, name="senter_ner.cfg") -> str:
@@ -187,8 +187,6 @@ class CrossValidation:
         predict = Predict(model_dir=model_dir, dataset_dir=gold_bratt_name, output_dir=json_name, spacy_only=spacy_only)
         predict.process_files()
 
-        self.ent_counts = predict.ent_counts
-
         # convert predictions to bratt format
         print("Converting predictions to bratt...")
         dataset_to_bratt(json_name, bratt_name, sentence_level)
@@ -206,36 +204,40 @@ class CrossValidation:
         Returns dictonary of average metrics and dictonary of entity counts.
         """
         avg_metrics, ents_found = defaultdict(), defaultdict()
+        ent_counts = self.count_entities()
         p_all, r_all, f_all = [], [], []
         p_weights, r_weights, f_weights = [], [], []
-        ents_found["ALL"] = []
+
 
         # inter_dataset_agreement for each fold
+        ents_found["ALL"] = 0
         for f in range(0, self.k_folds):
-            ents_found_counter = 0
             result = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pred_bratt"), 'strict')
             for k,v in result.items():
                 p_all.append(v.precision())
-                p_weights.append(self.ent_counts[k])
+                p_weights.append(ent_counts[f][k])
 
                 r_all.append(v.recall())
-                r_weights.append(self.ent_counts[k])
+                r_weights.append(ent_counts[f][k])
 
                 f_all.append(v.f_score())
-                f_weights.append(self.ent_counts[k])
+                f_weights.append(ent_counts[f][k])
 
                 avg_metrics[k] = [[v.precision()], [v.recall()], [v.f_score()]]
-                ents_found[k] += v.tp + v.fp
-                ents_found_counter += v.tp + v.fp
+                if k not in ents_found.keys():
+                    ents_found[k] = v.tp + v.fp
+                else:
+                    ents_found[k] += v.tp + v.fp
+                ents_found["ALL"] += v.tp + v.fp
 
-            ents_found["ALL"] = ents_found_counter
 
         # averaging
-        avg_metrics["ALL"][0] = np.average(p_all, p_weights)
-        avg_metrics["ALL"][1] = np.average(r_all, r_weights)
-        avg_metrics["ALL"][2] = np.average(r_all, r_weights)
+        avg_metrics["ALL"] = {}
+        avg_metrics["ALL"][0] = np.average(a=p_all, weights=p_weights)
+        avg_metrics["ALL"][1] = np.average(a=r_all, weights=r_weights)
+        avg_metrics["ALL"][2] = np.average(a=r_all, weights=r_weights)
         ents_found["ALL AVG"] = ents_found["ALL"] / self.k_folds
-        self.ent_counts["ALL AVG"] = self.ents_found["ALL"] / self.k_folds
+        ent_counts["ALL AVG"] = ent_counts["ALL"] / self.k_folds
 
         for k,v in avg_metrics.items():
             if k != "ALL":
@@ -243,11 +245,11 @@ class CrossValidation:
                 avg_metrics[k][1] = sum(avg_metrics[k][1]) / len(avg_metrics[k][1])
                 avg_metrics[k][2] = sum(avg_metrics[k][2]) / len(avg_metrics[k][2])
                 ents_found[k+" AVG"] = ents_found[k] / self.k_folds
-                self.ent_counts[k + " AVG"] = self.ent_counts[k] / self.k_folds
+                ent_counts[k + " AVG"] = ent_counts[k+" SUM"] / self.k_folds
 
-        return avg_metrics, ents_found
+        return avg_metrics, ents_found, ent_counts
 
-    def print_metrics(self, metrics : dict, ents_found : dict):
+    def print_metrics(self, metrics : dict, ents_found : dict, counts : dict):
         """
         Takes a dictonary of averages & entity counts created by medacy_eval()
         and formats & prints the averages and counts.
@@ -263,10 +265,11 @@ class CrossValidation:
         print("\t precision: " + str(metrics["ALL"][0]))
         print("\t recall: " +  str(metrics["ALL"][1]))
         print("\t F1: " +  str(metrics["ALL"][2]))
-        print("\t entities found across all folds: " + str(ents_found["ALL"]))
-        print("\t average entities found per fold: " + str(ents_found["ALL AVG"]))
-        print("\t\n entities across all folds: " + str(self.ent_counter["ALL"]))
-        print("\t average entities per fold: " + str(self.ent_counter["ALL AVG"]))
+        print("\t found across all folds: " + str(ents_found["ALL"]))
+        print("\t entities found per fold: " + str(ents_found["ALL AVG"]))
+        print()
+        print("\t entities across all folds: " + str(counts["ALL"]))
+        print("\t average entities per fold: " + str(counts["ALL AVG"]))
         print("\n")
         for k,v in sorted(metrics.items()):
             if k != "ALL":
@@ -274,10 +277,11 @@ class CrossValidation:
                 print("\t precision: " + str(metrics[k][0]))
                 print("\t recall: " + str(metrics[k][1]))
                 print("\t F1: " + str(metrics[k][2]))
-                print("\t entities found across all folds: " + str(ents_found[k]))
-                print("\t average entities found per fold: " + str(ents_found[k+ " AVG"]))
-                print("\t\n entities across all folds: " + str(self.ent_counts[k]))
-                print("\t average entities per fold: " + str(self.ent_counts[k+ " AVG"]))
+                print("\t found across all folds: " + str(ents_found[k]))
+                print("\t average found per fold: " + str(ents_found[k+ " AVG"]))
+                print()
+                print("\t entities across all folds: " + str(counts[k+" SUM"]))
+                print("\t average entities per fold: " + str(counts[k+ " AVG"]))
                 print("\n")
 
 
@@ -300,6 +304,35 @@ class CrossValidation:
             else:
                 shutil.rmtree(dir)
                 os.makedirs(dir)
+
+    def count_entities(self):
+        counts = defaultdict()
+        counts["ALL"] = 0
+
+        # counting entities
+        for f in range(0, self.k_folds):
+            current_dir = "fold_" + str(f) + "_results/gold_json"
+            files = glob.glob(current_dir+"/*.json", recursive=True)
+            counts[f] = defaultdict()
+            for file in files:
+                with open(file) as j:
+                    data = json.load(j)
+                key = list(data["sentences"].keys())[0]
+                for ent in data["sentences"][key]:
+                    lab = data["sentences"][key][ent]["label"]
+                    if lab in self.tags:
+                        if lab not in counts[f].keys():
+                            counts[f][lab] = 1
+                        else:
+                            counts[f][lab] += 1
+
+                        if lab+" SUM" not in counts.keys():
+                            counts[lab+" SUM"] = 1
+                        else:
+                            counts[lab+" SUM"] += 1
+                        counts["ALL"] += 1
+        print(counts)
+        return counts
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
