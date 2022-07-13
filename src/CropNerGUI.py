@@ -793,12 +793,10 @@ class CropNerGUI:
                     for page in self.pdf_document[self.page_number[0] - 1 : self.page_number[1]]:
                         txt = txt + page.text().replace("\r", "").replace("", "")
             else:
-                print("Runs the else statement for txt files")
-                print(f'Raw File: {self.raw_file}')
                 self.page_number = 0
                 self.chunk = self.page_number
                 txt = self.raw_file.read()
-                print(txt)
+                self.raw_file.seek(0)
 
             self.text.insert(1.0,txt)
             return txt
