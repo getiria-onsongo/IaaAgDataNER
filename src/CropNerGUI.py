@@ -579,14 +579,6 @@ class CropNerGUI:
             self.raw_file=None
             self.review_annotations()
         elif file_type == "pdf/txt":
-            if f.name.endswith(".txt"):
-                # Remove "Next Page" button if loading a txt file, which has no pages.
-                self.next_btn.pack_forget()
-            else:
-                # Bring back the "Next Page" button, placing it before the save button.
-                self.save_btn.pack_forget()
-                self.next_btn.pack(side=tk.LEFT)
-                self.save_btn.pack(side=tk.LEFT)
 
             self.raw_file=f
 
@@ -595,12 +587,26 @@ class CropNerGUI:
                 self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
                 return
 
+            # Detects file type
+            self.file_mode = self.raw_file.name.split(".")[-1] 
+
+            self.page_entry.delete(0, tk.END)
+
+            if self.file_mode == "pdf":
+                # Bring back the "Next Page" button, placing it before the save button.
+                self.save_btn.pack_forget()
+                self.next_btn.pack(side=tk.LEFT)
+                self.save_btn.pack(side=tk.LEFT)
+                self.page_entry.insert(0, "1")
+            else:
+                # Remove "Next Page" button if loading a txt file, which has no pages.
+                self.next_btn.pack_forget()
+
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
             self.pdf_document = None
             self.annotation_file = None
             self.json_initialized = False
-            self.page_entry.delete(0, tk.END)
 
             # Reset metadata
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
@@ -778,8 +784,6 @@ class CropNerGUI:
         # Reset annotation dictionary
         self.cust_ents_dict = {}
 
-        # Detects file type
-        self.file_mode = self.raw_file.name.split(".")[-1] 
 
         # Delete contents
         self.text.delete(1.0, tk.END)
