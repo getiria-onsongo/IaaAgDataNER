@@ -31,6 +31,7 @@ def mixed_type_2_dict(data, chunk, doc='', url='', date=''):
     """
 
     result = dict()
+    result['chunk'] = chunk
     result['doc'] = doc
     result['url'] = url
     result['date'] = date
