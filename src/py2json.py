@@ -33,9 +33,9 @@ def mixed_type_2_dict(data, chunk, doc='', url='', crop='', cvar=''):
     """
 
     result = dict()
+    result['chunk'] = chunk
     result['doc'] = doc
     result['url'] = url
-    result['chunk'] = chunk
     result['crop'] = crop
     result['cvar'] = cvar
     result['sentences'] = dict()

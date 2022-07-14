@@ -533,6 +533,10 @@ class CropNerGUI:
         """
         # TODO: Currently only loads 1 page. Update to load arbitrary number of pages (max=size of document).
         # TODO: Give users the option to load text files in addition to pdf files.
+        # TODO: Update self.annotation_file. This become an issue if a user opened an annotation file and then decides
+        # to annotate a new page. The old annotation file name will be in self.annotation_file which can result in a
+        # user overwriting the file
+
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
         else:
