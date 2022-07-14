@@ -143,7 +143,7 @@ class CrossValidation:
         self.print_metrics(avg_metrics, ents_found, ent_counts)
 
 
-    def predict(self, validation : list, fold : int, spacy_only : bool, model_dir="cv_model/model-best", sentence_level=False):
+    def predict(self, validation : list, fold : int, spacy_only : bool, model_dir="cv_model/model-best"):
         """
         For a given fold, predicts on the validation data and saves to json.
         Also moves the gold standard validation data in json format to a new
@@ -298,7 +298,7 @@ class CrossValidation:
         """
         counts = defaultdict()
         counts["ALL"] = 0
-        for f in range(0, self.k_folds):
+        for f in range(1, self.k_folds+1):
             current_dir = "fold_" + str(f) + "_results/gold_json"
             files = glob.glob(current_dir+"/*.json", recursive=True)
             counts[f] = defaultdict()
