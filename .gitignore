@@ -38,7 +38,3 @@ ner_2021_08_model/*
 ner_2021_08_training_data.jsonl
 ner_2021_08_validate_data.jsonl
 ner_2021_08_dev_data.jsonl
-*2021_08_model/*
-Data/*
-*env/*
-fold*/*
