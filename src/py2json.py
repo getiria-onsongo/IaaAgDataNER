@@ -21,8 +21,6 @@ def mixed_type_2_dict(data, chunk, doc='', url='', date=''):
      {'doc': 'BarCvDescLJ11.pdf', 
       'url': 'https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf', 
       'chunk': 2,
-      'crop': 'barley',
-      'cvar': 'eight-twelve',
       'sentences': {'sentence 1': {'entity 1': 
                                        {'start': 0, 'end': 3, 'label': 'TY1'}, 
                                    'entity 2': 
@@ -92,6 +90,12 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--chunk', help = 'integer page or chunk number within the document'
+    )
+    parser.add_argument(
+        '--crop', help='DEPRECATED - crop if the document has information for a single crop'
+    )
+    parser.add_argument(
+        '--cvar', help='DEPRECATED - crop variety if the document has information for a single crop variety'
     )
 
     if len(sys.argv)<2:

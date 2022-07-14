@@ -1,4 +1,5 @@
 #!/bin/env python3
+import platform
 import spacy.tokens
 
 from agParse import *
@@ -14,13 +15,6 @@ import random
 import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter.scrolledtext import ScrolledText
-
-# TODO *Done by Ruben: Even though users can add their own named entities, the tool does not recognize these user
-# defined named entities once they've quit the application. Basically, when a user customizes the GUI
-# the changes do not persist across sessions. Make customized additions to the GUI persistent across sessions.
-# One approach to implementing this would be to add a starting prompt that asks a user if they want to
-# 1) Annotate crop data 2) Annotate user data or 3) Review annotations. If they choose 2 or 3, build the GUI by
-# first scanning their annotations to determine what Named Entity tags (e.g., ALAS) to include in the GUI
 
 # 1) WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
 # "ROUGH AWNS" and "AWNS ARE ROUGH", WHITE ALEURONE AND ALEURONE IS WHITE. NOTE: Maybe compound traits
@@ -270,6 +264,11 @@ class CropNerGUI:
             # Create button
             btn = tk.Button(self.top_frame, highlightbackground=color_value,text=tag_value,
                             command=partial(self.get_ner, tag_value))
+            # Button colors already behaved differently between all 3 major platforms (highlightbackground
+            # behaves... weirdly on MacOS, just has an outline for Linux, and doesn't work on Windows). Now
+            # it still behaves differently on all of them, but fully highlights the button on Windows.
+            if(platform.system() == "Windows"):
+                btn.config(bg=color_value)
             btn.pack(side=tk.LEFT)
             self.tag_colors_buttonID[tag_value] = [color_value, btn]
 
@@ -405,6 +404,7 @@ class CropNerGUI:
         self.page_label.pack(side=tk.LEFT)
         self.page_entry = tk.Entry(self.open_frame, width=5)
         self.page_entry.pack(side=tk.LEFT)
+        self.page_entry.bind("<Return>", self.load_page_from_button)
         # Button to increase font in the text box (Font +)
         self.font_plus = tk.Button(self.open_frame, text="Font +", width=10, command=self.font_plus)
         self.font_plus.pack(side=tk.LEFT)
@@ -440,23 +440,32 @@ class CropNerGUI:
 
     def font_plus(self):
         """
-        Increase font size for text in ScrolledText (text box).
+        Increase font size for text in ScrolledText (text box), changing window size with it.
 
         Expects the global variable self.font_size which is of type string to be set. The default value is "16".
         This function increments self.font_size by 1 and then updates font size in self.text.
         """
+        prev_text_size = self.text.winfo_reqheight()
         self.font_size = str(int(self.font_size) + 1)
         self.text['font'] = "Times "+self.font_size
+        new_size = (self.text.winfo_reqheight() - prev_text_size) + self.rootWin.winfo_reqheight()
+        self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_size))
 
     def font_minus(self):
         """
-        Decrease font size for text in ScrolledText (text box).
+        Decrease font size for text in ScrolledText (text box), changing window size with it.
 
         Expects the global variable self.font_size which is of type string to be set. The default value is "16".
         This function decreases self.font_size by 1 and then updates font size in self.text.
         """
-        self.font_size = str(int(self.font_size) - 1)
+        prev_text_size = self.text.winfo_reqheight()
+        if not (int(self.font_size) <= 1):
+            self.font_size = str(int(self.font_size) - 1)
+        else:
+            self.msg.config(text="Font size can't get any smaller!", foreground="red")
         self.text['font'] = "Times "+self.font_size
+        new_size = (self.text.winfo_reqheight() - prev_text_size) + self.rootWin.winfo_reqheight()
+        self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_size))
 
     def add_ent(self):
         """
@@ -491,6 +500,8 @@ class CropNerGUI:
             self.tags.append(ent_label)
             btn = tk.Button(self.cust_ent_frame, highlightbackground=color, text=ent_label,
                             command=partial(self.get_ner, ent_label))
+            if(platform.system() == "Windows"):
+                btn.config(bg=color)
             btn.pack(side=tk.LEFT)
             self.text.tag_configure(ent_label, background=color)
             self.tag_colors_buttonID[ent_label] = [color, btn]
@@ -503,13 +514,32 @@ class CropNerGUI:
         entity. It then removes this named entity from the application.
         """
         ent_label = self.trait_entry.get().upper()
-        color = self.tag_colors_buttonID[ent_label][0]
-        ent_btn = self.tag_colors_buttonID[ent_label][1]
-        ent_btn.pack_forget()
-        # Remove elements from dictionary and arrays
-        self.tag_colors_buttonID.pop(ent_label)
-        self.colors.remove(color)
-        self.tags.remove(ent_label)
+        try:
+            color = self.tag_colors_buttonID[ent_label][0]
+            ent_btn = self.tag_colors_buttonID[ent_label][1]
+            ent_btn.pack_forget()
+            # Remove elements from dictionary and arrays
+            self.tag_colors_buttonID.pop(ent_label)
+            self.colors.remove(color)
+            self.tags.remove(ent_label)
+
+            # Remove highlighting
+            self.text.tag_remove(ent_label, "1.0", "end")
+
+            # Remove from annotation dictionary. This can probably be simplified.
+            new_ents = []
+            input_text = self.cust_ents_dict[self.chunk][0]
+            entities = self.cust_ents_dict[self.chunk][1]
+            for ent in entities:
+                if not (ent[2] == ent_label):
+                    new_ents.append(ent)
+            new_ents.sort()
+            self.cust_ents_dict[self.chunk] = [input_text, new_ents]
+
+            # Clear warning message
+            self.msg.config(text="")
+        except:
+            self.msg.config(text="WARNING!! The entity you tried to remove does not exist.", foreground="red")
 
     def toggle_metadata(self):
         """
@@ -546,15 +576,25 @@ class CropNerGUI:
             If the selected folder does not contain a valid spaCy pipeline, an OSError will be thrown and
         a default language model is used instead.
         """
-        self.model_dir = fd.askdirectory()
+        
+        dir = fd.askdirectory()
+        # Do nothing if the user presses cancel or X
+        if dir == "":
+            return
+
+        self.model_dir = dir
         try:
             self.nlp_agdata = spacy.load(self.model_dir)
             lang = self.nlp_agdata.lang # Attribute error thrown if valid language model is not selected
-            self.msg.config(text="NOTE: Model for "+lang+" language identified", foreground="red")
+            self.msg.config(text="NOTE: Model for "+lang+" language identified", foreground="orange")
         except OSError:
             self.msg.config(text="WARNING!!: Selected folder does not contain valid language model \n"
                                  "Default model 'en_core_web_lg' will be used.", foreground="red")
             self.nlp_agdata = spacy.load("en_core_web_lg")
+            # Resize window to fit error (it'll push buttons below the bottom if you don't
+            # do this and the window has been resized before)
+            new_height = self.rootWin.winfo_reqheight() + 15
+            self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_height))
         # NOTE: Commenting the line below for now. We will try using spaCy noun phrases instead
         # to capture tags such as 'rough owns'
         # self.nlp_agdata.add_pipe("compound_trait_entities", after='ner')
@@ -586,6 +626,7 @@ class CropNerGUI:
         # show the open file dialog
         f = fd.askopenfile(filetypes=filetypes)
 
+        # do nothing is no file is chosen
         if f is None:
             self.msg.config(text="No file was chosen", foreground="red")
             return
@@ -596,43 +637,37 @@ class CropNerGUI:
             self.file_name = self.annotation_file.name.split("/")[-1]
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
             self.json_initialized = True
+            self.raw_file=None
             self.review_annotations()
         elif file_type == "pdf/txt":
-            if f.name.endswith(".txt"):
-                # Remove "Next Page" button if loading a txt file, which has no pages.
-                self.next_btn.pack_forget()
-            else:
-                # Bring back the "Next Page" button, placing it before the save button.
-                self.save_btn.pack_forget()
-                self.next_btn.pack(side=tk.LEFT)
-                self.save_btn.pack(side=tk.LEFT)
 
             self.raw_file=f
+
+            # Ends the operation if a raw file wasn't selected
+            if self.raw_file is None:
+                self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
+                return
+
+            # Detects file type
+            self.file_mode = self.raw_file.name.split(".")[-1] 
+
+            self.page_entry.delete(0, tk.END)
+
+            if self.file_mode == "pdf":
+                # Bring back the "Next Page" button, placing it before the save button.
+                self.next_btn.pack(side=tk.LEFT)
+                self.page_entry.insert(0, "1")
+            else:
+                # Remove "Next Page" button if loading a txt file, which has no pages.
+                self.next_btn.pack_forget()
+
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
             self.pdf_document = None
-            self.load_page()
-        else:
-            self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
-
-    def load_page(self):
-        """
-        Load contents of a PDF or text file into text box.
-
-        If the entry box for page number has a value, it will load the page specified. If not, by default it will
-        load the first page.
-        """
-        # TODO: Currently only loads 1 page. Update to load arbitrary number of pages (max=size of document).
-        # *Done by Ruben
-        if self.raw_file is None:
-            self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
-        else:
-
-            if self.current_page != "Annotation":
-                self.switch_annotate()
-            
             self.annotation_file = None
             self.json_initialized = False
+
+            # Reset metadata
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
             self.doc_entry.delete(0, tk.END)
             self.doc_entry.insert(0, self.file_name)
@@ -642,44 +677,219 @@ class CropNerGUI:
             self.date_entry.insert(0, "File not initialized")
             self.date_entry.config(state=tk.DISABLED)
 
-            # Reset annotation dictionary
-            self.cust_ents_dict = {}
+            self.load_page()
+        else:
+            self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
 
-            # Detects file type
-            self.file_mode = self.raw_file.name[-3:]
+    def page_num_is_valid(self, page_num):
+        """
+        Returns True if page_num is a number, False if page_num is completely invalid, and -1 if it's a range.
+        Note that the function expects spacing to have already been cleaned out of it prior to being called.
+        In other words, it won't necessarily recognize something like "1 - 5" as a range.
+        """
+        if page_num.isdigit():
+            return True
+        dash_index = page_num.find("-")
+        if(dash_index == -1):
+            return False
+        pg1 = page_num[0 : dash_index]
+        if not pg1.isdigit():
+            return False
+        pg2 = page_num[dash_index + 1:]
+        if not pg2.isdigit():
+            return False
+        return -1
 
-            # Delete contents
-            self.text.delete(1.0, tk.END)
+    def handle_bad_page_requests(self, page_num_valid):
+        """
+        If a page not in the doc is requested, this will set the page number to a valid
+        one and print a warning.
 
-            # Calls pyxpdf in case the file is a PDF, otherwise reads as txt
-            if self.file_mode == "pdf":
-                # Read valid page number, otherwise reset to 1
-                page_num = self.page_entry.get()
-                if not page_num.isdigit():
-                    self.msg.config(text="Page number not entered. Value initialized to 1", foreground="red")
-                    self.page_number = 1
-                    self.page_entry.delete(0,tk.END)
-                    self.page_entry.insert(0, str(self.page_number))
+        page_num_valid is passed in so that this method already knows whether it should
+        be checking a list or single number.
+        """
+        doc_length = len(self.pdf_document)
+        err = False
+        double_err_text = " At least one other error was not displayed- see entry box."
+        if page_num_valid == -1: # ie, page number is a range
+            if self.page_number[0] < 1: # This will only take effect if the starting page is set to 0. Beginning hyphens are already invalid.
+                self.page_number[0] = 1
+                self.msg.config(text="First page entered is less than 1; setting first page to 1", foreground="red")
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, "1-" + str(self.page_number[1]))
+                err = True
+            if self.page_number[1] < 1:
+                self.page_number[1] = 1
+                self.page_entry.delete(0, tk.END)
+                if(err): # This will only happen if the user enters some form of "0-0"- trying to do a negative anywhere doesn't count as a range, just invalid
+                    self.msg.config(text="PDFs start with page 1, not 0. Additionally, you can enter just one page instead of a range if you'd like. Going to page 1.", foreground="red")
+                    self.page_entry.insert(0, "1")
                 else:
-                    self.page_number = int(page_num)
+                    self.msg.config(text="Second page entered is less than 1; setting second page to 1", foreground="red")
+                    self.page_entry.insert(0, str(self.page_number[0]) + "-1")
+                    err = True
+            if self.page_number[1] > doc_length:
+                self.page_number[1] = doc_length
+                if(err):
+                    err_text = "Last page entered is greater than the length of the PDF; setting last page to the end of the PDF." + double_err_text
+                else:
+                    err_text = "Last page entered is greater than the length of the PDF; setting last page to the end of the PDF."
+                    err = True
+                self.msg.config(text=err_text, foreground="red")
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, str(self.page_number[0]) + "-" + str(self.page_number[1]))
+            if self.page_number[0] > doc_length:
+                self.page_number[0] = doc_length
+                err_text = "First page entered is greater than the length of the PDF; setting first page to the end of the PDF."
+                if(err):
+                    err_text = err_text + double_err_text
+                self.msg.config(text=err_text, foreground="red")
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, str(self.page_number[0]) + "-" + str(self.page_number[1]))
+        else: # ie. there is a single page
+            if self.page_number < 1: # This may as well be self.page_number == 0. A beginning hyphen is already invalid (not a digit or a range).
+                self.page_number = 1
+                self.msg.config(text="Page entered is too small; setting to 1", foreground="red")
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, "1")
+            if self.page_number > doc_length:
+                self.page_number = doc_length
+                self.msg.config(text="Page entered is too large; setting it to the last page (" + str(doc_length) + ")", foreground="red")
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, str(doc_length))
 
+    def handle_page_range(self, page_range: list):
+        """
+        Sets everything related to the page number with the assumption that
+        the user has entered a range of numbers rather than a single page. I.e.,
+        the range is ordered correctly, self.page_number is set to a list of
+        two integer values, and self.chunk is set to the starting page.
+
+        Spacing should be removed from page_range before it's passed into this method.
+        """
+        dash_index = page_range.find("-")
+        pg1 = int(page_range[0 : dash_index])
+        pg2 = int(page_range[dash_index + 1:])
+        self.page_number = [pg1, pg2]
+        # Switch first and last page if the user's first number was the smaller one.
+        if(self.page_number[1] < self.page_number[0]):
+            self.msg.config(text="A larger page number was entered first. The pages will be displayed in order from smallest to largest anyway.", foreground="red")
+            placeholder = self.page_number[0]
+            self.page_number[0] = self.page_number[1]
+            self.page_number[1] = placeholder
+            self.page_entry.delete(0, tk.END)
+            self.page_entry.insert(0, str(self.page_number[0]) + "-" + str(self.page_number[1]))
+        self.chunk=self.page_number[0]
+
+    def is_spaced_range(self, raw_page_entry: str):
+        """
+        Checks to see if a page entry is simply two numbers separated by a space, which
+        the program should handle as a range of pages.
+        
+        Lots of processing of page_entry is done both before and after this method is
+        called. It will never be called on an entry with zany spacing, and it can be
+        wrong when it comes to invalid inputs since they'll get filtered out anyway.
+        """
+        first_space = raw_page_entry.find(" ")
+        # If there is one space...
+        if(not(first_space == -1)) and (first_space == raw_page_entry.rfind(" ")):
+            # And if this space is surrounded by only two valid, positive digits...
+            if(raw_page_entry[0 : first_space].isdigit() and raw_page_entry[first_space+1 :]):
+                return True
+        return False
+
+    def clean_spaces_in_page_entry(self, raw_page_entry: str):
+        """
+        Removes extra spaces. Then it checks to see if a user entered a range separated with
+        spaces and replaces the spaces with a dash if so.
+        """
+        old_entry = raw_page_entry.strip() # Remove loading and trailing spaces so that something like " 2 5" gets loaded as "2-5" instead of "25"
+        # Remove all spaces that are adjacent to a dash or a space
+        # The below line is straight from GeeksForGeeks, they're wonderful
+        all_spaces = [i for i in range(len(old_entry)) if old_entry.startswith(" ", i)]
+        entry = ""
+        for i in range(0, len(old_entry)):
+            if not(i in all_spaces):
+                entry = entry + old_entry[i] 
+            elif not(old_entry[i-1] == "-" or old_entry[i+1] == "-" or old_entry[i+1] == " "):
+                    entry = entry + old_entry[i]
+        # Past this point, only single spaces that aren't next to a dash should exist.
+        if(self.is_spaced_range(entry)):
+            self.msg.config(text="You have entered two numbers with spacing in between. Loading those pages and the pages between them.", foreground="orange")
+            entry = entry.replace(" ", "-")
+            # Replace user entry with how the program has read it.
+            self.page_entry.delete(0, tk.END)
+            self.page_entry.insert(0, entry)
+        return entry
+
+    def load_page_from_button(self, event=None):
+        """
+        Loading the page can cause warnings to pop on on the bottom, especially with ranges.
+        If you press "load data" and the warning from your last page load is still there, it
+        can look like you just got an error even though you didn't. Thus, pressing the button
+        to load the page first clears any warnings.
+        """
+        self.msg.config(text="")
+        self.load_page()
+
+    def load_page(self):
+        """
+        Load contents of a PDF or text file into text box.
+
+        If the entry box for page number has a value, it will load the page specified. If not, by default it will
+        load the first page.
+        """
+
+        if self.current_page != "Annotation":
+            self.switch_annotate()
+
+        # Reset annotation dictionary
+        self.cust_ents_dict = {}
+
+
+        # Delete contents
+        self.text.delete(1.0, tk.END)
+
+        # Calls pyxpdf in case the file is a PDF, otherwise reads as txt
+        if self.file_mode == "pdf":
+            page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
+            page_num_valid = self.page_num_is_valid(page_num)
+            if page_num_valid == False:
+                self.msg.config(text="Valid page number not entered. Value initialized to 1", foreground="red")
+                self.page_number = 1
+                self.page_entry.delete(0,tk.END)
+                self.page_entry.insert(0, str(self.page_number))
                 self.chunk=self.page_number
+            elif page_num_valid == True:
+                self.page_number = int(page_num)
+                self.chunk=self.page_number
+            else: # Range of numbers
+                self.handle_page_range(page_num)
 
-                # Load PDF file
-                if self.pdf_document is None:
-                    self.pdf_document = Document(self.raw_file.name)
+            # Load PDF file
+            if self.pdf_document is None:
+                self.pdf_document = Document(self.raw_file.name)
 
-                # Extract text from pdf while maintaining layout
-                control = TextControl(mode="physical")
+            self.handle_bad_page_requests(page_num_valid)
 
+            if not (page_num_valid == -1): # Single page, whether page_num_valid is true or false
                 page = self.pdf_document[self.page_number - 1]
-                txt = page.text()
-            else:
-                self.page_number = 0
-                self.chunk = self.page_number
-                txt = self.raw_file.read()
+                #  doesn't necessarily have to be removed for a single page; It gets removed in
+                # the else because tagging across multiple pages doesn't work correctly if  exists.
+                # However, it's removed here as well for consistency and neatness.
+                txt = page.text().replace("\r", "").replace("", "")
+            else: # Page range
+                txt = ""
+                for page in self.pdf_document[self.page_number[0] - 1 : self.page_number[1]]:
+                    txt = txt + page.text().replace("\r", "").replace("", "")
+        else:
+            self.page_number = 0
+            self.chunk = self.page_number
+            txt = self.raw_file.read().replace("\r", "").replace("", "")
+            self.raw_file.seek(0)
 
-            self.text.insert("1.0",txt)
+        self.text.insert(1.0,txt)
+        return txt
 
     def update_scrolled_text_line_content_index(self):
         """
@@ -752,11 +962,12 @@ class CropNerGUI:
         """
         # Clear warning message, if one exists
         self.msg.config(text="")
+
+        # Checks if there is an active NER model
         if self.model_dir is None:
             self.msg.config(text="Warning!! Unable to pre-tag. No NER model selected.", foreground="red")
         # Pre-tag with NER model
         else:
-            # Grabs selected text if in selection mode, otherwise ends the operation.
             if selection == "selection":
                 if (len(self.text.tag_ranges("sel")) > 0):
                     input_text =  self.text.get("sel.first", "sel.last")
@@ -764,30 +975,18 @@ class CropNerGUI:
                     self.msg.config(text="No selection detected; no text was tagged.", foreground="red")
                     return
             else:
-                # The code reserved for PDFs is currently a little unnecessary and the code will work without it, but if we eventually want the user to be able to type a page range and pre-tag them without reloading the text box first then this is where that will happen.
-                if self.file_mode == "pdf":
-                    # Get page number
-                    page_num = self.page_entry.get()
-                    if not page_num.isdigit():
-                        self.msg.config(text="Page number not entered. Page 1 in PDF loaded", foreground="red")
-                        page_num = 1
-                    self.page_number = int(page_num)
-                    self.chunk = self.page_number
-                    # Extract text from pdf while maintaining layout
-                    control = TextControl(mode="physical")
-
-                    page = self.pdf_document[self.page_number - 1]
-                    input_text = page.text()
-                else:
-                    # To not interferse with how the dictionary is structured the program will use page 0 for non-PDF files for now.
-                    self.page_number = 0
+                if self.raw_file is None:
+                    self.msg.config(text="Warning!! No PDF or txt file was detected. Attempting to tag what's currently in the text box.", foreground="red")
+                    # Will pre-tag whatever's in the current text box without trying to load data.
                     input_text = self.text.get(1.0, "end")
+                else:
+                    input_text = self.load_page()
 
             if not self.json_initialized:
                 self.initialize_new_file()                
 
             self.text.delete(1.0, tk.END)
-            self.text.insert("1.0", input_text)
+            self.text.insert(1.0, input_text)
 
             # Reset annotation dictionary
             self.cust_ents_dict = {}
@@ -798,25 +997,31 @@ class CropNerGUI:
             doc = self.tag_ner_with_spacy(input_text)
 
             custom_tags_present = False
+
+            if type(self.page_number) is list:
+                page_start = self.page_number[0]
+            else:
+                page_start = self.page_number
+
             for ent in doc.ents:
                 # NER is in our list of custom tags
                 if ent.label_ in self.tags:
                     custom_tags_present = True
                     # index = self.tags.index(ent.label_) # Find index for an element in a list
                     self.highlight_ent(ent.start_char, ent.end_char, ent.label_)
-                    if self.cust_ents_dict.get(self.page_number, False):
-                        self.cust_ents_dict[self.page_number].append((ent.start_char, ent.end_char, ent.label_))
+                    if self.cust_ents_dict.get(page_start, False):
+                        self.cust_ents_dict[page_start].append((ent.start_char, ent.end_char, ent.label_))
                     else:
-                        self.cust_ents_dict[self.page_number] = [(ent.start_char, ent.end_char, ent.label_)]
+                        self.cust_ents_dict[page_start] = [(ent.start_char, ent.end_char, ent.label_)]
 
             if not custom_tags_present:
                 self.msg.config(text="No custom agriculture tags detected in the text!", foreground="red")
             if len(doc.ents) == 0:
                 self.msg.config(text="No entities detected in the text!", foreground="red")
 
-            if self.cust_ents_dict.get(self.page_number, False):
-                tags = self.cust_ents_dict[self.page_number]
-                self.cust_ents_dict[self.page_number] = [input_text, tags]
+            if self.cust_ents_dict.get(page_start, False):
+                tags = self.cust_ents_dict[page_start]
+                self.cust_ents_dict[page_start] = [input_text, tags]
 
     def overlap(self, interval_one: list, interval_two: list) -> bool:
         """
@@ -842,9 +1047,9 @@ class CropNerGUI:
         interval_two_start = interval_two[0]
         interval_two_end = interval_two[1]
 
-        if (interval_two_start >= interval_one_start) and (interval_two_start <= interval_one_end):
+        if (interval_two_start >= interval_one_start) and (interval_two_start < interval_one_end):
             overlap = True
-        elif (interval_two_end >= interval_one_start) and (interval_two_end <= interval_one_end):
+        elif (interval_two_end > interval_one_start) and (interval_two_end <= interval_one_end):
             overlap = True
         elif (interval_two_start <= interval_one_start) and (interval_two_end >= interval_one_end):
             overlap = True
@@ -939,7 +1144,11 @@ class CropNerGUI:
         self.msg.config(text="")
 
         # Get indices for the first and last characters selected
-        (selection_start, selection_end) = self.get_selected_interval()
+        try:
+            (selection_start, selection_end) = self.get_selected_interval()
+        except:
+            self.msg.config(text="No selection detected!", foreground="red")
+            return
 
         new_ents = []
         overlapping_tags = []
@@ -963,6 +1172,23 @@ class CropNerGUI:
         new_ents.sort()
         self.cust_ents_dict[self.chunk] = [input_text, new_ents]
 
+    def get_custom_labels(self, data: dict):
+        """
+        Given a dictionary representing the entirety of a json file generated by this program,
+        this method finds every custom, user-defined label and loads them back into the program.
+        """
+        labels = []
+        for sentence_item in data['sentences']:
+            for entity_item in data['sentences'][sentence_item]:
+                label = data['sentences'][sentence_item][entity_item]['label']
+                if (not (label in labels)) and (not (label in self.tags)):
+                    # If a new tag is found, essentially auto-fill the custom trait field and press the button to add a custom entity.
+                    labels.append(label)
+                    self.trait_entry.delete(0, tk.END)
+                    self.trait_entry.insert(0, label)
+                    self.add_ent()
+                    self.trait_entry.delete(0, tk.END)
+
     def review_annotations(self):
         """
         Load a json file containing annotations and review it.
@@ -982,12 +1208,20 @@ class CropNerGUI:
                 self.switch_validate()
 
             # Load annotation data
-            data = json_2_dict(self.annotation_file.name)
-            train_data = dict_2_mixed_type(data)
+            try:
+                data = json_2_dict(self.annotation_file.name)
+                train_data = dict_2_mixed_type(data)
+                self.get_custom_labels(data)
+            except:
+                self.msg.config(text="WARNING!!: Couldn't load data from annotation file. Are you sure you loaded a valid json?", foreground="red")
+                self.annotation_file = None
+                return
             """
             doc = data['doc']
             url = data['url']
             """
+
+            # Updates the 'metadata' panel with information from json file, if info is different or invalid then the user is instructed to verify the data in a proper format.
             try:
                 self.doc_entry.delete(0, tk.END)
                 self.doc_entry.insert(0, data['doc'])
@@ -1030,7 +1264,7 @@ class CropNerGUI:
                 entities = text_annotation[1]['entities']
                 self.cust_ents_dict[self.chunk] = [annotated_text,entities]
 
-            self.text.insert("1.0", annotated_text + '\n')
+            self.text.insert(1.0, annotated_text + '\n')
 
             # Update variable that holds number of lines in textbox. You need this update
             # for highlight_ent to work
@@ -1147,16 +1381,22 @@ class CropNerGUI:
                 # self.file_save()
 
             # Increment page number
-            self.page_number = self.page_number + 1
-            self.page_entry.delete(0, tk.END)
-            self.page_entry.insert(0, str(self.page_number))
+            try:
+                self.page_number = self.page_number + 1
+                self.page_entry.delete(0, tk.END)
+                self.page_entry.insert(0, str(self.page_number))
 
-            # Reset annotation data
-            self.annotation_file = None
-            self.json_initialized = False
+                # Reset annotation data
+                self.annotation_file = None
 
-            # Load data
-            self.load_page()
+                # Load data
+                self.load_page()
+            except TypeError:
+                # While this would be easy to add, it's not clear what exactly SHOULD be incremented
+                # if the user clicks "next page" on a range, so that's left to the user.
+                self.msg.config(text="WARNING!! Cannot increment a range of pages.", foreground="red")
+        else:
+            self.msg.config(text="Warning!! No PDF is currently loaded, so the next page of it can't be loaded either.", foreground="red")
 
     def go(self):
         """

@@ -48,7 +48,7 @@ pip3 install -U pip setuptools wheel
 pip3 install -U spacy
 pip3 install spacy-transformers
 pip3 install -U scikit-learn
-pip3 install -U PyPDF2
+pip3 install -U pyxpdf
 
 ```
 
@@ -220,7 +220,7 @@ psql -h hostname -d ner
 The schema above is good for reducing data duplication in the database. It is, however, not 
 suitable for the kind of queries a typical user might be interested in. The commands below
 create a view that aggregates data into a view that is easier to query. NOTE: If performance 
-becomes an issue, we will need to use materialized viewa instead of plain views. 
+becomes an issue, we will need to use materialized views instead of plain views. 
 
 ```
 # Log into PostgreSQL 

@@ -1,0 +1,149 @@
+1	UC 937	CVAR
+1	six-rowed	TRAT
+1	spring	TRAT
+1	feed	TRAT
+1	barley	CROP
+2	California AES	ORG
+2	1999	DATE
+3	UC 937	CVAR
+3	Sma1/Sunbar 401/3/Gus/Kombyne//Sma1	PED
+4	Steptoe/2*Diamant /3/Minn Dwarf 64.98-8/Briggs/4/Asse	PED
+11	UC 937	CVAR
+11	resistance	PPTD
+11	stripe rust	PATH
+13	UC 937	CVAR
+13	tall	TRAT
+13	semi-dwarf	TRAT
+13	short-statured	TRAT
+13	taller	TRAT
+13	UC 828	CVAR
+13	straw strength	TRAT
+14	maturing	TRAT
+15	heading time	TRAT
+15	UC 828	CVAR
+15	emergence	TRAT
+16	Spikes	PLAN
+16	awned	PLAN
+17	Glumes	PLAN
+17	lemma	PLAN
+17	hairs	PLAN
+18	Glume awns	PLAN
+18	glumes	PLAN
+19	Lemma awns	PLAN
+20	kernels	PLAN
+20	aleurone	PLAN
+21	UC 937	CVAR
+21	resistant	PPTD
+21	stripe rust	PATH
+21	scald	PATH
+21	moderately resistant	PPTD
+21	BYD	PATH
+21	leaf rust	PATH
+21	powdery mildew	PATH
+21	net blotch	PATH
+22	susceptible	PPTD
+22	leaf rust	PATH
+22	moderately susceptible	PPTD
+22	powdery mildew	PATH
+24	Crop Science 42:1374 (2002)	JRNL
+26	UC Signal	CVAR
+26	six-rowed	TRAT
+26	spring	TRAT
+26	feed	TRAT
+26	barley	CROP
+27	California AES	ORG
+27	1973	DATE
+29	IV 363	ALAS
+29	UC Holt	ALAS
+32	awned	PLAN
+32	maturing	TRAT
+33	spikes	PLAN
+34	Kernels	PLAN
+34	aleurone	PLAN
+34	rachilla	PLAN
+35	moderately susceptible	PPTD
+35	scald	PATH
+35	susceptible	PPTD
+35	BYD	PATH
+35	powdery mildew	PATH
+37	Crop Science 15:603 (1975)	JRNL
+37	Walker	CVAR
+37	six-rowed	TRAT
+37	spring	TRAT
+37	feed	TRAT
+37	barley	CROP
+38	Utah AES	ORG
+38	1991	DATE
+39	Steptoe/M27	PED
+40	UT 1731	ALAS
+41	irrigation	TRAT
+42	maturity	TRAT
+42	Steptoe	CVAR
+42	heading date	TRAT
+42	mid-tall	TRAT
+42	taller	TRAT
+42	lodging resistance	TRAT
+43	Spikes	PLAN
+43	lateral kernels	PLAN
+43	hairs	PLAN
+43	rachis edges	PLAN
+44	Glumes	PLAN
+44	hairs	PLAN
+44	awns	PLAN
+45	Lemma awns	PLAN
+45	hair	PLAN
+45	teeth	PLAN
+46	seed	PLAN
+46	rachilla hairs	PLAN
+46	crease	PLAN
+46	base	PLAN
+47	Aleurone	PLAN
+48	base	PLAN
+48	spike	PLAN
+48	collar	PLAN
+49	Grain yield	TRAT
+49	Steptoe	CVAR
+49	test weight	TRAT
+49	protein	TRAT
+50	resistant	PPTD
+50	loose smut	PATH
+50	covered smut	PATH
+50	moderately resistant	PPTD
+50	powdery mildew	PATH
+50	susceptible	PPTD
+50	stripe rust	PATH
+52	Crop Science 33:1413 (1993)	JRNL
+53	Westbred 501	CVAR
+53	six-rowed	TRAT
+53	spring	TRAT
+53	feed	TRAT
+53	barley	CROP
+54	Western Plant Breeders	ORG
+54	1982	DATE
+56	WPB78-20	ALAS
+57	maturity	TRAT
+57	stature	TRAT
+58	plant height	TRAT
+58	straw strength	TRAT
+59	Early growth	TRAT
+60	Spikes	PLAN
+60	kernels	PLAN
+61	Rachis edges	PLAN
+61	hairs	PLAN
+62	Awns	PLAN
+63	Glumes	PLAN
+63	lemma	PLAN
+63	glume hairs	PLAN
+64	Glume awns	PLAN
+64	glumes	PLAN
+65	Hulls	PLAN
+66	Aleurone	PLAN
+67	Rachilla hairs	PLAN
+68	Veins	PLAN
+68	barbs	PLAN
+68	lateral veins	PLAN
+69	crease	PLAN
+69	awn	PLAN
+70	Kernels	PLAN
+70	lateral kernels	PLAN
+70	central kernels	PLAN

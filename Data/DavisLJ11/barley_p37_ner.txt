@@ -1,0 +1,95 @@
+1	barbs	PLAN
+1	lateral kernels	PLAN
+2	crease	PLAN
+2	awn	PLAN
+3	kernel	PLAN
+3	kernels	PLAN
+4	Lateral kernels	PLAN
+5	Winter Tennessee	CVAR
+5	Atlas	CVAR
+6	resistant	PPTD
+6	scald	PATH
+6	susceptible	PPTD
+6	BYD	PATH
+9	Wocus 71	CVAR
+9	six-rowed	TRAT
+9	spring	TRAT
+9	feed	TRAT
+9	barley	CROP
+10	University of California AES	ORG
+10	1972	DATE
+11	Wocus	CVAR
+11	straw quality	TRAT
+11	height	TRAT
+11	strength	TRAT
+11	maturity	TRAT
+11	kernel size	TRAT
+12	Wocus	CVAR
+12	Coast/Lion//Winter Club	PED
+12	Logan, Utah	GPE
+12	1949	DATE
+12	Oregon Agricultural Experiment Station	ORG
+12	1958	DATE
+13	Wocus 71	CVAR
+13	straw	PLAN
+13	shorter	TRAT
+13	maturity	TRAT
+13	Wocus	CVAR
+14	spike	PLAN
+14	awns	PLAN
+15	rachis	PLAN
+16	Kernels	PLAN
+16	rachilla hairs	PLAN
+16	aleurone	PLAN
+19	Crop Science 19:409 (1979)
+20	Xena	CVAR
+20	two-rowed	TRAT
+20	spring	TRAT
+20	feed	TRAT
+20	barley	CROP
+21	Western Plant Breeders	ORG
+21	1999	DATE
+22	Stark/Baronesse	PED
+23	WPB BZ 594-19	ALAS
+24	maturity	TRAT
+24	Steptoe	CVAR
+24	plant height	TRAT
+24	taller	TRAT
+24	Baronesse	CVAR
+24	straw strength	TRAT
+25	stem	PLAN
+25	collar	PLAN
+25	neck	PLAN
+26	leaves	PLAN
+26	anthocyanin	TRAT
+26	leaf sheath	PLAN
+26	stem	PLAN
+27	anthocyanin	TRAT
+27	veins	PLAN
+27	lemma	PLAN
+28	head	PLAN
+29	glume	PLAN
+29	lemma	PLAN
+29	glume	PLAN
+29	hairs	PLAN
+30	glume awns	PLAN
+30	glumes	PLAN
+31	lemma	PLAN
+31	awned	PLAN
+31	awns	PLAN
+32	lemma teeth	PLAN
+32	lemma hairs	PLAN
+32	rachilla hair	PLAN
+33	seed	PLAN
+33	aleurone	PLAN
+34	lateral florets	PLAN
+35	moderately resistant	PPTD
+35	scald	PATH
+35	BYD	PATH
+35	moderately susceptible	PPTD
+35	net blotch	PATH
+35	stripe rust	PATH
+35	susceptible	PPTD
+35	leaf rust	PATH
+35	stem rust	PATH
+35	powdery mildew	PATH

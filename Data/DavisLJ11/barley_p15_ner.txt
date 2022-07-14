@@ -1,0 +1,172 @@
+1	Colter	CVAR
+1	six-rowed	TRAT
+1	spring	TRAT
+1	feed	TRAT
+1	malting	TRAT
+1	barley	CROP
+2	USDA-ARS	ORG
+2	Idaho, Oregon, and Washington AESs	ORG
+2	1991	DATE
+3	Steptoe/Larker//Karla	PED
+4	79Ab10719-66LC	ALAS
+5	Colter	CVAR
+5	Steptoe	CVAR
+5	height	TRAT
+5	heading date	TRAT
+5	lodging resistance	TRAT
+5	grain yield	TRAT
+5	test weight	TRAT
+6	spikes	PLAN
+6	awns	PLAN
+6	kernels	PLAN
+6	aleurone	PLAN
+7	Lemma barbs	PLAN
+8	Rachilla hairs	PLAN
+9	kernel plumpness	TRAT
+9	malt extract	TRAT
+9	protein content	TRAT
+9	diastatic power	TRAT
+9	alpha amylase levels	TRAT
+10	susceptible	PPTD
+10	stripe rust	PATH
+10	powdery mildew	PATH
+10	BYD	PATH
+10	kernel blight	PATH
+10	Alternaria spp	PATH
+12	Crop Science 33:1401 (1993)	JRNL
+12	Columbia	CVAR
+12	six-rowed	TRAT
+12	spring	TRAT
+12	feed	TRAT
+12	barley	CROP
+13	Western Plant Breeders	ORG
+13	1982	DATE
+14	Gus/Kombar	PED
+16	Columbia	CVAR
+16	semi-dwarf	TRAT
+16	stiff straw	TRAT
+16	lodging resistance	TRAT
+16	maturity	TRAT
+16	Gus	CVAR
+17	growth habit	TRAT
+18	spike	PLAN
+19	Lemma awns	PLAN
+20	kernels	PLAN
+20	aleurone	PLAN
+21	hull	PLAN
+21	lemma teeth	PLAN
+21	rachilla hairs	PLAN
+22	glumes	PLAN
+22	lemma	PLAN
+22	hairs	PLAN
+23	glume awns	PLAN
+23	glumes	PLAN
+24	Columbia	CVAR
+24	resistant	PPTD
+24	moderately resistant	PPTD
+24	scald	PATH
+24	powdery mildew	PATH
+24	net blotch	PATH
+24	susceptible	PPTD
+24	moderately susceptible	PPTD
+24	leaf rust	PATH
+24	BYD	PATH
+24	spot blotch	PATH
+25	susceptible	PPTD
+25	scald	PATH
+28	Compana	CVAR
+28	two-rowed	TRAT
+28	spring	TRAT
+28	feed	TRAT
+28	barley	CROP
+29	Montana AES	ORG
+29	1941	DATE
+30	Composite Cross I, CIho 4116	PED
+31	drought resistant	TRAT
+31	shattering resistant	TRAT
+31	susceptible	PPTD
+31	grasshoppers	PATH
+32	maturing	TRAT
+32	awns	PLAN
+33	short	TRAT
+33	erect	TRAT
+34	hairs	PLAN
+34	glume	PLAN
+34	glume awn	PLAN
+35	hull	PLAN
+35	crease	PLAN
+36	aleurone	PLAN
+37	Rachilla hairs	PLAN
+38	central vein	PLAN
+38	lateral veins	PLAN
+39	barbs	PLAN
+39	lateral veins	PLAN
+40	crease	PLAN
+40	base	PLAN
+40	beard	PLAN
+41	Kernels	PLAN
+42	Compana	CVAR
+42	moderately resistant	PPTD
+42	covered smut	PATH
+42	susceptible	PPTD
+42	stripe mosaic virus	PATH
+44	Journal of American Society of Agronomy 33:252 (1941)	JRNL
+45	Conlon	CVAR
+45	two-rowed	TRAT
+45	spring	TRAT
+45	malting	TRAT
+45	barley	CROP
+46	North Dakota AES	ORG
+46	1996	DATE
+47	Bowman*2/Brigitta mutant//ND10232	PED
+49	Test weight	TRAT
+49	yield	TRAT
+49	Bowman	CVAR
+50	Yield	TRAT
+50	Stark	CVAR
+51	Conlon	CVAR
+51	heads	TRAT
+51	Bowman	CVAR
+51	heat tolerance	TRAT
+51	kernel plumpness	TRAT
+52	lodging	TRAT
+53	resistant	PPTD
+53	powdery mildew	PATH
+53	net blotch	PATH
+53	moderately susceptible	PPTD
+53	spot blotch	PATH
+56	Cougbar	CVAR
+56	six-rowed	TRAT
+56	spring	TRAT
+56	feed	TRAT
+56	barley	CROP
+57	Washington State University Agriculture Research Center	ORG
+57	Idaho and Oregon AESs	ORG
+57	1985	DATE
+58	Beacon//7136-62/6773-71	PED
+59	WA 14583-77	ALAS
+60	height	TRAT
+60	stiff straw	TRAT
+61	Maturity	TRAT
+61	Steptoe	CVAR
+61	Morex	CVAR
+62	Heads	PLAN
+63	awns	PLAN
+63	glumes	PLAN
+63	hairs	PLAN
+64	Kernels	PLAN
+64	hulls	PLAN
+64	rachilla hairs	PLAN
+64	veins	PLAN
+64	crease	PLAN
+64	base	PLAN
+64	tip	PLAN
+64	aleurone	PLAN
+65	Yield	TRAT
+65	Morex	CVAR
+65	Advance	CVAR
+65	Steptoe	CVAR
+66	Test weight	TRAT
+66	Morex	CVAR
+67	resistant	PPTD
+67	powdery mildew	PATH
