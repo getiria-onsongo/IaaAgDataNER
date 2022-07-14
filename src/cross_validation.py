@@ -84,10 +84,9 @@ class CrossValidation:
             if bratt conversion should take place on the sentence level
         """
         # shuffles and divides data into k folds and a dev set
-        print("Shuffling and splitting data...")
+        print("\nShuffling and splitting data...")
         splits = self.k_folds + 1
         files = glob.glob(data+"/**/*.json", recursive=True)
-        print(files)
         random.shuffle(files)
         files_per_divison = (len(files) // splits)
         folds = []
@@ -111,10 +110,10 @@ class CrossValidation:
         convertJsonToSpacyJsonl(outputFileName="ner_2021_08_dev_data.jsonl", filePaths=dev)
         convert(input_path="ner_2021_08_dev_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
-        fold_counter = 1
         # k-fold cross validation
-        for f in range(0, self.k_folds):
-            print("\nOn fold %s:" %fold_counter)
+        for f in range(1, self.k_folds+1):
+            print("\n\nFOLD %s:" %f)
+
             # train - validate split
             training = []
             for i in range(0, self.k_folds):
@@ -129,19 +128,20 @@ class CrossValidation:
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
             # train model
-            model_dir = model_dir_prefix + "_fold" + str(f)
-            train(config_path=config, output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
+            # model_dir = model_dir_prefix + "_fold" + str(f)
+            # train(config_path=config, output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # evaulate model on validation data
-            self.predict(validation, f, spacy_only, model_dir+"/model-best", sentence_level)
+            # self.predict(validation, f, spacy_only, model_dir+"/model-best", sentence_level)
+            self.predict(validation, f, spacy_only, "senter_ner_2021_08_model/model-best", sentence_level) # for testing on local machine
             fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pred_bratt"), 'strict')
-            print("Fold %s results: " %fold_counter)
+            print("\nFold %s results: " %f)
+            print("____________________________")
             print(format_results(fold_results))
-            fold_counter += 1
 
         # average metrics and print
-        avgs, ents = self.medacy_eval()
-        self.print_metrics(avgs, ents)
+        avg_metrics, ents_found, ent_counts = self.medacy_eval()
+        self.print_metrics(avg_metrics, ents_found, ent_counts)
 
 
     def predict(self, validation : list, fold : int, spacy_only : bool, model_dir="cv_model/model-best", sentence_level=False):
@@ -181,16 +181,19 @@ class CrossValidation:
             file_name = name_split[len(name_split)-1]
             with open(gold_json_name+"/"+file_name, 'w') as f:
                 json.dump(contents, f)
-        print("Converting gold standard to bratt...")
+        print("\nConverting gold standard to bratt...")
+        print("____________________________")
         dataset_to_bratt(gold_json_name, gold_bratt_name, sentence_level)
 
         # do pos tagging & entity expansion
         print("\nPredicting on validation data...")
+        print("____________________________")
         predict = Predict(model_dir=model_dir, dataset_dir=gold_bratt_name, output_dir=json_name, spacy_only=spacy_only)
         predict.process_files()
 
         # convert predictions to bratt format
-        print("Converting predictions to bratt...")
+        print("\nConverting predictions to bratt...")
+        print("____________________________")
         dataset_to_bratt(json_name, bratt_name, sentence_level)
 
 
@@ -263,6 +266,8 @@ class CrossValidation:
         counts : dict
             dictonary of toatl entity counts in gold standard from count_entities()
         """
+        print("\nResults")
+        print("____________________________")
         print("ALL:")
         print("\t precision: " + str(metrics["ALL"][0]))
         print("\t recall: " +  str(metrics["ALL"][1]))

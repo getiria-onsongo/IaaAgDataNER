@@ -165,7 +165,7 @@ class Predict:
             current page number
         """
         if self.spacy_only is False:
-            print("doing part of speech based entity expansion...")
+            print("Doing part of speech based entity expansion...")
 
         self.cust_ents_dict = {}
         doc = self.tag_ner_with_spacy(input_text)

@@ -21,18 +21,20 @@ if __name__ == "__main__":
     outfile = input("\nName your output file: ")
 
 
-def conversion(infile, outfile, sentence_level=False):
+def conversion(infile, outfile, sentence_level=False, print_statements=False):
     annfile = outfile + ".ann"
     txtfile = outfile + ".txt"
 
     # If statement checks if the file exists and deletes it because the files will be appended not overwritten
     if os.path.exists(annfile):
         os.remove(annfile)
-        print(f"\n{annfile} exists so it will be overwritten")
+        if print_statements:
+            print(f"\n{annfile} exists so it will be overwritten")
     if os.path.exists(txtfile):
         os.remove(txtfile)
-        print(f"{annfile} exists so it will be overwritten")
-    print()
+        if print_statements:
+            print(f"{annfile} exists so it will be overwritten")
+            print()
     # Load the json file
     with open(infile) as f:
         data = json.load(f)
@@ -88,9 +90,9 @@ def conversion(infile, outfile, sentence_level=False):
                         f.write(t_entry)
                         f.write("\n")
 
-                # else:
-                    # print(
-                    #    f"\n{x} sentence has been skipped because, \033[91m\033[1m{keyterm}\033[0m is not defined in the dictionary")
+                else:
+                    if print_statements:
+                        print(f"\n{x} sentence has been skipped because, \033[91m\033[1m{keyterm}\033[0m is not defined in the dictionary")
 
             # Exception if the sentence has not been formatted properly
             except:
