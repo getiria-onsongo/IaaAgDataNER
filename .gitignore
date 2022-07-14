@@ -1,3 +1,11 @@
+Data/WashCrop/Crystal_p1_crop_barley_cvar_crystal_td.json
+Data/WashCrop/Crystal_p2_crop_barley_cvar_klages_td.json
+Data/WashCrop/Poco_p1_crop_barley_cvar_poco_td.json
+Data/WashCrop/Poco_p2_crop_barleys_cvar_arivat_td.json
+ner_2022_05/ner_2022_05_training_data.spacy
+ner_2022_05/ner_2022_05_validate_data.spacy
+ner_2022_05_training_data.jsonl
+ner_2022_05_validate_data.jsonl
 Data/DavisLJ11/archive/
 temp*
 .DS_Store
@@ -6,6 +14,7 @@ src/temp.txt
 temp.txt
 train.cfg
 ner_2022*
+ner_2022_05_model/*/*
 YEDDA/
 ner-annotator/
 prodigy/
@@ -15,6 +24,7 @@ src/logo.png
 src/temp.json
 src/temp.py
 src/temp1.py
+src/CropNerGUI_experimental.py
 test.jsonl
 test1.txt
 test2.jsonl
@@ -28,3 +38,5 @@ ExperimentalCode/*
 .idea/*
 src/.idea/*
 .ipynb_checkpoints/*
+.gitignore
+Data/*
