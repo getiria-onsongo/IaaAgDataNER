@@ -132,7 +132,8 @@ class CrossValidation:
             train(config_path=config, output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # evaulate model on validation data
-            self.predict(validation, f, spacy_only, model_dir+"/model-best", sentence_level)
+            model_name = model_dir+"/model-best"
+            self.predict(validation, f, spacy_only, model_name)
             fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pred_bratt"), 'strict')
             print("\nFold %s results: " %f)
             print("____________________________")
