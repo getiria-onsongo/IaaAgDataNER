@@ -128,12 +128,11 @@ class CrossValidation:
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
             # train model
-            # model_dir = model_dir_prefix + "_fold" + str(f)
-            # train(config_path=config, output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
+            model_dir = model_dir_prefix + "_fold" + str(f)
+            train(config_path=config, output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # evaulate model on validation data
-            # self.predict(validation, f, spacy_only, model_dir+"/model-best", sentence_level)
-            self.predict(validation, f, spacy_only, "senter_ner_2021_08_model/model-best", sentence_level) # for testing on local machine
+            self.predict(validation, f, spacy_only, model_dir+"/model-best", sentence_level)
             fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pred_bratt"), 'strict')
             print("\nFold %s results: " %f)
             print("____________________________")
@@ -183,7 +182,7 @@ class CrossValidation:
                 json.dump(contents, f)
         print("\nConverting gold standard to bratt...")
         print("____________________________")
-        dataset_to_bratt(gold_json_name, gold_bratt_name, sentence_level)
+        dataset_to_bratt(gold_json_name, gold_bratt_name)
 
         # do pos tagging & entity expansion
         print("\nPredicting on validation data...")
@@ -194,7 +193,7 @@ class CrossValidation:
         # convert predictions to bratt format
         print("\nConverting predictions to bratt...")
         print("____________________________")
-        dataset_to_bratt(json_name, bratt_name, sentence_level)
+        dataset_to_bratt(json_name, bratt_name)
 
 
     def medacy_eval(self):
@@ -215,7 +214,7 @@ class CrossValidation:
 
         # inter_dataset_agreement for each fold
         ents_found["ALL"] = 0
-        for f in range(0, self.k_folds):
+        for f in range(1, self.k_folds+1):
             result = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pred_bratt"), 'strict')
             for k,v in result.items():
                 p_all.append(v.precision())
@@ -361,13 +360,8 @@ if __name__ == '__main__':
         action='store_true', default = False,
         help='only use spacy, no pos tagging & entity expansion'
     )
-    parser.add_argument(
-        '--sentence_level',
-        action='store_true', default = False,
-        help='preform conversion to bratt on the sentence level'
-    )
     args = parser.parse_args()
 
     val = CrossValidation(k_folds=int(args.folds))
     config_name = val.create_config()
-    val.cross_validate(data=args.dataset_dir, spacy_only=args.spacy_only, config=config_name, sentence_level=args.sentence_level)
+    val.cross_validate(data=args.dataset_dir, spacy_only=args.spacy_only, config=config_name)
