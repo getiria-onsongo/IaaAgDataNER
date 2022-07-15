@@ -146,8 +146,8 @@ class CropNerGUI:
         Use NLP pipeline to identify named entities in the text.
     file_save(self, mode: str)
         Save current annotation. Mode tells the method whether the user is updating a file (save) or creating a new file (save as)
-    next_page(self)
-        Load the next page.
+    change_page(self)
+        Load the next page/previous page depending on the button clicked.
     go(self)
         Start running the GUI running.
     quit(self)
@@ -218,15 +218,16 @@ class CropNerGUI:
         self.welcome_frame.pack(side=tk.TOP, fill="x")
 
         self.welcome_label = tk.Label(self.welcome_frame, text="Welcome Page")
-        self.welcome_label.pack(side=tk.TOP)
+        # Trying to get this set the padding based on window size
+        self.welcome_label.pack(side=tk.TOP, pady=(250, 0))
 
         self.annotate_btn = tk.Button(self.welcome_frame, text="Annotate NER Data", command = self.switch_annotate)
-        self.annotate_btn.pack(side=tk.TOP)
+        self.annotate_btn.pack()
 
-        tk.Label(self.welcome_frame, text="or").pack(side=tk.TOP)
+        tk.Label(self.welcome_frame, text="or").pack()
 
         self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations", command = self.switch_annotate)
-        self.validate_btn.pack(side=tk.TOP)
+        self.validate_btn.pack()
 
 
         # Frame for the annotation/validation widgets [INCOMPLETE; WILL SEPERATE LATER]
@@ -378,9 +379,11 @@ class CropNerGUI:
         # Clear message button
         self.msg_btn = tk.Button(self.bottom_frame, text="Clear Warning Message", width=20, command=self.clear_message)
         self.msg_btn.pack(side=tk.LEFT)
+        # Previous page button
+        self.prev_btn = tk.Button(self.bottom_frame, text="Previous Page", command=partial(self.change_page, "previous"))
         # Next page button
-        self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=self.next_page)
-        self.next_btn.pack(side=tk.LEFT)
+        self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=partial(self.change_page, "next"))
+        # self.next_btn.pack(side=tk.LEFT)
 
         # Frame that will contain messages being displayed to the user
         self.msg_frame = tk.Frame(self.annotation_frame)
@@ -407,10 +410,10 @@ class CropNerGUI:
         self.page_entry.bind("<Return>", self.load_page_from_button)
         # Button to increase font in the text box (Font +)
         self.font_plus = tk.Button(self.open_frame, text="Font +", width=10, command=self.font_plus)
-        self.font_plus.pack(side=tk.LEFT)
+        # self.font_plus.pack(side=tk.LEFT)
         # Button to decrease font in the text box (Font +)
         self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
-        self.font_minus.pack(side=tk.LEFT)
+        # self.font_minus.pack(side=tk.LEFT)
         
 
     def switch_annotate(self):
@@ -419,6 +422,7 @@ class CropNerGUI:
         """
         self.welcome_frame.pack_forget()
         self.annotation_frame.pack(fill="x")
+        self.page_entry.pack()
         self.current_page = "Annotate"
 
     def switch_validate(self):
@@ -427,6 +431,7 @@ class CropNerGUI:
         """
         self.welcome_frame.pack_forget()
         self.annotation_frame.pack(fill="x")
+        self.page_entry.pack_forget()
         self.current_page = "Validate"
 
     def return_to_welcome(self):
@@ -631,6 +636,7 @@ class CropNerGUI:
             self.msg.config(text="No file was chosen", foreground="red")
             return
         elif file_type == "json":
+            self.prev_btn.pack_forget()
             self.next_btn.pack_forget()
             self.annotation_file = f
             self.file_prefix = self.annotation_file.name.split(".")[0]
@@ -655,10 +661,12 @@ class CropNerGUI:
 
             if self.file_mode == "pdf":
                 # Bring back the "Next Page" button, placing it before the save button.
+                self.prev_btn.pack(side=tk.LEFT)
                 self.next_btn.pack(side=tk.LEFT)
                 self.page_entry.insert(0, "1")
             else:
                 # Remove "Next Page" button if loading a txt file, which has no pages.
+                self.prev_btn.pack_forget()
                 self.next_btn.pack_forget()
 
             self.file_prefix = self.raw_file.name.split(".")[0]
@@ -840,8 +848,6 @@ class CropNerGUI:
         load the first page.
         """
 
-        if self.current_page != "Annotation":
-            self.switch_annotate()
 
         # Reset annotation dictionary
         self.cust_ents_dict = {}
@@ -1366,7 +1372,7 @@ class CropNerGUI:
             self.msg.config(text="No NER data detected to save", foreground="red")
 
 
-    def next_page(self):
+    def change_page(self, mode):
         """
         Load the next page.
         """
@@ -1382,7 +1388,10 @@ class CropNerGUI:
 
             # Increment page number
             try:
-                self.page_number = self.page_number + 1
+                if mode == "next":
+                    self.page_number = self.page_number + 1
+                else:
+                    self.page_number = self.page_number - 1
                 self.page_entry.delete(0, tk.END)
                 self.page_entry.insert(0, str(self.page_number))
 
