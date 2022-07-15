@@ -39,4 +39,3 @@ ExperimentalCode/*
 src/.idea/*
 .ipynb_checkpoints/*
 .gitignore
-Data/*
