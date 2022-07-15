@@ -24,11 +24,11 @@ conda activate ner
 python3 src/json2SpacyJson.py Data/DavisLJ11 ner_2022_07  en_core_web_trf --suffix '.json' --split True --test_size 0.1 
 
 # Create directory. Spacy program to convert jsonl to Spacy format needs an output directory
-mkdir ner_2022_05_13
+mkdir ner_2022_07
 
 # Convert to spacy binary format
-python3 -m spacy convert --converter json ner_2022_05_13_training_data.jsonl ner_2022_05_13
-python3 -m spacy convert --converter json ner_2022_05_13_validate_data.jsonl ner_2022_05_13
+python3 -m spacy convert --converter json ner_2022_07_training_data.jsonl ner_2022_07
+python3 -m spacy convert --converter json ner_2022_07_validate_data.jsonl ner_2022_07
 
 # Create a config file to use for training
 # --lang: Two-letter code of the language to use
@@ -39,16 +39,15 @@ python3 -m spacy convert --converter json ner_2022_05_13_validate_data.jsonl ner
 python3 -m spacy init config --lang en --pipeline ner --optimize accuracy --force ner.cfg
 
 # Train a model
-python3 -m spacy train ner.cfg --output ner_2022_05_13_model --paths.train ner_2022_05_13/ner_2022_05_13_training_data.spacy --paths.dev ner_2022_05_13/ner_2022_05_13_validate_data.spacy 
+python3 -m spacy train ner.cfg --output ner_2022_07_model --paths.train ner_2022_07/ner_2022_07_training_data.spacy --paths.dev ner_2022_07/ner_2022_07_validate_data.spacy
 
-
-
-HERE
 
 # Open GUI
 python3 src/CropNerGUI.py 
 
 
+
+# MISC: OLD STUFF
 python -m spacy train ner.cfg --paths.train ./train.spacy --paths.dev ./dev.spacy
 # Prodigy
 > 
@@ -68,7 +67,7 @@ python -m spacy convert --converter json trainData.json TrainingData
 # Train
 python -m spacy train ner.cfg --output ner_model --paths.train TrainingData/trainData.spacy --paths.dev TrainingData/devData.spacy
 
-# HERE
+#
 source_nlp = spacy.load("en_core_web_sm")
 nlp_agdata = spacy.load("ner_model/model-best")
 nlp_agdata.add_pipe("parser", before="ner",source=source_nlp)
