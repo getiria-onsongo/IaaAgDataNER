@@ -21,7 +21,7 @@ conda activate ner
 
 # Take as input a folder containing raw json files and convert them into
 # jsonl format used by Spacy. You can ignore the warnings
-python3 src/json2SpacyJson.py Data/DavisLJ11 ner_2022_07  en_core_web_trf --suffix '.json' --split True --test_size 0.1 
+python3 src/json2SpacyJson.py Data ner_2022_07  en_core_web_trf --suffix '.json' --split True --test_size 0.1 
 
 # Create directory. Spacy program to convert jsonl to Spacy format needs an output directory
 mkdir ner_2022_07
