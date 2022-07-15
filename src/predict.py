@@ -250,6 +250,78 @@ class Predict:
                     print()
         return ent
 
+
+    # def expand(self, doc : spacy.tokens.Doc, current_index : int, ent : str, label : str) -> str:
+    #     """
+    #     If the first token in an entity is a noun or proper noun, finds all
+    #     adjectives proceeding the entity and expands the span to contain
+    #     all of them.
+    #
+    #     Parameters
+    #     ----------
+    #     doc : spacy.Doc
+    #         spacy model for pos with given sentence passed in
+    #     current_index : int
+    #         index of first token in the doc
+    #     ent : str
+    #         entity to possibly expand span of
+    #     label : str
+    #         label of ent
+    #
+    #     Returns expanded entity.
+    #     """
+    #     current = doc[current_index]
+    #     pos_current = current.pos_
+    #
+    #     if (label == "PLAN" or label == "TRAT") and ent.root.head.lemma_ == "be":
+    #         acomps = [token for token in head.children if token.dep_ == "acomp"]
+    #         acomp_ent = acomp[0]
+    #         ent = doc[ent.start:acomp_ent.end]
+    #         ent.label_ = "TRAT"
+    #         print("new: " + str(ent))
+    #         print("label: " + str(ent.label_))
+    #         print()
+    #     # same as adj_ent_entities() from agParse but recursive adj expansion
+    #     else if current_index >= 1:
+    #         left = doc[current_index-1]
+    #         pos_left = left.pos_
+    #         if pos_current == "NOUN" or pos_current == "PROPN":
+    #             if pos_left == "ADJ":
+    #                 print("Adj expanding...")
+    #                 print("entity: " + str(ent))
+    #                 i = current_index
+    #                 start_index = ent.start
+    #                 # same as adj_ent_entities from
+    #                 while i >= 1:
+    #                     i = i - 1
+    #                     if doc[i].pos_ == "ADJ":
+    #                         start_index = i
+    #                     else:
+    #                         break
+    #                 first_tok = doc[start_index]
+    #                 ent = doc[first_tok.i:ent.end]
+    #                 if label == "PLAN":
+    #                     ent.label_ == "TRAT"
+    #                 else:
+    #                     ent.label_ = label
+    #                 print("new: " + str(ent))
+    #                 print("label: " + str(ent.label_))
+    #                 print()
+    #
+    #     # same as trat_adj_entities() for agParse
+    #     else if current_index < len(doc) -1 :
+    #         right = doc[current_index+1]
+    #         pos_right = right.pos_
+    #         if pos_right == "ADV" and label == "TRAT" and next_token.dep_ == 'advmod':
+    #             end_index = current_index + 1
+    #             last_tok = doc[end_index]
+    #             ent = doc[ent.start:last_tok]
+    #             ent.label_ = label
+    #             print("new: " + str(ent))
+    #             print("label: " + str(ent.label_))
+    #             print()
+    #
+    #     return ent
     def file_save(self, pdf_name : str, url : str, chunk : str) -> str:
         """
         Simplifed version of GUI save file & continue_func which saves

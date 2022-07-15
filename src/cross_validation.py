@@ -133,45 +133,49 @@ class CrossValidation:
 
             # evaulate model on validation data
             model_name = model_dir+"/model-best"
-            self.predict(validation, f, spacy_only, model_name)
-            fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pred_bratt"), 'strict')
-            print("\nFold %s results: " %f)
+            # model_name = "senter_ner_2021_08_model/model-best"
+            fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f)
+
+            # spacy only
+            print("\nEvaluating with spacy only...")
+            print("____________________________")
+            self.predict(fold_dir, "spacy", gold_bratt_dir, True, model_name)
+            fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/spacy/pred_bratt"), 'strict')
+            print("\nFold %s results with spacy only: " %f)
+            print("____________________________")
+            print(format_results(fold_results))
+
+            # spacy + pos tagging
+            print("\nEvaluating with spacy & pos...")
+            print("____________________________")
+            self.predict(fold_dir, "pos", gold_bratt_dir, False, model_name)
+            fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
+            print("\nFold %s results with POS tagging: " %f)
             print("____________________________")
             print(format_results(fold_results))
 
         # average metrics and print
-        avg_metrics, ents_found, ent_counts = self.medacy_eval()
+        avg_metrics, ents_found, ent_counts = self.medacy_eval("spacy")
+        print("Spacy only results")
+        print("____________________________")
+        self.print_metrics(avg_metrics, ents_found, ent_counts)
+        print()
+        print("Spacy & POS tagging entity expansion results")
+        print("____________________________")
+        avg_metrics, ents_found, ent_counts = self.medacy_eval("pos")
         self.print_metrics(avg_metrics, ents_found, ent_counts)
 
-
-    def predict(self, validation : list, fold : int, spacy_only : bool, model_dir="cv_model/model-best"):
+    def create_gold_dataset(self, validation : list, fold : int):
         """
-        For a given fold, predicts on the validation data and saves to json.
-        Also moves the gold standard validation data in json format to a new
-        directory. Then converts both of these datasets to bratt format.
-
-        Parameters
-        ----------
         validation : list
             list of file names to use for validation
         fold : int
             current fold, used for directory naming
-        spacy_only : bool
-            if the model should only use spacy and not pos tagging & expansion
-        model_dir : str
-            path to spacy model to predict with
-        sentence_level : bool
-            if bratt conversion should take place on the sentence level
         """
-        # create output directories
-        print("\nCreating output directories...")
         fold_dir = "fold_" + str(fold) + "_results"
-        json_name = fold_dir + "/pred_json"
-        bratt_name = fold_dir + "/pred_bratt"
         gold_json_name = fold_dir + "/gold_json"
         gold_bratt_name = fold_dir + "/gold_bratt"
-        self.create_dirs([fold_dir, json_name, bratt_name, gold_json_name, gold_bratt_name])
-
+        self.create_dirs([fold_dir, gold_json_name, gold_bratt_name])
         # create and convert to bratt gold standard dataset
         print("\nCreating gold standard validation dataset...")
         for file in validation:
@@ -184,9 +188,30 @@ class CrossValidation:
         print("\nConverting gold standard to bratt...")
         print("____________________________")
         dataset_to_bratt(gold_json_name, gold_bratt_name)
+        return fold_dir, gold_bratt_name
 
-        # do pos tagging & entity expansion
-        print("\nPredicting on validation data...")
+    def predict(self, fold_dir, sub_dir, gold_bratt_name, spacy_only : bool, model_dir="cv_model/model-best"):
+        """
+        For a given fold, predicts on the validation data and saves to json.
+        Also moves the gold standard validation data in json format to a new
+        directory. Then converts both of these datasets to bratt format.
+
+        Parameters
+        ----------
+
+        spacy_only : bool
+            if the model should only use spacy and not pos tagging & expansion
+        model_dir : str
+            path to spacy model to predict with
+        """
+        # create output directories
+        print("\nCreating output directories...")
+        json_name = fold_dir + "/" + sub_dir + "/pred_json"
+        bratt_name = fold_dir + "/" + sub_dir + "/pred_bratt"
+        self.create_dirs([json_name, bratt_name])
+
+        # do pos tagging  entity expansion
+        print("\nPredicting on validation data ...")
         print("____________________________")
         predict = Predict(model_dir=model_dir, dataset_dir=gold_bratt_name, output_dir=json_name, spacy_only=spacy_only)
         predict.process_files()
@@ -197,7 +222,7 @@ class CrossValidation:
         dataset_to_bratt(json_name, bratt_name)
 
 
-    def medacy_eval(self):
+    def medacy_eval(self, sub_dir):
         """
         Finds average metrics and entity counts across all folds.
         Uses medacy's inter_dataset_agreement calculator to get
@@ -216,7 +241,7 @@ class CrossValidation:
         # inter_dataset_agreement for each fold
         ents_found["ALL"] = 0
         for f in range(1, self.k_folds+1):
-            result = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pred_bratt"), 'strict')
+            result = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/"+sub_dir+"/pred_bratt"), 'strict')
             for k,v in result.items():
                 p_all.append(v.precision())
                 p_weights.append(ent_counts[f][k])
@@ -266,8 +291,6 @@ class CrossValidation:
         counts : dict
             dictonary of toatl entity counts in gold standard from count_entities()
         """
-        print("\nResults")
-        print("____________________________")
         print("ALL:")
         print("\t precision: " + str(metrics["ALL"][0]))
         print("\t recall: " +  str(metrics["ALL"][1]))
