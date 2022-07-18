@@ -126,42 +126,42 @@ class CrossValidation:
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
             # evaulate model on validation data
-            model_name = model_dir_prefix
-            # model_name = "senter_ner_2021_08_model/model-best"
+            # model_name = model_dir_prefix
+            model_name = "senter_ner_model/senter_ner_2021_08_model"
             fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f)
 
             # train model
-            train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
+            # train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # spacy only
             print("\nEvaluating with spacy only...")
             print("____________________________")
             self.predict(fold_dir, "spacy", gold_bratt_dir, model_name+"/model-best")
-            fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/spacy/pred_bratt"), 'strict')
+            spacy_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/spacy/pred_bratt"), 'strict')
             print("\nFold %s results with spacy only: " %f)
             print("____________________________")
-            print(format_results(fold_results))
+            print(format_results(spacy_results))
 
             # spacy + pos tagging
             print("\nEvaluating with spacy & pos...")
             print("____________________________")
             self.predict(fold_dir, "pos", gold_bratt_dir, model_name+"/model-best")
-            fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
+            pos_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
             print("\nFold %s results with POS tagging: " %f)
             print("____________________________")
-            print(format_results(fold_results))
+            print(format_results(pos_results))
 
         # average metrics and print
-        avg_metrics, ents_found, ent_counts = self.medacy_eval("spacy")
+        spacy_avg_metrics, spacy_ents_found, spacy_ent_counts = self.medacy_eval("spacy")
         print("Spacy only results")
         print("____________________________")
-        self.print_metrics(avg_metrics, ents_found, ent_counts)
+        self.print_metrics(spacy_avg_metrics, spacy_ents_found, spacy_ent_counts)
         print()
 
         print("Spacy & POS tagging entity expansion results")
         print("____________________________")
-        avg_metrics, ents_found, ent_counts = self.medacy_eval("pos")
-        self.print_metrics(avg_metrics, ents_found, ent_counts)
+        pos_avg_metrics, pos_ents_found, pos_ent_counts = self.medacy_eval("pos")
+        self.print_metrics(pos_avg_metrics, pos_ents_found, pos_ent_counts)
 
     def create_gold_dataset(self, validation : list, fold : int):
         """
@@ -211,12 +211,14 @@ class CrossValidation:
         bratt_name = fold_dir + "/" + sub_dir + "/pred_bratt"
         self.create_dirs([json_name, bratt_name])
 
-        if fold_dir == "spacy":
+        if sub_dir == "spacy":
             flag = True
         else:
             flag = False
         # do pos tagging  entity expansion
-        print("\nPredicting on validation data ...")
+        print("Predicting on validation data ...")
+        print(sub_dir)
+        print(flag)
         print("____________________________")
         predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, output_dir=json_name, spacy_only=flag)
         predict.process_files()
@@ -384,13 +386,9 @@ if __name__ == '__main__':
         action='store', default=5,
         help='number of folds'
     )
-    parser.add_argument(
-        '--spacy_only',
-        action='store_true', default = False,
-        help='only use spacy, no pos tagging & entity expansion'
-    )
+
     args = parser.parse_args()
 
     val = CrossValidation(k_folds=int(args.folds))
     config_name = val.create_config()
-    val.cross_validate(data=args.dataset_dir, spacy_only=args.spacy_only, config=config_name)
+    val.cross_validate(data=args.dataset_dir, config=config_name)

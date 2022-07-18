@@ -201,7 +201,7 @@ class Predict:
             label = ent.label_
             # functions that expands ents to contain proceeding adjectives
             ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
-            ent = self.expand(doc, current_index, ent, label)
+            # ent = self.expand(doc, current_index, ent, label)
         return ent
 
     def adj_combine_noun_ent(self, doc : spacy.tokens.Doc, current_index : int, ent : str, label : str) -> str:
