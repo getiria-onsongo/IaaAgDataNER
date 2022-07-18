@@ -138,7 +138,7 @@ class CrossValidation:
             # spacy only
             print("\nEvaluating with spacy only...")
             print("____________________________")
-            self.predict(fold_dir, "spacy", gold_bratt_dir, True, model_name+"/model-best")
+            self.predict(fold_dir, "spacy", gold_bratt_dir, model_name+"/model-best")
             fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/spacy/pred_bratt"), 'strict')
             print("\nFold %s results with spacy only: " %f)
             print("____________________________")
@@ -147,7 +147,7 @@ class CrossValidation:
             # spacy + pos tagging
             print("\nEvaluating with spacy & pos...")
             print("____________________________")
-            self.predict(fold_dir, "pos", gold_bratt_dir, False, model_name+"/model-best")
+            self.predict(fold_dir, "pos", gold_bratt_dir, model_name+"/model-best")
             fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
             print("\nFold %s results with POS tagging: " %f)
             print("____________________________")
@@ -190,7 +190,7 @@ class CrossValidation:
         dataset_to_bratt(gold_json_name, gold_bratt_name)
         return fold_dir, gold_bratt_name
 
-    def predict(self, fold_dir, sub_dir, gold_bratt_name, spacy_only : bool, model_dir="cv_model/model-best"):
+    def predict(self, fold_dir, sub_dir, gold_bratt_name, model_dir):
         """
         For a given fold, predicts on the validation data and saves to json.
         Also moves the gold standard validation data in json format to a new
@@ -210,10 +210,14 @@ class CrossValidation:
         bratt_name = fold_dir + "/" + sub_dir + "/pred_bratt"
         self.create_dirs([json_name, bratt_name])
 
+        if fold_dir == "spacy":
+            flag = True
+        else:
+            flag = False
         # do pos tagging  entity expansion
         print("\nPredicting on validation data ...")
         print("____________________________")
-        predict = Predict(model_dir=model_dir, dataset_dir=gold_bratt_name, output_dir=json_name, spacy_only=spacy_only)
+        predict = Predict(model_dir=model_dir, dataset_dir=gold_bratt_name, output_dir=json_name, spacy_only=flag)
         predict.process_files()
 
         # convert predictions to bratt format
