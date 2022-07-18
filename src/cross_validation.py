@@ -52,7 +52,8 @@ class CrossValidation:
         self.tags = tags
         warnings.filterwarnings('ignore')
 
-    def create_config(self, name="senter_ner.cfg", gpu=False) -> str:
+    def create_config(self, name="senter_ner.cfg", gpu=False, model_name="cv_model", word_embed=False, vectors=
+    "glove.6B.zip") -> str:
         """
         Creates spacy model config file
 
@@ -67,10 +68,12 @@ class CrossValidation:
         if gpu:
             execute("python3 -m spacy init config --lang en --pipeline transformer,senter,ner  --optimize accuracy --force " + name +" -G")
         else:
+            if word_embed:
+                execute("python3 -m spacy init vectors en " + vectors + " "+ model_name)
             execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
         return name
 
-    def cross_validate(self, data : str, config : str, model_dir_prefix="cv_model", sentence_level=False):
+    def cross_validate(self, data : str, config : str, model_name="cv_model", sentence_level=False):
         """
         Preforms cross validation on spacy model.
 
@@ -131,7 +134,6 @@ class CrossValidation:
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
             # evaulate model on validation data
-            model_name = model_dir_prefix
             # model_name = "senter_ner_model/senter_ner_2021_08_model"
             fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f, sentence_level)
 
@@ -396,7 +398,12 @@ if __name__ == '__main__':
         help='wether or not to use GPU'
     )
     parser.add_argument(
-        '--sentence_level',
+            '--word_embed',
+            action='store_true', default=False,
+            help='wether or not to use word emeddings'
+        )
+    parser.add_argument(
+        '--sent_level',
         action='store_true', default=False,
         help='flag for sentence level annotations'
     )
@@ -404,5 +411,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     val = CrossValidation(k_folds=int(args.folds))
-    config_name = val.create_config(gpu=args.GPU)
-    val.cross_validate(data=args.dataset_dir, config=config_name, sentence_level=args.sentence_level)
+    config_name = val.create_config(gpu=args.GPU, word_embed=args.word_embed)
+    val.cross_validate(data=args.dataset_dir, config=config_name, sentence_level=args.sent_level)
