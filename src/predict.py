@@ -98,7 +98,6 @@ class Predict:
         self.cust_ents_dict = {}
         self.nlp.add_pipe("compound_trait_entities", after="ner")
 
-
     def process_files(self):
         """
         Gets a list of txt files from the dataset directory, then does ner
@@ -111,8 +110,8 @@ class Predict:
         json : bool
             flag to use json text reader
         """
-        files = glob.glob(self.dataset_dir + "/*" + self.dataset_suffix)
-
+        files =  glob.glob(self.dataset_dir + "/**/*" + self.dataset_suffix, recursive=True)
+        print(files)
         print("%s files to process." % str(len(files)))
         for f in files:
             # get text & page numbers from files
@@ -202,7 +201,7 @@ class Predict:
             label = ent.label_
             # functions that expands ents to contain proceeding adjectives
             ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
-            # ent = expand(doc, current_index, ent, label)
+            ent = self.expand(doc, current_index, ent, label)
         return ent
 
     def adj_combine_noun_ent(self, doc : spacy.tokens.Doc, current_index : int, ent : str, label : str) -> str:
@@ -250,94 +249,6 @@ class Predict:
                     print("label: " + str(ent.label_))
                     print()
         return ent
-
-
-    def expand(self, doc : spacy.tokens.Doc, current_index : int, ent : str, label : str) -> str:
-        """
-        If the first token in an entity is a noun or proper noun, finds all
-        adjectives proceeding the entity and expands the span to contain
-        all of them.
-
-        Parameters
-        ----------
-        doc : spacy.Doc
-            spacy model for pos with given sentence passed in
-        current_index : int
-            index of first token in the doc
-        ent : str
-            entity to possibly expand span of
-        label : str
-            label of ent
-
-        Returns expanded entity.
-        """
-        current = doc[current_index]
-        pos_current = current.pos_
-
-        if (label == "PLAN" or label == "TRAT") and ent.root.head.lemma_ == "be":
-            print(1)
-            ent = self.be_expand(self, doc, ent, current_index, pos_current)
-        if current_index >= 1:
-            print(2)
-            ent = self.adj_expand(doc, ent, current_index, pos_current)
-        if current_index < len(doc) - 1 :
-            print(3)
-            ent = self.adv_expand(doc, ent, current_index, pos_current)
-
-        return ent
-
-    # from agParse
-    def be_expand(self, doc, ent, current_index, pos_current):
-        acomps = [token for token in head.children if token.dep_ == "acomp"]
-        acomp_ent = acomp[0]
-        ent = doc[ent.start:acomp_ent.end]
-        ent.label_ = "TRAT"
-        print("new: " + str(ent))
-        print("label: " + str(ent.label_))
-        print()
-        return ent
-
-    # from agParse
-    def adv_expand(self, doc, ent, current_index, pos_current):
-        right = doc[current_index+1]
-        pos_right = right.pos_
-        if pos_right == "ADV" and label == "TRAT" and next_token.dep_ == 'advmod':
-            print("Adv expanding...")
-            print("entity: " + str(ent))
-            last_tok = doc[current_index+1]
-            ent = doc[ent.i:last_tok.end]
-            ent.label_ = label
-            print("new: " + str(ent))
-            print("label: " + str(ent.label_))
-            print()
-        return ent
-
-    def adj_expand(self, doc, ent, current_index, pos_current):
-        left = doc[current_index-1]
-        pos_left = left.pos_
-        if pos_current == "NOUN" or pos_current == "PROPN":
-            if pos_left == "ADJ":
-                print("Adj expanding...")
-                print("entity: " + str(ent))
-                i = current_index
-                start_index = ent.start
-                while i >= 1:
-                    i = i - 1
-                    if doc[i].pos_ == "ADJ":
-                        start_index = i
-                    else:
-                        break
-                first_tok = doc[start_index]
-                ent = doc[first_tok.i:ent.end]
-                if label == "PLAN":
-                    ent.label_ == "TRAT" # idea from agParse
-                else:
-                    ent.label_ = label
-                print("new: " + str(ent))
-                print("label: " + str(ent.label_))
-                print()
-        return ent
-
 
     def file_save(self, pdf_name : str, url : str, chunk : str) -> str:
         """
