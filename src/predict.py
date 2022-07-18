@@ -111,7 +111,6 @@ class Predict:
             flag to use json text reader
         """
         files =  glob.glob(self.dataset_dir + "/**/*" + self.dataset_suffix, recursive=True)
-        print(files)
         print("%s files to process." % str(len(files)))
         for f in files:
             # get text & page numbers from files
