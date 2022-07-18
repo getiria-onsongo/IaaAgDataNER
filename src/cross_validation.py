@@ -127,13 +127,13 @@ class CrossValidation:
             convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
-            # train model
-            train(config_path=config, output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
-
             # evaulate model on validation data
             model_name = model_dir_prefix + "/model-best"
             # model_name = "senter_ner_2021_08_model/model-best"
             fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f)
+
+            # train model
+            train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # spacy only
             print("\nEvaluating with spacy only...")
