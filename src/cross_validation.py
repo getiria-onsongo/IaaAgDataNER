@@ -128,11 +128,10 @@ class CrossValidation:
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
             # train model
-            model_dir = model_dir_prefix + "_fold" + str(f)
             train(config_path=config, output_path=model_dir, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # evaulate model on validation data
-            model_name = model_dir+"/model-best"
+            model_name = model_dir_prefix + "/model-best"
             # model_name = "senter_ner_2021_08_model/model-best"
             fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f)
 
@@ -160,6 +159,7 @@ class CrossValidation:
         print("____________________________")
         self.print_metrics(avg_metrics, ents_found, ent_counts)
         print()
+
         print("Spacy & POS tagging entity expansion results")
         print("____________________________")
         avg_metrics, ents_found, ent_counts = self.medacy_eval("pos")
