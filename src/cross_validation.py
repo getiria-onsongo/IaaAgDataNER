@@ -128,7 +128,7 @@ class CrossValidation:
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
             # evaulate model on validation data
-            model_name = model_dir_prefix + "/model-best"
+            model_name = model_dir_prefix
             # model_name = "senter_ner_2021_08_model/model-best"
             fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f)
 
@@ -138,7 +138,7 @@ class CrossValidation:
             # spacy only
             print("\nEvaluating with spacy only...")
             print("____________________________")
-            self.predict(fold_dir, "spacy", gold_bratt_dir, True, model_name)
+            self.predict(fold_dir, "spacy", gold_bratt_dir, True, model_name+"/model-best")
             fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/spacy/pred_bratt"), 'strict')
             print("\nFold %s results with spacy only: " %f)
             print("____________________________")
@@ -147,7 +147,7 @@ class CrossValidation:
             # spacy + pos tagging
             print("\nEvaluating with spacy & pos...")
             print("____________________________")
-            self.predict(fold_dir, "pos", gold_bratt_dir, False, model_name)
+            self.predict(fold_dir, "pos", gold_bratt_dir, False, model_name+"/model-best")
             fold_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
             print("\nFold %s results with POS tagging: " %f)
             print("____________________________")
