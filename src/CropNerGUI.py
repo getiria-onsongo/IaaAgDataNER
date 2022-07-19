@@ -298,6 +298,14 @@ class CropNerGUI:
         self.url_label = tk.Label(self.middle_frame, text="URL")
         # URL entry
         self.url_entry = tk.Entry(self.middle_frame, width=30)
+        # CROP label
+        self.crop_label = tk.Label(self.middle_frame, text="Crop")
+        # CROP entry
+        self.crop_entry = tk.Entry(self.middle_frame, width = 30)
+        # CVAR label
+        self.cvar_label = tk.Label(self.middle_frame, text="Crop Variety")
+        # CVAR entry
+        self.cvar_entry = tk.Entry(self.middle_frame, width=30)
         # Date label
         self.date_label = tk.Label(self.middle_frame, text="Date file created")
         # Date entry
@@ -492,6 +500,10 @@ class CropNerGUI:
             self.doc_entry.pack(side=tk.TOP, pady=(0,10))
             self.url_label.pack(side=tk.TOP)
             self.url_entry.pack(side=tk.TOP, pady=(0,10))
+            self.crop_label.pack(side=tk.TOP)
+            self.crop_entry.pack(side=tk.TOP, pady=(0, 10))
+            self.cvar_label.pack(side=tk.TOP)
+            self.cvar_entry.pack(side=tk.TOP, pady=(0, 10))
             self.date_label.pack(side=tk.TOP)
             self.date_entry.pack(side=tk.TOP, pady=(0,10))
         else:
@@ -500,6 +512,10 @@ class CropNerGUI:
             self.doc_entry.pack_forget()
             self.url_label.pack_forget()
             self.url_entry.pack_forget()
+            self.crop_label.pack_forget()
+            self.crop_entry.pack_forget()
+            self.cvar_label.pack_forget()
+            self.cvar_entry.pack_forget()
             self.date_label.pack_forget()
             self.date_entry.pack_forget()
 
@@ -613,6 +629,8 @@ class CropNerGUI:
             self.doc_entry.delete(0, tk.END)
             self.doc_entry.insert(0, self.file_name)
             self.url_entry.delete(0, tk.END)
+            self.crop_entry.delete(0, tk.END)
+            self.cvar_entry.delete(0, tk.END)
             self.date_entry.config(state=tk.NORMAL)
             self.date_entry.delete(0, tk.END)
             self.date_entry.insert(0, "File not initialized")
@@ -1168,6 +1186,10 @@ class CropNerGUI:
                 self.doc_entry.insert(0, data['doc'])
                 self.url_entry.delete(0, tk.END)
                 self.url_entry.insert(0, data['url'])
+                self.crop_entry.delete(0, tk.END)
+                self.crop_entry.insert(0, data['crop'])
+                self.cvar_entry.delete(0, tk.END)
+                self.cvar_entry.insert(0, data['cvar'])
                 self.date_entry.config(state=tk.NORMAL)
                 self.date_entry.delete(0, tk.END)
                 self.date_entry.insert(0, data['date'])
@@ -1273,7 +1295,9 @@ class CropNerGUI:
             entities = self.cust_ents_dict[self.chunk][1]
 
             # Calls dict_2_json on the newly created json file
-            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, self.doc_entry.get(), self.url_entry.get(), self.date_entry.get())
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, doc=self.doc_entry.get(),
+                url=self.url_entry.get(), date=self.date_entry.get(), crop=self.crop_entry.get().upper(),
+                cvar=self.cvar_entry.get().upper())
             dict_2_json_file(ann_train_dict, json_file)
 
             json_file.close()
