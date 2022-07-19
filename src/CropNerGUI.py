@@ -177,6 +177,12 @@ class CropNerGUI:
         self.metadata_toggle = False
         self.json_initialized = False
 
+        self.metadata_doc = ""
+        self.metadata_url = ""
+        self.metadata_crop = ""
+        self.metadata_cvar = ""
+        self.metadata_date = ""
+
         # ----------------------- Widgets for GUI start here.
         # Default font size for text in ScrolledText. Should be a string format
         # for a number e.g., '16'
@@ -527,9 +533,16 @@ class CropNerGUI:
         self.json_initialized = False
         self.annotation_file = None
         self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
+        self.metadata_doc = ""
         self.doc_entry.delete(0, tk.END)
         self.doc_entry.insert(0, self.file_name)
+        self.metadata_url = ""
         self.url_entry.delete(0, tk.END)
+        self.metadata_crop = ""
+        self.crop_entry.delete(0, tk.END)
+        self.metadata_cvar = ""
+        self.cvar_entry.delete(0, tk.END)
+        self.metadata_date = "File not initialized"
         self.date_entry.config(state=tk.NORMAL)
         self.date_entry.delete(0, tk.END)
         self.date_entry.insert(0, "File not initialized")
@@ -1024,6 +1037,7 @@ class CropNerGUI:
     def initialize_new_file(self):
         self.json_initialized = True
         self.working_file_label.config(text="Working Annotation File: Untitled.json")
+        self.metadata_date = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
         self.date_entry.config(state=tk.NORMAL)
         self.date_entry.delete(0, tk.END)
         self.date_entry.insert(0, datetime.now().strftime("%m_%d_%Y_%H_%M_%S"))
