@@ -15,12 +15,14 @@ import importlib
 # all, I won't bother figuring out how to get the PYTHONPATH properly changed
 # or whatever needs to happen to fix this.
 
-def mixed_type_2_dict(data, chunk, doc='', url='', date=''):
+def mixed_type_2_dict(data, chunk, doc='', url='', date='', crop='', cvar=''):
     """ Convert ('sentence 1', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]})
      to:
      {'doc': 'BarCvDescLJ11.pdf', 
       'url': 'https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf', 
       'chunk': 2,
+      'crop': 'barley',
+      'cvar': 'eight-twelve',
       'sentences': {'sentence 1': {'entity 1': 
                                        {'start': 0, 'end': 3, 'label': 'TY1'}, 
                                    'entity 2': 
@@ -31,10 +33,12 @@ def mixed_type_2_dict(data, chunk, doc='', url='', date=''):
     """
 
     result = dict()
+    result['chunk'] = chunk
     result['doc'] = doc
     result['url'] = url
     result['date'] = date
-    result['chunk'] = chunk
+    result['crop'] = crop
+    result['cvar'] = cvar
     result['sentences'] = dict()
 
     for record in data:
