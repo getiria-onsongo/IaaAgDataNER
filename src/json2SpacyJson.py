@@ -40,39 +40,7 @@ def convertJsonToSpacyJsonl(model="en_core_web_lg",outputFileName=None, filePath
     file.write("]")
     file.close()
 
-def split_test(files, dir="reserved_test"):
-    """
-    Resereves half of the validation data for usages other than spacy model creation.
-
-    Parameters
-    ----------
-    files : list[str]
-        list of file names in validation data
-    dir : str
-        name of directory to save reserved test data to
-
-    Returns list of validation datat to use for spacy model creation
-    """
-    midpoint = len(files) // 2
-    validate_reserve = files[midpoint:]
-    validate_use = files[:midpoint]
-
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-
-    for file in validate_reserve:
-        json_file = open(file)
-        data = json.load(json_file)
-        split_name = file.split("/")
-        name = dir + "/" + split_name[len(split_name)-1]
-        with open(name, 'w') as f:
-            json.dump(data, f)
-        json_file.close()
-
-    return validate_use
-
-
-def rawJsonToSpacyJson(dir=None, model="en_core_web_lg", suffix=".json", split=True, input_test_size=0.2,outputFileName=None,reserve_test=False,reserve_test_dir="Data/reserved_test"):
+def rawJsonToSpacyJson(dir=None, model="en_core_web_lg", suffix=".json", split=True, input_test_size=0.2,outputFileName=None):
     """Add docstring"""
 
     # Walk through the directory and retrieve all files ending in fileSuffix
@@ -91,9 +59,6 @@ def rawJsonToSpacyJson(dir=None, model="en_core_web_lg", suffix=".json", split=T
 
         train, validate = train_test_split(filePaths, test_size=input_test_size, shuffle=True)
 
-        if reserve_test:
-            validate = split_test(validate, reserve_test_dir)
-
         trainFile = outputFileName+"_training_data.jsonl"
         validateFile = outputFileName + "_validate_data.jsonl"
 
@@ -102,9 +67,9 @@ def rawJsonToSpacyJson(dir=None, model="en_core_web_lg", suffix=".json", split=T
 
         # Create validate set
         convertJsonToSpacyJsonl(model,validateFile, validate)
-
     else:
         convertJsonToSpacyJsonl(model,outputFileName+".jsonl", filePaths)
+
 
 if __name__ == "__main__":
 
@@ -133,13 +98,6 @@ if __name__ == "__main__":
     parser.add_argument(
         '--test_size', help='Size of validate set. Should be a value between 0 and 1. Default = 0.2'
     )
-    parser.add_argument(
-        '--reserve_test', help='Whether to reserve half of test data. Default=False',
-    )
-    parser.add_argument(
-        '--reserve_test_dir', help='Where to save reserved test data. Default=Data/reserved_test',
-    )
-
 
 
     if len(sys.argv) < 3:
@@ -161,9 +119,4 @@ if __name__ == "__main__":
     if args.suffix is None:
         args.suffix = ".json"
 
-    if args.reserve_test is None:
-        args.reserved_test = False
-    if args.reserve_test_dir is None:
-        args.reserve_test_dir = "Data/reserved_test"
-
-    rawJsonToSpacyJson(dir=args.jsonFolder, model=args.spacyModel, suffix=args.suffix, split=args.split, input_test_size=args.test_size,outputFileName=args.outputFileName, reserve_test=args.reserve_test, reserve_test_dir=args.reserve_test_dir)
+    rawJsonToSpacyJson(dir=args.jsonFolder, model=args.spacyModel, suffix=args.suffix, split=args.split, input_test_size=args.test_size,outputFileName=args.outputFileName)
