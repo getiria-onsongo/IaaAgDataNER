@@ -93,8 +93,6 @@ class CropNerGUI:
         Contains NER tag annotations. key = chunk number, values = entities
     self.page_number : int
         Current page number
-    self.metadata_toggle : bool
-        Boolean determining whether the metadata panel should be visible or not
     self.json_initialized : bool
         Whether a json file has been initialized in the workspace or not
 
@@ -174,7 +172,6 @@ class CropNerGUI:
         self.nlp_agdata = None
         self.cust_ents_dict = {}
         self.page_number = 0
-        self.metadata_toggle = False
         self.json_initialized = False
 
         # ----------------------- Widgets for GUI start here.
