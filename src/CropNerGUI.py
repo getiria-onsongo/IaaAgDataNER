@@ -503,6 +503,22 @@ class CropNerGUI:
             self.date_label.pack_forget()
             self.date_entry.pack_forget()
 
+    def reset_metadata(self):
+        """
+        Resets the metadata fields
+        """
+
+        self.json_initialized = False
+        self.annotation_file = None
+        self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
+        self.doc_entry.delete(0, tk.END)
+        self.doc_entry.insert(0, self.file_name)
+        self.url_entry.delete(0, tk.END)
+        self.date_entry.config(state=tk.NORMAL)
+        self.date_entry.delete(0, tk.END)
+        self.date_entry.insert(0, "File not initialized")
+        self.date_entry.config(state=tk.DISABLED)
+
     def get_ner_model_dir(self):
         """
         Select a folder containing spaCy nlp pipeline.
@@ -605,18 +621,7 @@ class CropNerGUI:
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
             self.pdf_document = None
-            self.annotation_file = None
-            self.json_initialized = False
-
-            # Reset metadata
-            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
-            self.doc_entry.delete(0, tk.END)
-            self.doc_entry.insert(0, self.file_name)
-            self.url_entry.delete(0, tk.END)
-            self.date_entry.config(state=tk.NORMAL)
-            self.date_entry.delete(0, tk.END)
-            self.date_entry.insert(0, "File not initialized")
-            self.date_entry.config(state=tk.DISABLED)
+            self.reset_metadata()
 
             self.load_page()
         else:
@@ -1296,6 +1301,7 @@ class CropNerGUI:
                 self.page_entry.insert(0, str(self.page_number))
 
                 # Reset annotation data
+                self.reset_metadata()
                 self.annotation_file = None
 
                 # Load data
