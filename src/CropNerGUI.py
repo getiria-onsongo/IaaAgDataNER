@@ -95,6 +95,8 @@ class CropNerGUI:
         Current page number
     self.json_initialized : bool
         Whether a json file has been initialized in the workspace or not
+    self.doc : str, self.url : str, self.crop : str, self.cvar : str, self.date : str
+        Store metadata values to be filled back into their entry fields when the metadata window is opened
 
     NOTE: Though the widgets are global variables, we will not document them here. Most are self-evident. We have
     added inline comments in the code itself.
@@ -287,15 +289,11 @@ class CropNerGUI:
         self.metadata_btn = tk.Button(self.edit_ent_frame, text="Metadata", width=10, command = self.toggle_metadata)
         self.metadata_btn.pack(side=tk.RIGHT)
 
-        # Doc metadata
+        # Metadata values
         self.doc = "None"
-        # URL metadata
         self.url = "None"
-        # CROP metadata
         self.crop = "None"
-        # CVAR metadata
         self.cvar = "None"
-        # Date metadata
         self.date = "None"
 
         # Specify how text will be highlighted in the textbox when a user selects it and click on a button to
@@ -475,7 +473,10 @@ class CropNerGUI:
 
     def toggle_metadata(self):
         """
-        A button toggle to introduce/remove entry boxes for setting metadata for the json file.
+        A button to open the metadata window to update and save metadata values.
+
+        This opens a new window because the alternative, adding a panel somewhere in the main window,
+        would go off of some users screens and force them to decrease font size.
         """
         def save():
             self.doc = doc_entry.get()
