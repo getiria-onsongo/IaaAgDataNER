@@ -31,10 +31,3 @@ src/.idea/*
 Pipfile
 Pipfile.lock
 .python-version
-env_medacy/*
-env_ner/*
-ner_2021_08/*
-ner_2021_08_model/*
-ner_2021_08_training_data.jsonl
-ner_2021_08_validate_data.jsonl
-ner_2021_08_dev_data.jsonl
