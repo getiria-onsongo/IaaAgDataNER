@@ -93,10 +93,10 @@ class CropNerGUI:
         Contains NER tag annotations. key = chunk number, values = entities
     self.page_number : int
         Current page number
-    self.metadata_toggle : bool
-        Boolean determining whether the metadata panel should be visible or not
     self.json_initialized : bool
         Whether a json file has been initialized in the workspace or not
+    self.meta_doc : str, self.meta_url : str, self.meta_crop : str, self.meta_cvar : str, self.meta_date : str
+        Store metadata values that will be written to the annotation file upon saving.
 
     NOTE: Though the widgets are global variables, we will not document them here. Most are self-evident. We have
     added inline comments in the code itself.
@@ -174,14 +174,13 @@ class CropNerGUI:
         self.nlp_agdata = None
         self.cust_ents_dict = {}
         self.page_number = 0
-        self.metadata_toggle = False
         self.json_initialized = False
-
-        self.metadata_doc = ""
-        self.metadata_url = ""
-        self.metadata_crop = ""
-        self.metadata_cvar = ""
-        self.metadata_date = ""
+        # Metadata values
+        self.meta_doc = ""
+        self.meta_url = ""
+        self.meta_crop = ""
+        self.meta_cvar = ""
+        self.meta_date = "File not initialized"
 
         # ----------------------- Widgets for GUI start here.
         # Default font size for text in ScrolledText. Should be a string format
@@ -296,28 +295,6 @@ class CropNerGUI:
         self.metadata_btn = tk.Button(self.edit_ent_frame, text="Metadata", width=10, command = self.toggle_metadata)
         self.metadata_btn.pack(side=tk.RIGHT)
 
-        # Doc label
-        self.doc_label = tk.Label(self.middle_frame, text="Document Name")
-        # Doc entry
-        self.doc_entry = tk.Entry(self.middle_frame, width=30)
-        # URL label
-        self.url_label = tk.Label(self.middle_frame, text="URL")
-        # URL entry
-        self.url_entry = tk.Entry(self.middle_frame, width=30)
-        # CROP label
-        self.crop_label = tk.Label(self.middle_frame, text="Crop")
-        # CROP entry
-        self.crop_entry = tk.Entry(self.middle_frame, width = 30)
-        # CVAR label
-        self.cvar_label = tk.Label(self.middle_frame, text="Crop Variety")
-        # CVAR entry
-        self.cvar_entry = tk.Entry(self.middle_frame, width=30)
-        # Date label
-        self.date_label = tk.Label(self.middle_frame, text="Date file created")
-        # Date entry
-        self.date_entry = tk.Entry(self.middle_frame, justify=tk.CENTER, width=30)
-        self.date_entry.insert(0, "File not initialized")
-        self.date_entry.config(state=tk.DISABLED)
 
         # Specify how text will be highlighted in the textbox when a user selects it and click on a button to
         # tag the text. If we only had one button (ALAS), we would have done this using the command
@@ -496,34 +473,55 @@ class CropNerGUI:
 
     def toggle_metadata(self):
         """
-        A button toggle to introduce/remove entry boxes for setting metadata for the json file.
-        """
-        self.metadata_toggle = not self.metadata_toggle
+        A button to open the metadata window to update and save metadata values.
 
-        if self.metadata_toggle:
-            self.text.pack(side=tk.LEFT, padx=(30,0))
-            self.doc_label.pack(side=tk.TOP)
-            self.doc_entry.pack(side=tk.TOP, pady=(0,10))
-            self.url_label.pack(side=tk.TOP)
-            self.url_entry.pack(side=tk.TOP, pady=(0,10))
-            self.crop_label.pack(side=tk.TOP)
-            self.crop_entry.pack(side=tk.TOP, pady=(0, 10))
-            self.cvar_label.pack(side=tk.TOP)
-            self.cvar_entry.pack(side=tk.TOP, pady=(0, 10))
-            self.date_label.pack(side=tk.TOP)
-            self.date_entry.pack(side=tk.TOP, pady=(0,10))
-        else:
-            self.text.pack(side=tk.TOP)
-            self.doc_label.pack_forget()
-            self.doc_entry.pack_forget()
-            self.url_label.pack_forget()
-            self.url_entry.pack_forget()
-            self.crop_label.pack_forget()
-            self.crop_entry.pack_forget()
-            self.cvar_label.pack_forget()
-            self.cvar_entry.pack_forget()
-            self.date_label.pack_forget()
-            self.date_entry.pack_forget()
+        This opens a new window because the alternative, adding a panel somewhere in the main window,
+        would go off of some users screens and force them to decrease font size. Upon saving, the
+        metadata values are updated and the window is closed.
+        """
+        def save():
+            self.meta_doc = doc_entry.get()
+            self.meta_url = url_entry.get()
+            self.meta_crop = crop_entry.get().upper()
+            self.meta_cvar = cvar_entry.get().upper()
+            self.meta_date = date_entry.get()
+            self.metadata_dialog.destroy()
+
+        self.metadata_dialog = tk.Toplevel(self.rootWin)
+        doc_label = tk.Label(self.metadata_dialog, text="Document Name")
+        doc_label.pack(side=tk.TOP)
+        doc_entry = tk.Entry(self.metadata_dialog, width=30)
+        doc_entry.insert(0, self.meta_doc)
+        doc_entry.pack(side=tk.TOP)
+        
+        url_label = tk.Label(self.metadata_dialog, text="URL")
+        url_label.pack(side=tk.TOP)
+        url_entry = tk.Entry(self.metadata_dialog, width=30)
+        url_entry.insert(0, self.meta_url)
+        url_entry.pack(side=tk.TOP)
+
+        crop_label = tk.Label(self.metadata_dialog, text="Crop")
+        crop_label.pack(side=tk.TOP)
+        crop_entry = tk.Entry(self.metadata_dialog, width=30)
+        crop_entry.insert(0, self.meta_crop)
+        crop_entry.pack(side=tk.TOP)
+        
+        cvar_label = tk.Label(self.metadata_dialog, text="Crop Variety")
+        cvar_label.pack(side=tk.TOP)
+        cvar_entry = tk.Entry(self.metadata_dialog, width=30)
+        cvar_entry.insert(0, self.meta_cvar)
+        cvar_entry.pack(side=tk.TOP)
+
+        date_label = tk.Label(self.metadata_dialog, text="Date file created")
+        date_label.pack(side=tk.TOP)
+        date_entry = tk.Entry(self.metadata_dialog, width=30)
+        date_entry.insert(0, self.meta_date)
+        date_entry.config(state=tk.DISABLED)
+        date_entry.pack(side=tk.TOP)
+
+        save_metadata = tk.Button(self.metadata_dialog, text="Save Metadata", command=save)
+        save_metadata.pack(side=tk.BOTTOM)
+
 
     def reset_metadata(self):
         """
@@ -533,20 +531,11 @@ class CropNerGUI:
         self.json_initialized = False
         self.annotation_file = None
         self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
-        self.metadata_doc = ""
-        self.doc_entry.delete(0, tk.END)
-        self.doc_entry.insert(0, self.file_name)
-        self.metadata_url = ""
-        self.url_entry.delete(0, tk.END)
-        self.metadata_crop = ""
-        self.crop_entry.delete(0, tk.END)
-        self.metadata_cvar = ""
-        self.cvar_entry.delete(0, tk.END)
-        self.metadata_date = "File not initialized"
-        self.date_entry.config(state=tk.NORMAL)
-        self.date_entry.delete(0, tk.END)
-        self.date_entry.insert(0, "File not initialized")
-        self.date_entry.config(state=tk.DISABLED)
+        self.meta_doc = ""
+        self.meta_url = ""
+        self.meta_crop = ""
+        self.meta_cvar = ""
+        self.meta_date = "File not initialized"
 
     def get_ner_model_dir(self):
         """
@@ -1037,11 +1026,8 @@ class CropNerGUI:
     def initialize_new_file(self):
         self.json_initialized = True
         self.working_file_label.config(text="Working Annotation File: Untitled.json")
-        self.metadata_date = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
-        self.date_entry.config(state=tk.NORMAL)
-        self.date_entry.delete(0, tk.END)
-        self.date_entry.insert(0, datetime.now().strftime("%m_%d_%Y_%H_%M_%S"))
-        self.date_entry.config(state=tk.DISABLED)
+        self.meta_date = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+        self.meta_doc = self.file_name
 
     def get_selected_interval(self) -> tuple:
         """
@@ -1199,21 +1185,13 @@ class CropNerGUI:
 
             # Updates the 'metadata' panel with information from json file, if info is different or invalid then the user is instructed to verify the data in a proper format.
             try:
-                self.doc_entry.delete(0, tk.END)
-                self.doc_entry.insert(0, data['doc'])
-                self.url_entry.delete(0, tk.END)
-                self.url_entry.insert(0, data['url'])
-                self.crop_entry.delete(0, tk.END)
-                self.crop_entry.insert(0, data['crop'])
-                self.cvar_entry.delete(0, tk.END)
-                self.cvar_entry.insert(0, data['cvar'])
-                self.date_entry.config(state=tk.NORMAL)
-                self.date_entry.delete(0, tk.END)
-                self.date_entry.insert(0, data['date'])
-                self.date_entry.config(state=tk.DISABLED)
+                self.doc = data['doc']
+                self.url = data['url']
+                self.crop = data['crop']
+                self.cvar = data['cvar']
+                self.date = data['date']
             except:
                 self.msg.config(text="Error retrieving metadata; please verify metadata manually", foreground="red")
-                self.date_entry.config(state=tk.NORMAL)
 
 
             self.chunk = int(data['chunk'])
@@ -1312,9 +1290,8 @@ class CropNerGUI:
             entities = self.cust_ents_dict[self.chunk][1]
 
             # Calls dict_2_json on the newly created json file
-            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, doc=self.doc_entry.get(),
-                url=self.url_entry.get(), date=self.date_entry.get(), crop=self.crop_entry.get().upper(),
-                cvar=self.cvar_entry.get().upper())
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, doc=self.doc,
+                url=self.url, date=self.date, crop=self.crop.upper(), cvar=self.cvar.upper())
             dict_2_json_file(ann_train_dict, json_file)
 
             json_file.close()
