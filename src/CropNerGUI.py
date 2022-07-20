@@ -1146,7 +1146,8 @@ class CropNerGUI:
         labels = []
         for sentence_item in data['sentences']:
             for entity_item in data['sentences'][sentence_item]:
-                label = data['sentences'][sentence_item][entity_item]['label']
+                # Gets label from index 2 of the entity tuple, where labels are stored 
+                label = data['sentences'][sentence_item][entity_item][2]
                 if (not (label in labels)) and (not (label in self.tags)):
                     # If a new tag is found, essentially auto-fill the custom trait field and press the button to add a custom entity.
                     labels.append(label)
@@ -1288,7 +1289,6 @@ class CropNerGUI:
 
             input_text = self.cust_ents_dict[self.chunk][0]
             entities = self.cust_ents_dict[self.chunk][1]
-
             # Calls dict_2_json on the newly created json file
             ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, doc=self.meta_doc,
                 url=self.meta_url, date=self.meta_date, crop=self.meta_crop.upper(), cvar=self.meta_cvar.upper())

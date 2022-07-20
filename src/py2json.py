@@ -48,7 +48,7 @@ def mixed_type_2_dict(data, chunk, doc='', url='', date='', crop='', cvar=''):
         for i in range(0,len(entities)):
             entity_id = 'entity '+str(i+1)
 #            result['sentences'][sentence][entity_id] = dict()
-            result['sentences'][sentence][entity_id] = {'start': entities[i][0], 'end': entities[i][1], 'label': entities[i][2]}
+            result['sentences'][sentence][entity_id] = (entities[i][0], entities[i][1], entities[i][2])
 
     return result
 

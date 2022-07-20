@@ -56,7 +56,7 @@ def dict_2_mixed_type_simple(data):
         entity_list = []
         for entity_label in data['sentences'][sentence]:
             entity = data['sentences'][sentence][entity_label]
-            tuple = (entity['start'], entity['end'], entity['label'])
+            tuple = (entity[0], entity[1], entity[2])
             entity_list.append(tuple)
         entity_dict['entities'] = entity_list
         training_data.append((sentence, entity_dict))
