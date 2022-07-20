@@ -1147,7 +1147,10 @@ class CropNerGUI:
         for sentence_item in data['sentences']:
             for entity_item in data['sentences'][sentence_item]:
                 # Gets label from index 2 of the entity tuple, where labels are stored 
-                label = data['sentences'][sentence_item][entity_item][2]
+                try:
+                    label = data['sentences'][sentence_item][entity_item][2]
+                except:
+                    label = data['sentences'][sentence_item][entity_item]['label']
                 if (not (label in labels)) and (not (label in self.tags)):
                     # If a new tag is found, essentially auto-fill the custom trait field and press the button to add a custom entity.
                     labels.append(label)
