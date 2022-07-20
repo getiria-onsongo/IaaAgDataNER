@@ -23,8 +23,8 @@ def mixed_type_2_dict(input_text, data, chunk, doc='', url='', date='', crop='',
       'chunk': 2,
       'crop': 'barley',
       'cvar': 'eight-twelve',
-      'text': 'All text'
-      'entities': [[Index1, Index2, "NER"], [Index1, Index2, "NER"], ...]
+      'text': 'All text',
+      'entities': [[Index1, Index2, "NER"], [Index1, Index2, "NER"], ...],
       'spancat': [TBD]
       }
     """
