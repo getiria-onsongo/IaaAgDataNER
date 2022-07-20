@@ -32,6 +32,7 @@ class CrossValidation:
         labels for ner entities
     self.sentence_level : bool
         flag for if the data is annotated at the sentence level
+    self.pos
 
     Methods
     ----------
@@ -52,14 +53,14 @@ class CrossValidation:
     create_dirs(self, dirs : list)
         creates directories from a given list
     """
-    def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"], sentence_level=False):
+    def __init__(self, pos=False, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
         self.k_folds = k_folds
         self.tags = tags
-        self.sentence_level = sentence_level
+        self.pos = False
         warnings.filterwarnings('ignore')
 
     def create_config(self, name="senter_ner.cfg", model_name="cv_model", gpu=False, word_embed=False, vectors=
-    "glove.6B.zip") -> str:
+    "glove.6B.zip", spancat=False) -> str:
         """
         Creates spacy model config file
 
@@ -80,6 +81,8 @@ class CrossValidation:
         """
         if gpu:
             execute("python3 -m spacy init config --lang en --pipeline transformer,senter,ner  --optimize accuracy --force " + name +" -G")
+        elif spancat:
+            execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,spancat  --optimize accuracy --force " + name)
         else:
             if word_embed:
                 execute("python3 -m spacy init vectors en " + vectors + " "+ model_name)
@@ -144,13 +147,13 @@ class CrossValidation:
             convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
 
-            # model_name = "senter_ner_model/senter_ner_2021_08_model" # for testing only
+            model_name = "model_page_level_Jul19" # for testing only
 
             # create gold standard data directory and bratt files
             fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f)
 
-            # train model
-            train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
+            # # train model
+            # train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")
@@ -161,14 +164,15 @@ class CrossValidation:
             print("____________________________")
             print(format_results(spacy_results))
 
-            # spacy + pos tagging predictions on validation data
-            print("\nEvaluating with spacy & pos...")
-            print("____________________________")
-            self.predict(fold_dir, "pos", gold_bratt_dir, model_name+"/model-best")
-            pos_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
-            print("\nFold %s results with POS tagging: " %f)
-            print("____________________________")
-            print(format_results(pos_results))
+            if self.pos:
+                # spacy + pos tagging predictions on validation data
+                print("\nEvaluating with spacy & pos...")
+                print("____________________________")
+                self.predict(fold_dir, "pos", gold_bratt_dir, model_name+"/model-best")
+                pos_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
+                print("\nFold %s results with POS tagging: " %f)
+                print("____________________________")
+                print(format_results(pos_results))
 
         # average metrics and print
         spacy_avg_metrics, spacy_ents_found, spacy_ent_counts = self.medacy_eval("spacy")
@@ -177,10 +181,11 @@ class CrossValidation:
         self.print_metrics(spacy_avg_metrics, spacy_ents_found, spacy_ent_counts)
         print()
 
-        print("Spacy & POS tagging entity expansion results")
-        print("____________________________")
-        pos_avg_metrics, pos_ents_found, pos_ent_counts = self.medacy_eval("pos")
-        self.print_metrics(pos_avg_metrics, pos_ents_found, pos_ent_counts)
+        if self.pos:
+            print("Spacy & POS tagging entity expansion results")
+            print("____________________________")
+            pos_avg_metrics, pos_ents_found, pos_ent_counts = self.medacy_eval("pos")
+            self.print_metrics(pos_avg_metrics, pos_ents_found, pos_ent_counts)
 
     def predict(self, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str):
         """
@@ -210,7 +215,7 @@ class CrossValidation:
         else:
             flag = False
 
-        # do pos tagging  entity expansion
+
         print("Predicting on validation data ...")
         print("____________________________")
         predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, output_dir=json_name, spacy_only=flag)
@@ -219,7 +224,7 @@ class CrossValidation:
         # convert predictions to bratt format
         print("\nConverting predictions to bratt...")
         print("____________________________")
-        dataset_to_bratt(input_dir=json_name, output_dir=bratt_name, sentence_level=self.sentence_level)
+        dataset_to_bratt(input_dir=json_name, output_dir=bratt_name)
 
 
     def medacy_eval(self, sub_dir):
@@ -349,7 +354,7 @@ class CrossValidation:
                 json.dump(contents, f)
         print("\nConverting gold standard to bratt...")
         print("____________________________")
-        dataset_to_bratt(input_dir=gold_json_name, output_dir=gold_bratt_name, sentence_level=self.sentence_level)
+        dataset_to_bratt(input_dir=gold_json_name, output_dir=gold_bratt_name)
 
         return fold_dir, gold_bratt_name
 
@@ -414,9 +419,19 @@ if __name__ == '__main__':
         'dataset_dir', help='path to dataset'
     )
     parser.add_argument(
+        '--pos',
+        action='store_true', default=False,
+        help='pos based entity expansion flag'
+    )
+    parser.add_argument(
         '--folds',
         action='store', default=5,
         help='number of folds'
+    )
+    parser.add_argument(
+        '--spancat',
+        action='store_true', default=False,
+        help='flag to use spancat instead of ner component in spacy'
     )
     parser.add_argument(
         '--GPU',
@@ -433,13 +448,9 @@ if __name__ == '__main__':
         action='store', default=None,
         help='path to vectors'
     )
-    parser.add_argument(
-        '--sent_level',
-        action='store_true', default=False,
-        help='flag for sentence level annotations'
-    )
+
     args = parser.parse_args()
 
-    val = CrossValidation(k_folds=int(args.folds))
-    config_name = val.create_config(gpu=args.GPU, word_embed=args.word_embed, vectors=args.vectors)
+    val = CrossValidation(pos=args.pos, k_folds=int(args.folds))
+    config_name = val.create_config(gpu=args.GPU, word_embed=args.word_embed, vectors=args.vectors, spancat=args.spancat)
     val.cross_validate(data=args.dataset_dir, config=config_name)
