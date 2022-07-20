@@ -16,7 +16,7 @@ import importlib
 # or whatever needs to happen to fix this.
 
 def mixed_type_2_dict(input_text, data, chunk, doc='', url='', date='', crop='', cvar=''):
-    """ Convert ('text', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]})
+    """ Convert ('text', [(0, 3, 'TY1'), (4, 6, 'TY2')])
      to:
      {'doc': 'BarCvDescLJ11.pdf', 
       'url': 'https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf', 
@@ -36,16 +36,9 @@ def mixed_type_2_dict(input_text, data, chunk, doc='', url='', date='', crop='',
     result['date'] = date
     result['crop'] = crop
     result['cvar'] = cvar
-    result['sentences'] = dict()
-
-    for record in data:
-        sentence = record[0]
-        entities = record[1]['entities']
-        result['sentences'][sentence] = dict()
-        for i in range(0,len(entities)):
-            entity_id = 'entity '+str(i+1)
-#            result['sentences'][sentence][entity_id] = dict()
-            result['sentences'][sentence][entity_id] = (entities[i][0], entities[i][1], entities[i][2])
+    result['text'] = input_text
+    result['entities'] = data
+    result['spancat'] = []
 
     return result
 
