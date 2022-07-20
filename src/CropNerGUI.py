@@ -492,7 +492,7 @@ class CropNerGUI:
         doc_label.pack(side=tk.TOP)
         doc_entry = tk.Entry(self.metadata_dialog, width=30)
         doc_entry.insert(0, self.meta_doc)
-        doc_entry.pack(side=tk.TOP)
+        doc_entry.pack(side=tk.TOP, padx="40")
         
         url_label = tk.Label(self.metadata_dialog, text="URL")
         url_label.pack(side=tk.TOP)
@@ -520,7 +520,7 @@ class CropNerGUI:
         date_entry.pack(side=tk.TOP)
 
         save_metadata = tk.Button(self.metadata_dialog, text="Save Metadata", command=save)
-        save_metadata.pack(side=tk.BOTTOM)
+        save_metadata.pack(side=tk.BOTTOM, pady="15")
 
 
     def reset_metadata(self):
