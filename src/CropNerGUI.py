@@ -177,24 +177,8 @@ class CropNerGUI:
         self.nlp_agdata = None
         self.cust_ents_dict = {}
         self.page_number = 0
-<<<<<<< HEAD
-        self.pos_model = spacy.load("en_core_web_lg")
-
-        self.model_default = model_default
-        self.file_default = file_default
-        if self.model_default is not None:
-            self.model_dir = self.model_default
-            self.nlp_agdata = spacy.load(self.model_dir)
-        else:
-            self.model_dir = None
-        if self.file_default is not None:
-            self.raw_file = self.file_default
-        else:
-            self.raw_file = None
-=======
         self.metadata_toggle = False
         self.json_initialized = False
->>>>>>> master
 
         # ----------------------- Widgets for GUI start here.
         # Default font size for text in ScrolledText. Should be a string format
@@ -394,7 +378,7 @@ class CropNerGUI:
         # Button to decrease font in the text box (Font +)
         self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
         self.font_minus.pack(side=tk.LEFT)
-        
+
 
     def font_plus(self):
         """
@@ -534,7 +518,7 @@ class CropNerGUI:
             If the selected folder does not contain a valid spaCy pipeline, an OSError will be thrown and
         a default language model is used instead.
         """
-        
+
         dir = fd.askdirectory()
         # Do nothing if the user presses cancel or X
         if dir == "":
@@ -559,7 +543,7 @@ class CropNerGUI:
 
 
 
-                
+
     def open_file(self, file_type: str):
         """
         Open a file (pdf/text) to be annotated or an annotation file (json) to be reviewed. selected using the GUI.
@@ -607,7 +591,7 @@ class CropNerGUI:
                 return
 
             # Detects file type
-            self.file_mode = self.raw_file.name.split(".")[-1] 
+            self.file_mode = self.raw_file.name.split(".")[-1]
 
             self.page_entry.delete(0, tk.END)
 
@@ -665,17 +649,6 @@ class CropNerGUI:
         If a page not in the doc is requested, this will set the page number to a valid
         one and print a warning.
 
-<<<<<<< HEAD
-        if self.raw_file is None:
-            self.msg.config(
-                text="No raw data file has been selected. Please select a file to load.", foreground="red")
-        if type(self.raw_file) is str:
-            self.pdf_document = Document(self.raw_file)
-        else:
-            self.file_prefix = self.raw_file.name.split(".")[0]
-            self.pdf_name = self.raw_file.name.split("/")[-1]
-            self.pdf_document = Document(self.raw_file.name)
-=======
         page_num_valid is passed in so that this method already knows whether it should
         be checking a list or single number.
         """
@@ -756,7 +729,7 @@ class CropNerGUI:
         """
         Checks to see if a page entry is simply two numbers separated by a space, which
         the program should handle as a range of pages.
-        
+
         Lots of processing of page_entry is done both before and after this method is
         called. It will never be called on an entry with zany spacing, and it can be
         wrong when it comes to invalid inputs since they'll get filtered out anyway.
@@ -781,7 +754,7 @@ class CropNerGUI:
         entry = ""
         for i in range(0, len(old_entry)):
             if not(i in all_spaces):
-                entry = entry + old_entry[i] 
+                entry = entry + old_entry[i]
             elif not(old_entry[i-1] == "-" or old_entry[i+1] == "-" or old_entry[i+1] == " "):
                     entry = entry + old_entry[i]
         # Past this point, only single spaces that aren't next to a dash should exist.
@@ -802,7 +775,6 @@ class CropNerGUI:
         """
         self.msg.config(text="")
         self.load_page()
->>>>>>> master
 
     def load_page(self):
         """
@@ -850,8 +822,8 @@ class CropNerGUI:
 
             if not (page_num_valid == -1): # Single page, whether page_num_valid is true or false
                 page = self.pdf_document[self.page_number - 1]
-                #  doesn't necessarily have to be removed for a single page; It gets removed in
-                # the else because tagging across multiple pages doesn't work correctly if  exists.
+                # doesn't necessarily have to be removed for a single page; It gets removed in
+                # the else because tagging across multiple pages doesn't work correctly if exists.
                 # However, it's removed here as well for consistency and neatness.
                 txt = page.text().replace("\r", "").replace("", "")
             else: # Page range
@@ -1013,7 +985,7 @@ class CropNerGUI:
                     input_text = self.load_page()
 
             if not self.json_initialized:
-                self.initialize_new_file()                
+                self.initialize_new_file()
 
             self.text.delete(1.0, tk.END)
             self.text.insert(1.0, input_text)
@@ -1036,11 +1008,7 @@ class CropNerGUI:
             for ent in doc.ents:
                 # NER is in our list of custom tags
                 if ent.label_ in self.tags:
-<<<<<<< HEAD
-                    ent = self.get_pos(ent)
-=======
                     custom_tags_present = True
->>>>>>> master
                     # index = self.tags.index(ent.label_) # Find index for an element in a list
                     self.highlight_ent(ent.start_char, ent.end_char, ent.label_)
                     if self.cust_ents_dict.get(page_start, False):
