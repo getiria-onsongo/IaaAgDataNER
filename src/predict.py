@@ -194,15 +194,18 @@ class Predict:
 
         Returns expanded entity
         """
-        doc = self.pos_model(ent.sent.text)
-        if(len(doc[ent.start:ent.end]) > 0):
-            current_index = doc[ent.start:ent.end][0].i
-            label = ent.label_
-            # functions that expands ents to contain proceeding adjectives
-            ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
+        parsed_sent = self.pos_model(ent.sent.text)
+
+        label = ent.label_
+        relative_start = ent.start-ent.sent.start
+        relative_end = ent.end-ent.sent.start
+        relative_span = parsed_sent[relative_start:relative_end]
+        if len(relative_span) > 0 and relative_start >= 1:
+            first_tok = relative_span[0]
+            ent = self.expand(parsed_sent, relative_span, first_tok, label)
         return ent
 
-    def adj_combine_noun_ent(self, doc : spacy.tokens.Doc, current_index : int, ent : str, label : str) -> str:
+    def expand(self, sent, ent, tok, label) -> str:
         """
         If the first token in an entity is a noun or proper noun, finds all
         adjectives proceeding the entity and expands the span to contain
@@ -210,42 +213,37 @@ class Predict:
 
         Parameters
         ----------
-        doc : spacy.Doc
-            spacy model for pos with given sentence passed in
-        current_index : int
-            index of first token in the doc
+        sent : list
+            list of spans, sentence for current ent
         ent : str
-            entity to possibly expand span of
-        label : str
-            label of ent
+            a span from the sent, the named entity to expand
+        tok : str
+            first token (individual word) in the ent span
 
         Returns expanded entity.
         """
-        if current_index >= 1:
-            current = doc[current_index]
-            left = doc[current_index-1]
-            pos_current = current.pos_
-            pos_left = left.pos_
+        old_ent = ent
+        index = tok.i
+        pos_tok = tok.pos_
+        pos_left = sent[index-1].pos_
+        start_index = index
+        i = start_index
 
-            if pos_current == "NOUN" or pos_current == "PROPN":
-                if pos_left == "ADJ":
-                    print("Adj expanding...")
-                    print("entity: " + str(ent))
-                    i = current_index
-                    start_index = ent.start
-                    # keeps searching until all adjectives are found
-                    while i >= 1:
-                        i = i - 1
-                        if doc[i].pos_ == "ADJ":
-                            start_index = i
-                        else:
-                            break
-                    first_tok = doc[start_index]
-                    ent = doc[first_tok.i:ent.end]
-                    ent.label_ = label
-                    print("new: " + str(ent))
-                    print("label: " + str(ent.label_))
-                    print()
+        if pos_tok == "NOUN" or pos_tok == "PROPN":
+            while i >= 1:
+                i = i - 1
+                if sent[i].pos_ == "ADJ" or sent[i].pos_ == "ADV":
+                    start_index = i
+                else:
+                    break
+            ent = sent[start_index:ent.end]
+
+        if start_index < index:
+            print("Old ent: " + str(old_ent))
+            print("New ent: " + str(ent))
+            print("Label: " + label)
+            print()
+        ent.label_ = label
         return ent
 
     def file_save(self, pdf_name : str, url : str, chunk : str) -> str:
