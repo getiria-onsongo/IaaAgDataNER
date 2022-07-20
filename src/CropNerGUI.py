@@ -638,6 +638,7 @@ class CropNerGUI:
             self.pdf_document = None
 
             self.json_initialized = False
+            self.annotation_file = None
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
             self.reset_metadata()
 
