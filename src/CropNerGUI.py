@@ -528,9 +528,6 @@ class CropNerGUI:
         Resets the metadata fields
         """
 
-        self.json_initialized = False
-        self.annotation_file = None
-        self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
         self.meta_doc = ""
         self.meta_url = ""
         self.meta_crop = ""
@@ -639,6 +636,9 @@ class CropNerGUI:
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
             self.pdf_document = None
+
+            self.json_initialized = False
+            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
             self.reset_metadata()
 
             self.load_page()
@@ -1346,8 +1346,10 @@ class CropNerGUI:
                 self.page_entry.insert(0, str(self.page_number))
 
                 # Reset annotation data
-                self.reset_metadata()
+                self.json_initialized = False
+                self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
                 self.annotation_file = None
+                self.reset_metadata()
 
                 # Load data
                 self.load_page()
