@@ -1187,13 +1187,18 @@ class CropNerGUI:
             url = data['url']
             """
 
+            # Clears metadata values so that if any fail to load from the json being loaded, we don't have
+            # leftover values from the last annotation
+            self.reset_metadata()
             # Updates the 'metadata' panel with information from json file, if info is different or invalid then the user is instructed to verify the data in a proper format.
             try:
-                self.doc = data['doc']
-                self.url = data['url']
-                self.crop = data['crop']
-                self.cvar = data['cvar']
-                self.date = data['date']
+                # Date should load first because it cannot be fixed if it fails to load, and it won't be
+                # loaded if anything before it doesn't have metadata
+                self.meta_date = data['date']
+                self.meta_doc = data['doc']
+                self.meta_url = data['url']
+                self.meta_crop = data['crop']
+                self.meta_cvar = data['cvar']
             except:
                 self.msg.config(text="Error retrieving metadata; please verify metadata manually", foreground="red")
 
