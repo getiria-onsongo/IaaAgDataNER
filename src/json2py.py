@@ -9,6 +9,13 @@ def dict_2_mixed_type(data):
     """ convert multi-document (list) or single-document (dict) JSON records
      to spaCy training ready objects.  E.g.:
 
+     newest format = {'chunk': 1, 'doc': 'p.pdf', 'url': 'https://hello', 'date': 07_05_2022_13_57_08, crop: 'BARLEY', cvar: 'MAJA',
+        'text': "All text here", 'entities': [[0, 3, 'TY1'], [4, 6, 'TY2']]}
+     
+     returns: [('All text here'), {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]}]
+
+     For some legacy json files saved by older versions of this program:
+
      simple = {'doc': 'p.pdf', 'url': 'https://hello', 'date': 07/05/2022, 'chunk': 1, 'sentences': {'sentence 1': {'entity 1': {'start': 0, 'end': 3, 'label': 'TY1'}, 'entity 2': {'start': 4, 'end': 6, 'label': 'TY2'}}}}
 
      returns: [('sentence 1', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]})]
@@ -21,16 +28,45 @@ def dict_2_mixed_type(data):
                ('sentence 2', {'entities': [(0, 4, 'TT1'), (6, 8, 'TT2')]})]
     """
 
-    if isinstance(data, dict):
-        return dict_2_mixed_type_simple(data)
-    else:
-        result = []
-        for record in data:
-            subset = dict_2_mixed_type_simple(record)
-            for sentence, entity_dict in subset:
-                result.append((sentence, entity_dict))
+    # Newer format has 'text' field as opposed to sentence fields- a lack of this field indicates that we should
+    # use older loading methods.
+    try:
+        data['text']
+        return dict_2_mixed_type_2022(data)
+    # Try older format if this fails
+    except:
+        if isinstance(data, dict):
+            return dict_2_mixed_type_simple(data)
+        else:
+            result = []
+            for record in data:
+                subset = dict_2_mixed_type_simple(record)
+                for sentence, entity_dict in subset:
+                    result.append((sentence, entity_dict))
+            return result
 
-    return result
+def dict_2_mixed_type_2022(data):
+    """ Convert Nested JSON-like dictionary to the complex training
+     data that spaCy requires. Specifically:
+     {'doc': 'BarCvDescLJ11.pdf', 
+      'url': 'https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf', 
+      'date': '07_05_2022_13_57_08'
+      'chunk': 2,
+      'crop': 'BARLEY'
+      'cvar': 'EIGHT-TWELVE'
+      'text': "All document text"
+      'entities': [[0, 3, 'TY1'], [4, 6, 'TY2'], ...]
+      }
+     is converted to:
+       [('All document text', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2'), ...]})]
+    """
+    training_data = list()
+    entity_list = dict()
+    entity_list['entities'] = list()
+    for entity in data['entities']:
+        entity_list['entities'].append((entity[0], entity[1], entity[2]))
+    training_data.append((data['text'], entity_list))
+    return training_data
 
 def dict_2_mixed_type_simple(data):
     """ Convert Nested JSON-like dictionary to the complex training
@@ -56,7 +92,10 @@ def dict_2_mixed_type_simple(data):
         entity_list = []
         for entity_label in data['sentences'][sentence]:
             entity = data['sentences'][sentence][entity_label]
-            tuple = (entity['start'], entity['end'], entity['label'])
+            try:
+                tuple = (entity[0], entity[1], entity[2])
+            except:
+                tuple = (entity['start'], entity['end'], entity['label'])
             entity_list.append(tuple)
         entity_dict['entities'] = entity_list
         training_data.append((sentence, entity_dict))
