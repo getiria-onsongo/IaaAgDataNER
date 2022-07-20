@@ -1152,7 +1152,6 @@ class CropNerGUI:
                 except:
                     label = data['sentences'][sentence_item][entity_item]['label']
                 if (not (label in labels)) and (not (label in self.tags)):
-                    # If a new tag is found, essentially auto-fill the custom trait field and press the button to add a custom entity.
                     labels.append(label)
                     self.trait_entry.delete(0, tk.END)
                     self.trait_entry.insert(0, label)
@@ -1195,15 +1194,25 @@ class CropNerGUI:
                 # Date should load first because it cannot be fixed if it fails to load, and it won't be
                 # loaded if anything before it doesn't have metadata
                 self.meta_date = data['date']
-                self.meta_doc = data['doc']
+                # Some older, briefly used version of json files saved doc as null. A null field keeps
+                # it from loading everything after in the metadata window, but I think this is only ever an issue with doc,
+                # so we probably only need this check for doc.
+                if data['doc'] == None:
+                    self.meta_doc = ""
+                else:
+                    self.meta_doc = data['doc']
                 self.meta_url = data['url']
                 self.meta_crop = data['crop']
                 self.meta_cvar = data['cvar']
             except:
+                # This error message might get eaten by the next. Both are triggered for some older json files
                 self.msg.config(text="Error retrieving metadata; please verify metadata manually", foreground="red")
 
-
-            self.chunk = int(data['chunk'])
+            try:
+                self.chunk = int(data['chunk'])
+            except:
+                self.chunk = 0
+                self.msg.config(text="WARNING!! No valid chunk in metadata. Setting chunk to 0.", foreground="red")
             self.page_number = self.chunk
 
             # Empty text box so we can load annotations

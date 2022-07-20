@@ -15,20 +15,17 @@ import importlib
 # all, I won't bother figuring out how to get the PYTHONPATH properly changed
 # or whatever needs to happen to fix this.
 
-def mixed_type_2_dict(data, chunk, doc='', url='', date='', crop='', cvar=''):
-    """ Convert ('sentence 1', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]})
+def mixed_type_2_dict(input_text, data, chunk, doc='', url='', date='', crop='', cvar=''):
+    """ Convert ('text', {'entities': [(0, 3, 'TY1'), (4, 6, 'TY2')]})
      to:
      {'doc': 'BarCvDescLJ11.pdf', 
       'url': 'https://smallgrains.ucdavis.edu/cereal_files/BarCvDescLJ11.pdf', 
       'chunk': 2,
       'crop': 'barley',
       'cvar': 'eight-twelve',
-      'sentences': {'sentence 1': {'entity 1': 
-                                       {'start': 0, 'end': 3, 'label': 'TY1'}, 
-                                   'entity 2': 
-                                       {'start': 4, 'end': 6, 'label': 'TY2'}
-                                   }
-                    }
+      'text': 'All text',
+      'entities': [[Index1, Index2, "NER"], [Index1, Index2, "NER"], ...],
+      'spancat': [TBD]
       }
     """
 
