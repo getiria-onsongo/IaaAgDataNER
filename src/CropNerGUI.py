@@ -1290,8 +1290,8 @@ class CropNerGUI:
             entities = self.cust_ents_dict[self.chunk][1]
 
             # Calls dict_2_json on the newly created json file
-            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, doc=self.doc,
-                url=self.url, date=self.date, crop=self.crop.upper(), cvar=self.cvar.upper())
+            ann_train_dict = mixed_type_2_dict([(input_text,{'entities': entities})], self.chunk, doc=self.meta_doc,
+                url=self.meta_url, date=self.meta_date, crop=self.meta_crop.upper(), cvar=self.meta_cvar.upper())
             dict_2_json_file(ann_train_dict, json_file)
 
             json_file.close()
