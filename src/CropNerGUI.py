@@ -411,23 +411,28 @@ class CropNerGUI:
             short = "Ctrl"
             long = "Control"
 
-        # Each of these has two binds so that they work if caps lock is enabled
+        # Most of these have two binds so that they work if caps lock is enabled
         self.file_menu.entryconfig("New", accelerator=short + "+N")
-        # This one needs to be set once some actual function is added to new.
         self.rootWin.bind_all("<Control-n>", self.new_annot_file)
+        self.rootWin.bind_all("<Control-N>", self.new_annot_file)
         self.file_menu.entryconfig("Open Raw File", accelerator=short + "+Shift+O")
-        self.rootWin.bind_all("<" + long + "-Shift-O>", partial(self.open_file, "json"))
         self.rootWin.bind_all("<" + long + "-Shift-o>", partial(self.open_file, "json"))
+        self.rootWin.bind_all("<" + long + "-Shift-O>", partial(self.open_file, "json"))
         self.file_menu.entryconfig("Open Annotation", accelerator=short + "+Alt+O")
         self.rootWin.bind_all("<" + long + "-Alt-o>", partial(self.open_file, "json"))
+        self.rootWin.bind_all("<" + long + "-Alt-O>", partial(self.open_file, "json"))
         self.file_menu.entryconfig("Save", accelerator=short + "+S")
         self.rootWin.bind_all("<" + long + "-s>", partial(self.file_save, "update"))
+        self.rootWin.bind_all("<" + long + "-S>", partial(self.file_save, "update"))
         self.file_menu.entryconfig("Save As...", accelerator=short + "+Alt+S")
         self.rootWin.bind_all("<" + long + "-Alt-s>", partial(self.file_save, "new"))
+        self.rootWin.bind_all("<" + long + "-Alt-S>", partial(self.file_save, "new"))
         self.file_menu.entryconfig("Close Editor", accelerator=short + "+W")
         self.rootWin.bind_all("<" + long + "-w>", self.return_to_welcome)
+        self.rootWin.bind_all("<" + long + "-W>", self.return_to_welcome)
         self.file_menu.entryconfig("Exit", accelerator=short + "+Q")
         self.rootWin.bind_all("<" + long + "-q>", partial(self.quit))
+        self.rootWin.bind_all("<" + long + "-Q>", partial(self.quit))
         self.view_menu.entryconfig("Font +", accelerator=short + " +")
         self.rootWin.bind_all("<" + long + "-+>", self.font_plus)
         self.view_menu.entryconfig("Font -", accelerator=short + " -")
