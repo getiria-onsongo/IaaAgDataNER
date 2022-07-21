@@ -195,7 +195,7 @@ class CropNerGUI:
 
         # File menu for handling file operations
         self.file_menu = tk.Menu(self.menubar, tearoff=0)
-        self.file_menu.add_command(label="New", command=self.new_annot_file)
+        self.file_menu.add_command(label="New", command=self.new_annot_file, underline=0)
         # Opens a raw file and switches GUI to annotation mode if not in it
         self.file_menu.add_command(label="Open Raw File", command=partial(self.open_file, "pdf/txt"), underline=5)
         # Opens an annotation file and switches GUI to validation mode if not in it
