@@ -1511,7 +1511,7 @@ class CropNerGUI:
                 """
                 Callback method attached to the save and quit button in the save dialog window.
                 """
-                self.file_save()
+                self.file_save("update")
                 self.rootWin.destroy()
 
             # Button for discaring changes and quitting
@@ -1522,7 +1522,7 @@ class CropNerGUI:
                 self.rootWin.destroy()
 
             self.save_dialog = tk.Toplevel(self.rootWin)
-            label = tk.Label(self.save_dialog, text="You currently have annotations in the workspace. Would you like to save or discard them?")
+            label = tk.Label(self.save_dialog, text="You currently have annotations in the workspace. Would you like to save or quit?")
             label.pack(side=tk.TOP)
             savedialog_discard = tk.Button(self.save_dialog, text="Discard and Quit", command=discard_and_quit)
             savedialog_discard.pack(side=tk.BOTTOM)
