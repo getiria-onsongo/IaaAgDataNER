@@ -211,8 +211,10 @@ class CropNerGUI:
 
         # Menu for changing visual aspects of GUI
         self.view_menu = tk.Menu(self.menubar, tearoff=0)
-        self.view_menu.add_command(label="Font +")
-        self.view_menu.add_command(label="Font -")
+        self.view_menu.add_command(label="Font +", command=self.font_plus)
+        self.view_menu.add_command(label="Font -", command=self.font_minus)
+        self.view_menu.entryconfig(0, state=tk.DISABLED)
+        self.view_menu.entryconfig(1, state=tk.DISABLED)
 
         self.menubar.add_cascade(label="File", menu=self.file_menu)
         self.menubar.add_cascade(label="View", menu=self.view_menu)
@@ -415,6 +417,9 @@ class CropNerGUI:
         self.annotation_frame.pack(fill="x")
         self.page_entry.pack()
         self.current_page = "Annotate"
+        # Make menu buttons clickable
+        self.view_menu.entryconfig(0, state=tk.NORMAL)
+        self.view_menu.entryconfig(1, state=tk.NORMAL)
 
     def switch_validate(self):
         """
@@ -424,6 +429,9 @@ class CropNerGUI:
         self.annotation_frame.pack(fill="x")
         self.page_entry.pack_forget()
         self.current_page = "Validate"
+        # Make menu buttons clickable
+        self.view_menu.entryconfig(0, state=tk.NORMAL)
+        self.view_menu.entryconfig(1, state=tk.NORMAL)
 
     def return_to_welcome(self):
         """
@@ -433,6 +441,9 @@ class CropNerGUI:
         self.annotation_frame.pack_forget()
         self.welcome_frame.pack()
         self.current_page = "Welcome"
+        # Disable menu buttons
+        self.view_menu.entryconfig(0, state=tk.DISABLED)
+        self.view_menu.entryconfig(1, state=tk.DISABLED)
 
     def font_plus(self):
         """
