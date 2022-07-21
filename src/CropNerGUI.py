@@ -220,6 +220,9 @@ class CropNerGUI:
         self.menubar.add_cascade(label="View", menu=self.view_menu, underline=0)
         self.rootWin.config(menu=self.menubar)
 
+        # Add keyboard shortcuts to menu options.
+        self.add_keyboard_shortcuts()
+
         # Inital frame for the welcome page
         self.welcome_frame = tk.Frame(self.rootWin)
         self.welcome_frame.pack(side=tk.TOP, fill="x")
@@ -408,6 +411,36 @@ class CropNerGUI:
         self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
         # self.font_minus.pack(side=tk.LEFT)
         
+    def add_keyboard_shortcuts(self):
+        # Darwin is MacOS
+        if platform.system() == "Darwin":
+            short = "Command"
+            long = "Command"
+        else:
+            short = "Ctrl"
+            long = "Control"
+
+        self.file_menu.entryconfig("New", accelerator=short + "+N")
+        # This one needs to be set once some actual function is added to new.
+        # self.rootWin.bind_all("<Control-n>")
+        self.file_menu.entryconfig("Open Raw File", accelerator=short + "+Shift+O")
+        # Two binds to make it work with or without caps lock
+        self.rootWin.bind_all("<" + long + "-Shift-O>", partial(self.open_file, "json"))
+        self.rootWin.bind_all("<" + long + "-Shift-o>", partial(self.open_file, "json"))
+        self.file_menu.entryconfig("Open Annotation", accelerator=short + "+Alt+O")
+        self.rootWin.bind_all("<" + long + "-Alt-o>", partial(self.open_file, "json"))
+        self.file_menu.entryconfig("Save", accelerator=short + "+S")
+        self.rootWin.bind_all("<" + long + "-s>", partial(self.file_save, "update"))
+        self.file_menu.entryconfig("Save As...", accelerator=short + "+Alt+S")
+        self.rootWin.bind_all("<" + long + "-Alt-s>", partial(self.file_save, "new"))
+        self.file_menu.entryconfig("Close Editor", accelerator=short + "+W")
+        self.rootWin.bind_all("<" + long + "-w>", self.return_to_welcome)
+        self.file_menu.entryconfig("Exit", accelerator=short + "+Q")
+        self.rootWin.bind_all("<" + long + "-q>", partial(self.quit))
+        self.view_menu.entryconfig("Font +", accelerator=short + " +")
+        self.rootWin.bind_all("<" + long + "-+>", self.font_plus)
+        self.view_menu.entryconfig("Font -", accelerator=short + " -")
+        self.rootWin.bind_all("<" + long + "-minus>", self.font_minus)
 
     def switch_annotate(self):
         """
@@ -433,7 +466,7 @@ class CropNerGUI:
         self.view_menu.entryconfig(0, state=tk.NORMAL)
         self.view_menu.entryconfig(1, state=tk.NORMAL)
 
-    def return_to_welcome(self):
+    def return_to_welcome(self, e=None):
         """
         Returns the GUI to the initial page where you choose to validate/annotate
         """
@@ -445,34 +478,36 @@ class CropNerGUI:
         self.view_menu.entryconfig(0, state=tk.DISABLED)
         self.view_menu.entryconfig(1, state=tk.DISABLED)
 
-    def font_plus(self):
+    def font_plus(self, e=None):
         """
         Increase font size for text in ScrolledText (text box), changing window size with it.
 
         Expects the global variable self.font_size which is of type string to be set. The default value is "16".
         This function increments self.font_size by 1 and then updates font size in self.text.
         """
-        prev_text_size = self.text.winfo_reqheight()
-        self.font_size = str(int(self.font_size) + 1)
-        self.text['font'] = "Times "+self.font_size
-        new_size = (self.text.winfo_reqheight() - prev_text_size) + self.rootWin.winfo_reqheight()
-        self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_size))
+        if not (self.current_page == "Welcome"):
+            prev_text_size = self.text.winfo_reqheight()
+            self.font_size = str(int(self.font_size) + 1)
+            self.text['font'] = "Times "+self.font_size
+            new_size = (self.text.winfo_reqheight() - prev_text_size) + self.rootWin.winfo_reqheight()
+            self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_size))
 
-    def font_minus(self):
+    def font_minus(self, e=None):
         """
         Decrease font size for text in ScrolledText (text box), changing window size with it.
 
         Expects the global variable self.font_size which is of type string to be set. The default value is "16".
         This function decreases self.font_size by 1 and then updates font size in self.text.
         """
-        prev_text_size = self.text.winfo_reqheight()
-        if not (int(self.font_size) <= 1):
-            self.font_size = str(int(self.font_size) - 1)
-        else:
-            self.msg.config(text="Font size can't get any smaller!", foreground="red")
-        self.text['font'] = "Times "+self.font_size
-        new_size = (self.text.winfo_reqheight() - prev_text_size) + self.rootWin.winfo_reqheight()
-        self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_size))
+        if not (self.current_page == "Welcome"):
+            prev_text_size = self.text.winfo_reqheight()
+            if not (int(self.font_size) <= 1):
+                self.font_size = str(int(self.font_size) - 1)
+            else:
+                self.msg.config(text="Font size can't get any smaller!", foreground="red")
+            self.text['font'] = "Times "+self.font_size
+            new_size = (self.text.winfo_reqheight() - prev_text_size) + self.rootWin.winfo_reqheight()
+            self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_size))
 
     def add_ent(self):
         """
@@ -649,7 +684,7 @@ class CropNerGUI:
 
 
                 
-    def open_file(self, file_type: str):
+    def open_file(self, file_type: str, e=None):
         """
         Open a file (pdf/text) to be annotated or an annotation file (json) to be reviewed. selected using the GUI.
 
@@ -1394,7 +1429,7 @@ class CropNerGUI:
         doc = self.nlp_agdata(text)
         return doc
 
-    def file_save(self, mode):
+    def file_save(self, mode, e=None):
         """
         Brings up a file dialog to choose a file name/location then saves annotations to it in .json format.
         """
@@ -1478,7 +1513,7 @@ class CropNerGUI:
         """
         self.rootWin.mainloop()
 
-    def quit(self):
+    def quit(self, e=None):
         """
         Callback method attached to the quit button.
 
