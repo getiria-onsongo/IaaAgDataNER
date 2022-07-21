@@ -195,7 +195,7 @@ class CropNerGUI:
 
         # File menu for handling file operations
         self.file_menu = tk.Menu(self.menubar, tearoff=0)
-        self.file_menu.add_command(label="New", underline=0)
+        self.file_menu.add_command(label="New", command=self.new_annot_file)
         # Opens a raw file and switches GUI to annotation mode if not in it
         self.file_menu.add_command(label="Open Raw File", command=partial(self.open_file, "pdf/txt"), underline=5)
         # Opens an annotation file and switches GUI to validation mode if not in it
@@ -362,7 +362,7 @@ class CropNerGUI:
 
         # Frame just below the text box. It contains buttons in the "Exit" button row
         self.bottom_frame = tk.Frame(self.annotation_frame)
-        self.bottom_frame.pack(side=tk.TOP, fill="x")
+        self.bottom_frame.pack(side=tk.TOP, fill="x", pady=15)
         # Blank label for formatting
         self.blank_label_three = tk.Label(self.bottom_frame, text="   ")
         self.blank_label_three.pack(side=tk.LEFT)
@@ -375,11 +375,25 @@ class CropNerGUI:
         # Clear message button
         self.msg_btn = tk.Button(self.bottom_frame, text="Clear Warning Message", width=20, command=self.clear_message)
         self.msg_btn.pack(side=tk.LEFT)
+        # Select folder with language model
+        self.ner_model_button = tk.Button(self.bottom_frame, text='Select NER model folder', width=18,
+                                          command=self.get_ner_model_dir)
+        self.ner_model_button.pack(side=tk.LEFT)
+
+        # Frame for PDF page number controls
+        self.page_frame = tk.Frame(self.bottom_frame)
+        # Enter page you would like to load. Start with 1 as opposed to the conventional 0 numbering in CS
+        self.page_entry = tk.Entry(self.page_frame, width=5)
+        self.page_entry.bind("<Return>", self.load_page_from_button)
+        self.page_entry.pack(side=tk.RIGHT, padx=(0,30))
+        self.page_label = tk.Label(self.page_frame, text="Raw Data File Page Num:", width=18)
+        self.page_label.pack(side=tk.RIGHT)
         # Previous page button
-        self.prev_btn = tk.Button(self.bottom_frame, text="Previous Page", command=partial(self.change_page, "previous"))
+        self.prev_btn = tk.Button(self.page_frame, text="Previous Page", command=partial(self.change_page, "previous"))
+        self.prev_btn.pack(side=tk.RIGHT)
         # Next page button
-        self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=partial(self.change_page, "next"))
-        # self.next_btn.pack(side=tk.LEFT)
+        self.next_btn = tk.Button(self.page_frame, text="Next Page", command=partial(self.change_page, "next"))
+        self.next_btn.pack(side=tk.RIGHT)
 
         # Frame that will contain messages being displayed to the user
         self.msg_frame = tk.Frame(self.annotation_frame)
@@ -387,29 +401,6 @@ class CropNerGUI:
         # Label to display messages
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
         self.msg.pack(side=tk.LEFT)
-
-        # Frame for selecting files and folders
-        self.open_frame = tk.Frame(self.annotation_frame)
-        self.open_frame.pack(side=tk.TOP,fill="x")
-        # Blank label for formatting
-        self.blank_label_five = tk.Label(self.open_frame, text="   ")
-        self.blank_label_five.pack(side=tk.LEFT)
-        # Select folder with language model
-        self.ner_model_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,
-                                          command=self.get_ner_model_dir)
-        self.ner_model_button.pack(side=tk.LEFT)
-        # Enter page you would like to load. Start with 1 as opposed to the conventional 0 numbering in CS
-        self.page_label = tk.Label(self.open_frame, text="Raw Data File Page Num:", width=18)
-        self.page_label.pack(side=tk.LEFT)
-        self.page_entry = tk.Entry(self.open_frame, width=5)
-        self.page_entry.pack(side=tk.LEFT)
-        self.page_entry.bind("<Return>", self.load_page_from_button)
-        # Button to increase font in the text box (Font +)
-        self.font_plus = tk.Button(self.open_frame, text="Font +", width=10, command=self.font_plus)
-        # self.font_plus.pack(side=tk.LEFT)
-        # Button to decrease font in the text box (Font +)
-        self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
-        # self.font_minus.pack(side=tk.LEFT)
         
     def add_keyboard_shortcuts(self):
         # Darwin is MacOS
@@ -420,11 +411,11 @@ class CropNerGUI:
             short = "Ctrl"
             long = "Control"
 
+        # Each of these has two binds so that they work if caps lock is enabled
         self.file_menu.entryconfig("New", accelerator=short + "+N")
         # This one needs to be set once some actual function is added to new.
-        # self.rootWin.bind_all("<Control-n>")
+        self.rootWin.bind_all("<Control-n>", self.new_annot_file)
         self.file_menu.entryconfig("Open Raw File", accelerator=short + "+Shift+O")
-        # Two binds to make it work with or without caps lock
         self.rootWin.bind_all("<" + long + "-Shift-O>", partial(self.open_file, "json"))
         self.rootWin.bind_all("<" + long + "-Shift-o>", partial(self.open_file, "json"))
         self.file_menu.entryconfig("Open Annotation", accelerator=short + "+Alt+O")
@@ -448,7 +439,6 @@ class CropNerGUI:
         """
         self.welcome_frame.pack_forget()
         self.annotation_frame.pack(fill="x")
-        self.page_entry.pack()
         self.current_page = "Annotate"
         # Make menu buttons clickable
         self.view_menu.entryconfig(0, state=tk.NORMAL)
@@ -459,8 +449,7 @@ class CropNerGUI:
         Switches GUI elements to validation mode
         """
         self.welcome_frame.pack_forget()
-        self.annotation_frame.pack(fill="x")
-        self.page_entry.pack_forget()
+        self.annotation_frame.pack_forget()
         self.current_page = "Validate"
         # Make menu buttons clickable
         self.view_menu.entryconfig(0, state=tk.NORMAL)
@@ -471,6 +460,7 @@ class CropNerGUI:
         Returns the GUI to the initial page where you choose to validate/annotate
         """
         self.clear_data()
+        self.page_frame.pack_forget()
         self.annotation_frame.pack_forget()
         self.welcome_frame.pack()
         self.current_page = "Welcome"
@@ -738,13 +728,10 @@ class CropNerGUI:
 
             if self.file_mode == "pdf":
                 # Bring back the "Next Page" button, placing it before the save button.
-                self.prev_btn.pack(side=tk.LEFT)
-                self.next_btn.pack(side=tk.LEFT)
-                self.page_entry.insert(0, "1")
+                self.page_frame.pack(side=tk.TOP)
             else:
                 # Remove "Next Page" button if loading a txt file, which has no pages.
-                self.prev_btn.pack_forget()
-                self.next_btn.pack_forget()
+                self.page_frame.pack_forget()
 
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
@@ -758,6 +745,41 @@ class CropNerGUI:
             self.load_page()
         else:
             self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
+
+    def new_annot_file(self):
+        """
+        Clears the current annotations in the editor and creates a new annotation file.
+        """
+
+        for tag in self.tags:
+            self.text.tag_remove(tag, "1.0", "end")
+
+        # Clear annotations
+        self.cust_ents_dict = {}
+
+        # Clear current annotation file
+        self.annotation_file = None
+        self.json_initialized = False
+
+        # Clear metadata panel
+        self.reset_metadata()
+
+        # Update annotation file label
+        self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
+
+        # Clear warning message
+        self.msg.config(text="")
+
+
+        json_file = fd.asksaveasfile(initialfile="Untitled", mode='w', defaultextension='.json')
+
+        if json_file is None or json_file.name[-4:] != "json":
+            self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
+            return
+        else:
+            self.annotation_file = json_file
+            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
+        json_file.close()
 
     def page_num_is_valid(self, page_num):
         """
@@ -925,7 +947,8 @@ class CropNerGUI:
 
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
-
+        else:
+            self.switch_annotate()
 
         # Reset annotation dictionary
         self.cust_ents_dict = {}
@@ -1393,6 +1416,9 @@ class CropNerGUI:
         self.annotation_file = None
         self.json_initialized = False
 
+        # Clear metadata panel
+        self.reset_metadata()
+
         # Update annotation file label
         self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
 
@@ -1401,13 +1427,6 @@ class CropNerGUI:
 
         # Clear content
         self.text.delete(1.0, tk.END)
-
-        # Clear metadata panel
-        self.doc_entry.delete(0, tk.END)
-        self.url_entry.delete(0, tk.END)
-        self.date_entry.config(state=tk.NORMAL)
-        self.date_entry.delete(0, tk.END)
-        self.date_entry.config(state=tk.DISABLED)
 
     def remove_all_tags(self):
         """
