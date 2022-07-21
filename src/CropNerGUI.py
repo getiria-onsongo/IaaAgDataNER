@@ -359,7 +359,7 @@ class CropNerGUI:
 
         # Frame just below the text box. It contains buttons in the "Exit" button row
         self.bottom_frame = tk.Frame(self.annotation_frame)
-        self.bottom_frame.pack(side=tk.TOP, fill="x")
+        self.bottom_frame.pack(side=tk.TOP, fill="x", pady=15)
         # Blank label for formatting
         self.blank_label_three = tk.Label(self.bottom_frame, text="   ")
         self.blank_label_three.pack(side=tk.LEFT)
@@ -372,11 +372,25 @@ class CropNerGUI:
         # Clear message button
         self.msg_btn = tk.Button(self.bottom_frame, text="Clear Warning Message", width=20, command=self.clear_message)
         self.msg_btn.pack(side=tk.LEFT)
+        # Select folder with language model
+        self.ner_model_button = tk.Button(self.bottom_frame, text='Select NER model folder', width=18,
+                                          command=self.get_ner_model_dir)
+        self.ner_model_button.pack(side=tk.LEFT)
+
+        # Frame for PDF page number controls
+        self.page_frame = tk.Frame(self.bottom_frame)
+        # Enter page you would like to load. Start with 1 as opposed to the conventional 0 numbering in CS
+        self.page_entry = tk.Entry(self.page_frame, width=5)
+        self.page_entry.bind("<Return>", self.load_page_from_button)
+        self.page_entry.pack(side=tk.RIGHT, padx=(0,30))
+        self.page_label = tk.Label(self.page_frame, text="Raw Data File Page Num:", width=18)
+        self.page_label.pack(side=tk.RIGHT)
         # Previous page button
-        self.prev_btn = tk.Button(self.bottom_frame, text="Previous Page", command=partial(self.change_page, "previous"))
+        self.prev_btn = tk.Button(self.page_frame, text="Previous Page", command=partial(self.change_page, "previous"))
+        self.prev_btn.pack(side=tk.RIGHT)
         # Next page button
-        self.next_btn = tk.Button(self.bottom_frame, text="Next Page", command=partial(self.change_page, "next"))
-        # self.next_btn.pack(side=tk.LEFT)
+        self.next_btn = tk.Button(self.page_frame, text="Next Page", command=partial(self.change_page, "next"))
+        self.next_btn.pack(side=tk.RIGHT)
 
         # Frame that will contain messages being displayed to the user
         self.msg_frame = tk.Frame(self.annotation_frame)
@@ -384,29 +398,6 @@ class CropNerGUI:
         # Label to display messages
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
         self.msg.pack(side=tk.LEFT)
-
-        # Frame for selecting files and folders
-        self.open_frame = tk.Frame(self.annotation_frame)
-        self.open_frame.pack(side=tk.TOP,fill="x")
-        # Blank label for formatting
-        self.blank_label_five = tk.Label(self.open_frame, text="   ")
-        self.blank_label_five.pack(side=tk.LEFT)
-        # Select folder with language model
-        self.ner_model_button = tk.Button(self.open_frame, text='Select NER model folder', width=18,
-                                          command=self.get_ner_model_dir)
-        self.ner_model_button.pack(side=tk.LEFT)
-        # Enter page you would like to load. Start with 1 as opposed to the conventional 0 numbering in CS
-        self.page_label = tk.Label(self.open_frame, text="Raw Data File Page Num:", width=18)
-        self.page_label.pack(side=tk.LEFT)
-        self.page_entry = tk.Entry(self.open_frame, width=5)
-        self.page_entry.pack(side=tk.LEFT)
-        self.page_entry.bind("<Return>", self.load_page_from_button)
-        # Button to increase font in the text box (Font +)
-        self.font_plus = tk.Button(self.open_frame, text="Font +", width=10, command=self.font_plus)
-        # self.font_plus.pack(side=tk.LEFT)
-        # Button to decrease font in the text box (Font +)
-        self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
-        # self.font_minus.pack(side=tk.LEFT)
         
 
     def switch_annotate(self):
@@ -415,7 +406,6 @@ class CropNerGUI:
         """
         self.welcome_frame.pack_forget()
         self.annotation_frame.pack(fill="x")
-        self.page_entry.pack()
         self.current_page = "Annotate"
         # Make menu buttons clickable
         self.view_menu.entryconfig(0, state=tk.NORMAL)
@@ -427,7 +417,6 @@ class CropNerGUI:
         """
         self.welcome_frame.pack_forget()
         self.annotation_frame.pack(fill="x")
-        self.page_entry.pack_forget()
         self.current_page = "Validate"
         # Make menu buttons clickable
         self.view_menu.entryconfig(0, state=tk.NORMAL)
@@ -438,6 +427,7 @@ class CropNerGUI:
         Returns the GUI to the initial page where you choose to validate/annotate
         """
         self.clear_data()
+        self.page_frame.pack_forget()
         self.annotation_frame.pack_forget()
         self.welcome_frame.pack()
         self.current_page = "Welcome"
@@ -703,13 +693,10 @@ class CropNerGUI:
 
             if self.file_mode == "pdf":
                 # Bring back the "Next Page" button, placing it before the save button.
-                self.prev_btn.pack(side=tk.LEFT)
-                self.next_btn.pack(side=tk.LEFT)
-                self.page_entry.insert(0, "1")
+                self.page_frame.pack(side=tk.TOP)
             else:
                 # Remove "Next Page" button if loading a txt file, which has no pages.
-                self.prev_btn.pack_forget()
-                self.next_btn.pack_forget()
+                self.page_frame.pack_forget()
 
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
@@ -1368,11 +1355,7 @@ class CropNerGUI:
         self.text.delete(1.0, tk.END)
 
         # Clear metadata panel
-        self.doc_entry.delete(0, tk.END)
-        self.url_entry.delete(0, tk.END)
-        self.date_entry.config(state=tk.NORMAL)
-        self.date_entry.delete(0, tk.END)
-        self.date_entry.config(state=tk.DISABLED)
+        self.reset_metadata()
 
     def remove_all_tags(self):
         """
