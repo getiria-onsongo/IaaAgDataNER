@@ -233,7 +233,7 @@ class CropNerGUI:
 
         tk.Label(self.welcome_frame, text="or").pack()
 
-        self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations", command = self.switch_annotate)
+        self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations", command = self.switch_validate)
         self.validate_btn.pack()
 
 
@@ -700,12 +700,6 @@ class CropNerGUI:
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
             self.pdf_document = None
-
-            self.json_initialized = False
-            self.annotation_file = None
-            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
-            self.reset_metadata()
-
             self.load_page()
         else:
             self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
@@ -715,24 +709,6 @@ class CropNerGUI:
         Clears the current annotations in the editor and creates a new annotation file.
         """
 
-        for tag in self.tags:
-            self.text.tag_remove(tag, "1.0", "end")
-
-        # Clear annotations
-        self.cust_ents_dict = {}
-
-        # Clear current annotation file
-        self.annotation_file = None
-        self.json_initialized = False
-
-        # Clear metadata panel
-        self.reset_metadata()
-
-        # Update annotation file label
-        self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
-
-        # Clear warning message
-        self.msg.config(text="")
 
 
         json_file = fd.asksaveasfile(initialfile="Untitled", mode='w', defaultextension='.json')
@@ -741,6 +717,25 @@ class CropNerGUI:
             self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
             return
         else:
+            for tag in self.tags:
+                self.text.tag_remove(tag, "1.0", "end")
+
+            # Clear annotations
+            self.cust_ents_dict = {}
+
+            # Clear current annotation file
+            self.annotation_file = None
+            self.json_initialized = False
+
+            # Clear metadata panel
+            self.reset_metadata()
+
+            # Update annotation file label
+            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
+
+            # Clear warning message
+            self.msg.config(text="")
+
             self.annotation_file = json_file
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
         json_file.close()
@@ -903,19 +898,29 @@ class CropNerGUI:
         If the entry box for page number has a value, it will load the page specified. If not, by default it will
         load the first page.
         """
-        # TODO: Currently only loads 1 page. Update to load arbitrary number of pages (max=size of document).
-        # TODO: Give users the option to load text files in addition to pdf files.
-        # TODO: Update self.annotation_file. This become an issue if a user opened an annotation file and then decides
-        # to annotate a new page. The old annotation file name will be in self.annotation_file which can result in a
-        # user overwriting the file
+
+        if self.current_page == "Validate":
+            self.review_annotations()
+            return
 
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
+            return
         else:
             self.switch_annotate()
 
         # Reset annotation dictionary
         self.cust_ents_dict = {}
+
+        # Clear current annotation file
+        self.annotation_file = None
+        self.json_initialized = False
+
+        # Clear metadata panel
+        self.reset_metadata()
+
+        # Update annotation file label
+        self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
 
         # Delete contents
         self.text.delete(1.0, tk.END)
@@ -1454,7 +1459,7 @@ class CropNerGUI:
 
     def change_page(self, mode):
         """
-        Load the next page.
+        Load the next or previous page.
         """
         if self.file_mode == "pdf":
             if len(self.cust_ents_dict) == 0:
