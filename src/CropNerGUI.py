@@ -152,6 +152,9 @@ class CropNerGUI:
         Start running the GUI running.
     quit(self)
         Callback method attached to the quit button.
+    
+    NOTE: Many methods have e=None as a parameter. This can safely be ignored. It exists so that these methods can
+    be triggered by keyboard shortcuts.
     """
 
     def __init__(self):
@@ -328,6 +331,7 @@ class CropNerGUI:
         # Text entry widget for user to type the name of a user defined NER tag they want to add
         self.trait_entry = tk.Entry(self.edit_ent_frame, width=10)
         self.trait_entry.pack(side=tk.LEFT)
+        self.trait_entry.bind("<Return>", self.add_ent)
 
         # Button to add new NER tag
         self.add_ent_btn = tk.Button(self.edit_ent_frame, text="Add Entity", width=10, command=self.add_ent)
@@ -442,10 +446,29 @@ class CropNerGUI:
         self.rootWin.bind_all("<" + long + "-+>", self.font_plus)
         self.rootWin.bind_all("<" + long + "-minus>", self.font_minus)
 
-    def switch_annotate(self):
+        # Button shortcuts
+        self.rootWin.bind_all("<" + long + "-Right>", partial(self.change_page, "next")) # Next Page
+        self.rootWin.bind_all("<" + long + "-Left>", partial(self.change_page, "previous")) # Previous Page
+        self.rootWin.bind_all("<" + long + "-m>", self.toggle_metadata) # Metadata
+        self.rootWin.bind_all("<" + long + "-M>", self.toggle_metadata) # Metadata
+        self.rootWin.bind_all("<" + long + "-Return>", partial(self.pre_tag, "selection")) # Pre-Tag Selection
+        self.rootWin.bind_all("<" + long + "-Alt-Return>", partial(self.pre_tag, "page")) # Pre-Tag Page(s)
+        self.rootWin.bind_all("<" + long + "-r>", self.load_page_from_button) # Reload Page
+        self.rootWin.bind_all("<" + long + "-R>", self.load_page_from_button) # Reload Page
+        self.rootWin.bind_all("<" + long + "-slash>", self.get_ner_model_dir) # Select NER model folder
+        self.rootWin.bind_all("<" + long + "-quoteleft>", self.remove_tag) # Remove-Tag(s)
+        # quoteleft is tilda (`). It was originally Esc, but that triggered Windows shortcuts
+        self.rootWin.bind_all("<" + long + "-Alt-quoteleft>", self.remove_all_tags) # Remove All Tags
+        self.rootWin.bind_all("<" + long + "-period>", lambda e : self.msg.config(text="")) # Clear Warning Message
+        self.rootWin.bind_all("<" + long + "-1>", self.switch_annotate) # Annotate (welcome screen)
+        self.rootWin.bind_all("<" + long + "-2>", self.switch_validate) # Validate (welcome screen)
+
+    def switch_annotate(self, e=None):
         """
         Switches GUI elements to annotation mode
         """
+        if not (self.current_page == "Welcome"):
+            return
         self.welcome_frame.pack_forget()
         self.annotation_frame.pack(fill="x")
         self.current_page = "Annotate"
@@ -453,10 +476,12 @@ class CropNerGUI:
         self.view_menu.entryconfig(0, state=tk.NORMAL)
         self.view_menu.entryconfig(1, state=tk.NORMAL)
 
-    def switch_validate(self):
+    def switch_validate(self, e=None):
         """
         Switches GUI elements to validation mode
         """
+        if not (self.current_page == "Welcome"):
+            return
         self.welcome_frame.pack_forget()
         self.annotation_frame.pack(fill="x")
         self.page_frame.pack_forget()
@@ -509,7 +534,7 @@ class CropNerGUI:
             new_size = (self.text.winfo_reqheight() - prev_text_size) + self.rootWin.winfo_reqheight()
             self.rootWin.geometry(str(self.rootWin.winfo_reqwidth()) + "x" + str(new_size))
 
-    def add_ent(self):
+    def add_ent(self, e=None):
         """
         Add a user defined named entity to the application.
 
@@ -583,7 +608,7 @@ class CropNerGUI:
         except:
             self.msg.config(text="WARNING!! The entity you tried to remove does not exist.", foreground="red")
 
-    def toggle_metadata(self):
+    def toggle_metadata(self, e=None):
         """
         A button to open the metadata window to update and save metadata values.
 
@@ -591,6 +616,9 @@ class CropNerGUI:
         would go off of some users screens and force them to decrease font size. Upon saving, the
         metadata values are updated and the window is closed.
         """
+        if self.current_page == "Welcome":
+            return
+        
         def save():
             self.meta_doc = doc_entry.get()
             self.meta_url = url_entry.get()
@@ -646,7 +674,7 @@ class CropNerGUI:
         self.meta_cvar = ""
         self.meta_date = "File not initialized"
 
-    def get_ner_model_dir(self):
+    def get_ner_model_dir(self, e=None):
         """
         Select a folder containing spaCy nlp pipeline.
 
@@ -658,6 +686,8 @@ class CropNerGUI:
             If the selected folder does not contain a valid spaCy pipeline, an OSError will be thrown and
         a default language model is used instead.
         """
+        if self.current_page == "Welcome":
+            return
         
         dir = fd.askdirectory()
         # Do nothing if the user presses cancel or X
@@ -935,7 +965,7 @@ class CropNerGUI:
         self.msg.config(text="")
         self.load_page()
 
-    def load_page(self):
+    def load_page(self, e=None):
         """
         Load contents of a PDF or text file into text box.
 
@@ -1065,7 +1095,7 @@ class CropNerGUI:
 
         self.text.tag_add(label, str(line_start) + "." + str(char_start), str(line_end) + "." + str(char_end))
 
-    def pre_tag(self, selection: str):
+    def pre_tag(self, selection: str, e=None):
         """
         Pre-tag selected content or all the text in text box with NER tags.
 
@@ -1079,6 +1109,9 @@ class CropNerGUI:
 
         If they clicked the "Pre-Tag Pages(s)" button, all the text loaded in the text box will be annotated.
         """
+        if (self.current_page == "Welcome"):
+            return
+        
         # Clear warning message, if one exists
         self.msg.config(text="")
 
@@ -1250,13 +1283,14 @@ class CropNerGUI:
         except tk.TclError:
             self.msg.config(text="Warning!! get_ner error.", foreground="red")
 
-    def remove_tag(self):
+    def remove_tag(self, e=None):
         """
         Untag a piece of text that was classified as a named entity.
 
         Extract the piece of text that was selected and remove it from the list of named entities.
         """
-
+        if self.current_page == "Welcome":
+            return
         # Clear warning message, if one exists
         self.msg.config(text="")
 
@@ -1412,7 +1446,7 @@ class CropNerGUI:
             for ent_val in entities:
                 self.highlight_ent(ent_val[0],ent_val[1], ent_val[2])
 
-    def clear_message(self):
+    def clear_message(self, e=None):
         """
         Clear warning message
         """
@@ -1441,7 +1475,7 @@ class CropNerGUI:
         # Clear content
         self.text.delete(1.0, tk.END)
 
-    def remove_all_tags(self):
+    def remove_all_tags(self, e=None):
         """
         Remove all the NER tags on text loaded in the text box.
         """
@@ -1501,10 +1535,14 @@ class CropNerGUI:
             self.msg.config(text="No NER data detected to save", foreground="red")
 
 
-    def change_page(self, mode):
+    def change_page(self, mode, e=None):
         """
         Load the next or previous page.
         """
+        # If this method is called outside the annotate page (e.g., with Alt+Left), do nothing
+        if not (self.current_page == "Annotate"):
+            return
+        
         if self.file_mode == "pdf":
             if len(self.cust_ents_dict) == 0:
                 self.msg.config(text="Warning!! No annotations to save.", foreground="red")
