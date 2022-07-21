@@ -56,7 +56,7 @@ class CrossValidation:
     def __init__(self, pos=False, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
         self.k_folds = k_folds
         self.tags = tags
-        self.pos = False
+        self.pos = pos
         warnings.filterwarnings('ignore')
 
     def create_config(self, name="senter_ner.cfg", model_name="cv_model", gpu=False, word_embed=False, vectors=

@@ -82,6 +82,7 @@ def conversion(infile, outfile, sentence_level=False, print_statements=False):
                     substring = x[int(entitydata[1].replace(",", "")): int(
                         entitydata[3].replace(",", ""))]
 
+                    substring = substring.replace("\n", " ")
                     # File is outputted in this formatted seen below
                     t_entry = f"T{tindx}\t{keyterm} {startnum} {endnum}\t{substring}"
 
