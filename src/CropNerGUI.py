@@ -407,17 +407,21 @@ class CropNerGUI:
         if platform.system() == "Darwin":
             short = "Command"
             long = "Command"
+            self.view_menu.entryconfig("Font +", accelerator="Command++")
+            self.view_menu.entryconfig("Font -", accelerator="Command+-")
         else:
             short = "Ctrl"
             long = "Control"
+            self.view_menu.entryconfig("Font +", accelerator="Ctrl +")
+            self.view_menu.entryconfig("Font -", accelerator="Ctrl -")
 
         # Most of these have two binds so that they work if caps lock is enabled
         self.file_menu.entryconfig("New", accelerator=short + "+N")
-        self.rootWin.bind_all("<Control-n>", self.new_annot_file)
-        self.rootWin.bind_all("<Control-N>", self.new_annot_file)
+        self.rootWin.bind_all("<" + long + "-n>", self.new_annot_file)
+        self.rootWin.bind_all("<" + long + "-N>", self.new_annot_file)
         self.file_menu.entryconfig("Open Raw File", accelerator=short + "+Shift+O")
-        self.rootWin.bind_all("<" + long + "-Shift-o>", partial(self.open_file, "json"))
-        self.rootWin.bind_all("<" + long + "-Shift-O>", partial(self.open_file, "json"))
+        self.rootWin.bind_all("<" + long + "-Shift-o>", partial(self.open_file, "pdf/txt"))
+        self.rootWin.bind_all("<" + long + "-Shift-O>", partial(self.open_file, "pdf/txt"))
         self.file_menu.entryconfig("Open Annotation", accelerator=short + "+Alt+O")
         self.rootWin.bind_all("<" + long + "-Alt-o>", partial(self.open_file, "json"))
         self.rootWin.bind_all("<" + long + "-Alt-O>", partial(self.open_file, "json"))
@@ -430,12 +434,12 @@ class CropNerGUI:
         self.file_menu.entryconfig("Close Editor", accelerator=short + "+W")
         self.rootWin.bind_all("<" + long + "-w>", self.return_to_welcome)
         self.rootWin.bind_all("<" + long + "-W>", self.return_to_welcome)
+        # MacOS refuses to display Cmd+Q. I will tell it to anyway.
         self.file_menu.entryconfig("Exit", accelerator=short + "+Q")
         self.rootWin.bind_all("<" + long + "-q>", partial(self.quit))
         self.rootWin.bind_all("<" + long + "-Q>", partial(self.quit))
-        self.view_menu.entryconfig("Font +", accelerator=short + " +")
+        self.rootWin.bind_all("<" + long + "-=>", self.font_plus)
         self.rootWin.bind_all("<" + long + "-+>", self.font_plus)
-        self.view_menu.entryconfig("Font -", accelerator=short + " -")
         self.rootWin.bind_all("<" + long + "-minus>", self.font_minus)
 
     def switch_annotate(self):
@@ -751,7 +755,7 @@ class CropNerGUI:
         else:
             self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
 
-    def new_annot_file(self):
+    def new_annot_file(self, e=None):
         """
         Clears the current annotations in the editor and creates a new annotation file.
         """
