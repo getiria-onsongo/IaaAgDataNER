@@ -136,20 +136,6 @@ class Predict:
             text = f.read()
         return text
 
-    def tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
-        """
-        Use NLP pipeline to identify named entities in the text.
-
-        Parameters
-        ----------
-        text : str
-            text to give spacy model
-
-        Returns spacy doc
-        """
-        doc = self.nlp(text)
-        return doc
-
     def pre_tag(self, input_text : str, page_number : int):
         """
         Tags input text using model for ner taging and saves to
@@ -167,20 +153,48 @@ class Predict:
 
         self.cust_ents_dict = {}
         doc = self.tag_ner_with_spacy(input_text)
+        custom_tags_present = False
+
         for ent in doc.ents:
             # NER is in our list of custom tags
-            if ent.label_ in self.tags:
-                if not self.spacy_only:
-                    ent = self.get_pos(ent)
+            label = ent.label_
+            if label in self.tags:
+                start = ent.start_char
+                end = ent.end_char
+
+                if not self.spacy_only: # pos based entity expansion
+                    new_ent = self.get_pos(ent)
+                    start_char = ent.sent.start_char + new_ent.start_char
+                    end_char = ent.sent.start_char + new_ent.start_char
+
+                custom_tags_present = True
                 if self.cust_ents_dict.get(page_number, False):
-                    self.cust_ents_dict[page_number].append((ent.start_char, ent.end_char, ent.label_))
+                    self.cust_ents_dict[page_number].append((start, end, label))
                 else:
-                    self.cust_ents_dict[page_number] = [(ent.start_char, ent.end_char, ent.label_)]
+                    self.cust_ents_dict[page_number] = [(start, end, label)]
+
+        if not custom_tags_present:
+            print("No custom agriculture tags detected in the text!")
+        if len(doc.ents) == 0:
+            print("No entities detected in the text!")
 
         if self.cust_ents_dict.get(page_number, False):
             tags = self.cust_ents_dict[page_number]
             self.cust_ents_dict[page_number] = [input_text, tags]
 
+    def tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
+        """
+        Use NLP pipeline to identify named entities in the text.
+
+        Parameters
+        ----------
+        text : str
+            text to give spacy model
+
+        Returns spacy doc
+        """
+        doc = self.nlp(text)
+        return doc
 
     def get_pos(self, ent : str) -> str:
         """
@@ -293,6 +307,7 @@ class Predict:
         else:
             input_text = self.cust_ents_dict[chunk][0]
             entities = self.cust_ents_dict[chunk][1]
+
             ann_train_dict = mixed_type_2_dict([(input_text, {"entities": entities})], chunk, pdf_name, url)
             dict_2_json(ann_train_dict, output_filename)
             print("Created %s." % output_filename)
