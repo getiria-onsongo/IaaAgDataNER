@@ -203,7 +203,7 @@ class CropNerGUI:
         # Saves an existing annotation file if one exists, otherwise opens file dialog to create a new one
         self.file_menu.add_command(label="Save", command=partial(self.file_save, "update"), underline=0)
         # Opens file dialog to create and save new annotation file
-        self.file_menu.add_command(label="Save As...", command=partial(self.file_save, "new"), underline=7)
+        self.file_menu.add_command(label="Save As...", command=partial(self.file_save, "new"), underline=9)
         # Switches the GUI to the welcome page and clears all raw data/annotations
         self.file_menu.add_command(label="Close Editor", command=self.return_to_welcome, underline=0)
         # Exits the program, asks to save unsaved changes
