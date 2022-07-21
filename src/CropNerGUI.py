@@ -416,7 +416,8 @@ class CropNerGUI:
         Switches GUI elements to validation mode
         """
         self.welcome_frame.pack_forget()
-        self.annotation_frame.pack_forget()
+        self.annotation_frame.pack(fill="x")
+        self.page_frame.pack_forget()
         self.current_page = "Validate"
         # Make menu buttons clickable
         self.view_menu.entryconfig(0, state=tk.NORMAL)
@@ -668,8 +669,6 @@ class CropNerGUI:
             self.msg.config(text="No file was chosen", foreground="red")
             return
         elif file_type == "json":
-            self.prev_btn.pack_forget()
-            self.next_btn.pack_forget()
             self.annotation_file = f
             self.file_prefix = self.annotation_file.name.split(".")[0]
             self.file_name = self.annotation_file.name.split("/")[-1]
