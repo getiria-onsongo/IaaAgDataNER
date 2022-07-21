@@ -195,7 +195,7 @@ class CropNerGUI:
 
         # File menu for handling file operations
         self.file_menu = tk.Menu(self.menubar, tearoff=0)
-        self.file_menu.add_command(label="New")
+        self.file_menu.add_command(label="New", command=self.new_annot_file)
         # Opens a raw file and switches GUI to annotation mode if not in it
         self.file_menu.add_command(label="Open Raw File", command=partial(self.open_file, "pdf/txt"))
         # Opens an annotation file and switches GUI to validation mode if not in it
@@ -416,7 +416,7 @@ class CropNerGUI:
         Switches GUI elements to validation mode
         """
         self.welcome_frame.pack_forget()
-        self.annotation_frame.pack(fill="x")
+        self.annotation_frame.pack_forget()
         self.current_page = "Validate"
         # Make menu buttons clickable
         self.view_menu.entryconfig(0, state=tk.NORMAL)
@@ -711,6 +711,41 @@ class CropNerGUI:
         else:
             self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
 
+    def new_annot_file(self):
+        """
+        Clears the current annotations in the editor and creates a new annotation file.
+        """
+
+        for tag in self.tags:
+            self.text.tag_remove(tag, "1.0", "end")
+
+        # Clear annotations
+        self.cust_ents_dict = {}
+
+        # Clear current annotation file
+        self.annotation_file = None
+        self.json_initialized = False
+
+        # Clear metadata panel
+        self.reset_metadata()
+
+        # Update annotation file label
+        self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
+
+        # Clear warning message
+        self.msg.config(text="")
+
+
+        json_file = fd.asksaveasfile(initialfile="Untitled", mode='w', defaultextension='.json')
+
+        if json_file is None or json_file.name[-4:] != "json":
+            self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
+            return
+        else:
+            self.annotation_file = json_file
+            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
+        json_file.close()
+
     def page_num_is_valid(self, page_num):
         """
         Returns True if page_num is a number, False if page_num is completely invalid, and -1 if it's a range.
@@ -877,7 +912,8 @@ class CropNerGUI:
 
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
-
+        else:
+            self.switch_annotate()
 
         # Reset annotation dictionary
         self.cust_ents_dict = {}
@@ -1345,6 +1381,9 @@ class CropNerGUI:
         self.annotation_file = None
         self.json_initialized = False
 
+        # Clear metadata panel
+        self.reset_metadata()
+
         # Update annotation file label
         self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
 
@@ -1353,9 +1392,6 @@ class CropNerGUI:
 
         # Clear content
         self.text.delete(1.0, tk.END)
-
-        # Clear metadata panel
-        self.reset_metadata()
 
     def remove_all_tags(self):
         """
