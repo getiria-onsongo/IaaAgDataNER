@@ -195,29 +195,29 @@ class CropNerGUI:
 
         # File menu for handling file operations
         self.file_menu = tk.Menu(self.menubar, tearoff=0)
-        self.file_menu.add_command(label="New")
+        self.file_menu.add_command(label="New", underline=0)
         # Opens a raw file and switches GUI to annotation mode if not in it
-        self.file_menu.add_command(label="Open Raw File", command=partial(self.open_file, "pdf/txt"))
+        self.file_menu.add_command(label="Open Raw File", command=partial(self.open_file, "pdf/txt"), underline=5)
         # Opens an annotation file and switches GUI to validation mode if not in it
-        self.file_menu.add_command(label="Open Annotation", command=partial(self.open_file, "json"))
+        self.file_menu.add_command(label="Open Annotation", command=partial(self.open_file, "json"), underline=5)
         # Saves an existing annotation file if one exists, otherwise opens file dialog to create a new one
-        self.file_menu.add_command(label="Save", command=partial(self.file_save, "update"))
+        self.file_menu.add_command(label="Save", command=partial(self.file_save, "update"), underline=0)
         # Opens file dialog to create and save new annotation file
-        self.file_menu.add_command(label="Save As...", command=partial(self.file_save, "new"))
+        self.file_menu.add_command(label="Save As...", command=partial(self.file_save, "new"), underline=7)
         # Switches the GUI to the welcome page and clears all raw data/annotations
-        self.file_menu.add_command(label="Close Editor", command=self.return_to_welcome)
+        self.file_menu.add_command(label="Close Editor", command=self.return_to_welcome, underline=0)
         # Exits the program, asks to save unsaved changes
-        self.file_menu.add_command(label="Exit", command=self.quit)
+        self.file_menu.add_command(label="Exit", command=self.quit, underline=0)
 
         # Menu for changing visual aspects of GUI
         self.view_menu = tk.Menu(self.menubar, tearoff=0)
-        self.view_menu.add_command(label="Font +", command=self.font_plus)
-        self.view_menu.add_command(label="Font -", command=self.font_minus)
+        self.view_menu.add_command(label="Font +", command=self.font_plus, underline=5)
+        self.view_menu.add_command(label="Font -", command=self.font_minus, underline=5)
         self.view_menu.entryconfig(0, state=tk.DISABLED)
         self.view_menu.entryconfig(1, state=tk.DISABLED)
 
-        self.menubar.add_cascade(label="File", menu=self.file_menu)
-        self.menubar.add_cascade(label="View", menu=self.view_menu)
+        self.menubar.add_cascade(label="File", menu=self.file_menu, underline=0)
+        self.menubar.add_cascade(label="View", menu=self.view_menu, underline=0)
         self.rootWin.config(menu=self.menubar)
 
         # Inital frame for the welcome page
