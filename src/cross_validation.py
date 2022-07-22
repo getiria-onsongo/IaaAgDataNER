@@ -30,40 +30,42 @@ class CrossValidation:
         number of folds
     self.tags : list[str]
         labels for ner entities
-    self.sentence_level : bool
-        flag for if the data is annotated at the sentence level
-    self.pos
+    self.pos : bool
+        flag to do POS-tagging based entity expansion
+    self.spancat : bool
+        flag to use spancat SpaCy component instead of the normal ner component,
+        not done implementing yet
 
     Methods
     ----------
     create_config(self, name : str, model_name : str, gpu : bool, word_embed : bool, vectors : str) -> str
-        creates spacy model config file
-    cross_validate(self, data : str, config : str, model_name : str, sentence_level : bool)
+        creates spacy config file
+    cross_validate(self, data : str, config : str, model_name : str)
         preforms k-fold cross validation
-    predict(self, validation : list, fold : int, spacy_only : bool, model_dir : str, dataset_suffix : str)
-        predicts with validation data and trained model
-    medacy_eval(self)
-        uses medacy to evaluate results
+    predict(self, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str)
+        predicts with trained model on validation data
+    medacy_eval(self, sub_dir)
+        evaluate results
     print_metrics(self, metrics : dict, ents : dict)
-        prints and formats metrics & entity counts
+        prints metrics & entity counts
     create_gold_dataset(self, validation : list, fold : int)
-        creates gold standard dataset for a given fold's predictions
-    count_entities()
-        counts entities in gold standard data for each fold
+        creates gold standard dataset
+    count_entities(self)
+        counts entities in gold standard data
     create_dirs(self, dirs : list)
-        creates directories from a given list
+        creates directories
     """
     def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"],  pos=False, spancat=False):
         self.k_folds = k_folds
         self.tags = tags
         self.pos = pos
         self.spancat = spancat
-        warnings.filterwarnings('ignore')
+        warnings.filterwarnings('ignore') # ignore SpaCy warnings for cleaner terminal output
 
     def create_config(self, name="senter_ner.cfg", model_name="cv_model", gpu=False, word_embed=False, vectors=
     "glove.6B.zip") -> str:
         """
-        Creates spacy model config file
+        Creates spacy model config file to use to train the model
 
         Parameters
         ----------
@@ -81,28 +83,28 @@ class CrossValidation:
         Returns path to config file
         """
         if gpu:
-            execute("python3 -m spacy init config --lang en --pipeline transformer,senter,ner  --optimize accuracy --force " + name +" -G")
+            execute("python3 -m spacy init config --lang en --pipeline transformer,senter,ner  --optimize accuracy --force " + name +" -G", shell=True)
         elif self.spancat:
             execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,spancat  --optimize accuracy --force " + name)
         else:
             if word_embed:
-                execute("python3 -m spacy init vectors en " + vectors + " "+ model_name)
+                execute("python3 -m spacy init vectors en " + vectors + " "+ model_name, shell=True)
             execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
         return name
 
     def cross_validate(self, data : str, config : str, model_name="cv_model"):
         """
-        Preforms cross validation on spacy model.
+        Preforms k-fold cross validation on spacy model since SpaCy does not support
+        it out of the box
 
         Parameters
         ----------
         data : str
-            path to data directort
+            path to data directory
         config : str
             path to model config file
         model_name : str
-            start of output path for the model, each fold creates a model with
-            that prefix and the suffix of _XFold where X is the fold number
+            path to save model, overwritten during the subsequent fold
         """
         # shuffles and divides data into k folds and a dev set
         print("\nShuffling and splitting data...")
@@ -193,18 +195,17 @@ class CrossValidation:
 
     def predict(self, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str):
         """
-        For a given fold, predicts on the validation data and saves to json.
-        Also moves the gold standard validation data in json format to a new
-        directory. Then converts both of these datasets to bratt format.
+        For a given fold, uses trained model to predict on the validation data
+        Then saves to json before converting bratt
 
         Parameters
         ----------
         fold_dir : str
-            path to output predictions to
+            path to save currenft fold's predictions to
         sub_dir : str
-            path to subdirectory for output, either "pos" or "spacy"
+            path to subdirectory of fold_dir for output, either "pos" or "spacy"
         gold_dir : str
-            path to gold standard dataset
+            path to gold standard dataset for the current fold
         model_dir : str
             path to model
         """
@@ -219,7 +220,7 @@ class CrossValidation:
         else:
             flag = False
 
-
+        # predict using trained model
         print("Predicting on validation data ...")
         print("____________________________")
         predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, output_dir=json_name, spacy_only=flag)
@@ -230,14 +231,10 @@ class CrossValidation:
         print("____________________________")
         dataset_to_bratt(input_dir=json_name, output_dir=bratt_name)
 
-
     def medacy_eval(self, sub_dir):
         """
-        Finds average metrics and entity counts across all folds.
-        Uses medacy's inter_dataset_agreement calculator to get
-        precesion, recall, and f-score for each label and overall for each fold.
-        Then finds averages of those metrics across every folds. Also keeps
-        track of found entity counts and entitiy counts from gold standard.
+        Finds average metrics and entity counts across all folds using extracted
+        methods from medacy
 
         Parameters
         ----------
@@ -253,7 +250,7 @@ class CrossValidation:
         p_all, r_all, f_all = [], [], []
         p_weights, r_weights, f_weights = [], [], []
 
-        # inter_dataset_agreement for each fold
+        # inter_dataset_agreement and entity counting for each fold
         ents_found["ALL"] = 0
         for f in range(1, self.k_folds+1):
             result = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/"+sub_dir+"/pred_bratt"), 'strict')
@@ -274,7 +271,7 @@ class CrossValidation:
                     ents_found[k] += v.tp + v.fp
                 ents_found["ALL"] += v.tp + v.fp
 
-        # averaging
+        # get averages
         avg_metrics["ALL"] = {}
         avg_metrics["ALL"][0] = np.average(a=p_all, weights=p_weights)
         avg_metrics["ALL"][1] = np.average(a=r_all, weights=r_weights)
@@ -295,7 +292,7 @@ class CrossValidation:
     def print_metrics(self, metrics : dict, ents_found : dict, counts : dict):
         """
         Takes a dictonary of averages & entity counts created by medacy_eval()
-        and formats & prints the averages and counts.
+        to format & print the averages and counts
 
         Parameters
         ----------
@@ -304,7 +301,7 @@ class CrossValidation:
         ents : dict
             dictonary of found entity counts from medacy_eval()
         counts : dict
-            dictonary of toatl entity counts in gold standard from count_entities()
+            dictonary of total entity counts in gold standard from count_entities()
         """
         print("ALL:")
         print("\t precision: " + str(metrics["ALL"][0]))
@@ -331,7 +328,7 @@ class CrossValidation:
 
     def create_gold_dataset(self, validation : list, fold : int):
         """
-        Creates gold standard dataset for current fold and converts to bratt.
+        Creates gold standard dataset for current fold and converts to bratt
 
         Parameters
         ----------
