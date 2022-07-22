@@ -442,8 +442,8 @@ class CropNerGUI:
         self.file_menu.entryconfig("Exit", accelerator=short + "+Q")
         self.rootWin.bind_all("<" + long + "-q>", partial(self.quit))
         self.rootWin.bind_all("<" + long + "-Q>", partial(self.quit))
-        self.rootWin.bind_all("<" + long + "-=>", self.font_plus)
-        self.rootWin.bind_all("<" + long + "-+>", self.font_plus)
+        self.rootWin.bind_all("<" + long + "-equal>", self.font_plus)
+        self.rootWin.bind_all("<" + long + "-plus>", self.font_plus)
         self.rootWin.bind_all("<" + long + "-minus>", self.font_minus)
 
         # Button shortcuts
