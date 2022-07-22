@@ -459,8 +459,8 @@ class CropNerGUI:
         self.rootWin.bind_all("<" + long + "-M>", self.toggle_metadata) # Metadata
         self.rootWin.bind_all("<F1>", partial(self.pre_tag, "selection")) # Pre-Tag Selection
         self.rootWin.bind_all("<F5>", partial(self.pre_tag, "page")) # Pre-Tag Page(s)
-        self.rootWin.bind_all("<" + long + "-r>", self.load_page_from_button) # Reload Page
-        self.rootWin.bind_all("<" + long + "-R>", self.load_page_from_button) # Reload Page
+        self.rootWin.bind_all("<" + long + "-r>", self.load_page_from_entry) # Reload Page
+        self.rootWin.bind_all("<" + long + "-R>", self.load_page_from_entry) # Reload Page
         self.rootWin.bind_all("<" + long + "-slash>", self.get_ner_model_dir) # Select NER model folder
         self.rootWin.bind_all("<F3>", self.remove_tag) # Remove-Tag(s)
         self.rootWin.bind_all("<F7>", self.remove_all_tags) # Remove All Tags
