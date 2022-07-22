@@ -99,6 +99,8 @@ class CropNerGUI:
         Stores the current page the program is in (welcome, annotation, validation, etc.)
     self.meta_doc : str, self.meta_url : str, self.meta_crop : str, self.meta_cvar : str, self.meta_date : str
         Store metadata values that will be written to the annotation file upon saving.
+    self.metadata_open : bool
+        Whether or not the metadata window is currently open
 
     NOTE: Though the widgets are global variables, we will not document them here. Most are self-evident. We have
     added inline comments in the code itself.
@@ -187,6 +189,7 @@ class CropNerGUI:
         self.meta_crop = ""
         self.meta_cvar = ""
         self.meta_date = "File not initialized"
+        self.metadata_open = False
 
         # ----------------------- Widgets for GUI start here.
         # Default font size for text in ScrolledText. Should be a string format
@@ -234,12 +237,12 @@ class CropNerGUI:
         # Trying to get this set the padding based on window size
         self.welcome_label.pack(side=tk.TOP, pady=(250, 0))
 
-        self.annotate_btn = tk.Button(self.welcome_frame, text="Annotate NER Data", command = self.switch_annotate)
+        self.annotate_btn = tk.Button(self.welcome_frame, text="Annotate NER Data (1)", command = self.switch_annotate)
         self.annotate_btn.pack()
 
         tk.Label(self.welcome_frame, text="or").pack()
 
-        self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations", command = self.switch_validate)
+        self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations (2)", command = self.switch_validate)
         self.validate_btn.pack()
 
 
@@ -432,9 +435,8 @@ class CropNerGUI:
         self.file_menu.entryconfig("Save", accelerator=short + "+S")
         self.rootWin.bind_all("<" + long + "-s>", partial(self.file_save, "update"))
         self.rootWin.bind_all("<" + long + "-S>", partial(self.file_save, "update"))
-        self.file_menu.entryconfig("Save As...", accelerator=short + "+Alt+S")
-        self.rootWin.bind_all("<" + long + "-Alt-s>", partial(self.file_save, "new"))
-        self.rootWin.bind_all("<" + long + "-Alt-S>", partial(self.file_save, "new"))
+        self.file_menu.entryconfig("Save As...", accelerator="F12")
+        self.rootWin.bind_all("<F12>", partial(self.file_save, "new"))
         self.file_menu.entryconfig("Close Editor", accelerator=short + "+W")
         self.rootWin.bind_all("<" + long + "-w>", self.return_to_welcome)
         self.rootWin.bind_all("<" + long + "-W>", self.return_to_welcome)
@@ -447,21 +449,22 @@ class CropNerGUI:
         self.rootWin.bind_all("<" + long + "-minus>", self.font_minus)
 
         # Button shortcuts
-        self.rootWin.bind_all("<" + long + "-Right>", partial(self.change_page, "next")) # Next Page
-        self.rootWin.bind_all("<" + long + "-Left>", partial(self.change_page, "previous")) # Previous Page
+        self.rootWin.bind_all("<Alt-Right>", partial(self.change_page, "next")) # Next Page
+        self.rootWin.bind_all("<Alt-Left>", partial(self.change_page, "previous")) # Previous Page
         self.rootWin.bind_all("<" + long + "-m>", self.toggle_metadata) # Metadata
         self.rootWin.bind_all("<" + long + "-M>", self.toggle_metadata) # Metadata
-        self.rootWin.bind_all("<" + long + "-Return>", partial(self.pre_tag, "selection")) # Pre-Tag Selection
-        self.rootWin.bind_all("<" + long + "-Alt-Return>", partial(self.pre_tag, "page")) # Pre-Tag Page(s)
+        self.rootWin.bind_all("<" + long + "-Tab>", partial(self.pre_tag, "selection")) # Pre-Tag Selection
+        self.rootWin.bind_all("<" + long + "-Shift-Tab>", partial(self.pre_tag, "page")) # Pre-Tag Page(s)
         self.rootWin.bind_all("<" + long + "-r>", self.load_page_from_button) # Reload Page
         self.rootWin.bind_all("<" + long + "-R>", self.load_page_from_button) # Reload Page
         self.rootWin.bind_all("<" + long + "-slash>", self.get_ner_model_dir) # Select NER model folder
-        self.rootWin.bind_all("<" + long + "-quoteleft>", self.remove_tag) # Remove-Tag(s)
         # quoteleft is tilda (`). It was originally Esc, but that triggered Windows shortcuts
-        self.rootWin.bind_all("<" + long + "-Alt-quoteleft>", self.remove_all_tags) # Remove All Tags
+        self.rootWin.bind_all("<" + long + "-quoteleft>", self.remove_tag) # Remove-Tag(s)
+        # Similarly, asciitilde is just ~ - the below shortcut is the above, but with shift being held
+        self.rootWin.bind_all("<" + long + "-Shift-asciitilde>", self.remove_all_tags) # Remove All Tags
         self.rootWin.bind_all("<" + long + "-period>", lambda e : self.msg.config(text="")) # Clear Warning Message
-        self.rootWin.bind_all("<" + long + "-1>", self.switch_annotate) # Annotate (welcome screen)
-        self.rootWin.bind_all("<" + long + "-2>", self.switch_validate) # Validate (welcome screen)
+        self.rootWin.bind_all("1", self.switch_annotate) # Annotate (welcome screen) - Bound to 1
+        self.rootWin.bind_all("2", self.switch_validate) # Validate (welcome screen) - Bound to 2
 
     def switch_annotate(self, e=None):
         """
@@ -502,6 +505,8 @@ class CropNerGUI:
         # Disable menu buttons
         self.view_menu.entryconfig(0, state=tk.DISABLED)
         self.view_menu.entryconfig(1, state=tk.DISABLED)
+        # Make sure user isn't still focused on text field (otherwise, pressing 1 or 2 to select will put the number in the field)
+        self.rootWin.focus()
 
     def font_plus(self, e=None):
         """
@@ -616,18 +621,27 @@ class CropNerGUI:
         would go off of some users screens and force them to decrease font size. Upon saving, the
         metadata values are updated and the window is closed.
         """
-        if self.current_page == "Welcome":
+        if self.current_page == "Welcome" or self.metadata_open:
             return
         
-        def save():
+        if(platform.system() == "Darwin"):
+            long = "Command"
+        else:
+            long = "Control"
+
+        def save(e=None):
             self.meta_doc = doc_entry.get()
             self.meta_url = url_entry.get()
             self.meta_crop = crop_entry.get().upper()
             self.meta_cvar = cvar_entry.get().upper()
             self.meta_date = date_entry.get()
             self.metadata_dialog.destroy()
+            self.metadata_open = False
+            self.rootWin.bind_all("<" + long + "-m>", self.toggle_metadata)
+            self.rootWin.bind_all("<" + long + "-M>", self.toggle_metadata)
 
         self.metadata_dialog = tk.Toplevel(self.rootWin)
+        self.metadata_open = True
         doc_label = tk.Label(self.metadata_dialog, text="Document Name")
         doc_label.pack(side=tk.TOP)
         doc_entry = tk.Entry(self.metadata_dialog, width=30)
@@ -660,6 +674,8 @@ class CropNerGUI:
         date_entry.pack(side=tk.TOP)
 
         save_metadata = tk.Button(self.metadata_dialog, text="Save Metadata", command=save)
+        self.rootWin.bind_all("<" + long + "-m>", save)
+        self.rootWin.bind_all("<" + long + "-M>", save)
         save_metadata.pack(side=tk.BOTTOM, pady="15")
 
 
