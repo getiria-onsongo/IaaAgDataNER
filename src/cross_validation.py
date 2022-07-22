@@ -53,14 +53,15 @@ class CrossValidation:
     create_dirs(self, dirs : list)
         creates directories from a given list
     """
-    def __init__(self, pos=False, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]):
+    def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"],  pos=False, spancat=False):
         self.k_folds = k_folds
         self.tags = tags
         self.pos = pos
+        self.spancat = spancat
         warnings.filterwarnings('ignore')
 
     def create_config(self, name="senter_ner.cfg", model_name="cv_model", gpu=False, word_embed=False, vectors=
-    "glove.6B.zip", spancat=False) -> str:
+    "glove.6B.zip") -> str:
         """
         Creates spacy model config file
 
@@ -81,7 +82,7 @@ class CrossValidation:
         """
         if gpu:
             execute("python3 -m spacy init config --lang en --pipeline transformer,senter,ner  --optimize accuracy --force " + name +" -G")
-        elif spancat:
+        elif self.spancat:
             execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,spancat  --optimize accuracy --force " + name)
         else:
             if word_embed:
@@ -129,6 +130,8 @@ class CrossValidation:
         dev = folds[len(folds)-1]
         convertJsonToSpacyJsonl(outputFileName="ner_2021_08_dev_data.jsonl", filePaths=dev)
         convert(input_path="ner_2021_08_dev_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
+        if self.spancat:
+            execute("python src/add_ents_to_spans_dict.py ner_2021_08/ner_2021_08_dev_data.spacy en sc")
 
         # k-fold cross validation
         for f in range(1, self.k_folds+1):
@@ -146,8 +149,10 @@ class CrossValidation:
             print("____________________________")
             convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
+            if self.spancat:
+                execute("python src/add_ents_to_spans_dict.py ner_2021_08/ner_2021_08_training_data.spacy en sc")
 
-            # model_name = "model_page_level_Jul19" # for testing only
+            # model_name = "cv_model" # for testing only
 
             # create gold standard data directory and bratt files
             fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f)
@@ -451,6 +456,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    val = CrossValidation(pos=args.pos, k_folds=int(args.folds))
-    config_name = val.create_config(gpu=args.GPU, word_embed=args.word_embed, vectors=args.vectors, spancat=args.spancat)
+    val = CrossValidation(k_folds=int(args.folds), pos=args.pos, spancat=args.spancat)
+    config_name = val.create_config(gpu=args.GPU, word_embed=args.word_embed, vectors=args.vectors)
     val.cross_validate(data=args.dataset_dir, config=config_name)

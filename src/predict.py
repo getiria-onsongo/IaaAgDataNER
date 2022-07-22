@@ -164,8 +164,8 @@ class Predict:
 
                 if not self.spacy_only: # pos based entity expansion
                     new_ent = self.get_pos(ent)
-                    start_char = ent.sent.start_char + new_ent.start_char
-                    end_char = ent.sent.start_char + new_ent.start_char
+                    start = ent.sent.start_char + new_ent.start_char
+                    end = ent.sent.start_char + new_ent.end_char
 
                 custom_tags_present = True
                 if self.cust_ents_dict.get(page_number, False):
