@@ -108,6 +108,14 @@ class CropNerGUI:
 
     Methods
     -------
+    add_keyboard_shortcuts(self)
+        Adds all the keyboard shorcuts for program functions depending on OS detected.
+    switch_annotate(self)
+        Switches the GUI into annotation mode for annotating PDF/txt files.
+    switch_validate(self)
+        Switches the GUI into validation mode for validating json annotation files.
+    return_to_welcome(self)
+        Returns the GUI to the welcome page where user selects between annotating and validating.
     font_plus(self)
         Increase font size for text in ScrolledText (text box).
     font_minus(self)
@@ -116,12 +124,30 @@ class CropNerGUI:
         Add a user defined named entity to the application.
     remove_ent(self)
         Remove a user defined named entity from the application.
+    toggle_metadata(self)
+        Opens the metadata pop-up for modifying an annotation file's metadata.
+    reset_metadata(self)
+        Resets metadata fields to empty.
     get_ner_model_dir(self)
         Select a folder containing spaCy nlp pipeline.
     open_file(self, file_type: str)
         Open a file (pdf/text) to be annotated or an annotation file (json) to be reviewed. selected using the GUI.
-    load_page(self)
-        Load contents of a PDF or text file into text box.
+    new_annot_file(self)
+        Wipe all current annotations and start a new annotation file (json) to begin tagging with. Created using file dialog.
+    page_num_is_valid(self) -> bool or -1
+        Checks to see if the page number/range entered in the entry box is valid; True if it's a number, False if it's invalid, and -1 if it's a range.
+    handle_bad_page_requests(self, page_num_valid)
+        If a page number is invalid, this is called in order to reset the page number to a valid value most convenient to the user.
+    handle_page_range(self, page_range: list)
+        If a page range is input, this is called in order to handle that and update internal page numbers properly.
+    is_spaced_range(self, raw_page_entry: str) -> bool
+        Checks to see if the string input into the page entry is only two numbers separated by a space.
+    clean_spaces_in_page_entry(self, raw_page_entry: str)
+        Cleans up extra spaces input in the page entry in order to safely read.
+    load_page_from_entry(self)
+        Handles loading page from the entry box, clearing current annotation file that would otherwise not be cleared.
+    load_page(self) -> str
+        Load contents of a PDF (given page) or text file into text box and returns the text if in annotation mode. If in validation mode, reloads the json file to its original state.
     update_scrolled_text_line_content_index(self)
         Populate the dictionary self.scrolled_text_line_content_index with position indices for the first and
         last characters in each line in the text box.
@@ -131,12 +157,16 @@ class CropNerGUI:
          Pre-tag selected content or all the text in text box with NER tags.
     overlap(self, interval_one: list, interval_two: list) -> bool
         Check to see if two intervals overlap.
+    initialize_new_file(self)
+        Starts a new untitled json file when the first tag is placed and there is no annotation file present.
     get_selected_interval(self) -> tuple
         Determines the index of the first and last characters (char_start, char_end) selected by the user.
     get_ner(self, tag_label: str)
         Tag a piece of text that has been selected as a named entity.
     remove_tag(self)
         Untag a piece of text that was classified as a named entity.
+    get_custom_labels(self, data: dict)
+        Retrieves any extra custom labels from a loaded json file and adds the buttons to the GUI.
     review_annotations(self)
         Load a json file containing annotations and review it.
     clear_message(self)
@@ -209,10 +239,8 @@ class CropNerGUI:
         self.file_menu.add_command(label="Open Annotation", command=partial(self.open_file, "json"), underline=5)
         # Saves an existing annotation file if one exists, otherwise opens file dialog to create a new one
         self.file_menu.add_command(label="Save", command=partial(self.file_save, "update"), underline=0)
-        self.file_menu.entryconfig(3, state=tk.DISABLED)
         # Opens file dialog to create and save new annotation file
         self.file_menu.add_command(label="Save As...", command=partial(self.file_save, "new"), underline=9)
-        self.file_menu.entryconfig(4, state=tk.DISABLED)
         # Switches the GUI to the welcome page and clears all raw data/annotations
         self.file_menu.add_command(label="Close Editor", command=self.return_to_welcome, underline=0)
         # Exits the program, asks to save unsaved changes
@@ -416,7 +444,7 @@ class CropNerGUI:
         
     def add_keyboard_shortcuts(self):
         """
-        Adds functionality for all keyboard shortcuts, along with the underlines for the Alt menu shortcuts.
+        Adds all the keyboard shorcuts for program functions depending on OS detected.
         """
         # Darwin is MacOS
         if platform.system() == "Darwin":
@@ -1243,6 +1271,9 @@ class CropNerGUI:
         return overlap
 
     def initialize_new_file(self):
+        """
+        Starts a new untitled json file when the first tag is placed and there is no annotation file present.
+        """
         if self.json_initialized == False:
             self.json_initialized = True
             self.working_file_label.config(text="Working Annotation File: Untitled.json")
