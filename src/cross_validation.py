@@ -131,7 +131,7 @@ class CrossValidation:
         convertJsonToSpacyJsonl(outputFileName="ner_2021_08_dev_data.jsonl", filePaths=dev)
         convert(input_path="ner_2021_08_dev_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
         if self.spancat:
-            execute("python src/add_ents_to_spans_dict.py ner_2021_08/ner_2021_08_dev_data.spacy en sc")
+            execute("python ~/Packages/IaaAgDataNER/src/add_ents_to_spans_dict.py ner_2021_08/ner_2021_08_dev_data.spacy en sc")
 
         # k-fold cross validation
         for f in range(1, self.k_folds+1):
@@ -150,10 +150,9 @@ class CrossValidation:
             convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
             if self.spancat:
-                execute("python src/add_ents_to_spans_dict.py ner_2021_08/ner_2021_08_training_data.spacy en sc")
+                execute("python  ~/Packages/IaaAgDataNER/src/add_ents_to_spans_dict.py ner_2021_08/ner_2021_08_training_data.spacy en sc")
 
             # model_name = "cv_model" # for testing only
-
             # create gold standard data directory and bratt files
             fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f)
 
