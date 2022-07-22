@@ -416,11 +416,15 @@ class CropNerGUI:
             long = "Command"
             self.view_menu.entryconfig("Font +", accelerator="Command++")
             self.view_menu.entryconfig("Font -", accelerator="Command+-")
+            self.rootWin.bind_all("<Command-Right>", partial(self.change_page, "next")) # Next Page
+            self.rootWin.bind_all("<Command-Left>", partial(self.change_page, "previous")) # Previous Page
         else:
             short = "Ctrl"
             long = "Control"
             self.view_menu.entryconfig("Font +", accelerator="Ctrl +")
             self.view_menu.entryconfig("Font -", accelerator="Ctrl -")
+            self.rootWin.bind_all("<Alt-Right>", partial(self.change_page, "next")) # Next Page
+            self.rootWin.bind_all("<Alt-Left>", partial(self.change_page, "previous")) # Previous Page
 
         # Most of these have two binds so that they work if caps lock is enabled
         self.file_menu.entryconfig("New", accelerator=short + "+N")
@@ -449,19 +453,15 @@ class CropNerGUI:
         self.rootWin.bind_all("<" + long + "-minus>", self.font_minus)
 
         # Button shortcuts
-        self.rootWin.bind_all("<Alt-Right>", partial(self.change_page, "next")) # Next Page
-        self.rootWin.bind_all("<Alt-Left>", partial(self.change_page, "previous")) # Previous Page
         self.rootWin.bind_all("<" + long + "-m>", self.toggle_metadata) # Metadata
         self.rootWin.bind_all("<" + long + "-M>", self.toggle_metadata) # Metadata
-        self.rootWin.bind_all("<" + long + "-Tab>", partial(self.pre_tag, "selection")) # Pre-Tag Selection
-        self.rootWin.bind_all("<" + long + "-Shift-Tab>", partial(self.pre_tag, "page")) # Pre-Tag Page(s)
+        self.rootWin.bind_all("<F1>", partial(self.pre_tag, "selection")) # Pre-Tag Selection
+        self.rootWin.bind_all("<F5>", partial(self.pre_tag, "page")) # Pre-Tag Page(s)
         self.rootWin.bind_all("<" + long + "-r>", self.load_page_from_button) # Reload Page
         self.rootWin.bind_all("<" + long + "-R>", self.load_page_from_button) # Reload Page
         self.rootWin.bind_all("<" + long + "-slash>", self.get_ner_model_dir) # Select NER model folder
-        # quoteleft is tilda (`). It was originally Esc, but that triggered Windows shortcuts
-        self.rootWin.bind_all("<" + long + "-quoteleft>", self.remove_tag) # Remove-Tag(s)
-        # Similarly, asciitilde is just ~ - the below shortcut is the above, but with shift being held
-        self.rootWin.bind_all("<" + long + "-Shift-asciitilde>", self.remove_all_tags) # Remove All Tags
+        self.rootWin.bind_all("<F3>", self.remove_tag) # Remove-Tag(s)
+        self.rootWin.bind_all("<F7>", self.remove_all_tags) # Remove All Tags
         self.rootWin.bind_all("<" + long + "-period>", lambda e : self.msg.config(text="")) # Clear Warning Message
         self.rootWin.bind_all("1", self.switch_annotate) # Annotate (welcome screen) - Bound to 1
         self.rootWin.bind_all("2", self.switch_validate) # Validate (welcome screen) - Bound to 2
