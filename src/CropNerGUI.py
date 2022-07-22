@@ -753,9 +753,6 @@ class CropNerGUI:
         """
         Clears the current annotations in the editor and creates a new annotation file.
         """
-
-
-
         json_file = fd.asksaveasfile(initialfile="Untitled", mode='w', defaultextension='.json')
 
         if json_file is None or json_file.name[-4:] != "json":
@@ -768,20 +765,14 @@ class CropNerGUI:
             # Clear annotations
             self.cust_ents_dict = {}
 
-            # Clear current annotation file
-            self.annotation_file = None
-            self.json_initialized = False
-
             # Clear metadata panel
             self.reset_metadata()
-
-            # Update annotation file label
-            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
 
             # Clear warning message
             self.msg.config(text="")
 
             self.annotation_file = json_file
+            self.json_initialized = True
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
         json_file.close()
 
