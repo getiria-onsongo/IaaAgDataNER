@@ -238,10 +238,8 @@ class CropNerGUI:
         self.file_menu.add_command(label="Open Annotation", command=partial(self.open_file, "json"), underline=5)
         # Saves an existing annotation file if one exists, otherwise opens file dialog to create a new one
         self.file_menu.add_command(label="Save", command=partial(self.file_save, "update"), underline=0)
-        self.file_menu.entryconfig(3, state=tk.DISABLED)
         # Opens file dialog to create and save new annotation file
         self.file_menu.add_command(label="Save As...", command=partial(self.file_save, "new"), underline=9)
-        self.file_menu.entryconfig(4, state=tk.DISABLED)
         # Switches the GUI to the welcome page and clears all raw data/annotations
         self.file_menu.add_command(label="Close Editor", command=self.return_to_welcome, underline=0)
         # Exits the program, asks to save unsaved changes
