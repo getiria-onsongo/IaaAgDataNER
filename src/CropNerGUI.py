@@ -6,6 +6,7 @@ from agParse import *
 from tkinterColorList import *
 from datetime import datetime
 from functools import partial
+from tooltip import Hovertip
 from json2py import *
 import os.path
 from py2json import *
@@ -228,9 +229,6 @@ class CropNerGUI:
         self.menubar.add_cascade(label="View", menu=self.view_menu, underline=0)
         self.rootWin.config(menu=self.menubar)
 
-        # Add keyboard shortcuts to menu options.
-        self.add_keyboard_shortcuts()
-
         # Inital frame for the welcome page
         self.welcome_frame = tk.Frame(self.rootWin)
         self.welcome_frame.pack(side=tk.TOP, fill="x")
@@ -410,8 +408,16 @@ class CropNerGUI:
         # Label to display messages
         self.msg = tk.Label(self.msg_frame, text="", padx=5, pady=5)
         self.msg.pack(side=tk.LEFT)
+
+        # Add keyboard shortcuts to menu options.
+        # This should be called after the buttons so that the tooltips can be added to them.
+        # Otherwise, the program will complain that they don't exist and refuse to launch.
+        self.add_keyboard_shortcuts()
         
     def add_keyboard_shortcuts(self):
+        """
+        Adds functionality for all keyboard shortcuts, along with the underlines for the Alt menu shortcuts.
+        """
         # Darwin is MacOS
         if platform.system() == "Darwin":
             short = "Command"
@@ -467,6 +473,28 @@ class CropNerGUI:
         self.rootWin.bind_all("<" + long + "-period>", lambda e : self.msg.config(text="")) # Clear Warning Message
         self.rootWin.bind_all("1", partial(self.open_file, "pdf/txt")) # Annotate (welcome screen) - Bound to 1
         self.rootWin.bind_all("2", partial(self.open_file, "json")) # Validate (welcome screen) - Bound to 2
+        self.add_tooltips(short)
+
+    def add_tooltips(self, label):
+        """
+        Adds tooltips to all buttons with keyboard shortcuts showing what keyboard shortcuts they have.
+
+        Default delay for these tooltips is 1000 ms. This can be changed by passing in a hover_delay argument.
+        """
+        annotate_tooltip = Hovertip(self.annotate_btn, "Press 1 to start annotating")
+        validate_tooltip = Hovertip(self.validate_btn, "Press 2 to start validating")
+
+        next_tooltip = Hovertip(self.next_btn, label + "+→")
+        prev_tooltip = Hovertip(self.prev_btn, label + "+←")
+        metadata_tooltip = Hovertip(self.metadata_btn, label + "+M")
+        # Second metadata tooltip is in self.toggle_metadata
+        pre_tag_selection_tooltip = Hovertip(self.pre_tag_selection_btn, "F1")
+        pre_tag_page_tooltip = Hovertip(self.pre_tag_page_btn, "F5")
+        load_tooltip = Hovertip(self.load_btn, label + "+R")
+        ner_model_tooltip = Hovertip(self.ner_model_button, label + "+/")
+        clear_tag_tooltip = Hovertip(self.clear_tag_btn, "F3")
+        clear_tooltip = Hovertip(self.clear_btn, "F7")
+        msg_tooltip = Hovertip(self.msg_btn, label + "+.")
 
     def switch_annotate(self, e=None):
         """
@@ -678,6 +706,7 @@ class CropNerGUI:
         save_metadata = tk.Button(self.metadata_dialog, text="Save Metadata", command=save)
         self.rootWin.bind_all("<" + long + "-m>", save)
         self.rootWin.bind_all("<" + long + "-M>", save)
+        save_metadata_tooltip = Hovertip(save_metadata, long + "+M")
         save_metadata.pack(side=tk.BOTTOM, pady="15")
 
 
