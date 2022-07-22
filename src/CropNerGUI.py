@@ -438,8 +438,7 @@ class CropNerGUI:
         self.file_menu.entryconfig("Exit", accelerator=short + "+Q")
         self.rootWin.bind_all("<" + long + "-q>", partial(self.quit))
         self.rootWin.bind_all("<" + long + "-Q>", partial(self.quit))
-        self.rootWin.bind_all("<" + long + "-=>", self.font_plus)
-        self.rootWin.bind_all("<" + long + "-+>", self.font_plus)
+        self.rootWin.bind_all("<" + long + "-equal>", self.font_plus)
         self.rootWin.bind_all("<" + long + "-minus>", self.font_minus)
 
     def switch_annotate(self):
@@ -721,7 +720,6 @@ class CropNerGUI:
             self.raw_file=None
             self.review_annotations()
         elif file_type == "pdf/txt":
-
             self.raw_file=f
 
             # Ends the operation if a raw file wasn't selected
@@ -735,15 +733,18 @@ class CropNerGUI:
             self.page_entry.delete(0, tk.END)
 
             if self.file_mode == "pdf":
-                # Bring back the "Next Page" button, placing it before the save button.
+                # Shows the frame with page number controls upon loading a PDF.
                 self.page_frame.pack(side=tk.TOP)
+                self.page_entry.insert(0, "1")
             else:
-                # Remove "Next Page" button if loading a txt file, which has no pages.
+                # Removes the page controls if file loaded is not PDF.
                 self.page_frame.pack_forget()
 
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
             self.pdf_document = None
+            if self.current_page != "Annotation":
+                self.switch_annotate()
             self.load_page()
         else:
             self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
@@ -1331,10 +1332,6 @@ class CropNerGUI:
         if self.annotation_file is None:
             self.msg.config(text="Please select an annotations file (json)", foreground="red")
         else:
-
-            if self.current_page != "Validate":
-                self.switch_validate()
-
             # Load annotation data
             try:
                 data = json_2_dict(self.annotation_file.name)
@@ -1348,6 +1345,9 @@ class CropNerGUI:
             doc = data['doc']
             url = data['url']
             """
+
+            if self.current_page != "Validate":
+                self.switch_validate()
 
             # Clears metadata values so that if any fail to load from the json being loaded, we don't have
             # leftover values from the last annotation
