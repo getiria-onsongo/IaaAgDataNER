@@ -208,8 +208,10 @@ class CropNerGUI:
         self.file_menu.add_command(label="Open Annotation", command=partial(self.open_file, "json"), underline=5)
         # Saves an existing annotation file if one exists, otherwise opens file dialog to create a new one
         self.file_menu.add_command(label="Save", command=partial(self.file_save, "update"), underline=0)
+        self.file_menu.entryconfig(3, state=tk.DISABLED)
         # Opens file dialog to create and save new annotation file
         self.file_menu.add_command(label="Save As...", command=partial(self.file_save, "new"), underline=9)
+        self.file_menu.entryconfig(4, state=tk.DISABLED)
         # Switches the GUI to the welcome page and clears all raw data/annotations
         self.file_menu.add_command(label="Close Editor", command=self.return_to_welcome, underline=0)
         # Exits the program, asks to save unsaved changes
@@ -237,12 +239,12 @@ class CropNerGUI:
         # Trying to get this set the padding based on window size
         self.welcome_label.pack(side=tk.TOP, pady=(250, 0))
 
-        self.annotate_btn = tk.Button(self.welcome_frame, text="Annotate NER Data (1)", command = self.switch_annotate)
+        self.annotate_btn = tk.Button(self.welcome_frame, text="Annotate NER Data", command = partial(self.open_file, "pdf/txt"))
         self.annotate_btn.pack()
 
         tk.Label(self.welcome_frame, text="or").pack()
 
-        self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations (2)", command = self.switch_validate)
+        self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations", command = partial(self.open_file, "json"))
         self.validate_btn.pack()
 
 
@@ -391,16 +393,16 @@ class CropNerGUI:
         self.page_frame = tk.Frame(self.bottom_frame)
         # Enter page you would like to load. Start with 1 as opposed to the conventional 0 numbering in CS
         self.page_entry = tk.Entry(self.page_frame, width=5)
-        self.page_entry.bind("<Return>", self.load_page_from_button)
+        self.page_entry.bind("<Return>", self.load_page_from_entry)
         self.page_entry.pack(side=tk.RIGHT, padx=(0,30))
         self.page_label = tk.Label(self.page_frame, text="Raw Data File Page Num:", width=18)
         self.page_label.pack(side=tk.RIGHT)
-        # Previous page button
-        self.prev_btn = tk.Button(self.page_frame, text="Previous Page", command=partial(self.change_page, "previous"))
-        self.prev_btn.pack(side=tk.RIGHT)
         # Next page button
         self.next_btn = tk.Button(self.page_frame, text="Next Page", command=partial(self.change_page, "next"))
         self.next_btn.pack(side=tk.RIGHT)
+        # Previous page button
+        self.prev_btn = tk.Button(self.page_frame, text="Previous Page", command=partial(self.change_page, "previous"))
+        self.prev_btn.pack(side=tk.RIGHT)
 
         # Frame that will contain messages being displayed to the user
         self.msg_frame = tk.Frame(self.annotation_frame)
@@ -463,8 +465,8 @@ class CropNerGUI:
         self.rootWin.bind_all("<F3>", self.remove_tag) # Remove-Tag(s)
         self.rootWin.bind_all("<F7>", self.remove_all_tags) # Remove All Tags
         self.rootWin.bind_all("<" + long + "-period>", lambda e : self.msg.config(text="")) # Clear Warning Message
-        self.rootWin.bind_all("1", self.switch_annotate) # Annotate (welcome screen) - Bound to 1
-        self.rootWin.bind_all("2", self.switch_validate) # Validate (welcome screen) - Bound to 2
+        self.rootWin.bind_all("1", partial(self.open_file, "pdf/txt")) # Annotate (welcome screen) - Bound to 1
+        self.rootWin.bind_all("2", partial(self.open_file, "json")) # Validate (welcome screen) - Bound to 2
 
     def switch_annotate(self, e=None):
         """
@@ -767,7 +769,6 @@ class CropNerGUI:
             self.raw_file=None
             self.review_annotations()
         elif file_type == "pdf/txt":
-
             self.raw_file=f
 
             # Ends the operation if a raw file wasn't selected
@@ -781,15 +782,18 @@ class CropNerGUI:
             self.page_entry.delete(0, tk.END)
 
             if self.file_mode == "pdf":
-                # Bring back the "Next Page" button, placing it before the save button.
+                # Shows the frame with page number controls upon loading a PDF.
                 self.page_frame.pack(side=tk.TOP)
+                self.page_entry.insert(0, "1")
             else:
-                # Remove "Next Page" button if loading a txt file, which has no pages.
+                # Removes the page controls if file loaded is not PDF.
                 self.page_frame.pack_forget()
 
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
             self.pdf_document = None
+            if self.current_page != "Annotation":
+                self.switch_annotate()
             self.load_page()
         else:
             self.msg.config(text="Warning!! Please select a valid file.", foreground="red")
@@ -798,9 +802,6 @@ class CropNerGUI:
         """
         Clears the current annotations in the editor and creates a new annotation file.
         """
-
-
-
         json_file = fd.asksaveasfile(initialfile="Untitled", mode='w', defaultextension='.json')
 
         if json_file is None or json_file.name[-4:] != "json":
@@ -813,19 +814,15 @@ class CropNerGUI:
             # Clear annotations
             self.cust_ents_dict = {}
 
-            # Clear current annotation file
-            self.annotation_file = None
-            self.json_initialized = False
-
             # Clear metadata panel
             self.reset_metadata()
-
-            # Update annotation file label
-            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
 
             # Clear warning message
             self.msg.config(text="")
 
+            self.json_initialized = False
+
+            self.initialize_new_file()
             self.annotation_file = json_file
             self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
         json_file.close()
@@ -971,14 +968,17 @@ class CropNerGUI:
             self.page_entry.insert(0, entry)
         return entry
 
-    def load_page_from_button(self, event=None):
+    def load_page_from_entry(self, event=None):
         """
-        Loading the page can cause warnings to pop on on the bottom, especially with ranges.
-        If you press "load data" and the warning from your last page load is still there, it
-        can look like you just got an error even though you didn't. Thus, pressing the button
-        to load the page first clears any warnings.
+        The change page buttons will clear the annotation file when going to next/previous page, so this function
+        is in place to do the same when hitting enter in the page entry box to load the page instead.
         """
-        self.msg.config(text="")
+        # Reset annotation data
+        self.json_initialized = False
+        self.annotation_file = None
+        self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
+        self.reset_metadata()
+
         self.load_page()
 
     def load_page(self, e=None):
@@ -1002,15 +1002,6 @@ class CropNerGUI:
         # Reset annotation dictionary
         self.cust_ents_dict = {}
 
-        # Clear current annotation file
-        self.annotation_file = None
-        self.json_initialized = False
-
-        # Clear metadata panel
-        self.reset_metadata()
-
-        # Update annotation file label
-        self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
 
         # Delete contents
         self.text.delete(1.0, tk.END)
@@ -1150,7 +1141,6 @@ class CropNerGUI:
                 else:
                     input_text = self.load_page()
 
-            if not self.json_initialized:
                 self.initialize_new_file()                
 
             self.text.delete(1.0, tk.END)
@@ -1224,10 +1214,11 @@ class CropNerGUI:
         return overlap
 
     def initialize_new_file(self):
-        self.json_initialized = True
-        self.working_file_label.config(text="Working Annotation File: Untitled.json")
-        self.meta_date = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
-        self.meta_doc = self.file_name
+        if self.json_initialized == False:
+            self.json_initialized = True
+            self.working_file_label.config(text="Working Annotation File: Untitled.json")
+            self.meta_date = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+            self.meta_doc = self.file_name
 
     def get_selected_interval(self) -> tuple:
         """
@@ -1290,8 +1281,10 @@ class CropNerGUI:
                 # Add the new NER tag into the dictionary
                 self.cust_ents_dict[self.chunk][1].append((ent_char_start,ent_char_end, tag_label))
             else:
-                self.initialize_new_file()
                 self.cust_ents_dict[self.chunk] = [input_text, [(ent_char_start,ent_char_end, tag_label)]]
+
+            # Initializes file if not previously initialized
+            self.initialize_new_file()
 
             # Highlight the new NER  tag
             self.text.tag_add(tag_label, "sel.first", "sel.last")
@@ -1381,10 +1374,6 @@ class CropNerGUI:
         if self.annotation_file is None:
             self.msg.config(text="Please select an annotations file (json)", foreground="red")
         else:
-
-            if self.current_page != "Validate":
-                self.switch_validate()
-
             # Load annotation data
             try:
                 data = json_2_dict(self.annotation_file.name)
@@ -1398,6 +1387,9 @@ class CropNerGUI:
             doc = data['doc']
             url = data['url']
             """
+
+            if self.current_page != "Validate":
+                self.switch_validate()
 
             # Clears metadata values so that if any fail to load from the json being loaded, we don't have
             # leftover values from the last annotation
