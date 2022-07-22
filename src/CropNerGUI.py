@@ -231,12 +231,12 @@ class CropNerGUI:
         # Trying to get this set the padding based on window size
         self.welcome_label.pack(side=tk.TOP, pady=(250, 0))
 
-        self.annotate_btn = tk.Button(self.welcome_frame, text="Annotate NER Data", command = self.switch_annotate)
+        self.annotate_btn = tk.Button(self.welcome_frame, text="Annotate NER Data", command = partial(self.open_file, "pdf/txt"))
         self.annotate_btn.pack()
 
         tk.Label(self.welcome_frame, text="or").pack()
 
-        self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations", command = self.switch_validate)
+        self.validate_btn = tk.Button(self.welcome_frame, text="Validate NER Annotations", command = partial(self.open_file, "json"))
         self.validate_btn.pack()
 
 
@@ -388,12 +388,12 @@ class CropNerGUI:
         self.page_entry.pack(side=tk.RIGHT, padx=(0,30))
         self.page_label = tk.Label(self.page_frame, text="Raw Data File Page Num:", width=18)
         self.page_label.pack(side=tk.RIGHT)
-        # Previous page button
-        self.prev_btn = tk.Button(self.page_frame, text="Previous Page", command=partial(self.change_page, "previous"))
-        self.prev_btn.pack(side=tk.RIGHT)
         # Next page button
         self.next_btn = tk.Button(self.page_frame, text="Next Page", command=partial(self.change_page, "next"))
         self.next_btn.pack(side=tk.RIGHT)
+        # Previous page button
+        self.prev_btn = tk.Button(self.page_frame, text="Previous Page", command=partial(self.change_page, "previous"))
+        self.prev_btn.pack(side=tk.RIGHT)
 
         # Frame that will contain messages being displayed to the user
         self.msg_frame = tk.Frame(self.annotation_frame)
