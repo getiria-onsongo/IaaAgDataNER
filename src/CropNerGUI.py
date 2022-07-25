@@ -214,6 +214,7 @@ class CropNerGUI:
         self.page_number = 0
         self.json_initialized = False
         self.current_page = "Welcome"
+        self.rootWin.protocol('WM_DELETE_WINDOW', self.quit)
         # Metadata values
         self.meta_doc = ""
         self.meta_url = ""
