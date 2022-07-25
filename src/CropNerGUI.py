@@ -801,6 +801,9 @@ class CropNerGUI:
         If a user selects a pdf ot text file, it will be loaded into the text box for annotation. If a json file
         containing annotation is selected, it will bo loaded with the annotations highlighted.
         """
+        # If called with a keyboard shortcut outside of the welcome page.
+        if (not (e==None)) and (not (self.current_page=="Welcome")):
+            return
         # Clear warning message, if one exists
         self.msg.config(text="")
 
@@ -818,6 +821,7 @@ class CropNerGUI:
             self.msg.config(text="No file was chosen", foreground="red")
             return
         elif file_type == "json":
+            self.switch_validate()
             self.annotation_file = f
             self.file_prefix = self.annotation_file.name.split(".")[0]
             self.file_name = self.annotation_file.name.split("/")[-1]
@@ -826,6 +830,7 @@ class CropNerGUI:
             self.raw_file=None
             self.review_annotations()
         elif file_type == "pdf/txt":
+            self.switch_annotate()
             self.raw_file=f
 
             # Ends the operation if a raw file wasn't selected
