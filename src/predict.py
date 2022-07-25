@@ -93,16 +93,18 @@ class Predict:
         self.no_overwrite = no_overwrite
         self.spacy_model_name = spacy_model_name
 
-        if crf:
-            self.pos_model = spacy.load(self.spacy_model_name, disable=["ner"])
-            self.pos_model.add_pipe("ner-crf")
-        else:
-            self.pos_model = spacy.load(self.spacy_model_name)
+        self.pos_model = spacy.load(self.spacy_model_name)
 
-        self.nlp = spacy.load(self.model_dir)
+        if crf:
+            self.nlp = spacy.load(self.model_dir)
+            self.nlp.add_pipe("ner-crf", disable=["ner"])
+        else:
+            self.nlp = spacy.load(self.model_dir)
+            self.nlp.add_pipe("compound_trait_entities", after="ner")
+
+
         self.tags = ["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]
         self.cust_ents_dict = {}
-        self.nlp.add_pipe("compound_trait_entities", after="ner")
 
 
     @Language.factory("ner-crf")
