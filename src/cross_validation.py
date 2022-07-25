@@ -84,12 +84,15 @@ class CrossValidation:
         """
         if gpu:
             execute("python3 -m spacy init config --lang en --pipeline transformer,senter,ner  --optimize accuracy --force " + name +" -G", shell=True)
-        elif self.spancat:
-            execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,spancat  --optimize accuracy --force " + name)
         else:
+            if self.spancat:
+                execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,spancat  --optimize accuracy --force " + name)
+            else:
+                execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
+
             if word_embed:
                 execute("python3 -m spacy init vectors en " + vectors + " "+ model_name, shell=True)
-            execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
+
         return name
 
     def cross_validate(self, data : str, config : str, model_name="cv_model"):
@@ -133,7 +136,7 @@ class CrossValidation:
         convertJsonToSpacyJsonl(outputFileName="ner_2021_08_dev_data.jsonl", filePaths=dev)
         convert(input_path="ner_2021_08_dev_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
         if self.spancat:
-            execute("python ~/Packages/IaaAgDataNER/src/add_ents_to_spans_dict.py  ner_2021_08/ner_2021_08_dev_data.spacy en sc")
+            execute("python3 ~/Packages/IaaAgDataNER/src/add_ents_to_spans_dict.py  ner_2021_08/ner_2021_08_dev_data.spacy en sc")
 
         # k-fold cross validation
         for f in range(1, self.k_folds+1):
@@ -152,7 +155,7 @@ class CrossValidation:
             convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
             if self.spancat:
-                execute("python  ~/Packages/IaaAgDataNER/src/add_ents_to_spans_dict.py  ner_2021_08/ner_2021_08_training_data.spacy en sc")
+                execute("python3 ~/Packages/IaaAgDataNER/src/add_ents_to_spans_dict.py  ner_2021_08/ner_2021_08_training_data.spacy en sc")
 
             # model_name = "cv_model" # for testing only
             # create gold standard data directory and bratt files
