@@ -687,18 +687,23 @@ class CropNerGUI:
         else:
             long = "Control"
 
+        # This should be called when X is pressed on the metadata window, or when the user presses save metadata.
+        def on_close():
+            self.metadata_dialog.destroy()
+            self.metadata_open = False
+            self.rootWin.bind_all("<" + long + "-m>", self.toggle_metadata)
+            self.rootWin.bind_all("<" + long + "-M>", self.toggle_metadata)
+
         def save(e=None):
             self.meta_doc = doc_entry.get()
             self.meta_url = url_entry.get()
             self.meta_crop = crop_entry.get().upper()
             self.meta_cvar = cvar_entry.get().upper()
             self.meta_date = date_entry.get()
-            self.metadata_dialog.destroy()
-            self.metadata_open = False
-            self.rootWin.bind_all("<" + long + "-m>", self.toggle_metadata)
-            self.rootWin.bind_all("<" + long + "-M>", self.toggle_metadata)
+            on_close()
 
         self.metadata_dialog = tk.Toplevel(self.rootWin)
+        self.metadata_dialog.protocol("WM_DELETE_WINDOW",  on_close)
         self.metadata_open = True
         doc_label = tk.Label(self.metadata_dialog, text="Document Name")
         doc_label.pack(side=tk.TOP)
