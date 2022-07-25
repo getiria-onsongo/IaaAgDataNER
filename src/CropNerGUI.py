@@ -529,8 +529,6 @@ class CropNerGUI:
         """
         Switches GUI elements to annotation mode
         """
-        if not (self.current_page == "Welcome"):
-            return
         self.welcome_frame.pack_forget()
         self.annotation_frame.pack(fill="x")
         self.current_page = "Annotate"
@@ -542,8 +540,6 @@ class CropNerGUI:
         """
         Switches GUI elements to validation mode
         """
-        if not (self.current_page == "Welcome"):
-            return
         self.welcome_frame.pack_forget()
         self.annotation_frame.pack(fill="x")
         self.page_frame.pack_forget()
@@ -1460,6 +1456,7 @@ class CropNerGUI:
             """
 
             if self.current_page != "Validate":
+                print("Runs switch validate")
                 self.switch_validate()
 
             # Clears metadata values so that if any fail to load from the json being loaded, we don't have
@@ -1588,18 +1585,21 @@ class CropNerGUI:
                     save_name = self.file_name.split(".")[0]+"_pg"+str(self.page_number)+".json"
                 else:
                     save_name = self.file_name
-                json_file = fd.asksaveasfile(initialfile=save_name, mode='w', defaultextension='.json')
+                print("open save dialog")
+                json_file = fd.asksaveasfilename(initialfile=save_name, defaultextension='.json')
+                # Cancels operation if invalid file chosen to save to, otherwise updates current working file
+                if json_file is None or json_file[-4:] != "json":
+                    self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
+                    return
+                else:
+                    json_file = open(json_file, 'w')
             else:
+                print("just opens file")
                 json_file = open(self.annotation_file.name, 'w')
                 
 
-            # Cancels operation if invalid file chosen to save to, otherwise updates current working file
-            if json_file is None or json_file.name[-4:] != "json":
-                self.msg.config(text="Invalid file or no file chosen; annotations not saved.", foreground="red")
-                return
-            else:
-                self.annotation_file = json_file
-                self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
+            self.annotation_file = json_file
+            self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file.name.split("/")[-1]))
 
             input_text = self.cust_ents_dict[self.chunk][0]
             entities = self.cust_ents_dict[self.chunk][1]
