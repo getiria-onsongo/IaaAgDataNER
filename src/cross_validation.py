@@ -17,6 +17,7 @@ from inter_dataset_agreement import measure_dataset, format_results
 from json2SpacyJson import convertJsonToSpacyJsonl
 from json2py import json_2_dict
 from dataset2bratt import dataset_to_bratt
+from add_ents_to_spans_dict import convert_to_span
 from validation_testing import execute
 
 class CrossValidation:
@@ -55,11 +56,12 @@ class CrossValidation:
     create_dirs(self, dirs : list)
         creates directories
     """
-    def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"],  pos=False, spancat=False):
+    def __init__(self, k_folds=5, tags=["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"],  pos=False, spancat=False, crf=False):
         self.k_folds = k_folds
         self.tags = tags
         self.pos = pos
         self.spancat = spancat
+        self.crf = crf
         warnings.filterwarnings('ignore') # ignore SpaCy warnings for cleaner terminal output
 
     def create_config(self, name="senter_ner.cfg", model_name="cv_model", gpu=False, word_embed=False, vectors=
@@ -91,7 +93,7 @@ class CrossValidation:
                 execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
 
             if word_embed:
-                execute("python3 -m spacy init vectors en " + vectors + " "+ model_name, shell=True)
+                execute("python3 -m spacy init vectors en " + vectors + " "+ model_name)
 
         return name
 
@@ -136,7 +138,7 @@ class CrossValidation:
         convertJsonToSpacyJsonl(outputFileName="ner_2021_08_dev_data.jsonl", filePaths=dev)
         convert(input_path="ner_2021_08_dev_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
         if self.spancat:
-            execute("python3 ~/Packages/IaaAgDataNER/src/add_ents_to_spans_dict.py  ner_2021_08/ner_2021_08_dev_data.spacy en sc")
+            convert_to_span("ner_2021_08/ner_2021_08_dev_data.spacy", "en", "sc")
 
         # k-fold cross validation
         for f in range(1, self.k_folds+1):
@@ -155,7 +157,7 @@ class CrossValidation:
             convertJsonToSpacyJsonl(outputFileName="ner_2021_08_training_data.jsonl", filePaths=training)
             convert(input_path="ner_2021_08_training_data.jsonl", output_dir="ner_2021_08", converter="json", file_type="spacy")
             if self.spancat:
-                execute("python3 ~/Packages/IaaAgDataNER/src/add_ents_to_spans_dict.py  ner_2021_08/ner_2021_08_training_data.spacy en sc")
+                convert_to_span("ner_2021_08/ner_2021_08_training_data.spacy", "en", "sc")
 
             # model_name = "cv_model" # for testing only
             # create gold standard data directory and bratt files
@@ -226,7 +228,7 @@ class CrossValidation:
         # predict using trained model
         print("Predicting on validation data ...")
         print("____________________________")
-        predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, output_dir=json_name, spacy_only=flag)
+        predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, output_dir=json_name, spacy_only=flag, crf=self.crf)
         predict.process_files()
 
         # convert predictions to bratt format
@@ -452,9 +454,14 @@ if __name__ == '__main__':
         action='store', default=None,
         help='path to vectors'
     )
+    parser.add_argument(
+        '--crf',
+        action='store_true', default=False,
+        help='add crf layer'
+    )
 
     args = parser.parse_args()
 
-    val = CrossValidation(k_folds=int(args.folds), pos=args.pos, spancat=args.spancat)
+    val = CrossValidation(k_folds=int(args.folds), pos=args.pos, spancat=args.spancat, crf=args.crf)
     config_name = val.create_config(gpu=args.GPU, word_embed=args.word_embed, vectors=args.vectors)
     val.cross_validate(data=args.dataset_dir, config=config_name)

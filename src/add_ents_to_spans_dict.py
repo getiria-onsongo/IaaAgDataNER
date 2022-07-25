@@ -8,7 +8,7 @@ from spacy.tokens import DocBin
 From https://github.com/explosion/projects/blob/v3/experimental/ner_spancat/
 """
 
-def main(loc: Path, lang: str, span_key: str):
+def convert_to_span(loc: Path, lang: str, span_key: str):
     """
     Set the NER data into the doc.spans, under a given key.
 
@@ -22,7 +22,3 @@ def main(loc: Path, lang: str, span_key: str):
     for doc in docs:
         doc.spans[span_key] = list(doc.ents)
     DocBin(docs=docs).to_disk(loc)
-
-
-if __name__ == "__main__":
-    typer.run(main)
