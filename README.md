@@ -51,6 +51,7 @@ pip3 install -U scikit-learn
 pip3 install -U pyxpdf
 
 ```
+The GUI also uses part of Idlelib, but this doesn't need to be separately installed. 
 
 ## Download language models
 ```
