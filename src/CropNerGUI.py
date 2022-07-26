@@ -805,8 +805,8 @@ class CropNerGUI:
         If a user selects a pdf ot text file, it will be loaded into the text box for annotation. If a json file
         containing annotation is selected, it will bo loaded with the annotations highlighted.
         """
-        # If called with a keyboard shortcut outside of the welcome page.
-        if (not (e==None)) and (not (self.current_page=="Welcome")):
+        # If called with 1 or 2 outside of the welcome page.
+        if (e.keysym == '1' or e.keysym == '2') and (not (self.current_page=="Welcome")):
             return
         # Clear warning message, if one exists
         self.msg.config(text="")
