@@ -744,8 +744,10 @@ class CropNerGUI:
         """
         Resets the metadata fields
         """
-
-        self.meta_doc = ""
+        if (self.file_name == None) or (self.file_name==""):
+            self.meta_doc = ""
+        else:
+            self.meta_doc = self.file_name
         self.meta_url = ""
         self.meta_crop = ""
         self.meta_cvar = ""
@@ -855,6 +857,7 @@ class CropNerGUI:
 
             self.file_prefix = self.raw_file.name.split(".")[0]
             self.file_name = self.raw_file.name.split("/")[-1]
+            self.meta_doc = self.file_name
             self.pdf_document = None
             if self.current_page != "Annotation":
                 self.switch_annotate()
@@ -1041,9 +1044,9 @@ class CropNerGUI:
         self.json_initialized = False
         self.annotation_file = None
         self.working_file_label.config(text="Working Annotation File: "+str(self.annotation_file))
-        self.reset_metadata()
 
         self.load_page()
+        self.reset_metadata()
 
     def load_page(self, e=None):
         """
@@ -1585,7 +1588,6 @@ class CropNerGUI:
                     save_name = self.file_name.split(".")[0]+"_pg"+str(self.page_number)+".json"
                 else:
                     save_name = self.file_name
-                print("open save dialog")
                 json_file = fd.asksaveasfilename(initialfile=save_name, defaultextension='.json')
                 # Cancels operation if invalid file chosen to save to, otherwise updates current working file
                 if json_file is None or json_file[-4:] != "json":
