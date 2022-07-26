@@ -12,6 +12,11 @@ from json2bratt import conversion
 from dataset2bratt import extract_page_num
 from collections import defaultdict
 
+@Language.factory("ner-crf")
+def create_my_component(nlp, name):
+    crf_extractor = CRFExtractor().from_disk("spacy_crfsuite_conll03_sm.bz2")
+    return CRFEntityExtractor(nlp, crf_extractor=crf_extractor)
+
 class Predict:
     """
     A class to do predictions on data using the trained model
@@ -108,11 +113,6 @@ class Predict:
         self.tags = ["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]
         self.cust_ents_dict = {}
 
-
-    @Language.factory("ner-crf")
-    def create_my_component(self, nlp, name):
-        crf_extractor = CRFExtractor().from_disk("spacy_crfsuite_conll03_sm.bz2")
-        return CRFEntityExtractor(nlp, crf_extractor=crf_extractor)
 
     def process_files(self):
         """
