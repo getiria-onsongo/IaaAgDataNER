@@ -70,7 +70,6 @@ file. 0.1 means the test set will be approximately 10 percent of data in the fol
 
 ```
 python3 src/json2SpacyJson.py Data ner_2021_08 en_core_web_lg --suffix '.json' --split True --test_size 0.1
-
 ```
 
 ## Create directory to store training data in spaCy format
