@@ -97,7 +97,7 @@ class Predict:
 
         if crf:
             self.nlp = spacy.load(self.model_dir)
-            self.nlp.add_pipe("ner-crf", disable=["ner"])
+            self.nlp.add_pipe("ner-crf")
         else:
             self.nlp = spacy.load(self.model_dir)
             if spancat:
