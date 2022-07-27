@@ -1323,7 +1323,7 @@ class CropNerGUI:
         tag_label : str
             Label to assign to the named entity that was selected.
         """
-
+        self.remove_tag()
         # Clear warning message, if one exists
         self.msg.config(text="")
         try:
