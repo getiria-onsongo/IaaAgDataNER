@@ -104,13 +104,14 @@ class Predict:
 
 
         if self.crf:
-            print("damn")
-            self.nlp.add_pipe("compound_trait_entities", after="ner")
+            self.nlp = spacy.load(self.model_dir, disable=["ner"])
             self.nlp.add_pipe("ner-crf")
         else:
             if self.spancat:
+                self.nlp = spacy.load(self.model_dir)
                 self.nlp.add_pipe("compound_trait_entities", after="spancat")
             else:
+                self.nlp = spacy.load(self.model_dir)
                 self.nlp.add_pipe("compound_trait_entities", after="ner")
 
         self.tags = ["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]
