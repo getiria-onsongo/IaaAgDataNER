@@ -806,8 +806,12 @@ class CropNerGUI:
         containing annotation is selected, it will bo loaded with the annotations highlighted.
         """
         # If called with 1 or 2 outside of the welcome page.
-        if (e.keysym == '1' or e.keysym == '2') and (not (self.current_page=="Welcome")):
-            return
+        try:
+            if (e.keysym == '1' or e.keysym == '2') and (not (self.current_page=="Welcome")):
+                return
+        except:
+            # User pressed button, no checks needed to carry on
+            pass
         # Clear warning message, if one exists
         self.msg.config(text="")
 
