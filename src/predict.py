@@ -87,7 +87,7 @@ class Predict:
         saves json for a given page
     """
 
-    def __init__(self, model_dir : str, dataset_dir : str, crf=False, spancat=False, output_dir=None, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
+    def __init__(self, model_dir : str, dataset_dir : str, output_dir : str, crf=False, spancat=False, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
         self.model_dir = model_dir
         self.dataset_dir = dataset_dir
         self.crf = crf
@@ -100,14 +100,14 @@ class Predict:
         self.no_overwrite = no_overwrite
         self.spacy_model_name = spacy_model_name
         self.pos_model = spacy.load(self.spacy_model_name)
+        self.nlp = spacy.load(self.model_dir)
+
 
         if self.crf:
-            self.nlp = spacy.load(self.model_dir)
+            print("damn")
             self.nlp.add_pipe("compound_trait_entities", after="ner")
-            self.nlp.add_pipe("ner-crf", config={'overwrite_ents':False})
-
+            self.nlp.add_pipe("ner-crf")
         else:
-            self.nlp = spacy.load(self.model_dir)
             if self.spancat:
                 self.nlp.add_pipe("compound_trait_entities", after="spancat")
             else:
@@ -174,12 +174,14 @@ class Predict:
         doc = self.tag_ner_with_spacy(input_text)
         custom_tags_present = False
 
+        if self.spancat:
+            named_ents = doc.spans
+        elif self.crf:
+            named_ents = filter_spans(doc.ents)
+        else:
+            named_ents = doc.ents
 
-        if self.crf:
-            filtered = filter_spans(ents)
-            doc.ents = filtered
-
-        for ent in doc.ents:
+        for ent in named_ents:
             # NER is in our list of custom tags
             label = ent.label_
             if label in self.tags:
