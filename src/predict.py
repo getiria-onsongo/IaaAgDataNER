@@ -103,6 +103,7 @@ class Predict:
 
         if self.crf:
             self.nlp = spacy.load(self.model_dir)
+            self.nlp.add_pipe("compound_trait_entities", after="ner")
             self.nlp.add_pipe("ner-crf", config={'overwrite_ents':False})
 
         else:
