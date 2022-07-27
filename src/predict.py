@@ -15,7 +15,7 @@ from collections import defaultdict
 
 @Language.factory("ner-crf")
 def create_my_component(nlp, name):
-    crf_extractor = CRFExtractor().from_disk("spacy_crfsuite_conll03_sm.bz2")
+    crf_extractor = CRFExtractor().from_disk("../spacy_crfsuite_conll03_sm.bz2")
     return CRFEntityExtractor(nlp, crf_extractor=crf_extractor)
 
 class Predict:
