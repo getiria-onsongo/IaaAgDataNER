@@ -7,6 +7,7 @@ from py2json import *
 from datetime import datetime
 from pyxpdf import Document
 from pyxpdf.xpdf import TextControl
+from spacy.util import filter_spans
 from spacy_crfsuite import CRFEntityExtractor, CRFExtractor
 from json2bratt import conversion
 from dataset2bratt import extract_page_num
@@ -89,23 +90,23 @@ class Predict:
     def __init__(self, model_dir : str, dataset_dir : str, crf=False, spancat=False, output_dir=None, spacy_only=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False, spacy_model_name="en_core_web_lg"):
         self.model_dir = model_dir
         self.dataset_dir = dataset_dir
+        self.crf = crf
+        self.spancat = spancat
         self.output_dir = output_dir
-
         self.spacy_only = spacy_only
         self.json_prefix = json_prefix
         self.dataset_suffix = dataset_suffix
         self.json_suffix = json_suffix
         self.no_overwrite = no_overwrite
         self.spacy_model_name = spacy_model_name
-
         self.pos_model = spacy.load(self.spacy_model_name)
 
-        if crf:
+        if self.crf:
             self.nlp = spacy.load(self.model_dir)
             self.nlp.add_pipe("ner-crf")
         else:
             self.nlp = spacy.load(self.model_dir)
-            if spancat:
+            if self.spancat:
                 self.nlp.add_pipe("compound_trait_entities", after="spancat")
             else:
                 self.nlp.add_pipe("compound_trait_entities", after="ner")
@@ -170,6 +171,13 @@ class Predict:
         self.cust_ents_dict = {}
         doc = self.tag_ner_with_spacy(input_text)
         custom_tags_present = False
+
+
+        if self.crf:
+            filtered = filter_spans(ents)
+            len_filtered = len(filtered)
+            doc.ents = filtered
+
 
         for ent in doc.ents:
             # NER is in our list of custom tags

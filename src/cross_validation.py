@@ -86,8 +86,8 @@ class CrossValidation:
         if gpu:
             execute("python3 -m spacy init config --lang en --pipeline transformer,senter,ner  --optimize accuracy --force " + name + " -G")
         elif word_embed:
+            execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
             execute("python3 -m spacy init vectors en " + vectors + " " + model_name)
-            execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,spancat  --optimize accuracy --force " + name)
         elif self.spancat:
             execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,spancat  --optimize accuracy --force " + name)
         else:
