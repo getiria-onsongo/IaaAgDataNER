@@ -103,7 +103,8 @@ class Predict:
 
         if self.crf:
             self.nlp = spacy.load(self.model_dir)
-            self.nlp.add_pipe("ner-crf")
+            self.nlp.add_pipe("ner-crf", config={'overwrite_ents':False})
+
         else:
             self.nlp = spacy.load(self.model_dir)
             if self.spancat:
@@ -175,9 +176,7 @@ class Predict:
 
         if self.crf:
             filtered = filter_spans(ents)
-            len_filtered = len(filtered)
             doc.ents = filtered
-
 
         for ent in doc.ents:
             # NER is in our list of custom tags
