@@ -176,7 +176,7 @@ class Predict:
         custom_tags_present = False
 
         if self.spancat:
-            named_ents = doc.spans
+            named_ents = doc.spans["sc"]
         elif self.crf:
             named_ents = filter_spans(doc.ents)
         else:
