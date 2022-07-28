@@ -167,7 +167,7 @@ class CrossValidation:
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")
             print("____________________________")
-            self.predict(crf, fold_dir, "spacy", gold_bratt_dir, model_name+"/model-best")
+            self.predict(crf, fold_dir, "spacy", gold_bratt_dir, model_name+"/model-best", training)
             spacy_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/spacy/pred_bratt"), 'strict')
             print("\nFold %s results with spacy only: " %f)
             print("____________________________")
@@ -177,7 +177,7 @@ class CrossValidation:
                 # spacy + pos tagging predictions on validation data
                 print("\nEvaluating with spacy & pos...")
                 print("____________________________")
-                self.predict(crf, fold_dir, "pos", gold_bratt_dir, model_name+"/model-best")
+                self.predict(crf, fold_dir, "pos", gold_bratt_dir, model_name+"/model-best", training)
                 pos_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
                 print("\nFold %s results with POS tagging: " %f)
                 print("____________________________")
@@ -196,7 +196,7 @@ class CrossValidation:
             pos_avg_metrics, pos_ents_found, pos_ent_counts = self.medacy_eval("pos")
             self.print_metrics(pos_avg_metrics, pos_ents_found, pos_ent_counts)
 
-    def predict(self, crf : bool, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str):
+    def predict(self, crf : bool, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str, training : list):
         """
         For a given fold, uses trained model to predict on the validation data
         Then saves to json before converting bratt
@@ -226,7 +226,7 @@ class CrossValidation:
         # predict using trained model
         print("Predicting on validation data ...")
         print("____________________________")
-        predict = Predict(model_dir=model_dir, dataset_dir=gold_dir,crf=crf, spancat=self.spancat, output_dir=json_name, spacy_only=flag)
+        predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, crf=crf, spancat=self.spancat, output_dir=json_name, spacy_only=flag, training=training)
         predict.process_files()
 
         # convert predictions to bratt format
