@@ -26,7 +26,7 @@ def create_crf_component(nlp, paths):
     for f in paths:
         train_data.append(dict(format_dict(f)))
 
-    # nlp = spacy.load("en_core_web_sm", disable=["ner"])
+    nlp = spacy.load("en_core_web_sm", disable=["ner"])
     tokenizer = SpacyTokenizer(nlp)
     train_dataset = [ gold_example_to_crf_tokens(ex, tokenizer=tokenizer) for ex in train_data ]
     component_config = srsly.read_json("crf_config.json")
@@ -36,5 +36,4 @@ def create_crf_component(nlp, paths):
     crf_extractor.train(train_dataset)
     classification_report = crf_extractor.eval(train_dataset)
     print(classification_report[1])
-    print(crf_extractor.explain())
     return CRFEntityExtractor(nlp, crf_extractor=crf_extractor)

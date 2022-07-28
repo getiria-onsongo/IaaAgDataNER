@@ -16,6 +16,7 @@ from dataset import Dataset
 from inter_dataset_agreement import measure_dataset, format_results
 from json2SpacyJson import convertJsonToSpacyJsonl
 from json2py import json_2_dict
+
 from dataset2bratt import dataset_to_bratt
 from add_ents_to_spans_dict import convert_to_span
 from validation_testing import execute
@@ -164,10 +165,12 @@ class CrossValidation:
             # train model
             train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
+            crf_pipe = create_crf_component(self.nlp, self.training)
+
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")
             print("____________________________")
-            self.predict(crf, fold_dir, "spacy", gold_bratt_dir, model_name+"/model-best", training)
+            self.predict(crf, fold_dir, "spacy", gold_bratt_dir, model_name+"/model-best", crf_pipe)
             spacy_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/spacy/pred_bratt"), 'strict')
             print("\nFold %s results with spacy only: " %f)
             print("____________________________")
@@ -177,7 +180,7 @@ class CrossValidation:
                 # spacy + pos tagging predictions on validation data
                 print("\nEvaluating with spacy & pos...")
                 print("____________________________")
-                self.predict(crf, fold_dir, "pos", gold_bratt_dir, model_name+"/model-best", training)
+                self.predict(crf, fold_dir, "pos", gold_bratt_dir, model_name+"/model-best", crf_pipe)
                 pos_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
                 print("\nFold %s results with POS tagging: " %f)
                 print("____________________________")
@@ -196,7 +199,7 @@ class CrossValidation:
             pos_avg_metrics, pos_ents_found, pos_ent_counts = self.medacy_eval("pos")
             self.print_metrics(pos_avg_metrics, pos_ents_found, pos_ent_counts)
 
-    def predict(self, crf : bool, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str, training : list):
+    def predict(self, crf : bool, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str, crf_pipe):
         """
         For a given fold, uses trained model to predict on the validation data
         Then saves to json before converting bratt
@@ -226,7 +229,7 @@ class CrossValidation:
         # predict using trained model
         print("Predicting on validation data ...")
         print("____________________________")
-        predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, crf=crf, spancat=self.spancat, output_dir=json_name, spacy_only=flag, training=training)
+        predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, crf=crf, spancat=self.spancat, output_dir=json_name, spacy_only=flag, crf_pipe=crf_pipe)
         predict.process_files()
 
         # convert predictions to bratt format
