@@ -167,14 +167,13 @@ class CrossValidation:
             train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             if crf:
-                crf_pipe = create_crf_component(training)
-            else:
-                crf_pipe = None
+                nlp = create_crf_component(spacy.load(model_name), training)
+                nlp.to_disk(model_name)
 
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")
             print("____________________________")
-            self.predict(crf, fold_dir, "spacy", gold_bratt_dir, model_name+"/model-best", crf_pipe)
+            self.predict(crf, fold_dir, "spacy", gold_bratt_dir, model_name+"/model-best")
             spacy_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/spacy/pred_bratt"), 'strict')
             print("\nFold %s results with spacy only: " %f)
             print("____________________________")
@@ -184,7 +183,7 @@ class CrossValidation:
                 # spacy + pos tagging predictions on validation data
                 print("\nEvaluating with spacy & pos...")
                 print("____________________________")
-                self.predict(crf, fold_dir, "pos", gold_bratt_dir, model_name+"/model-best", crf_pipe)
+                self.predict(crf, fold_dir, "pos", gold_bratt_dir, model_name+"/model-best")
                 pos_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
                 print("\nFold %s results with POS tagging: " %f)
                 print("____________________________")
@@ -203,7 +202,7 @@ class CrossValidation:
             pos_avg_metrics, pos_ents_found, pos_ent_counts = self.medacy_eval("pos")
             self.print_metrics(pos_avg_metrics, pos_ents_found, pos_ent_counts)
 
-    def predict(self, crf : bool, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str, crf_pipe):
+    def predict(self, crf : bool, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str):
         """
         For a given fold, uses trained model to predict on the validation data
         Then saves to json before converting bratt
@@ -233,7 +232,7 @@ class CrossValidation:
         # predict using trained model
         print("Predicting on validation data ...")
         print("____________________________")
-        predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, crf=crf, spancat=self.spancat, output_dir=json_name, spacy_only=flag, crf_pipe=crf_pipe)
+        predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, crf=crf, spancat=self.spancat, output_dir=json_name, spacy_only=flag)
         predict.process_files()
 
         # convert predictions to bratt format
@@ -461,14 +460,8 @@ if __name__ == '__main__':
         action='store', default=None,
         help='path to vectors'
     )
-    parser.add_argument(
-        '--crf',
-        action='store_true', default=False,
-        help='add crf layer'
-    )
 
     args = parser.parse_args()
-
     val = CrossValidation(k_folds=int(args.folds), pos=args.pos, spancat=args.spancat)
     config_name = val.create_config(gpu=args.GPU, word_embed=args.word_embed, vectors=args.vectors)
     val.cross_validate( data=args.dataset_dir, config=config_name, crf=args.crf)
