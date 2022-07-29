@@ -19,7 +19,7 @@ class SpacyCRF():
         crf_dict = defaultdict()
         text = list(json["sentences"].keys())[0]
         crf_dict["text"] = text
-            crf_dict["entities"] = []
+        crf_dict["entities"] = []
         for s in json["sentences"].values():
             for e in s.values():
                 start =  e["start"]
@@ -31,6 +31,7 @@ class SpacyCRF():
         train_data = []
         for f in paths:
             train_data.append(dict(self.format_dict(f)))
+
         tokenizer = SpacyTokenizer(nlp)
         train_dataset = [gold_example_to_crf_tokens(ex, tokenizer=tokenizer) for ex in train_data]
         component_config = srsly.read_json("../crf_config.json")
