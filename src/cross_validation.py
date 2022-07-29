@@ -460,7 +460,11 @@ if __name__ == '__main__':
         action='store', default=None,
         help='path to vectors'
     )
-
+    parser.add_argument(
+        '--crf',
+        action='store_true', default=False,
+        help='flag for crf layers'
+    )
     args = parser.parse_args()
     val = CrossValidation(k_folds=int(args.folds), pos=args.pos, spancat=args.spancat)
     config_name = val.create_config(gpu=args.GPU, word_embed=args.word_embed, vectors=args.vectors)
