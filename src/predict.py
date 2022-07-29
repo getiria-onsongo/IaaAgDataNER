@@ -10,7 +10,6 @@ from pyxpdf.xpdf import TextControl
 from spacy.util import filter_spans
 from json2bratt import conversion
 from dataset2bratt import extract_page_num
-from crf_component import create_crf_component
 from collections import defaultdict
 
 class Predict:
