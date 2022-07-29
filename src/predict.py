@@ -366,11 +366,6 @@ if __name__ == '__main__':
         help='Flag to prevent overwritting files.',
         action='store_true', default=False
     )
-    parser.add_argument(
-        '--crf',
-        help='Flag to use crf layer',
-        action='store_true', default=False
-    )
 
     args = parser.parse_args()
     model, dataset_dir, output_dir, spacy_only, json_prefix, json_suffix, dataset_suffix, no_overwrite = args.model, args.dataset_dir, args.output_dir, args.spacy_only, args.json_prefix, args.json_suffix, args.dataset_suffix, args.no_overwrite
