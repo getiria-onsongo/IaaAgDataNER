@@ -8,16 +8,16 @@ import warnings
 import argparse
 import numpy as np
 from collections import defaultdict
+import spacy
 from spacy.cli.convert import convert
 from spacy.cli.train import train
 from spacy.cli.evaluate import evaluate
 from predict import Predict
 from dataset import Dataset
+from spacy_crf import SpacyCRF
 from inter_dataset_agreement import measure_dataset, format_results
-from crf_component import create_crf_component
 from json2SpacyJson import convertJsonToSpacyJsonl
 from json2py import json_2_dict
-
 from dataset2bratt import dataset_to_bratt
 from add_ents_to_spans_dict import convert_to_span
 from validation_testing import execute
@@ -167,7 +167,7 @@ class CrossValidation:
             train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             if crf:
-                nlp = create_crf_component(spacy.load(model_name), training)
+                nlp = SpacyCRF(spacy.load(model_name), training)
                 nlp.to_disk(model_name)
 
             # spacy only predictions on validation data
