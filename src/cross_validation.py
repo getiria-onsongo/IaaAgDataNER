@@ -14,6 +14,7 @@ from spacy.cli.evaluate import evaluate
 from predict import Predict
 from dataset import Dataset
 from inter_dataset_agreement import measure_dataset, format_results
+from crf_component import create_crf_component
 from json2SpacyJson import convertJsonToSpacyJsonl
 from json2py import json_2_dict
 
@@ -165,7 +166,10 @@ class CrossValidation:
             # train model
             train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
-            crf_pipe = create_crf_component(self.nlp, self.training)
+            if crf:
+                crf_pipe = create_crf_component(training)
+            else:
+                crf_pipe = None
 
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")

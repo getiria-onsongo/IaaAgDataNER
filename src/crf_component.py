@@ -21,14 +21,14 @@ def format_dict(f):
             crf_dict["entities"].append({"start": start, "end": end, "value" : text[start:end], "entity":e["label"]})
     return crf_dict
 
-def create_crf_component(nlp, paths):
+def create_crf_component(paths):
     train_data = []
     for f in paths:
         train_data.append(dict(format_dict(f)))
 
     nlp = spacy.load("en_core_web_sm", disable=["ner"])
     tokenizer = SpacyTokenizer(nlp)
-    train_dataset = [ gold_example_to_crf_tokens(ex, tokenizer=tokenizer) for ex in train_data ]
+    train_dataset = [gold_example_to_crf_tokens(ex, tokenizer=tokenizer) for ex in train_data]
     component_config = srsly.read_json("../crf_config.json")
     crf_extractor = CRFExtractor(component_config=component_config)
     rs = crf_extractor.fine_tune(train_dataset, cv=5, n_iter=50, random_state=42)
