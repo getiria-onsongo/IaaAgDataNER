@@ -37,20 +37,17 @@ class SpacyCRF():
         train_dataset = [gold_example_to_crf_tokens(ex, tokenizer=tokenizer) for ex in train_data]
         component_config = srsly.read_json("../crf_config.json")
         crf_extractor = CRFExtractor(component_config=component_config)
-        rs = crf_extractor.fine_tune(train_dataset, cv=3, n_iter=10, random_state=42)
+        rs = crf_extractor.fine_tune(train_dataset, cv=5, n_iter=50, random_state=42)
         print("best_params:", rs.best_params_, ", score:", rs.best_score_)
         crf_extractor.train(train_dataset)
         classification_report = crf_extractor.eval(train_dataset)
         print(classification_report[1])
         crf_extractor.to_disk("model.pkl")
 
-@Language.factory("ner-crf")
-def create_my_component(nlp, name):
-    crf_extractor = CRFExtractor().from_disk("model.pkl")
-    return CRFEntityExtractor(nlp, crf_extractor=crf_extractor)
 
-paths = ["../../Data/IaaAgDataNER/dev_onsongo/barley_p10_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p10_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p11_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p12_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p13_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p14_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p15_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p16_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p17_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p18_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p19_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p20_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p21_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p22_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p23_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p24_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p25_td.json"]
 
-nlp = spacy.load("en_core_web_sm", disable=["ner"])
-crf = SpacyCRF(nlp, paths)
-nlp.add_pipe("ner-crf")
+# paths = ["../../Data/IaaAgDataNER/dev_onsongo/barley_p10_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p10_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p11_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p12_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p13_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p14_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p15_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p16_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p17_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p18_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p19_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p20_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p21_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p22_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p23_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p24_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p25_td.json"]
+#
+# nlp = spacy.load("en_core_web_sm", disable=["ner"])
+# crf = SpacyCRF(nlp, paths)
+# nlp.add_pipe("ner-crf")

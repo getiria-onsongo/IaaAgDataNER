@@ -21,6 +21,13 @@ from json2py import json_2_dict
 from dataset2bratt import dataset_to_bratt
 from add_ents_to_spans_dict import convert_to_span
 from validation_testing import execute
+from spacy_crfsuite import CRFExtractor
+from spacy_crfsuite import CRFEntityExtractor
+
+@Language.factory("ner-crf")
+def create_my_component(nlp, name):
+    crf_extractor = CRFExtractor().from_disk("model.pkl")
+    return CRFEntityExtractor(nlp, crf_extractor=crf_extractor)
 
 class CrossValidation:
     """
@@ -167,8 +174,11 @@ class CrossValidation:
             train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
             if crf:
-                nlp = SpacyCRF(spacy.load(model_name), training)
+                nlp = spacy.load(model_name)
+                SpacyCRF(nlp, training)
+                nlp.add_pipe("ner-crf")
                 nlp.to_disk(model_name)
+
 
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")
