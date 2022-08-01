@@ -36,7 +36,7 @@ class SpacyCRF():
         train_dataset = [gold_example_to_crf_tokens(ex, tokenizer=tokenizer) for ex in train_data]
         component_config = srsly.read_json("../crf_config.json")
         crf_extractor = CRFExtractor(component_config=component_config)
-        rs = crf_extractor.fine_tune(train_dataset, cv=5, n_iter=50, random_state=42)
+        rs = crf_extractor.fine_tune(train_dataset, cv=3, n_iter=10, random_state=42)
         print("best_params:", rs.best_params_, ", score:", rs.best_score_)
         crf_extractor.train(train_dataset)
         classification_report = crf_extractor.eval(train_dataset)
