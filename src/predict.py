@@ -27,8 +27,12 @@ class Predict:
         path to output predictions to
     self.spacy_only : bool
         flag to only uses spacy model and not the part-of-speech based entity
-        expansion feature
-    self.name_json : str
+            expansion feature
+    self.spancat : bool
+        flag to use spancat instead of ner component
+    self.crf : bool
+        flag to use crf layer
+    self.json_prefix : str
         start of file name for a new json file.
         Ex: for creating predictions with files in the naming scheme
         barley_p1_td.json ... barley_p37_td.json, the prefix would be barley_p
@@ -66,22 +70,19 @@ class Predict:
         as json files
     get_text(self, file : str) -> str
         reads in a text file and returns contents
-    get_json_text(self, file : str) -> str
-        reads in a json annotation file and returns text contents
-    tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
-        creates spacy doc from inputed text and the trained ner spacy model
     pre_tag(self, input_text : str, page_number : int)
         finds entities for a given page in a pdf
+    tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
+        creates spacy doc from inputed text and the trained ner spacy model
     get_pos(self, ent : str ) -> str
         finds the part of speech for an entity and expands if needed
-    adj_combine_noun_ent(self, doc : spacy.tokens.Doc, current_index : int, ent :
-    str, label : str) -> str
-        expands an entity to contain adjectives
+    expand(self, sent, ent, tok, label) -> str:
+        expands an entity to include adjectives describing it
     file_save(self, pdf_name : str, url : str, chunk : int) -> str
         saves json for a given page
     """
 
-    def __init__(self, model_dir : str, dataset_dir : str, output_dir : str, spancat=False, spacy_only=False, crf=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False,  spacy_model_name="en_core_web_lg"):
+    def __init__(self, model_dir : str, dataset_dir : str, output_dir : str, spacy_only=False, spancat=False, crf=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False,  spacy_model_name="en_core_web_lg"):
         self.model_dir = model_dir
         self.dataset_dir = dataset_dir
         self.spancat = spancat
@@ -95,7 +96,6 @@ class Predict:
         self.spacy_model_name = spacy_model_name
         self.pos_model = spacy.load(self.spacy_model_name)
         self.nlp = spacy.load(self.model_dir)
-
 
         if self.spancat:
             self.nlp = spacy.load(self.model_dir)
@@ -111,13 +111,6 @@ class Predict:
         """
         Gets a list of txt files from the dataset directory, then does ner
         tagging on them before saving as json.
-
-        Parameters
-        ----------
-        file_list : list[str]
-            list of file names to use instead of searching a directory for files
-        json : bool
-            flag to use json text reader
         """
         files =  glob.glob(self.dataset_dir + "/**/*" + self.dataset_suffix, recursive=True)
         print("%s files to process." % str(len(files)))
@@ -249,6 +242,8 @@ class Predict:
             a span from the sent, the named entity to expand
         tok : str
             first token (individual word) in the ent span
+        label : str
+            label of entity
 
         Returns expanded entity.
         """
@@ -333,7 +328,7 @@ class Predict:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Prepares data for medacy validation",
-        epilog='python predict.py model dir output_dir'
+        epilog='python predict.py model_dir output_dir'
     )
     parser.add_argument(
         'model', help='path to trained model'
@@ -345,7 +340,15 @@ if __name__ == '__main__':
         'output_dir', help='path of directory to save the converted files trained on to'
     )
     parser.add_argument(
-        '--spacy_only', help='only uses spacy model',
+        '--spacy_only', help='flag to only use spacy model',
+        action='store_true', default=False
+    )
+    parser.add_argument(
+        '--spancat', help='flag to use spancat',
+        action='store_true', default=False
+    )
+    parser.add_argument(
+        '--crf', help='flag to use crf',
         action='store_true', default=False
     )
     parser.add_argument(
@@ -367,16 +370,16 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-    model, dataset_dir, output_dir, spacy_only, json_prefix, json_suffix, dataset_suffix, no_overwrite = args.model, args.dataset_dir, args.output_dir, args.spacy_only, args.json_prefix, args.json_suffix, args.dataset_suffix, args.no_overwrite
+    spacy_model =  "en_core_web_lg"
 
-    if not os.path.exists(model):
+    if not os.path.exists(args.model):
         print("Path to model invalid")
-    elif not os.path.exists(dataset_dir):
+    elif not os.path.exists(args.dataset_dir):
         print("Path to dataset invalid")
     else:
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        if not os.path.exists(args.output_dir):
+            os.makedirs(args.output_dir)
 
-        preprocess = Predict(model, dataset_dir, output_dir, spacy_only=spacy_only,
-                             json_prefix=json_prefix, json_suffix=json_suffix, dataset_suffix=dataset_suffix, no_overwrite=no_overwrite)
-        preprocess.process_files()
+        predict = Predict(args.model, args.dataset_dir, args.output_dir, args.spacy_only, args.spancat, args.crf,
+                             args.json_prefix, args.json_suffix, args.dataset_suffix, args.no_overwrite, spacy_model)
+        predict.process_files()

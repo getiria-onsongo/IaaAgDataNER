@@ -39,21 +39,20 @@ class CrossValidation:
     ----------
     self.k_folds : int
         number of folds
-    self.tags : list[str]
-        labels for ner entities
     self.pos : bool
         flag to do POS-tagging based entity expansion
     self.spancat : bool
-        flag to use spancat SpaCy component instead of the normal ner component,
-        not done implementing yet
+        flag to use spancat SpaCy component instead of the ner component
+    self.tags : list[str]
+        labels for ner entities
 
     Methods
     ----------
     create_config(self, name : str, model_name : str, gpu : bool, word_embed : bool, vectors : str) -> str
         creates spacy config file
-    cross_validate(self, data : str, config : str, model_name : str)
+    cross_validate(self, data : str, config : str, crf : bool, model_name : str)
         preforms k-fold cross validation
-    predict(self, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str)
+    predict(self, crf : bool, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str)
         predicts with trained model on validation data
     medacy_eval(self, sub_dir)
         evaluate results
@@ -116,6 +115,8 @@ class CrossValidation:
             path to data directory
         config : str
             path to model config file
+        crf : bool
+            flag to use crf layer
         model_name : str
             path to save model, overwritten during the subsequent fold
         """
@@ -167,19 +168,18 @@ class CrossValidation:
             if self.spancat:
                 convert_to_span("ner_2021_08/ner_2021_08_training_data.spacy", "en", "sc")
 
-            # model_name = "cv_model" # for testing only
             # create gold standard data directory and bratt files
             fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f)
 
             # train model
             train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
+            # train & add crf layer
             if crf:
                 nlp = spacy.load(model_name)
                 SpacyCRF(nlp, training)
                 nlp.add_pipe("ner-crf")
                 nlp.to_disk(model_name)
-
 
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")
@@ -220,6 +220,8 @@ class CrossValidation:
 
         Parameters
         ----------
+        crf : bool
+            flag to use crf layer
         fold_dir : str
             path to save currenft fold's predictions to
         sub_dir : str
@@ -364,6 +366,7 @@ class CrossValidation:
         gold_json_name = fold_dir + "/gold_json"
         gold_bratt_name = fold_dir + "/gold_bratt"
         self.create_dirs([fold_dir, gold_json_name, gold_bratt_name])
+
         # create and convert to bratt gold standard dataset
         print("\nCreating gold standard validation dataset...")
         for file in validation:
