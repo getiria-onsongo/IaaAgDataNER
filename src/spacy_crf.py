@@ -1,6 +1,7 @@
 from collections import defaultdict
 import spacy
 import srsly
+from spacy.language import Language
 from spacy_crfsuite import read_file
 from spacy_crfsuite.tokenizer import SpacyTokenizer
 from spacy_crfsuite.train import gold_example_to_crf_tokens
@@ -12,7 +13,7 @@ from json2py import json_2_dict
 class SpacyCRF():
 
     def __init__(self, nlp, paths):
-        self.create_crf_component(nlp, paths)
+        self.train_crf(nlp, paths)
 
     def format_dict(self, file):
         json = json_2_dict(file)
@@ -50,6 +51,6 @@ def create_my_component(nlp, name):
 
 paths = ["../../Data/IaaAgDataNER/dev_onsongo/barley_p10_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p10_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p11_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p12_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p13_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p14_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p15_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p16_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p17_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p18_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p19_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p20_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p21_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p22_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p23_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p24_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p25_td.json"]
 
-crf = SpacyCRF(nlp, paths)
 nlp = spacy.load("en_core_web_sm", disable=["ner"])
+crf = SpacyCRF(nlp, paths)
 nlp.add_pipe("ner-crf")
