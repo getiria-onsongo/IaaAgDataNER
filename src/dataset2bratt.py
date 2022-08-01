@@ -4,14 +4,13 @@ import argparse
 import os
 
 """
-File to convert a json dataset to bratt, also has page number extraction helper
-function
+File to convert a json dataset to bratt, also has page number extraction helper function.
 
 Functions
 -------
 extract_page_num(self, f : str, suffix : str) -> str
-    for file names with page numbers before the suffix, extracts the numerals
-dataset_to_bratt(input_dir : str, output_dir : str, file_pattern : str)
+    extracts page numbers from file names
+dataset_to_bratt(input_dir : str, output_dir : str, file_pattern : str, sentence_level : bool)
     converts a json dataset to bratt format
 """
 
@@ -25,7 +24,7 @@ def extract_page_num(f : str, suffix : str) -> str:
     f : str
         file name
     suffix : str
-        file ending
+        file ending, everything after page numbers
 
     Returns page number as string, otherwise returns empty string
     """
@@ -52,9 +51,11 @@ def dataset_to_bratt(input_dir : str, output_dir : str, file_pattern="/*_td.json
     name_prefix : str
         start of name for new bratt and json files
     """
+    # retrive files
     files = glob.glob(input_dir+"/**/*.json", recursive=True)
     print("%s files to convert." % str(len(files)))
 
+    # convert
     for f in files:
         path_no_suffix = f.split(".json")[0].split("/")
         prefix = path_no_suffix[len(path_no_suffix)-1]
@@ -79,7 +80,7 @@ if __name__ == '__main__':
         action='store', default="/*_td.json"
     )
     parser.add_argument(
-        '--sentence_level',
+        '--sentence_level', help = 'flag to convert at sentence level'
         action='store_true', default=False
     )
 
