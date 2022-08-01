@@ -27,7 +27,7 @@ class SpacyCRF():
                 crf_dict["entities"].append({"start": start, "end": end, "value" : text[start:end], "entity":e["label"]})
         return crf_dict
 
-    def create_crf_component(self, nlp, paths):
+    def train_crf(self, nlp, paths):
         train_data = []
         for f in paths:
             train_data.append(dict(self.format_dict(f)))
@@ -41,10 +41,15 @@ class SpacyCRF():
         crf_extractor.train(train_dataset)
         classification_report = crf_extractor.eval(train_dataset)
         print(classification_report[1])
-        # crf_extractor.to_disk("model/model.pkl")
-        # pipe = CRFEntityExtractor(nlp).from_disk("model/model.pkl")
-        nlp.add_pipe("CRFExtractor")
+        crf_extractor.to_disk("model.pkl")
 
-nlp = spacy.load("en_core_web_sm", disable=["ner"])
+@Language.factory("ner-crf")
+def create_my_component(nlp, name):
+    crf_extractor = CRFExtractor().from_disk("model.pkl")
+    return CRFEntityExtractor(nlp, crf_extractor=crf_extractor)
+
 paths = ["../../Data/IaaAgDataNER/dev_onsongo/barley_p10_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p10_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p11_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p12_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p13_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p14_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p15_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p16_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p17_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p18_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p19_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p20_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p21_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p22_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p23_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p24_td.json", "../../Data/IaaAgDataNER/dev_onsongo/barley_p25_td.json"]
+
 crf = SpacyCRF(nlp, paths)
+nlp = spacy.load("en_core_web_sm", disable=["ner"])
+nlp.add_pipe("ner-crf")
