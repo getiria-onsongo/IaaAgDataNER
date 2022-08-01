@@ -4,6 +4,9 @@ import re
 from collections import Counter, namedtuple
 from math import ceil
 
+"""
+Extracted MedaCy class used by MedaCy dataset wrapper, which is used by inter_dataset_agreement, the class that calculates metrics for k-fold cross validation.
+"""
 
 EntTuple = namedtuple('EntTuple', ['tag', 'start', 'end', 'text'])
 

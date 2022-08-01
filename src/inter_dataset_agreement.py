@@ -1,4 +1,6 @@
 """
+Extracted from MedaCy to calcuate metrics for k-fold cross validation.
+
 Inter-dataset agreement calculator
 This module calculates precision, recall, and F1 scores given two parallel datasets with a strict or lenient setting.
 The strict setting will only count true positives from the predicted data if they have an exact match, span for span,

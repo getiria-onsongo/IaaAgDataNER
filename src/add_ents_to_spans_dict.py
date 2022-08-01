@@ -5,6 +5,8 @@ from spacy.tokens import DocBin
 
 
 """
+This function converts ner entities to spans to be able to use SpaCy's
+spancat for ner.
 From https://github.com/explosion/projects/blob/v3/experimental/ner_spancat/
 """
 
