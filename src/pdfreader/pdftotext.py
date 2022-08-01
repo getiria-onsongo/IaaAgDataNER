@@ -44,7 +44,7 @@ def conversion(filename, outfile):
         # All the reading is done here
         text += pageObj.extractText()
 
-    # Double column is a bit tough to just print out and understand so there is another file that does the post processing
+    # Double column is tough to just print out and understand so there is another file that does the post-processing
     if isDoubleColumn:
         print(f"\n{filename.rsplit('/', 1)[-1]} is a double column pdf\n")
         text = PostProcessing(text)

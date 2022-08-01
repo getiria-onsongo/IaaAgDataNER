@@ -46,13 +46,25 @@ def ocrConversion(infile, outfile):
     else:
         os.mkdir("%temp%")
 
+    # Getting the current directory of the script
     curDir = os.getcwd()
-    print(f"Converting {infile.rsplit('/', 1)[1]} to a string")
+
+    # Creating a temp folder to convert the pages to png for OCR
+    try:
+        os.mkdir(curDir + "/%temp%/")
+    except:
+        pass
+
+    # Changing the directory to a temp folder
+    os.chdir(curDir + "/%temp%/")
+
+    filename = infile.rsplit('/', 1)[1]
+    print(f"Converting {filename} to a string")
+
+    # Used a for each loop to convert every page into png then extract text
     for page in pages:
 
-        # Creating a temp folder to convert the pages to png for OCR
-        os.chdir(curDir + "/%temp%")
-        imageName = f'{infile} Page {i}.png'
+        imageName = f'{filename} Page {i}.png'
 
         # Save the page to png for tessaract to process it
         pages[i].save(imageName, 'PNG')
@@ -75,6 +87,7 @@ def ocrConversion(infile, outfile):
     text += pytesseract.image_to_string(f'%temp%/Page {i}.png')
     '''
     os.chdir(curDir)
+    print(os.getcwd())
     # Scripts for post-processing
     if isDoubleColumn:
         print("\n")

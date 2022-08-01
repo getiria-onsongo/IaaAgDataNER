@@ -8,7 +8,7 @@ from Postprocess import fitzPostProcess
 
 def imageextraction(file_path):
     pdf_file = fitz.open(file_path)
-    location = f"{file_path}_output"
+    location = f"{os.getcwd()}_output"
     if not (os.path.exists(location)):
         os.mkdir(location)
     else:
@@ -72,7 +72,6 @@ def imageextraction(file_path):
     out = open(location + "/text_notFinal.txt", "wb")  # open text output
     for page in pdf_file:  # iterate the document pages
         text = page.get_text().encode("utf8")  # get plain text (is in UTF-8)
-        text = fitzPostProcess()
         out.write(text)  # write text of page
         out.write(bytes((12,)))  # write page delimiter (form feed 0x0C)
     pdf_file.close()
