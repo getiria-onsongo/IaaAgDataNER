@@ -4,6 +4,10 @@ from typing import Match
 from data_file import DataFile
 from annotations import Annotations
 
+"""
+Extracted medaCy class which provides entity representation used in inter_dataset_agreement, the class that calculates metrics for k-fold cross validation.
+
+"""
 
 class Entity:
     """
