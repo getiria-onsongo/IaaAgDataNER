@@ -42,7 +42,7 @@ class SpacyCRF():
         classification_report = crf_extractor.eval(train_dataset)
         print(classification_report[1])
         crf_extractor.to_disk()
-        pipe = crf.from_disk()
+        pipe = crf_extractor.from_disk()
         nlp.add_pipe(pipe)
         nlp.to_disk(model)
 
