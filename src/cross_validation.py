@@ -21,6 +21,7 @@ from json2py import json_2_dict
 from dataset2bratt import dataset_to_bratt
 from add_ents_to_spans_dict import convert_to_span
 from validation_testing import execute
+from spacy.language import Language
 from spacy_crfsuite import CRFExtractor
 from spacy_crfsuite import CRFEntityExtractor
 

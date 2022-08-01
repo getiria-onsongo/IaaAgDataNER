@@ -80,7 +80,7 @@ if __name__ == '__main__':
         action='store', default="/*_td.json"
     )
     parser.add_argument(
-        '--sentence_level', help = 'flag to convert at sentence level'
+        '--sentence_level', help = 'flag to convert at sentence level',
         action='store_true', default=False
     )
 
