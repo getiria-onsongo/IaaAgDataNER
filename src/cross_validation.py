@@ -176,7 +176,7 @@ class CrossValidation:
 
             # train & add crf layer
             if crf:
-                nlp = spacy.load(model_name, disable["ner"])
+                nlp = spacy.load(model_name, disable=["ner"])
                 SpacyCRF(nlp, training)
                 nlp.add_pipe("ner-crf")
                 nlp.to_disk(model_name)
