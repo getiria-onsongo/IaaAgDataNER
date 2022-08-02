@@ -182,7 +182,7 @@ class CrossValidation:
                 nlp = spacy.load(model_name)
                 SpacyCRF(nlp, training)
                 nlp.add_pipe("ner-crf")
-                nlp.to_disk(model_name)
+                nlp.to_disk("cv_model/ner-crf")
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")
             print("____________________________")
