@@ -72,7 +72,7 @@ class CrossValidation:
         self.spancat = spancat
         warnings.filterwarnings('ignore') # ignore SpaCy warnings for cleaner terminal output
 
-    def create_config(self, name="senter_ner.cfg", model_name="cv_model", gpu=False, word_embed=False, vectors=
+    def create_config(self, name="senter_ner.cfg", model_name="cv_model", gpu=False, crf=False, word_embed=False, vectors=
     "glove.6B.zip") -> str:
         """
         Creates spacy model config file to use to train the model
@@ -94,13 +94,15 @@ class CrossValidation:
         """
         if gpu:
             execute("python3 -m spacy init config --lang en --pipeline transformer,senter,ner  --optimize accuracy --force " + name + " -G")
-        elif word_embed:
-            execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
-            execute("python3 -m spacy init vectors en " + vectors + " " + model_name)
+        if crf:
+            execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter  --optimize accuracy --force " + name)
         elif self.spancat:
             execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,spancat  --optimize accuracy --force " + name)
         else:
             execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,ner  --optimize accuracy --force " + name)
+
+        if word_embed:
+            execute("python3 -m spacy init vectors en " + vectors + " " + model_name)
 
         return name
 
@@ -174,13 +176,13 @@ class CrossValidation:
             # train model
             train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
+
             # train & add crf layer
             if crf:
-                nlp = spacy.load(model_name, disable=["ner"])
+                nlp = spacy.load(model_name)
                 SpacyCRF(nlp, training)
                 nlp.add_pipe("ner-crf")
                 nlp.to_disk(model_name)
-
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")
             print("____________________________")
@@ -481,5 +483,5 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
     val = CrossValidation(k_folds=int(args.folds), pos=args.pos, spancat=args.spancat)
-    config_name = val.create_config(gpu=args.GPU, word_embed=args.word_embed, vectors=args.vectors)
+    config_name = val.create_config(gpu=args.GPU, crf=args.crf, word_embed=args.word_embed, vectors=args.vectors)
     val.cross_validate( data=args.dataset_dir, config=config_name, crf=args.crf)
