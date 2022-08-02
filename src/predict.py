@@ -100,9 +100,12 @@ class Predict:
         if self.spancat:
             self.nlp = spacy.load(self.model_dir)
             self.nlp.add_pipe("compound_trait_entities", after="spancat")
+        elif self.crf:
+            self.nlp = spacy.load(self.model_dir)
         else:
             self.nlp = spacy.load(self.model_dir)
             self.nlp.add_pipe("compound_trait_entities", after="ner")
+
 
         self.tags = ["ALAS", "CROP", "CVAR", "JRNL", "PATH", "PED", "PLAN", "PPTD", "TRAT"]
         self.cust_ents_dict = {}
