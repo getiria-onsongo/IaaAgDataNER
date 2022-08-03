@@ -50,13 +50,10 @@ from tkinter.scrolledtext import ScrolledText
 class CropNerGUI:
     """ A class used to represent NER tagging GUI window.
 
+
     ...
     Attributes
     ----------
-    self.model_default : str
-        default model from argparse if given
-    self.file_default : str
-            default file from argparse if given
     self.rootWin : tk.Tk()
         tKinter class that represents the main window
     self.rootWin.title : self.rootWin.title()
@@ -155,7 +152,7 @@ class CropNerGUI:
         Callback method attached to the quit button.
     """
 
-    def __init__(self, model_default=None, file_default=None):
+    def __init__(self):
         """ Initialize  CropNerGU object"""
 
         self.rootWin = tk.Tk()
@@ -378,7 +375,7 @@ class CropNerGUI:
         # Button to decrease font in the text box (Font +)
         self.font_minus = tk.Button(self.open_frame, text="Font -", width=10, command=self.font_minus)
         self.font_minus.pack(side=tk.LEFT)
-
+        
 
     def font_plus(self):
         """
@@ -518,7 +515,7 @@ class CropNerGUI:
             If the selected folder does not contain a valid spaCy pipeline, an OSError will be thrown and
         a default language model is used instead.
         """
-
+        
         dir = fd.askdirectory()
         # Do nothing if the user presses cancel or X
         if dir == "":
@@ -543,7 +540,7 @@ class CropNerGUI:
 
 
 
-
+                
     def open_file(self, file_type: str):
         """
         Open a file (pdf/text) to be annotated or an annotation file (json) to be reviewed. selected using the GUI.
@@ -591,7 +588,7 @@ class CropNerGUI:
                 return
 
             # Detects file type
-            self.file_mode = self.raw_file.name.split(".")[-1]
+            self.file_mode = self.raw_file.name.split(".")[-1] 
 
             self.page_entry.delete(0, tk.END)
 
@@ -729,7 +726,7 @@ class CropNerGUI:
         """
         Checks to see if a page entry is simply two numbers separated by a space, which
         the program should handle as a range of pages.
-
+        
         Lots of processing of page_entry is done both before and after this method is
         called. It will never be called on an entry with zany spacing, and it can be
         wrong when it comes to invalid inputs since they'll get filtered out anyway.
@@ -754,7 +751,7 @@ class CropNerGUI:
         entry = ""
         for i in range(0, len(old_entry)):
             if not(i in all_spaces):
-                entry = entry + old_entry[i]
+                entry = entry + old_entry[i] 
             elif not(old_entry[i-1] == "-" or old_entry[i+1] == "-" or old_entry[i+1] == " "):
                     entry = entry + old_entry[i]
         # Past this point, only single spaces that aren't next to a dash should exist.
@@ -822,8 +819,8 @@ class CropNerGUI:
 
             if not (page_num_valid == -1): # Single page, whether page_num_valid is true or false
                 page = self.pdf_document[self.page_number - 1]
-                # doesn't necessarily have to be removed for a single page; It gets removed in
-                # the else because tagging across multiple pages doesn't work correctly if exists.
+                #  doesn't necessarily have to be removed for a single page; It gets removed in
+                # the else because tagging across multiple pages doesn't work correctly if  exists.
                 # However, it's removed here as well for consistency and neatness.
                 txt = page.text().replace("\r", "").replace("", "")
             else: # Page range
@@ -894,60 +891,6 @@ class CropNerGUI:
 
         self.text.tag_add(label, str(line_start) + "." + str(char_start), str(line_end) + "." + str(char_end))
 
-    def get_pos(self, ent):
-        '''
-        Proceses a given entity with rules that use pos tag data to expand
-        the entity span if needed.
-        :param ent: entity to possibly expand span of
-        :param nlp: spacy model for pos tagging
-        :returns: entity, with an expanded span if needed
-        '''
-        doc = self.pos_model(ent.sent.text)
-        if(len(doc[ent.start:ent.end]) > 0):
-            current_index = doc[ent.start:ent.end][0].i
-            label = ent.label_
-            # functions that expands ents to contain proceeding adjectives
-            ent = self.adj_combine_noun_ent(doc, current_index, ent, label)
-        return ent
-
-    def adj_combine_noun_ent(self, doc, current_index, ent, label):
-        '''
-        If the first token in an entity is a noun or proper noun, finds
-        all adjectives proceeding the entity and expands the span to
-        contain all of them.
-        :param doc: sentence entity belongs to passed through spacy model
-        :param current_index: index of first token in the doc
-        :param ent: entity to possibly expand span of
-        :param label: label of ent
-        :returns: entity, which has been expanded if needed
-        '''
-        if current_index >= 1:
-            current = doc[current_index]
-            left = doc[current_index-1]
-            pos_current = current.pos_
-            pos_left = left.pos_
-
-            if pos_current == "NOUN" or pos_current == "PROPN":
-                if pos_left == "ADJ":
-                    print("Adj expanding...")
-                    print("entity: " + str(ent))
-                    i = current_index
-                    start_index = ent.start
-                    # keeps searching until all adjectives are found
-                    while i >= 1:
-                        i = i - 1
-                        if doc[i].pos_ == "ADJ":
-                            start_index = i
-                        else:
-                            break
-                    first_tok = doc[start_index]
-                    ent = doc[first_tok.i:ent.end]
-                    ent.label_ = label
-                    print("new: " + str(ent))
-                    print("label: " + str(ent.label_))
-                    print()
-        return ent
-
     def pre_tag(self, selection: str):
         """
         Pre-tag selected content or all the text in text box with NER tags.
@@ -985,7 +928,7 @@ class CropNerGUI:
                     input_text = self.load_page()
 
             if not self.json_initialized:
-                self.initialize_new_file()
+                self.initialize_new_file()                
 
             self.text.delete(1.0, tk.END)
             self.text.insert(1.0, input_text)
@@ -1415,19 +1358,5 @@ class CropNerGUI:
 
 # Driver code
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='runs GUI with option for default model and file',
-        epilog='python src/CropNerGUI --model senter_ner_model/model-best --file Data/CSU/Bill-Brown-Reprint.pdf'
-        )
-    parser.add_argument(
-        '--model', help='path to trained model',
-        action='store', default=None
-        )
-    parser.add_argument(
-        '--file', help='path to directory of dataset',
-        action='store', default=None
-        )
-    args = parser.parse_args()
-    model, file = args.model, args.file
-    ner_gui = CropNerGUI(model_default=model, file_default=file)
+    ner_gui = CropNerGUI()
     ner_gui.go()
