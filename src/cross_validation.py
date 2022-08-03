@@ -25,11 +25,6 @@ from spacy.language import Language
 from spacy_crfsuite import CRFExtractor
 from spacy_crfsuite import CRFEntityExtractor
 
-@Language.factory("ner-crf")
-def create_my_component(nlp, name):
-    crf_extractor = CRFExtractor().from_disk("model.pkl")
-    return CRFEntityExtractor(nlp, crf_extractor=crf_extractor)
-
 class CrossValidation:
     """
     A class to do k-fold cross validation for a Spacy model
@@ -176,13 +171,6 @@ class CrossValidation:
             # train model
             train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
 
-
-            # train & add crf layer
-            if crf:
-                nlp = spacy.load(model_name)
-                SpacyCRF(nlp, training)
-                nlp.add_pipe("ner-crf")
-                nlp.to_disk("cv_model/ner-crf")
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")
             print("____________________________")
@@ -479,7 +467,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--crf',
         action='store_true', default=False,
-        help='flag for crf layers'
+        help='flag for crf layer, not yet implemented'
     )
     args = parser.parse_args()
     val = CrossValidation(k_folds=int(args.folds), pos=args.pos, spancat=args.spancat)
