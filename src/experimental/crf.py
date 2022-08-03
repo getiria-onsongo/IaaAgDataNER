@@ -12,6 +12,10 @@ from cross_validation import CrossValidation
 from inter_dataset_agreement import measure_dataset, format_results
 from dataset2bratt import dataset_to_bratt
 from json2py import json_2_dict
+"""
+Unfinished crf class
+"""
+
 
 @Language.factory("ner-crf")
 def crf_component(nlp, name):
@@ -99,7 +103,7 @@ class CRF:
         return brat_output_name
 
 crf = CRF()
-train, val = crf.get_data("~/Data/IaaAgDataNER/dev_onsongo")
+train, val = crf.get_data("../../Data/IaaAgDataNER/dev_onsongo")
 # train, val = crf.get_data("Data/dev_onsongo")
 # gold = crf.create_gold_standard(val)
 crf.train_crf(train, "../crf_config.json")
