@@ -36,6 +36,8 @@ class CRF:
         return crf_dict
 
     def create_gold_standard(self, validation, gold_json_name="gold_standard/json", gold_brat_name="gold_standard/brat" ):
+        print("Creating gold standard dataset...")
+        print("____________________________")
         self.cv.create_dirs([gold_json_name, gold_brat_name])
         for file in validation:
             json_file = open(file)
@@ -49,14 +51,21 @@ class CRF:
 
     def get_data(self, data_dir):
         data = glob.glob(data_dir+"/**/*.json", recursive=True)
+        print(data)
         train = data[0:round(len(data)*.80)]
+        print(len(train))
         val = data[round(len(data)*.80):len(data)]
+        print(len(val))
         return train, val
 
     def train_crf(self, train, config):
+        print("Formating dictonary...")
+        print("____________________________")
         formated_train = []
         for f in train:
             formated_train.append(dict(self.format_dict(f)))
+        print("Training...")
+        print("____________________________")
         nlp = spacy.load("en_core_web_lg", disable=["ner"])
         tokenizer = SpacyTokenizer(nlp)
         train_dataset = [gold_example_to_crf_tokens(ex, tokenizer=tokenizer) for ex in formated_train]
@@ -65,15 +74,21 @@ class CRF:
         rs = crf_extractor.fine_tune(train_dataset, cv=5, n_iter=50, random_state=42)
         print("best_params:", rs.best_params_, ", score:", rs.best_score_)
         crf_extractor.train(train_dataset)
+        print("Evaluating crf...")
+        print("____________________________")
         classification_report = crf_extractor.eval(train_dataset)
         print(classification_report[1])
         crf_extractor.to_disk("crf.pkl")
 
     def medacy_eval(self, gold, system):
+        print("Evaluating model...")
+        print("____________________________")
         results = measure_dataset(gold, system)
         format_results(results)
 
     def predict(self, gold_dir, model_name="crf_model", json_output_name="predictions/crf_json", brat_output_name="predictions/crf_brat"):
+        print("Predicting...")
+        print("____________________________")
         self.cv.create_dirs([json_output_name, brat_output_name])
         nlp = spacy.load("en_core_web_lg", disable=["ner"])
         nlp.add_pipe("ner-crf")
@@ -85,7 +100,9 @@ class CRF:
 
 crf = CRF()
 train, val = crf.get_data("~/Data/IaaAgDataNER/dev_onsongo")
-gold = crf.create_gold_standard(val)
+# train, val = crf.get_data("Data/dev_onsongo")
+# gold = crf.create_gold_standard(val)
 crf.train_crf(train, "../crf_config.json")
+crf.train_crf(train, "crf_config.json")
 system = crf.predict(gold_dir=gold)
 crf.medacy_eval(gold, system)
