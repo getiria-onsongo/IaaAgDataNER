@@ -8,9 +8,13 @@ from spacy_crfsuite.train import gold_example_to_crf_tokens
 from spacy_crfsuite import CRFExtractor
 from spacy_crfsuite import CRFEntityExtractor
 from json2py import json_2_dict
+"""
+Old version of stripped down crf class, now rewritten in crf.py, but
+smaller and therefore useful to keep around.
 
+"""
 
-class SpacyCRF():
+class SimpleCRF():
 
     def __init__(self, nlp, paths):
         self.train_crf(nlp, paths)

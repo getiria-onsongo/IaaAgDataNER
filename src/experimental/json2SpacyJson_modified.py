@@ -6,6 +6,11 @@ from sklearn.model_selection import train_test_split
 from spacy.training import offsets_to_biluo_tags
 from spacy.training import docs_to_json
 
+"""
+Modified version of json2SpaCyjson that can do a train-test-validate split
+
+"""
+
 def convertJsonToSpacyJsonl(model="en_core_web_lg",outputFileName=None, filePaths=None):
     # Load spacy pipeline
     nlp = spacy.load(model)
@@ -69,6 +74,38 @@ def rawJsonToSpacyJson(dir=None, model="en_core_web_lg", suffix=".json", split=T
         convertJsonToSpacyJsonl(model,validateFile, validate)
     else:
         convertJsonToSpacyJsonl(model,outputFileName+".jsonl", filePaths)
+
+
+def split_test(files, dir="reserved_val"):
+    """
+    Creates validation data besides spacy test. Possible future use.
+
+    Parameters
+    ----------
+    files : list[str]
+        list of file names in validation data
+    dir : str
+        name of directory to save reserved test data to
+
+    Returns list of validation data to use for spacy model creation
+    """
+    midpoint = len(files) // 2
+    validate_reserve = files[midpoint:]
+    validate_use = files[:midpoint]
+
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+    for file in validate_reserve:
+        json_file = open(file)
+        data = json.load(json_file)
+        split_name = file.split("/")
+        name = dir + "/" + split_name[len(split_name)-1]
+        with open(name, 'w') as f:
+            json.dump(data, f)
+        json_file.close()
+
+    return validate_use
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 """
-Extracted MedaCy dataset wrapper class used in inter_dataset_agreement which we use retrieve metrics for k-fold cross validation.
+Extracted MedaCy dataset wrapper class used in inter_dataset_agreement.
 
 A medaCy Dataset facilities the management of data for both model training and model prediction.
 A Dataset object provides a wrapper for a unix file directory containing training/prediction

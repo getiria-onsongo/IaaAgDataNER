@@ -14,11 +14,10 @@ from spacy.cli.train import train
 from spacy.cli.evaluate import evaluate
 from predict import Predict
 from dataset import Dataset
-from spacy_crf import SpacyCRF
 from inter_dataset_agreement import measure_dataset, format_results
 from json2SpacyJson import convertJsonToSpacyJsonl
 from json2py import json_2_dict
-from dataset2bratt import dataset_to_bratt
+from dataset2brat import dataset_to_brat
 from add_ents_to_spans_dict import convert_to_span
 from validation_testing import execute
 from spacy.language import Language
@@ -27,7 +26,7 @@ from spacy_crfsuite import CRFEntityExtractor
 
 class CrossValidation:
     """
-    A class to do k-fold cross validation for a Spacy model
+    A class to do k-fold cross validation for a SpaCy model
 
     ...
     Attributes
@@ -45,17 +44,17 @@ class CrossValidation:
     ----------
     create_config(self, name : str, model_name : str, gpu : bool, word_embed : bool, vectors : str) -> str
         creates spacy config file
-    cross_validate(self, data : str, config : str, crf : bool, model_name : str)
+    cross_validate(self, data : str, config : str, model_name : str)
         preforms k-fold cross validation
-    predict(self, crf : bool, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str)
+    predict(self, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str)
         predicts with trained model on validation data
-    medacy_eval(self, sub_dir)
+    medacy_eval(self, sub_dir) -> tuple
         evaluate results
-    print_metrics(self, metrics : dict, ents : dict)
+    print_metrics(self, metrics : dict, ents_found : dict, counts : dict)
         prints metrics & entity counts
-    create_gold_dataset(self, validation : list, fold : int)
+    create_gold_dataset(self, validation : list, fold : int) -> tuple
         creates gold standard dataset
-    count_entities(self)
+    count_entities(self) -> collections.defaultdict
         counts entities in gold standard data
     create_dirs(self, dirs : list)
         creates directories
@@ -67,7 +66,7 @@ class CrossValidation:
         self.spancat = spancat
         warnings.filterwarnings('ignore') # ignore SpaCy warnings for cleaner terminal output
 
-    def create_config(self, name="senter_ner.cfg", model_name="cv_model", gpu=False, crf=False, word_embed=False, vectors=
+    def create_config(self, name="senter_ner.cfg", model_name="cv_model", gpu=False, word_embed=False, vectors=
     "glove.6B.zip") -> str:
         """
         Creates spacy model config file to use to train the model
@@ -89,8 +88,6 @@ class CrossValidation:
         """
         if gpu:
             execute("python3 -m spacy init config --lang en --pipeline transformer,senter,ner  --optimize accuracy --force " + name + " -G")
-        if crf:
-            execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter  --optimize accuracy --force " + name)
         elif self.spancat:
             execute("python3 -m spacy init config --lang en --pipeline tok2vec,senter,spancat  --optimize accuracy --force " + name)
         else:
@@ -101,7 +98,7 @@ class CrossValidation:
 
         return name
 
-    def cross_validate(self, data : str, config : str, crf=False, model_name="cv_model"):
+    def cross_validate(self, data : str, config : str, model_name="cv_model"):
         """
         Preforms k-fold cross validation on spacy model since SpaCy does not support
         it out of the box
@@ -112,8 +109,6 @@ class CrossValidation:
             path to data directory
         config : str
             path to model config file
-        crf : bool
-            flag to use crf layer
         model_name : str
             path to save model, overwritten during the subsequent fold
         """
@@ -169,12 +164,12 @@ class CrossValidation:
             fold_dir, gold_bratt_dir = self.create_gold_dataset(validation, f)
 
             # train model
-            train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
-
+            # train(config_path=config, output_path=model_name, overrides={"paths.train": "ner_2021_08/ner_2021_08_training_data.spacy", "paths.dev": "ner_2021_08/ner_2021_08_dev_data.spacy"})
+            model_name = "model"
             # spacy only predictions on validation data
             print("\nEvaluating with spacy only...")
             print("____________________________")
-            self.predict(crf, fold_dir, "spacy", gold_bratt_dir, model_name+"/model-best")
+            self.predict(fold_dir, "spacy", gold_bratt_dir, model_name+"/model-best")
             spacy_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/spacy/pred_bratt"), 'strict')
             print("\nFold %s results with spacy only: " %f)
             print("____________________________")
@@ -184,7 +179,7 @@ class CrossValidation:
                 # spacy + pos tagging predictions on validation data
                 print("\nEvaluating with spacy & pos...")
                 print("____________________________")
-                self.predict(crf, fold_dir, "pos", gold_bratt_dir, model_name+"/model-best")
+                self.predict(fold_dir, "pos", gold_bratt_dir, model_name+"/model-best")
                 pos_results = measure_dataset(Dataset("fold_"+str(f)+"_results/gold_bratt"), Dataset("fold_"+str(f)+"_results/pos/pred_bratt"), 'strict')
                 print("\nFold %s results with POS tagging: " %f)
                 print("____________________________")
@@ -203,19 +198,17 @@ class CrossValidation:
             pos_avg_metrics, pos_ents_found, pos_ent_counts = self.medacy_eval("pos")
             self.print_metrics(pos_avg_metrics, pos_ents_found, pos_ent_counts)
 
-    def predict(self, crf : bool, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str):
+    def predict(self, fold_dir : str, sub_dir : str, gold_dir : str, model_dir : str):
         """
         For a given fold, uses trained model to predict on the validation data
         Then saves to json before converting bratt
 
         Parameters
         ----------
-        crf : bool
-            flag to use crf layer
         fold_dir : str
-            path to save currenft fold's predictions to
+            path to save current fold's predictions to
         sub_dir : str
-            path to subdirectory of fold_dir for output, either "pos" or "spacy"
+            subdirectory of output, either "pos" or "spacy"
         gold_dir : str
             path to gold standard dataset for the current fold
         model_dir : str
@@ -235,23 +228,23 @@ class CrossValidation:
         # predict using trained model
         print("Predicting on validation data ...")
         print("____________________________")
-        predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, crf=crf, spancat=self.spancat, output_dir=json_name, spacy_only=flag)
+        predict = Predict(model_dir=model_dir, dataset_dir=gold_dir, spancat=self.spancat, output_dir=json_name, spacy_only=flag)
         predict.process_files()
 
         # convert predictions to bratt format
         print("\nConverting predictions to bratt...")
         print("____________________________")
-        dataset_to_bratt(input_dir=json_name, output_dir=bratt_name)
+        dataset_to_brat(input_dir=json_name, output_dir=bratt_name)
 
-    def medacy_eval(self, sub_dir):
+    def medacy_eval(self, sub_dir : str) -> tuple:
         """
         Finds average metrics and entity counts across all folds using extracted
-        methods from medacy
+        methods from medaCy
 
         Parameters
         ----------
         sub_dir : str
-            current sub directory for predictions evaluating with, either pos
+            current sub directory for predictions, either pos
             or spacy
 
         Returns dictonary of average metrics, found entity counts, and
@@ -338,7 +331,7 @@ class CrossValidation:
                 print("\t average entities per fold: " + str(counts[k+ " AVG"]))
                 print("\n")
 
-    def create_gold_dataset(self, validation : list, fold : int):
+    def create_gold_dataset(self, validation : list, fold : int) -> tuple:
         """
         Creates gold standard dataset for current fold and converts to bratt
 
@@ -368,11 +361,11 @@ class CrossValidation:
                 json.dump(contents, f)
         print("\nConverting gold standard to bratt...")
         print("____________________________")
-        dataset_to_bratt(input_dir=gold_json_name, output_dir=gold_bratt_name)
+        dataset_to_brat(input_dir=gold_json_name, output_dir=gold_bratt_name)
 
         return fold_dir, gold_bratt_name
 
-    def count_entities(self):
+    def count_entities(self) -> defaultdict:
         """
         Counts number of entities in gold standard data for each fold.
 
@@ -405,10 +398,9 @@ class CrossValidation:
 
     def create_dirs(self, dirs : list):
         """
-        Takes a list of directories, and for if it
-        doesn't exist, creates a new directory and if it does exist, deletes the
-        current one and creates a new empty one. Unless specified in the
-        directory's name, creates the new directory in the current directory.
+        Takes a list of directories, and  if it
+        doesn't exist, creates a new directory. If it does exist, deletes the
+        current one and creates a new empty directorty.
 
         Parameters
         ----------
@@ -464,12 +456,7 @@ if __name__ == '__main__':
         action='store', default=None,
         help='path to vectors'
     )
-    parser.add_argument(
-        '--crf',
-        action='store_true', default=False,
-        help='flag for crf layer, not yet implemented'
-    )
     args = parser.parse_args()
     val = CrossValidation(k_folds=int(args.folds), pos=args.pos, spancat=args.spancat)
-    config_name = val.create_config(gpu=args.GPU, crf=args.crf, word_embed=args.word_embed, vectors=args.vectors)
-    val.cross_validate( data=args.dataset_dir, config=config_name, crf=args.crf)
+    config_name = val.create_config(gpu=args.GPU,  word_embed=args.word_embed, vectors=args.vectors)
+    val.cross_validate(data=args.dataset_dir, config=config_name)

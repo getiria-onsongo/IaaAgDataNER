@@ -1,5 +1,5 @@
 """
-Extracted from MedaCy to calcuate metrics for k-fold cross validation.
+Extracted class from MedaCy used to calcuate metrics for k-fold cross validation.
 
 Inter-dataset agreement calculator
 This module calculates precision, recall, and F1 scores given two parallel datasets with a strict or lenient setting.

@@ -12,10 +12,11 @@ from cross_validation import CrossValidation
 from inter_dataset_agreement import measure_dataset, format_results
 from dataset2bratt import dataset_to_bratt
 from json2py import json_2_dict
+
 """
 Unfinished crf class
-"""
 
+"""
 
 @Language.factory("ner-crf")
 def crf_component(nlp, name):

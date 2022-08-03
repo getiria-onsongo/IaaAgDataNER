@@ -1,17 +1,17 @@
-from json2bratt import conversion
+from json2brat import conversion
 import glob
 import argparse
 import os
 
 """
-File to convert a json dataset to bratt, also has page number extraction helper function.
+File to convert a json dataset to brat, also has page number extraction helper function.
 
 Functions
 -------
 extract_page_num(self, f : str, suffix : str) -> str
     extracts page numbers from file names
 dataset_to_bratt(input_dir : str, output_dir : str, file_pattern : str, sentence_level : bool)
-    converts a json dataset to bratt format
+    converts a json dataset to brat format
 """
 
 def extract_page_num(f : str, suffix : str) -> str:
@@ -35,7 +35,7 @@ def extract_page_num(f : str, suffix : str) -> str:
             num = f[len(f)-(len(suffix)+2)] + num
     return num
 
-def dataset_to_bratt(input_dir : str, output_dir : str, file_pattern="/*_td.json", sentence_level=False):
+def dataset_to_brat(input_dir : str, output_dir : str, file_pattern="/*_td.json", sentence_level=False):
     """
     Converts a whole dataset into bratt and txt files.
 
@@ -65,7 +65,7 @@ def dataset_to_bratt(input_dir : str, output_dir : str, file_pattern="/*_td.json
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="Converts a dataset to bratt",
+        description="Converts a dataset to brat",
         epilog='python dataset2bratt.py input_dir output_dir'
     )
     parser.add_argument(
@@ -85,11 +85,10 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-    input, output, pattern, sentence_level = args.input_dir, args.output_dir, args.file_pattern, args.sentence_level
 
-    if not os.path.exists(input):
+    if not os.path.exists(args.input_dir):
         print("input dataset path does not exist")
     else:
-        if not os.path.exists(output):
-            os.makedirs(output)
-        dataset_to_bratt(input, output, file_pattern=pattern, sentence_level=sentence_level)
+        if not os.path.exists(args.output_dir):
+            os.makedirs(args.output_dir)
+        dataset_to_brat(args.input_dir, args.output_dir, file_pattern=args.file_pattern, sentence_level= args.sentence_level)

@@ -19,8 +19,10 @@ from json2py import json_2_dict
 from dataset2bratt import dataset_to_bratt
 from validation_testing import execute
 
+"""
+Unfinshed train-test split pipeline
 
-
+"""
 
 class Train_Test:
 

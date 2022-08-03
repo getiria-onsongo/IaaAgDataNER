@@ -2,7 +2,8 @@ import os
 from dataclasses import dataclass
 
 """
-Extracted MedaCy wrapper class for text files in MedaCy datasets. MedaCy datasets are needed to calculate the metrics using inter_dataset_agreement for k-fold cross validation.
+Extracted MedaCy class that represents text files in MedaCy's dataset wrapper class.
+
 """
 
 @dataclass

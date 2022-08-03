@@ -8,8 +8,8 @@ from datetime import datetime
 from pyxpdf import Document
 from pyxpdf.xpdf import TextControl
 from spacy.util import filter_spans
-from json2bratt import conversion
-from dataset2bratt import extract_page_num
+from json2brat import conversion
+from dataset2brat import extract_page_num
 from collections import defaultdict
 
 class Predict:
@@ -26,21 +26,18 @@ class Predict:
     self.output_dir : str
         path to output predictions to
     self.spacy_only : bool
-        flag to only uses spacy model and not the part-of-speech based entity
-            expansion feature
+        flag to only uses spacy model
     self.spancat : bool
         flag to use spancat instead of ner component
-    self.crf : bool
-        flag to use crf layer
     self.json_prefix : str
         start of file name for a new json file.
         Ex: for creating predictions with files in the naming scheme
-        barley_p1_td.json ... barley_p37_td.json, the prefix would be barley_p
+        barley_p1_td.json, the prefix would be barley_p
         as it is the start of all file names
     self.json_suffix : str
         end of file name for a new json file
         Ex: for creating predictions with files in the naming scheme
-        barley_p1_td.json ... barley_p37_td.json, the suffix would be _td.json
+        barley_p1_td.json, the suffix would be _td.json
         as it is the end of all file names
     self.dataset_suffix
         endings of files from dataset directory to read in and predict on,
@@ -48,9 +45,9 @@ class Predict:
         would be _td.txt as it is the part of the file name all the files share
     self.no_overwrite: bool
         flag for creating new files instead of overwritting, which is the
-        default. with this flag, files will have the exact time of generation
-        between the file prefix and suffix instead of the page number to make
-        sure the file name is unique
+        default. With this flag, files will have the exact time of generation
+        after the prefix but before the page number to make sure the file
+        name is unique.
     self.spacy_model_name : str
         name of spacy model to use for part of speech, the default is
         "en_core_web_lg"
@@ -75,18 +72,17 @@ class Predict:
     tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
         creates spacy doc from inputed text and the trained ner spacy model
     get_pos(self, ent : str ) -> str
-        finds the part of speech for an entity and expands if needed
-    expand(self, sent, ent, tok, label) -> str:
+        finds part of speech data
+    expand(self, sent : list, ent : str, tok : str, label : str) -> str:
         expands an entity to include adjectives describing it
     file_save(self, pdf_name : str, url : str, chunk : int) -> str
         saves json for a given page
     """
 
-    def __init__(self, model_dir : str, dataset_dir : str, output_dir : str, spacy_only=False, spancat=False, crf=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False,  spacy_model_name="en_core_web_lg"):
+    def __init__(self, model_dir : str, dataset_dir : str, output_dir : str, spacy_only=False, spancat=False, json_prefix=None, json_suffix="_td.json", dataset_suffix="_td.txt", no_overwrite=False,  spacy_model_name="en_core_web_lg"):
         self.model_dir = model_dir
         self.dataset_dir = dataset_dir
         self.spancat = spancat
-        self.crf = crf
         self.output_dir = output_dir
         self.spacy_only = spacy_only
         self.json_prefix = json_prefix
@@ -96,6 +92,7 @@ class Predict:
         self.spacy_model_name = spacy_model_name
         self.pos_model = spacy.load(self.spacy_model_name)
         self.nlp = spacy.load(self.model_dir)
+        self.crf = False # crf is not implemented
 
         if self.spancat:
             self.nlp = spacy.load(self.model_dir)
@@ -161,6 +158,7 @@ class Predict:
         if self.spancat:
             named_ents = doc.spans["sc"]
         elif self.crf:
+            # possiby need this in the future for crf
             named_ents = filter_spans(doc.ents)
         else:
             named_ents = doc.ents
@@ -192,7 +190,7 @@ class Predict:
             tags = self.cust_ents_dict[page_number]
             self.cust_ents_dict[page_number] = [input_text, tags]
 
-    def tag_ner_with_spacy(self, text: str) -> spacy.tokens.Doc:
+    def tag_ner_with_spacy(self, text : str) -> spacy.tokens.Doc:
         """
         Use NLP pipeline to identify named entities in the text.
 
@@ -208,8 +206,8 @@ class Predict:
 
     def get_pos(self, ent : str) -> str:
         """
-        Proceses a given entity with rules that use part of speech data to
-        expand the entity span if needed.
+        Gets part of speech data on sentence level and calls expansion function
+        to expand if needed.
 
         Parameters
         ----------
@@ -229,11 +227,11 @@ class Predict:
             ent = self.expand(parsed_sent, relative_span, first_tok, label)
         return ent
 
-    def expand(self, sent, ent, tok, label) -> str:
+    def expand(self, sent : list, ent : str, tok : str, label : str) -> str:
         """
         If the first token in an entity is a noun or proper noun, finds all
         adjectives proceeding the entity and expands the span to contain
-        all of them.
+        them.
 
         Parameters
         ----------
@@ -348,10 +346,7 @@ if __name__ == '__main__':
         '--spancat', help='flag to use spancat',
         action='store_true', default=False
     )
-    parser.add_argument(
-        '--crf', help='flag to use crf',
-        action='store_true', default=False
-    )
+
     parser.add_argument(
         '--json_prefix', help='prefix to use to name json files',
         action='store', default=None
@@ -381,6 +376,5 @@ if __name__ == '__main__':
         if not os.path.exists(args.output_dir):
             os.makedirs(args.output_dir)
 
-        predict = Predict(args.model, args.dataset_dir, args.output_dir, args.spacy_only, args.spancat, args.crf,
-                             args.json_prefix, args.json_suffix, args.dataset_suffix, args.no_overwrite, spacy_model)
+        predict = Predict(args.model, args.dataset_dir, args.output_dir, args.spacy_only, args.spancat,  args.json_prefix, args.json_suffix, args.dataset_suffix, args.no_overwrite, spacy_model)
         predict.process_files()

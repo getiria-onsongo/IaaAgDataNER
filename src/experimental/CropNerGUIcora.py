@@ -17,6 +17,11 @@ from tkinter.scrolledtext import ScrolledText
 import os
 import sys
 
+"""
+My dev version of CropNerGUI 
+
+"""
+
 # 1) WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
 # ROUGH AWNS OR AWNS ARE ROUGH. NOTE: Maybe compound traits
 # do not make sense because we need to be able to know
