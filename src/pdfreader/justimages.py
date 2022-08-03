@@ -8,7 +8,10 @@ from Postprocess import fitzPostProcess
 
 def imageextraction(file_path):
     pdf_file = fitz.open(file_path)
-    location = f"{os.getcwd()}_output"
+    split = file_path.rsplit("/", 1)
+    loc = os.getcwd()
+    folderName = split[1].rsplit(".", 1)[0]
+    location = f"{loc}/{folderName}_output"
     if not (os.path.exists(location)):
         os.mkdir(location)
     else:
@@ -67,7 +70,7 @@ def imageextraction(file_path):
                 print(f"image{current_page_index}-{img_index} has invalid color space")
     # All the above is for image processing
     print("\n--------------------------------------------\n")
-    print(f"Images extracted to {file_path}_output folder")
+    print(f"Images extracted to {location} folder")
     # This is for text processing
     out = open(location + "/text_notFinal.txt", "wb")  # open text output
     for page in pdf_file:  # iterate the document pages

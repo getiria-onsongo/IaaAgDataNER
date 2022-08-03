@@ -9,6 +9,7 @@ if the pdf is one or two column then use different post-processing scripts
 ***NOTE***
 This take a long time if the pdf especially with pdfs that have 10+ pages which almost any type of research paper
 """
+import math
 import time
 
 import pdfplumber
@@ -25,10 +26,13 @@ from justimages import imageextraction
 def ocrConversion(infile, outfile):
     start_time=time.time()
     file = pdfplumber.open(infile)
-
+    numPages = len(file.pages)
+    pageNum = 3
+    if numPages <= 4:
+        pageNum = math.ceil(numPages / 2)
     # This part check if the pdf is one column or two
     # If text tolerance is above 12 it starts to have issues
-    isDoubleColumn = bool(file.pages[3].extract_table(dict(vertical_strategy='text', text_tolerance=12)))
+    isDoubleColumn = bool(file.pages[pageNum].extract_table(dict(vertical_strategy='text', text_tolerance=12)))
 
     # Converts the pdf to object to convert it to a png file
     pages = convert_from_path(infile, 500)
