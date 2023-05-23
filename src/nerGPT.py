@@ -1,0 +1,3 @@
+clean_text = """
+Eight-Twelve is a six-rowed winter feed barley. It was released by the USDA-ARS and the Idaho AES in 1991. It was  selected from the cross Steveland/Luther//Wintermalt. Its experimental designation was 79Ab812. It has rough awns,  midseason maturity, good winter hardiness, and is medium height with intermediate lodging resistance. Spikes are short and dense. Kernels have white aleurone and short rachilla hairs. It is susceptible to stripe rust, scald, and snow mold, and moderately susceptible to BYD. It was evaluated as Entry 697 in the UC Regional Cereal Testing program from 1982-2006 for fall planting in the intermountain region of northern California. Crop Science 32(3):828 (1992) 
+"""

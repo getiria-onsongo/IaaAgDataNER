@@ -19,6 +19,7 @@ cd /Users/gonsongo/Desktop/research/gems/IaaAgDataNER
 conda activate ner
 
 
+
 # Take as input a folder containing raw json files and convert them into
 # jsonl format used by Spacy. You can ignore the warnings
 python3 src/json2SpacyJson.py Data ner_2022_07  en_core_web_trf --suffix '.json' --split True --test_size 0.1 
@@ -43,6 +44,69 @@ python3 -m spacy train ner.cfg --output ner_2022_07_model --paths.train ner_2022
 
 
 # Open GUI
-python3 src/CropNerGUI.py 
+python3 src/CropAnnotatorGUI.py
 
 
+
+
+# ----------- Navigate to working dir
+cd /Users/gonsongo/Desktop/research/gems/IaaAgDataNER
+
+
+# ----------- Update Conda
+
+#update the conda package manager to the latest version
+conda update --all -y
+
+
+# Create new environment for space-llm
+conda create --name spacyLLM -y
+
+conda activate spacyLLM
+
+# Install Spacy
+conda install -c conda-forge spacy -y
+
+
+# First make sure all the packages are up to date
+python -m spacy validate 
+
+# Space LLMs
+# https://github.com/explosion/spacy-llm
+
+
+# Install LLM package
+python -m pip install spacy-llm
+
+# Install other packages you might need
+conda install -c conda-forge pdfminer -y
+
+
+# If you want to use a Conda virtual environment in PyCharm, use the command below to find out 
+# the location for the virtual envs
+conda activate spacyLLM
+echo $CONDA_PREFIX
+
+# You will see a path similar to the one below
+/Users/gonsongo/anaconda3/envs/spacyLLM
+
+# To add it to your PyCharm IDE Go To
+Pycharm -> Settings -> Project -> Python Interpreter -> Add Interpreter -> Add Local Interpreter -> Conda Environment -> Click the three dots (...) next to <New Virtualenv> -> 
+Navigate to /Users/gonsongo/anaconda3/envs/spacyLLM/bin/python and select the python executable
+
+- You can make it available to all projects
+
+
+# Open GUI
+python src/CropAnnotatorGUI.py
+
+
+
+# Exit environment
+conda deactivate
+
+# ----------- Creating Git Tags
+git tag -a v1.0 -m "pyxpdf version"
+
+# To see details of a specific tag
+git show  v1.0 
