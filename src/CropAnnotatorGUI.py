@@ -1,19 +1,19 @@
 #!/bin/env python3
+
 import platform
+import random
 import spacy.tokens
+import tkinter as tk
 
 from agParse import *
-from tkinterColorList import *
 from datetime import datetime
 from functools import partial
 from json2py import *
-import os.path
 from py2json import *
-from pyxpdf import Document, Page, Config
-from pyxpdf.xpdf import TextControl
-import random
-import tkinter as tk
+from pdf2text import *
+
 from tkinter import filedialog as fd
+from tkinterColorList import *
 from tkinter.scrolledtext import ScrolledText
 
 # 1) WE NEED TO RESOLVE STANDARDIZING THINGS SUCH AS
@@ -45,11 +45,9 @@ from tkinter.scrolledtext import ScrolledText
 #
 # 5) Need to start thinking about an ontology
 
-
 # Create NER GUI class
 class CropNerGUI:
     """ A class used to represent NER tagging GUI window.
-
 
     ...
     Attributes
@@ -173,7 +171,7 @@ class CropNerGUI:
         self.scrolled_text_line_content_index = {}
         self.nlp_agdata = None
         self.cust_ents_dict = {}
-        self.page_number = 0
+        self.page_number = -1
         self.metadata_toggle = False
         self.json_initialized = False
 
@@ -786,6 +784,7 @@ class CropNerGUI:
         # to annotate a new page. The old annotation file name will be in self.annotation_file which can result in a
         # user overwriting the file
 
+        txt = ""
         if self.raw_file is None:
             self.msg.config(text="No raw data file has been selected. Please select a file to load.", foreground="red")
 
@@ -795,14 +794,19 @@ class CropNerGUI:
         # Delete contents
         self.text.delete(1.0, tk.END)
 
-        # Calls pyxpdf in case the file is a PDF, otherwise reads as txt
+        if self.file_mode == "pdf":
+            txt = pdf_2_text_whole_document(self.raw_file.name)
+            self.text.insert(1.0, txt)
+
+        """
+        # If file is PDF, it needs to be converted to text. Otherwise read as txt
         if self.file_mode == "pdf":
             page_num = self.clean_spaces_in_page_entry(self.page_entry.get())
             page_num_valid = self.page_num_is_valid(page_num)
             if page_num_valid == False:
-                self.msg.config(text="Valid page number not entered. Value initialized to 1", foreground="red")
-                self.page_number = 1
+                # Load the whole document
                 self.page_entry.delete(0,tk.END)
+
                 self.page_entry.insert(0, str(self.page_number))
                 self.chunk=self.page_number
             elif page_num_valid == True:
@@ -834,6 +838,8 @@ class CropNerGUI:
             self.raw_file.seek(0)
 
         self.text.insert(1.0,txt)
+        """
+
         return txt
 
     def update_scrolled_text_line_content_index(self):
