@@ -5,6 +5,7 @@ import tiktoken
 from prefix import *
 from gemspdf2text import *
 import requests
+import sys
 
 completion_prefix = """ """
 def count_tokens(input_prompt: str, input_model:str) -> int:
@@ -59,11 +60,14 @@ def extract_single_call(esc_text, esc_input_model, esc_input_key, esc_expected_o
     # (update to use the os module to be platform independent: os.path.join(os.getcwd(), file_name)
     esc_response_path = esc_dir + "/" + esc_name_base + ".pkl"
 
-    """
-    response = make_completion_call(input_prompt, esc_input_model, esc_input_key, esc_expected_out_tokens, esc_response_path)
-   """
-    pickle_file_path = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/testOne_output.pkl"
-    response = load_openai_response(pickle_file_path)
+    if os.path.isfile(esc_response_path):
+        print(f'Looks like an API call was made for the same file name: {esc_response_path},')
+        print(f'Delete or rename the file to make a new API request to be saved in the same file.')
+        response = load_openai_response(esc_response_path)
+    else:
+        response = make_completion_call(input_prompt, esc_input_model, esc_input_key, esc_expected_out_tokens, esc_response_path)
+
+    #print("response=\n", response["choices"][0]["text"])
     annotation = parse_completion_call_response(response, esc_source)
     return annotation
 
@@ -85,21 +89,32 @@ def extract_multiple_calls(emc_text, emc_input_model, emc_input_key, emc_expecte
             current_tokens = current_tokens + count_tokens(row, emc_input_model)
         else:
             input_prompt = prompt_prefix_smaller + local_text
-            print(input_prompt)
             emc_response_path = dir + "/" + str(cnt) + "_" + emc_name_base + ".pkl"
-            response = ""
-            # response = make_completion_call(input_prompt, emc_input_model, emc_input_key, emc_expected_out_tokens,emc_response_path)
-            # annotation = annotation + parse_completion_call_response(response, emc_source)
+            if os.path.isfile(emc_response_path):
+                print(f'Looks like an API call was made for the same file name: {emc_response_path},')
+                print(f'Delete or rename the file to make a new API request to be saved in the same file.')
+                response = load_openai_response(emc_response_path)
+            else:
+                response = make_completion_call(input_prompt, emc_input_model, emc_input_key, emc_expected_out_tokens,
+                                                emc_response_path)
+
+            annotation = annotation + parse_completion_call_response(response, emc_source)
             current_tokens = base_tokens
             local_text = ""
             cnt = cnt + 1
 
     input_prompt = prompt_prefix_smaller + local_text
-    print(input_prompt)
     emc_response_path = dir + "/" + str(cnt) + "_" + emc_name_base + ".pkl"
-    response = ""
-    # response = make_completion_call(input_prompt, emc_input_model, emc_input_key, emc_expected_out_tokens,emc_response_path)
-    # annotation = annotation + parse_completion_call_response(response, emc_source)
+    if os.path.isfile(emc_response_path):
+        print(f'Looks like an API call was made for the same file name: {emc_response_path},')
+        print(f'Delete or rename the file to make a new API request to be saved in the same file.')
+        response = load_openai_response(emc_response_path)
+    else:
+        response = make_completion_call(input_prompt, emc_input_model, emc_input_key, emc_expected_out_tokens,
+                                        emc_response_path)
+
+    annotation = annotation + parse_completion_call_response(response, emc_source)
+
     return annotation
 
 
@@ -109,16 +124,21 @@ def extract_data(input_model, input_key, dir, source):
     # context_length : This is a global variable declared in prefix.py
 
     # file_path = download_file(source, dir) # UNCOMMENT WHEN DONE TESTING
-    # file_path = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/Blackberry%20profile.pdf"
-    file_path = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/Bond-CL-Reprint.pdf"
+    file_path = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/Blackberry%20profile.pdf"
+    # file_path = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/Bond-CL-Reprint.pdf"
+    # file_path = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/testFive.pdf"
+    #file_path = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/testFour.html"
 
     extension = file_path.split(".")[-1].lower().strip()
-    name_base = os.path.basename(source).split(".")[0]
+    name_base = os.path.basename(file_path).split(".")[0]
 
     ed_text = ""
     if extension == 'pdf':
         ed_text = textract.process(file_path, method='pdfminer').decode('utf-8').strip()
-
+    elif extension == 'html':
+        ed_text = textract.process(file_path, extension='html').decode('utf-8').strip()
+    else:
+        sys.exit('File extension not recognized. Please use .pdf or .html extensions.')
     # Path to file containing extracted data
     data_file_path = dir + "/" + name_base + ".txt"
 
@@ -137,8 +157,7 @@ def extract_data(input_model, input_key, dir, source):
     else:
         print("Go to plan B")
         data = extract_multiple_calls(ed_text, input_model, input_key, expected_out_tokens, source, dir, name_base)
-        #print(data)
-        #print(data, data_file_path)
+        print(data, data_file_path)
 
 
 def parse_completion_call_response(data, input_source):
@@ -205,6 +224,7 @@ def parse_completion_call_response(data, input_source):
     if len(current_data) > 0:
         extracted_data = extracted_data + current_data
     return extracted_data
+
 
 def append_variety_name(variety_name_key, input_data_dictionary, input_source):
     """ Add documentation """
@@ -293,8 +313,10 @@ if __name__ == "__main__":
 
 
     dir = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test"
-    #file_source = "https://www.canr.msu.edu/potatobg/Files/Potato-Varieties/Blackberry%20profile.pdf"
-    file_source = "https://agsci.colostate.edu/wheat/wp-content/uploads/sites/85/2016/02/Bond-CL-Reprint.pdf"
+    file_source = "https://www.canr.msu.edu/potatobg/Files/Potato-Varieties/Blackberry%20profile.pdf"
+    # file_source = "https://agsci.colostate.edu/wheat/wp-content/uploads/sites/85/2016/02/Bond-CL-Reprint.pdf"
+    # file_source = "http://smallgrains.ucdavis.edu"
+    # file_source = "https://seedpotato.russell.wisc.edu/2019/06/25/adirondack-blue-fact-sheet/"
     extract_data(api_model, api_key, dir, file_source)
     #
 
