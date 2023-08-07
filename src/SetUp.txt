@@ -82,16 +82,26 @@ path_to_src=/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/sr
 python3 $path_to_src/json2csv.py AnnotatedData BarCvDescLJ11.csv
 
 # POSTGRESQL
-# To create a database run the command below from the terminal. This creates the
+# Login as default user
+> psql postgres
+
+# Create new user
+> CREATE ROLE ner WITH LOGIN PASSWORD 'j***_1*';
+
+> ALTER ROLE ner CREATEDB;
+
+# To create a database run the command below ON THE COMMANDLINE (not psql). This creates the
 # database ner
 > createdb ner
 
 # Log in
-psql -h localhost -d ner
+> psql -U ner -h localhost -d ner
+
+# ---------------------------------------- HERE
 
 # Exit postgreSQL then create tables (relations)
-> path_to_sql=/Users/gonsongo/Desktop/research/iaa/Projects/python/IaaAgDataNER/src/CreateTables.sql
-> psql -h localhost -d ner -f $path_to_sql
+> path_to_sql=/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/src/CreateTables.sql
+> psql -U ner -h localhost -d ner -f $path_to_sql
 
 # Log into PostgreSQL and load raw data.
 psql -h localhost -d ner
