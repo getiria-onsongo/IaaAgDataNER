@@ -12,6 +12,15 @@
 -- usually the slowest of the three because of its additional storage costs. In most situations text or
 -- character varying should be used instead.
 
+DROP TABLE IF EXISTS raw_data;
+CREATE TABLE raw_data(
+    date_time text,
+    file_name text,
+    variety_name text,
+    category text,
+    value text
+);
+
 DROP TABLE IF EXISTS document CASCADE;
 CREATE TABLE document(
     doc_name text PRIMARY KEY,
@@ -58,14 +67,4 @@ CREATE TABLE crop_attribute(
     PRIMARY KEY (value, id, label)
 );
 
-DROP TABLE IF EXISTS raw_data;
-CREATE TABLE raw_data(
-       crop_name text,
-       doc_name text,
-       url text,
-       chunk smallint,
-       id bigint,
-       cvar text,
-       label text,
-       value text
-);
+

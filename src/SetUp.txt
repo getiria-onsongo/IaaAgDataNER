@@ -97,7 +97,62 @@ python3 $path_to_src/json2csv.py AnnotatedData BarCvDescLJ11.csv
 # Log in
 > psql -U ner -h localhost -d ner
 
-# ---------------------------------------- HERE
+
+\COPY raw_data FROM 'Bond-CL-Reprint.txt' DELIMITER E'\t';
+\COPY raw_data FROM 'BoulderProfile.txt' DELIMITER E'\t';
+\COPY raw_data FROM 'HS1296.txt' DELIMITER E'\t';
+\COPY raw_data FROM 'Incline-AX.txt' DELIMITER E'\t';
+\COPY raw_data FROM 'adirondack-blue-fact-sheet.txt' DELIMITER E'\t';
+\COPY raw_data FROM 'clearwater-russet-fact-sheet.txt' DELIMITER E'\t';
+\COPY raw_data FROM 'yukon-gold-potato-fact-sheet-3.txt' DELIMITER E'\t';
+\COPY raw_data FROM 'yukon-gold-solanum-tuberosum.txt' DELIMITER E'\t';
+\COPY raw_data FROM 'yukongold_characteristics.txt' DELIMITER E'\t';
+
+DROP TABLE IF EXISTS crop_variety ;
+CREATE TABLE crop_variety AS
+SELECT DISTINCT variety_name, value as crop_name FROM raw_data
+WHERE category = 'crop name';
+ALTER TABLE crop_variety ADD PRIMARY KEY (variety_name);
+
+DROP TABLE IF EXISTS annotation_source ;
+CREATE TABLE annotation_source AS
+SELECT DISTINCT date_time, file_name, variety_name, value as source FROM raw_data
+WHERE category = 'source';
+ALTER TABLE annotation_source ADD PRIMARY KEY (variety_name, date_time);
+ALTER TABLE annotation_source ADD CONSTRAINT fk_annot_source_crop_var
+FOREIGN KEY (variety_name) REFERENCES crop_variety (variety_name);
+
+DROP TABLE IF EXISTS category;
+CREATE TABLE category AS
+SELECT DISTINCT category AS category_name FROM raw_data;
+ALTER TABLE category ADD PRIMARY KEY (category_name);
+
+DROP TABLE IF EXISTS trait;
+CREATE TABLE trait AS
+SELECT DISTINCT  variety_name, date_time, value AS trait_description, category AS category_name
+FROM raw_data;
+ALTER TABLE trait ADD CONSTRAINT fk_trait_annot_source
+FOREIGN KEY (variety_name, date_time) REFERENCES annotation_source (variety_name, date_time);
+ALTER TABLE trait ADD CONSTRAINT fk_trait_category
+FOREIGN KEY (category_name) REFERENCES category (category_name);
+ALTER TABLE trait ADD PRIMARY KEY (variety_name, trait_description, category_name, date_time);
+
+-- ------------ HERE
+SELECT DISTINCT trait_description
+FROM
+(SELECT * FROM trait WHERE category_name LIKE '%trait%') A
+JOIN
+(SELECT  variety_name, crop_name FROM crop_variety WHERE crop_name = 'potato' AND variety_name = 'clearwater russet') B
+USING(variety_name);
+
+
+
+
+SELECT DISTINCT date_time, variety_name, category AS category_name FROM raw_data order by variety_name,category;
+
+
+
+SELECT DISTINCT * FROM raw_data WHERE category = 'source';
 
 # Exit postgreSQL then create tables (relations)
 > path_to_sql=/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/src/CreateTables.sql
@@ -137,6 +192,22 @@ USING(ID);
 
 select value from crop_data where crop_name = 'barley' and cvar = 'strider' and label = 'TRAT';
 
+# -------------- Setting up jupyter notebook
+> conda activate spacyLLM
+
+> conda install -c anaconda notebook
+
+> jupyter notebook &
 
 
+import os
+import shutil
+from IPython.display import IFrame
+source = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/BoulderProfile.pdf"
+destination = "./test.pdf"
 
+
+status = shutil.copyfile(source, destination)
+
+
+IFrame(destination, width=600, height=300)

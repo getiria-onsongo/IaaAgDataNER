@@ -1,22 +1,23 @@
+import getopt
 import os
 import re
 import openai
 import pickle
 import tiktoken
+from api import *
 from prefix import *
 from gemspdf2text import *
+
+
 import requests
 import sys
 from htmldate import find_date
 from time import mktime, strptime
 from datetime import datetime
-from bs4 import BeautifulSoup
-import spacy
-
 
 completion_prefix = """ """
-
-token_buffer = 150
+currTime = datetime.now().isoformat()
+token_buffer = 50
 def count_tokens(input_prompt: str, input_model:str) -> int:
     """
         Because OpenAI limits the total number of tokens (prompt + completion), it is
@@ -61,7 +62,7 @@ def make_completion_call(input_prompt, input_model, input_key, expected_output_t
     return response
 
 
-def extract_single_call(esc_text, esc_input_model, esc_input_key, esc_expected_out_tokens, esc_source, esc_dir, esc_name_base):
+def extract_single_call(esc_text, esc_input_model, esc_input_key, esc_expected_out_tokens, esc_source, esc_dir, esc_name_base, file_path):
     # prompt_prefix : This is a global variable declared in prefix.py
     input_prompt = prompt_prefix + esc_text
 
@@ -77,11 +78,11 @@ def extract_single_call(esc_text, esc_input_model, esc_input_key, esc_expected_o
         response = make_completion_call(input_prompt, esc_input_model, esc_input_key, esc_expected_out_tokens, esc_response_path)
 
     #print("response=\n", response["choices"][0]["text"])
-    annotation = parse_completion_call_response(response, esc_source)
+    annotation = parse_completion_call_response(response, esc_source, file_path)
     return annotation
 
 
-def extract_multiple_calls(emc_text, emc_input_model, emc_input_key, emc_expected_out_tokens, emc_source, emc_dir, emc_name_base):
+def extract_multiple_calls(emc_text, emc_input_model, emc_input_key, emc_expected_out_tokens, emc_source, emc_dir, emc_name_base, file_path):
     # prompt_prefix_smaller : This is a global variable declared in prefix.py
 
     base_tokens = count_tokens(prompt_prefix, emc_input_model) + emc_expected_out_tokens
@@ -108,7 +109,7 @@ def extract_multiple_calls(emc_text, emc_input_model, emc_input_key, emc_expecte
                 response = make_completion_call(input_prompt, emc_input_model, emc_input_key, emc_expected_out_tokens,
                                                 emc_response_path)
 
-            annotation.extend(parse_completion_call_response(response, emc_source))
+            annotation.extend(parse_completion_call_response(response, emc_source, file_path))
             current_tokens = base_tokens
             local_text = ""
             cnt = cnt + 1
@@ -124,18 +125,19 @@ def extract_multiple_calls(emc_text, emc_input_model, emc_input_key, emc_expecte
         response = make_completion_call(input_prompt, emc_input_model, emc_input_key, emc_expected_out_tokens,
                                         emc_response_path)
 
-    annotation.extend(parse_completion_call_response(response, emc_source))
+    annotation.extend(parse_completion_call_response(response, emc_source, file_path))
     return annotation
 
 
-def extract_data(input_model, input_key, dir, source):
+def extract_data(input_model, input_key, dir, source, out_file_name):
 
     # sample_output : This is a global variable declared in prefix.py
     # context_length : This is a global variable declared in prefix.py
 
     file_path = download_file(source, dir)
     extension = file_path.split(".")[-1].lower().strip()
-    name_base = os.path.basename(file_path).split(".")[0]
+    # name_base = os.path.basename(file_path).split(".")[0]
+    name_base = os.path.basename(file_path)
 
     ed_text = ""
     doc_date = "not found"
@@ -151,7 +153,7 @@ def extract_data(input_model, input_key, dir, source):
     else:
         sys.exit('File extension not recognized. Please use .pdf or .html extensions.')
 
-    print("doc_date=", doc_date)
+    # print("doc_date=", doc_date)
 
     # Path to file containing extracted data
     data_file_path = dir + "/" + name_base + ".txt"
@@ -172,18 +174,20 @@ def extract_data(input_model, input_key, dir, source):
 
     if expected_tokens < context_length:
         print("Go to plan A")
-        data = extract_single_call(clean_text, input_model, input_key, expected_out_tokens, source, dir, name_base)
+        data = extract_single_call(clean_text, input_model, input_key, expected_out_tokens, source, dir, name_base, file_path)
 
     else:
         print("Go to plan B")
-        data = extract_multiple_calls(clean_text, input_model, input_key, expected_out_tokens, source, dir, name_base)
+        data = extract_multiple_calls(clean_text, input_model, input_key, expected_out_tokens, source, dir, name_base, file_path)
 
     nodup_data = remove_list_duplicates(data)
     nodup_data.sort()
-    for val in nodup_data:
-        print(val)
 
-def parse_completion_call_response(data, input_source):
+    with open(out_file_name, 'a') as output_file:
+        for val in nodup_data:
+            print(val, file=output_file)
+
+def parse_completion_call_response(data, input_source, file_path):
     """
     Takes as input text submitted to openAI and completion response from OpenAI. It parses the results
     returning a tab delimited file that can be easily loaded into a database. This function assumes the results
@@ -224,7 +228,7 @@ def parse_completion_call_response(data, input_source):
                 if dump_data == 0:
                     dump_data = 1
                 else:
-                    current_data = append_variety_name(variety_name_key, local_data_dictionary, input_source)
+                    current_data = append_variety_name(variety_name_key, local_data_dictionary, input_source, file_path)
                     if len(current_data) > 0:
                         extracted_data.append(current_data)
                     local_data_dictionary = {}
@@ -243,23 +247,25 @@ def parse_completion_call_response(data, input_source):
 
     # If there was only one variety name found, the if block that extracts data will not have been reached. We
     # need to extract data
-    current_data = append_variety_name(variety_name_key, local_data_dictionary, input_source)
+    current_data = append_variety_name(variety_name_key, local_data_dictionary, input_source, file_path)
     if len(current_data) > 0:
         extracted_data.extend(current_data)
     return extracted_data
 
 
-def append_variety_name(variety_name_key, input_data_dictionary, input_source):
+def append_variety_name(variety_name_key, input_data_dictionary, input_source, file_path):
     """ Add documentation """
     # missing_symbol: This is a global variable declared in prefix.py
     output = []
+    name_base = os.path.basename(file_path)
     if variety_name_key in input_data_dictionary:
         variety_name = input_data_dictionary[variety_name_key][0]
         for (key, values) in input_data_dictionary.items():
             for value in values:
                 if value != missing_symbol:
-                    output.append(variety_name + ":" + key + ":" + value)
-        output.append(variety_name + ":source:" + input_source)
+                    output.append(currTime + "\t" + name_base + "\t" + variety_name + "\t" + key + "\t" + value.strip())
+        output.append(currTime + "\t" + name_base + "\t" + variety_name + "\tsource\t" + input_source)
+        output.append(currTime + "\t" + name_base + "\t" + variety_name + "\tlocal_path\t" + file_path)
         output.sort()
     return output
 
@@ -281,11 +287,17 @@ def download_file(url: str, dir:str) -> str:
     else:
         file_name = "NoName"
 
+    ext = check_file_type(url)
     # update to use the os module to be platform independent: os.path.join(os.getcwd(), file_name
-    if "pdf" in file_name:
-        file_path = dir + "/" + file_name
+    if ext == ".html":
+        file_path = dir + "/" + file_name + ".html"
+    elif ext == ".pdf":
+        if ".pdf" in file_name:
+            file_path = dir + "/" + file_name
+        else:
+            file_path = dir + "/" + file_name + ".pdf"
     else:
-        file_path = dir + "/" + file_name+".html"
+        sys.exit("The file in your source is currently not supported")
 
     # Request URL and get response object
     response = requests.get(url, stream=True)
@@ -348,7 +360,18 @@ def print_parsed_output(data):
         if (val[0] != 'doc_name' and val[0] != 'source_text'):
             print(variety_name, "\t", val[0], "\t", val[1])
 
+def check_file_type(source):
+    r = requests.get(source)
+    content_type = r.headers.get('content-type')
+    if 'application/pdf' in content_type:
+        ext = '.pdf'
+    elif 'text/html' in content_type:
+        ext = '.html'
+    else:
+        ext = ''
+        print('Unknown type: {}'.format(content_type))
 
+    return ext
 
 if __name__ == "__main__":
     api_model = "text-davinci-003"
@@ -359,11 +382,18 @@ if __name__ == "__main__":
     # OPENAI_API_KEY is an environment variable set by bash_profile.sh
     api_key = os.getenv("OPENAI_API_KEY")
 
-    dir = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test"
-    # file_source = "https://agsci.colostate.edu/wheat/wp-content/uploads/sites/85/2020/01/canvas.pdf"
-    # file_source = "https://agsci.colostate.edu/wheat/wp-content/uploads/sites/85/2016/02/Bond-CL-Reprint.pdf"
-    file_source = "https://seedpotato.russell.wisc.edu/2018/05/14/yukon-gold-potato-fact-sheet-3/"
 
+    dir = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test"
+
+    # file_source = "https://agsci.colostate.edu/wheat/wp-content/uploads/sites/85/2016/02/Bond-CL-Reprint.pdf"
+    # file_source = "https://www.canr.msu.edu/potatobg/Files/Potato-Varieties/BoulderProfile.pdf"
+    # file_source = "https://edis.ifas.ufl.edu/publication/HS1296"
+    # file_source = "https://agsci.colostate.edu/wheat/wp-content/uploads/sites/85/2019/03/Incline-AX.pdf"
+    # file_source = "https://seedpotato.russell.wisc.edu/2019/06/25/adirondack-blue-fact-sheet/"
+    # file_source = "https://seedpotato.russell.wisc.edu/2019/06/27/clearwater-russet-fact-sheet/"
+    # file_source = "https://seedpotato.russell.wisc.edu/2018/05/14/yukon-gold-potato-fact-sheet-3/"
+    # file_source = "https://potatoassociation.org/varieties/white-varieties/yukon-gold-solanum-tuberosum/"
+    file_source = "https://cropwatch.unl.edu/potato/yukongold_characteristics"
 
     # The Examples below are a bit more complex. More time needs to be devoted into figuring out
     # instances where a variety name wasn't in the phrase. NOTE: This could problem would be
@@ -379,11 +409,65 @@ if __name__ == "__main__":
     # file_source = "https://core.ac.uk/download/pdf/158353049.pdf"
     # file_source = "https://seedpotato.russell.wisc.edu/2019/06/25/adirondack-blue-fact-sheet/"
 
-    # This example sometimes produces a release date that does not exist. May be?
-    # Confirm and if this is indeed the case, post process to ensure contents exists
-    # file_source = "https://www.canr.msu.edu/potatobg/Files/Potato-Varieties/Blackberry%20profile.pdf"
+    out_file_name = ""
+    if len(sys.argv) > 1:
+        out_file_name = sys.argv[1]
+    out_dir = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/postgres"
+    output_file = out_dir + "/" + out_file_name
+    # -------- extract_data(api_model, api_key, dir, file_source, output_file)
 
-    extract_data(api_model, api_key, dir, file_source)
+    print(get_crop_varieties("potato"))
+
+    print(get_crop_info('potato', 'yukon gold'))
+
+    # -------- getInfo(cropName, varietyName)
+    # give info on what year the variety was introduced, what institution produced it, where geographically was it produced
+
+    # -------  getTraits(cropName, varietyName)
+    # -------- give me all the traits of adirondack.
+    #
+
+    # --------- matchTraits(cropName, traitInclusionList[].TraitExclusionList[])
+
+    """
+    source = "https://digitalcommons.unl.edu/cgi/viewcontent.cgi?article=2062&context=extensionhist"
+    file_path = download_file(source, dir)
+    print(file_path)
+
+    source = "https://www.mncia.org/umn-releases-mn-rothsay-wheat/"
+    file_path = download_file(source, dir)
+    print(file_path)
+
+    source = "https://agsci.colostate.edu/wheat/wp-content/uploads/sites/85/2020/01/canvas.pdf"
+    file_path = download_file(source, dir)
+    print(file_path)
+
+    source = "https://seedpotato.russell.wisc.edu/2018/05/14/yukon-gold-potato-fact-sheet-3/"
+    file_path = download_file(source, dir)
+    print(file_path)
+    """
+
+    """
+    file_path ="/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/yukon-gold-potato-fact-sheet-3.html"
+    ed_text = textract.process(file_path, extension='html').decode('utf-8').strip().lower()
+    print(ed_text)
+    """
+
+    """
+    file_path = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/Blackberry%20profile.pdf"
+    ed_text = textract.process(file_path, method='pdfminer').decode('utf-8').strip().lower()
+    print(ed_text)
+    """
+
+    """
+    file_path = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/yukon-gold-potato-fact-sheet-3.html"
+    name_base = os.path.basename(file_path)
+    print(name_base)
+
+    file_path = "/Users/gonsongo/Desktop/research/gems/IaaAgDataNER/Data/test/viewcontent.cgi?article=2062&context=extensionhist.pdf"
+    name_base = os.path.basename(file_path)
+    print(name_base)
+    """
 
     # Try to remove acknowledgement and references
 
