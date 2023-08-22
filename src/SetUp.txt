@@ -122,6 +122,9 @@ ALTER TABLE annotation_source ADD PRIMARY KEY (variety_name, date_time);
 ALTER TABLE annotation_source ADD CONSTRAINT fk_annot_source_crop_var
 FOREIGN KEY (variety_name) REFERENCES crop_variety (variety_name);
 
+ALTER TABLE annotation_source
+ADD COLUMN source_number SERIAL;
+
 DROP TABLE IF EXISTS category;
 CREATE TABLE category AS
 SELECT DISTINCT category AS category_name FROM raw_data;

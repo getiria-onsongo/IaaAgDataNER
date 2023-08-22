@@ -312,6 +312,7 @@ def download_file(url: str, dir:str) -> str:
 
     return file_path
 
+
 def load_openai_response(file_path: str):
     """ Load OpenAI completion API response that was saved using pickle.
 
@@ -327,6 +328,7 @@ def load_openai_response(file_path: str):
     file.close()
 
     return data
+
 
 def get_pdf_date(file_path):
     """ Add documentation. """
@@ -344,6 +346,7 @@ def get_html_date(url):
     html_date = find_date(url)
     return html_date
 
+
 def remove_list_duplicates(input_list):
     """ Add documentation. """
     dedup = []
@@ -352,6 +355,7 @@ def remove_list_duplicates(input_list):
             dedup.append(item)
     return dedup
 
+
 def print_parsed_output(data):
     variety_name = data[0]
     variety_annotation = data[1]
@@ -359,6 +363,7 @@ def print_parsed_output(data):
     for val in variety_annotation:
         if (val[0] != 'doc_name' and val[0] != 'source_text'):
             print(variety_name, "\t", val[0], "\t", val[1])
+
 
 def check_file_type(source):
     r = requests.get(source)
@@ -372,6 +377,7 @@ def check_file_type(source):
         print('Unknown type: {}'.format(content_type))
 
     return ext
+
 
 if __name__ == "__main__":
     api_model = "text-davinci-003"
@@ -416,16 +422,20 @@ if __name__ == "__main__":
     output_file = out_dir + "/" + out_file_name
     # -------- extract_data(api_model, api_key, dir, file_source, output_file)
 
-    print(get_crop_varieties("potato"))
-
-    print(get_crop_info('potato', 'yukon gold'))
+    # --------- print(get_crop_varieties("potato"))
 
     # -------- getInfo(cropName, varietyName)
     # give info on what year the variety was introduced, what institution produced it, where geographically was it produced
+    # -------- print(get_crop_info('potato', 'yukon gold'))
 
     # -------  getTraits(cropName, varietyName)
     # -------- give me all the traits of adirondack.
     #
+
+    # ------ print(get_traits('potato', 'yukon gold'))
+
+    # --------print(get_source('wheat', 'incline ax', 'excellent resistance to stripe rust'))
+    print(get_file_name(4))
 
     # --------- matchTraits(cropName, traitInclusionList[].TraitExclusionList[])
 
