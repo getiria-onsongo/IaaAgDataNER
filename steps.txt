@@ -110,3 +110,7 @@ git tag -a v1.0 -m "pyxpdf version"
 
 # To see details of a specific tag
 git show  v1.0 
+
+# ----------- Save postgres database (ner)
+
+pg_dump -U ner -h localhost -p 5432 ner > ner.sql

@@ -435,9 +435,13 @@ if __name__ == "__main__":
     # ------ print(get_traits('potato', 'yukon gold'))
 
     # --------print(get_source('wheat', 'incline ax', 'excellent resistance to stripe rust'))
-    print(get_file_name(4))
+    #------- print(get_file_name(4))
 
-    # --------- matchTraits(cropName, traitInclusionList[].TraitExclusionList[])
+    cropName = 'potato'
+    trait_inclusion_list = ['resistant to verticillium wilt', 'white creamy flesh']
+    trait_exclusion_list = ['susceptible to common scab']
+    print(match_traits(cropName , trait_inclusion_list, trait_exclusion_list))
+    # --------- matchTraits(cropName, traitInclusionList[], TraitExclusionList[])
 
     """
     source = "https://digitalcommons.unl.edu/cgi/viewcontent.cgi?article=2062&context=extensionhist"

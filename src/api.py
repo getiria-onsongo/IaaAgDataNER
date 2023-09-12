@@ -174,6 +174,76 @@ def get_source(crop_name = 'potato', variety_name = 'yukon gold', trait = 'susce
             connection.close()
 
 
+def create_sql_or_string(traitInclusionList):
+    include_str = "%"
+    if len(traitInclusionList) == 1:
+        include_str = include_str + traitInclusionList[0].lower()
+    else:
+        for index in range(len(traitInclusionList) - 1):
+            include_str = include_str + traitInclusionList[index].lower() + "%' OR trait_description LIKE '%"
+        include_str = include_str + traitInclusionList[len(traitInclusionList) - 1].lower()
+    include_str = include_str + "%"
+    return include_str
+
+
+def match_traits(crop_name , trait_inclusion_list, trait_exclusion_list):
+    crop_name = crop_name.lower()
+    connection = ""
+    cursor = ""
+    inclusion_str = create_sql_or_string(trait_inclusion_list)
+    exclusion_str = create_sql_or_string(trait_exclusion_list)
+    try:
+        # Connect to an existing database
+        connection = psycopg2.connect(user="ner",
+                                      password="",
+                                      host="localhost",
+                                      port="5432",
+                                      database="ner")
+
+        # Create a cursor to perform database operations
+        cursor = connection.cursor()
+
+        # Executing a SQL query
+        sql_query = """
+        SELECT variety_name
+        FROM
+        (SELECT date_time, variety_name
+        FROM
+        (SELECT * FROM crop_variety WHERE crop_name = '"""+crop_name+"""') A
+        JOIN
+        annotation_source B
+        USING(variety_name)) A1
+        JOIN
+        (SELECT *  FROM trait WHERE trait_description LIKE '"""+inclusion_str+"""') B1
+        USING(variety_name, date_time)
+        EXCEPT
+        SELECT variety_name
+        FROM
+        (SELECT date_time, variety_name
+        FROM
+        (SELECT * FROM crop_variety WHERE crop_name = '"""+crop_name+"""') A
+        JOIN
+        annotation_source B
+        USING(variety_name)) A1
+        JOIN
+        (SELECT *  FROM trait WHERE trait_description LIKE '"""+exclusion_str+"""') B1
+        USING(variety_name, date_time);
+        """
+        cursor.execute(sql_query)
+        # Fetch result
+        column_names =["Variety Name" ]
+        records = cursor.fetchall()
+        df = pd.DataFrame(records, columns=column_names)
+        return df
+
+    except (Exception, Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if connection:
+            cursor.close()
+            connection.close()
+
+
 def get_file_name(source_number = 1):
     connection = ""
     cursor = ""

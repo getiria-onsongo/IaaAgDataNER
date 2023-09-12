@@ -88,6 +88,7 @@ python3 $path_to_src/json2csv.py AnnotatedData BarCvDescLJ11.csv
 # Create new user
 > CREATE ROLE ner WITH LOGIN PASSWORD 'j***_1*';
 
+
 > ALTER ROLE ner CREATEDB;
 
 # To create a database run the command below ON THE COMMANDLINE (not psql). This creates the
@@ -194,6 +195,27 @@ crop_attribute B
 USING(ID);
 
 select value from crop_data where crop_name = 'barley' and cvar = 'strider' and label = 'TRAT';
+# -------------- Create Database Backup
+
+pg_dump -U ner -h localhost -p 5432 ner > ner.sql
+
+# -------------- Delete a database
+# Enter the command below on the command line
+> dropdb ner
+
+# -------------- Loading data from Database dump runs the commands below ON THE COMMANDLINE (not psql)
+> createdb ner
+> psql ner <  ner.sql
+
+# -------------- Test to make sure data loaded correctly
+> psql -U ner -h localhost -d ner
+ner=> SELECT DISTINCT file_name FROM annotation_source WHERE source_number = 4;
+
+
+
+
+
+
 
 # -------------- Setting up jupyter notebook
 > conda activate spacyLLM
